@@ -83,15 +83,46 @@ class MainActivity : ComponentActivity() {
     private var lastTouchDeviceName = ""
     private var lastRightTapTimeMs = 0L
 
+    @Volatile
+    private var speaking = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        statusView = TextView(this).apply {
-            textSize = 20f
-            setPadding(32, 96, 32, 32)
+        // LEGACY-ELLA minimal AR UI (user feedback 2026-07-23): fullscreen BLACK root
+        // (black = transparent on the waveguide display), bold centered status word,
+        // small gray hint at the bottom. No prefixes, no bright backgrounds.
+        val root = android.widget.FrameLayout(this).apply {
+            setBackgroundColor(android.graphics.Color.BLACK)
         }
-        setContentView(statusView)
-        updateStatus("CONNECTING")
+        statusView = TextView(this).apply {
+            textSize = 48f
+            setTypeface(typeface, android.graphics.Typeface.BOLD)
+            setTextColor(android.graphics.Color.WHITE)
+        }
+        root.addView(
+            statusView,
+            android.widget.FrameLayout.LayoutParams(
+                android.widget.FrameLayout.LayoutParams.WRAP_CONTENT,
+                android.widget.FrameLayout.LayoutParams.WRAP_CONTENT,
+                android.view.Gravity.CENTER,
+            ),
+        )
+        val hintView = TextView(this).apply {
+            textSize = 18f
+            setTextColor(android.graphics.Color.parseColor("#888888"))
+            text = "우측 탭: 말하기 · 좌측 탭: 사진"
+        }
+        root.addView(
+            hintView,
+            android.widget.FrameLayout.LayoutParams(
+                android.widget.FrameLayout.LayoutParams.WRAP_CONTENT,
+                android.widget.FrameLayout.LayoutParams.WRAP_CONTENT,
+                android.view.Gravity.CENTER_HORIZONTAL or android.view.Gravity.BOTTOM,
+            ).apply { bottomMargin = (32 * resources.displayMetrics.density).toInt() },
+        )
+        setContentView(root)
+        updateStatus("Connecting...", "#9C27B0")
 
         config = AppConfig.fromBuildConfig()
         camera = GlassesCamera(this, this)
@@ -123,7 +154,7 @@ class MainActivity : ComponentActivity() {
             // transport, which are left uninitialized in this branch.
             Log.w(TAG, "TokenServiceCredentialProvider construction failed (blank/invalid base URL); degrading to TOKEN-FAIL")
             voiceTransportUnavailable = true
-            updateStatus("TOKEN-FAIL")
+            updateStatus("Token error", "#FF0000")
             ensurePermissions()
             return
         }
@@ -134,13 +165,21 @@ class MainActivity : ComponentActivity() {
             socketFactory = socketFactory,
             listener = object : OpenAiRealtimeTransport.Listener {
                 override fun onStatus(status: RealtimeConnectionStatus) {
-                    val label = statusLabel(status)
-                    Log.i(TAG, "status=$label")
-                    runOnUiThread { updateStatus(label) }
+                    Log.i(TAG, "status=${statusLabel(status)}")
+                    runOnUiThread { applyStatus(status) }
                 }
 
                 override fun onAudioDelta(base64Pcm16: String) {
+                    if (!speaking) {
+                        speaking = true
+                        runOnUiThread { updateStatus("Speaking...", "#4CAF50") }
+                    }
                     audioPlayback.playDelta(base64Pcm16)
+                }
+
+                override fun onAudioDone() {
+                    speaking = false
+                    runOnUiThread { updateStatus("Ready") }
                 }
 
                 override fun onInputTranscript(text: String) {
@@ -166,7 +205,7 @@ class MainActivity : ComponentActivity() {
             onChunk = { chunk -> transport.appendAudio(chunk) },
             onError = { message ->
                 Log.w(TAG, "Audio capture error: $message")
-                runOnUiThread { updateStatus("MIC-ERROR") }
+                runOnUiThread { updateStatus("Mic error", "#FF0000") }
             },
         )
 
@@ -251,7 +290,7 @@ class MainActivity : ComponentActivity() {
             // immediately, then post the status update back to the UI thread.
             slowPathExecutor.execute {
                 voiceFastPath.onTurnStart(turnId)
-                runOnUiThread { updateStatus("THINKING") }
+                runOnUiThread { updateStatus("Thinking...", "#2196F3") }
             }
         } else {
             if (!transport.sessionReady) {
@@ -259,25 +298,30 @@ class MainActivity : ComponentActivity() {
                 return
             }
             audioCapture.start()
-            updateStatus("LISTENING")
+            updateStatus(if (pendingImageId != null) "Listening... (+ Photo)" else "Listening...", "#FF5722")
         }
     }
 
     /** Left tap: photo capture. Analysis is async (45s ceiling tolerated by TutorBrain callers); the fast path keeps talking. */
     private fun capturePhoto() {
+        updateStatus("Capturing...", "#9C27B0")
         camera.captureImage(
             onCaptured = { bytes ->
                 slowPathExecutor.execute {
                     try {
                         val imageContext = brain.analyzeImage(bytes, "image/jpeg")
                         pendingImageId = imageContext.imageId.takeIf { it.isNotBlank() }
-                        runOnUiThread { updateStatus("PHOTO-READY") }
+                        runOnUiThread { updateStatus("Photo ready! Tap to speak", "#9C27B0") }
                     } catch (e: Exception) {
                         Log.w(TAG, "analyzeImage failed: ${e.message}")
+                        runOnUiThread { updateStatus("Capture failed", "#FF0000") }
                     }
                 }
             },
-            onError = { message -> Log.w(TAG, "Camera capture failed: $message") },
+            onError = { message ->
+                Log.w(TAG, "Camera capture failed: $message")
+                runOnUiThread { updateStatus("Capture error", "#FF0000") }
+            },
         )
     }
 
@@ -308,8 +352,19 @@ class MainActivity : ComponentActivity() {
         RealtimeConnectionStatus.CLOSED -> "CLOSED"
     }
 
-    private fun updateStatus(text: String) {
-        if (::statusView.isInitialized) statusView.text = "lumella: $text"
+    /** LEGACY-ELLA status/color mapping (user feedback 2026-07-23: minimal, no prefixes). */
+    private fun applyStatus(status: RealtimeConnectionStatus) = when (status) {
+        RealtimeConnectionStatus.CONNECTING -> updateStatus("Connecting...", "#9C27B0")
+        RealtimeConnectionStatus.READY -> updateStatus("Ready")
+        RealtimeConnectionStatus.DEGRADED -> updateStatus("Voice-only", "#FFC107")
+        RealtimeConnectionStatus.TOKEN_FAIL -> updateStatus("Token error", "#FF0000")
+        RealtimeConnectionStatus.CLOSED -> updateStatus("Reconnecting...", "#9C27B0")
+    }
+
+    private fun updateStatus(text: String, colorHex: String = "#FFFFFF") {
+        if (!::statusView.isInitialized) return
+        statusView.text = text
+        statusView.setTextColor(android.graphics.Color.parseColor(colorHex))
     }
 
     private fun ensurePermissions() {
