@@ -159,7 +159,7 @@ class MainActivity : Activity() {
             brain = brain,
             transport = transport,
             sessionId = { sessionIdRef.get() },
-            personaSummary = "You are Luma, a warm, encouraging English-tutoring voice assistant.",
+            personaSummary = OpenAiRealtimeTransport.DEFAULT_SESSION_INSTRUCTIONS,
         )
 
         audioCapture = AudioCapture(

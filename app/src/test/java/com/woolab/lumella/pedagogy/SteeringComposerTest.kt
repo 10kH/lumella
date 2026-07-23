@@ -10,7 +10,7 @@ import org.junit.Test
 
 class SteeringComposerTest {
 
-    private val persona = "You are Ella, a warm English tutor."
+    private val persona = "You are Lumella, a warm Korean-language tutor."
 
     @Test
     fun detectsKoreanCodeSwitching() {
@@ -20,26 +20,38 @@ class SteeringComposerTest {
     }
 
     @Test
-    fun ac11_koreanUtteranceTriggersEncourageEnglishScaffold() {
+    fun nonKoreanUtteranceTriggersEncourageKoreanScaffold() {
+        // v1 Korean tutoring: the scaffold fires when the learner AVOIDED Korean.
         val text = SteeringComposer.compose(
             personaSummary = persona,
             state = LearnerState(),
             corrections = emptyList(),
-            lastUserUtterance = "음... 그거 어떻게 말해요?",
+            lastUserUtterance = "How do I say that?",
         )
-        assertTrue(text.contains("code-switched into Korean"))
-        assertTrue(text.contains("encourage them to try in English"))
+        assertTrue(text.contains("without using Korean"))
+        assertTrue(text.contains("encourage them to try in Korean"))
     }
 
     @Test
-    fun englishUtteranceDoesNotTriggerCodeSwitchScaffold() {
+    fun koreanUtteranceDoesNotTriggerCodeSwitchScaffold() {
         val text = SteeringComposer.compose(
             personaSummary = persona,
             state = LearnerState(),
             corrections = emptyList(),
-            lastUserUtterance = "I went to the park yesterday",
+            lastUserUtterance = "어제 공원에 갔었어요",
         )
-        assertFalse(text.contains("code-switched"))
+        assertFalse(text.contains("without using Korean"))
+    }
+
+    @Test
+    fun blankUtteranceDoesNotTriggerCodeSwitchScaffold() {
+        val text = SteeringComposer.compose(
+            personaSummary = persona,
+            state = LearnerState(),
+            corrections = emptyList(),
+            lastUserUtterance = "  ",
+        )
+        assertFalse(text.contains("without using Korean"))
     }
 
     @Test

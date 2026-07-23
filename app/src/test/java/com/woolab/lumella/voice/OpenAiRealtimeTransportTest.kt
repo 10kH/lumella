@@ -157,8 +157,26 @@ class OpenAiRealtimeTransportTest {
         transport.connect()
         factory.lastListener?.onOpen()
 
+        transport.appendAudio("QUJD")
         assertTrue(transport.commitAudio())
         assertEquals("""{"type":"input_audio_buffer.commit"}""", factory.socket.sent.last())
+    }
+
+    @Test
+    fun commitWithoutAppendedAudioIsSkippedClientSide() {
+        // On-device finding 2026-07-23: empty taps produced input_audio_buffer_commit_empty.
+        val factory = FakeFactory()
+        val transport = OpenAiRealtimeTransport(successProvider(), factory)
+        transport.connect()
+        factory.lastListener?.onOpen()
+        val sentBefore = factory.socket.sent.size
+
+        assertFalse(transport.commitAudio())                       // nothing appended -> no send
+        assertEquals(sentBefore, factory.socket.sent.size)
+
+        transport.appendAudio("QUJD")
+        assertTrue(transport.commitAudio())                        // real audio -> commit
+        assertFalse(transport.commitAudio())                       // guard resets after commit
     }
 
     @Test

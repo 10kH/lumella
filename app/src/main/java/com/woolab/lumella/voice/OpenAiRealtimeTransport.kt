@@ -57,8 +57,16 @@ class OpenAiRealtimeTransport(
     }
 
     companion object {
+        /**
+         * v1 product decision (Intent Reconciliation 2026-07-21): KOREAN tutoring.
+         * English meta-instructions, Korean speech — realtime models follow this reliably.
+         */
         const val DEFAULT_SESSION_INSTRUCTIONS =
-            "You are Luma, a warm, encouraging English-tutoring voice assistant."
+            "You are Lumella, a warm, encouraging Korean-language conversation tutor. " +
+                "Speak in natural, clear Korean matched to the learner's level; keep replies " +
+                "short and conversational. Weave corrections in gently as part of the dialogue. " +
+                "Do not switch to English unless the learner is completely stuck — then give a " +
+                "brief Korean scaffold instead."
 
         /** Reconnect backoff: 1s, 2s, 4s, … capped at 30s; reset on READY. */
         internal const val RECONNECT_BASE_DELAY_MS = 1_000L
@@ -183,11 +191,26 @@ class OpenAiRealtimeTransport(
 
     /** Appends a base64-encoded PCM16 audio chunk (see [com.woolab.lumella.audio.AudioCapture]) to the input buffer. */
     fun appendAudio(base64Pcm16: String) {
-        sendRaw(buildAudioAppendJson(base64Pcm16))
+        if (sendRaw(buildAudioAppendJson(base64Pcm16))) {
+            audioAppendedSinceCommit = true
+        }
     }
 
-    /** Commits the input audio buffer, ending the learner's turn. Returns false if unsent. */
-    fun commitAudio(): Boolean = sendRaw("""{"type":"input_audio_buffer.commit"}""")
+    /**
+     * Commits the input audio buffer, ending the learner's turn. Returns false if unsent.
+     * Empty-commit guard (on-device finding 2026-07-23: taps without speech produced
+     * `input_audio_buffer_commit_empty` server errors): a commit with no appended audio
+     * since the last commit is skipped client-side.
+     */
+    fun commitAudio(): Boolean {
+        if (!audioAppendedSinceCommit) return false
+        val sent = sendRaw("""{"type":"input_audio_buffer.commit"}""")
+        if (sent) audioAppendedSinceCommit = false
+        return sent
+    }
+
+    @Volatile
+    private var audioAppendedSinceCommit: Boolean = false
 
     /** Closes the WebSocket. Safe to call repeatedly / before connect. Suppresses auto-reconnect. */
     fun close() {

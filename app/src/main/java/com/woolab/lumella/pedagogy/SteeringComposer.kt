@@ -8,12 +8,13 @@ import com.woolab.lumella.state.LearnerState
  * response.create.instructions. Pure + JVM-testable.
  *
  * Combines: clean persona summary, target vocabulary, the most recent egocentric
- * visual context (AC6 — grounding what the learner is looking at), Korean-EFL
- * code-switching scaffolding (AC11), and non-stale deferred corrections.
+ * visual context (AC6 — grounding what the learner is looking at), target-language
+ * code-switching scaffolding (v1: KOREAN tutoring — inverted from ELLA's EFL AC11),
+ * and non-stale deferred corrections.
  */
 object SteeringComposer {
 
-    /** True if the text contains any Hangul syllable/jamo (learner code-switched to Korean). */
+    /** True if the text contains any Hangul syllable/jamo. */
     fun containsKorean(text: String): Boolean = text.any { c ->
         c in '\uAC00'..'\uD7A3' || // Hangul syllables
             c in '\u1100'..'\u11FF' || // Jamo
@@ -38,11 +39,13 @@ object SteeringComposer {
         val sb = StringBuilder()
         if (personaSummary.isNotBlank()) sb.append(personaSummary.trim()).append('\n')
 
-        // AC11: Korean-EFL code-switching — encourage English, offer a scaffold, do not switch to Korean.
-        if (lastUserUtterance != null && containsKorean(lastUserUtterance)) {
+        // v1 Korean tutoring (Intent Reconciliation 2026-07-21) — inverted from ELLA's
+        // English-EFL AC11: the target language is KOREAN, so the scaffold fires when the
+        // learner avoided Korean, encouraging them to try in Korean.
+        if (!lastUserUtterance.isNullOrBlank() && !containsKorean(lastUserUtterance)) {
             sb.append(
-                "The learner just code-switched into Korean. Warmly encourage them to try in " +
-                    "English and offer a short scaffold (\"You can say it like ...\"); do not switch to Korean yourself.\n",
+                "The learner replied without using Korean. Warmly encourage them to try in " +
+                    "Korean and offer a short scaffold (\"이렇게 말해볼 수 있어요: ...\"); keep speaking Korean yourself.\n",
             )
         }
 
