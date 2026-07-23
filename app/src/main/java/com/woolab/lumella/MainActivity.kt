@@ -1,6 +1,6 @@
 package com.woolab.lumella
 
-import android.app.Activity
+import androidx.activity.ComponentActivity
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
@@ -46,7 +46,7 @@ import java.util.concurrent.atomic.AtomicReference
  * status view reports the degrade state and the touch/mic loop stays alive (voice-only when
  * the brain is unavailable; visibly TOKEN-FAIL when no realtime credential can be minted).
  */
-class MainActivity : Activity() {
+class MainActivity : ComponentActivity() {
 
     companion object {
         private const val TAG = "lumella"
@@ -94,7 +94,7 @@ class MainActivity : Activity() {
         updateStatus("CONNECTING")
 
         config = AppConfig.fromBuildConfig()
-        camera = GlassesCamera(this)
+        camera = GlassesCamera(this, this)
         audioPlayback = AudioPlayback().apply { start() }
 
         brain = BrainFactory.create(config.brainClassName) { reason ->

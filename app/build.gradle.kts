@@ -81,6 +81,10 @@ dependencies {
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
+    // CameraX (LEGACY-ELLA-proven capture recipe on RayNeo, G006 photo fix)
+    implementation(libs.androidx.camera.core)
+    implementation(libs.androidx.camera.camera2)
+    implementation(libs.androidx.camera.lifecycle)
     // WS client for OpenAiRealtimeTransport (plan G006 decision: ELLA used okhttp for its
     // Realtime WS connection; :app had no HTTP/WS dependency before this — okhttp is the
     // only new dependency this change adds, version pinned to the ELLA-main baseline).
