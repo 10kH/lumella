@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Plan G006 P1: cleartext HTTP is blocked by default; it is permitted only for the small,
+  explicit set of dev-loopback hosts below. Do NOT set a blanket
+  android:usesCleartextTraffic="true" on the <application> tag instead of this file.
+
+  See docs/dev-loop.md "Base URLs" and "G006 on-device smoke amendment" for the physical
+  RayNeo device LAN-IP procedure referenced below.
+-->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="false" />
+
+    <domain-config cleartextTrafficPermitted="true">
+        <!-- Android emulator's host-loopback alias (token-service/luma-api on the dev Mac). -->
+        <domain includeSubdomains="false">10.0.2.2</domain>
+        <!-- On-device loopback (e.g. adb reverse tunnels, local test doubles). -->
+        <domain includeSubdomains="false">127.0.0.1</domain>
+        <!-- Dev Mac LAN IP for the current RayNeo smoke session (2026-07-21) — remove after. -->
+        <domain includeSubdomains="false">192.168.35.170</domain>
+
+        <!--
+          Physical RayNeo device testing (docs/dev-loop.md "G006 on-device smoke amendment"):
+          token-service/luma-api run as plain HTTP on the dev Mac, so a physical device on the
+          same LAN needs the Mac's LAN IP added here as one extra <domain> line, e.g. if the
+          Mac's LAN IP is 192.168.1.42:
+
+            <domain includeSubdomains="false">192.168.1.42</domain>
+
+          Arbitrary RFC1918 LAN IPs cannot be enumerated statically in this file — add only the
+          single concrete IP you are actually using for that test session, and remove it again
+          afterward. Do NOT widen this to a subnet, wildcard, or the whole 10.0.0.0/8,
+          172.16.0.0/12, or 192.168.0.0/16 ranges. The alternative that needs no edit here at
+          all is serving token-service/luma-api over https via a tunnel (e.g. ngrok/cloudflared)
+          instead of plain LAN HTTP.
+        -->
+    </domain-config>
+</network-security-config>

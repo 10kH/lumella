@@ -1,0 +1,73 @@
+{
+  "schemaVersion": 1,
+  "id": "capabilities",
+  "grade": "key-free",
+  "source": "live-server GET /v1/capabilities (no auth header sent)",
+  "recordedAt": "2026-07-21T02:50:12Z",
+  "recordedAgainst": {
+    "component": "luma-api",
+    "host": "http://127.0.0.1:8010"
+  },
+  "request": {
+    "method": "GET",
+    "path": "/v1/capabilities",
+    "headers": {},
+    "body": null
+  },
+  "response": {
+    "status": 200,
+    "body": {
+      "schemaRev": 1,
+      "coach": true,
+      "routes": [
+        "/v1/archive/orchestrator",
+        "/v1/archive/orchestrator/{orchestrator_session_id}",
+        "/v1/auth/session",
+        "/v1/capabilities",
+        "/v1/devices",
+        "/v1/devices/register",
+        "/v1/devices/{device_id}",
+        "/v1/devices/{device_id}/active-orchestrator-session",
+        "/v1/devices/{device_id}/active-session",
+        "/v1/devices/{device_id}/heartbeat",
+        "/v1/health",
+        "/v1/home",
+        "/v1/images/analyze",
+        "/v1/korean/free/respond",
+        "/v1/korean/reading/compose",
+        "/v1/korean/reading/respond",
+        "/v1/korean/scenario/compose",
+        "/v1/korean/scenario/respond",
+        "/v1/korean/topic/respond",
+        "/v1/korean/writing/evaluate",
+        "/v1/learner-state",
+        "/v1/me",
+        "/v1/onboarding",
+        "/v1/orchestrator/analytics/summary",
+        "/v1/orchestrator/audio-turn",
+        "/v1/orchestrator/datasets/sessions/{orchestrator_session_id}",
+        "/v1/orchestrator/sessions/{orchestrator_session_id}/end",
+        "/v1/orchestrator/turn",
+        "/v1/preferences",
+        "/v1/progress/history",
+        "/v1/progress/summary",
+        "/v1/sessions",
+        "/v1/sessions/{session_id}",
+        "/v1/sessions/{session_id}/end",
+        "/v1/sessions/{session_id}/messages",
+        "/v1/sessions/{session_id}/summary",
+        "/v1/users/me/account",
+        "/v1/users/me/active-orchestrator-session",
+        "/v1/users/me/conversation-history",
+        "/v1/writing/reviews"
+      ]
+    }
+  },
+  "invariants": [
+    { "path": "response.status", "equals": 200 },
+    { "path": "response.body.schemaRev", "type": "number" },
+    { "path": "response.body.coach", "type": "boolean", "equals": true },
+    { "path": "response.body.routes", "type": "array", "minLength": 1 },
+    { "path": "response.body.routes", "contains": "/v1/orchestrator/turn" }
+  ]
+}

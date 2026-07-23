@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 1,
+  "id": "turn-coach-empty",
+  "grade": "key-free",
+  "source": "live-server POST /v1/orchestrator/turn, same content as turn-default WITH responseMode=coach; prose (free_chat) route never parses ETRI prose for corrections, so coachEvidence is present but corrections is empty",
+  "recordedAt": "2026-07-21T02:50:23Z",
+  "recordedAgainst": {
+    "component": "luma-api",
+    "host": "http://127.0.0.1:8010"
+  },
+  "request": {
+    "method": "POST",
+    "path": "/v1/orchestrator/turn",
+    "headers": {
+      "Authorization": "Bearer <redacted>",
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "surface": "glasses",
+      "content": "오늘 날씨 이야기 좀 할까요?",
+      "responseMode": "coach"
+    }
+  },
+  "response": {
+    "status": 200,
+    "body": {
+      "session": {
+        "id": "orch_d74b8d04e2d9e5a3",
+        "userId": "usr_0eedaf397001ae26",
+        "surface": "glasses",
+        "deviceId": null,
+        "status": "active",
+        "title": "오늘 날씨 이야기 좀 할까요? 자유 대화",
+        "currentRoute": "free_chat",
+        "currentProvider": "etri",
+        "turnCount": 1,
+        "routeChangeCount": 0
+      },
+      "selectedRoute": "free_chat",
+      "selectedProvider": "etri",
+      "policyAction": "stay",
+      "routeChanged": false,
+      "deliveredAssistantText": null,
+      "fallbackUsed": false,
+      "fallbackReason": null,
+      "assistantText": "",
+      "legacySessionId": "sess_e6b40eb822286eb5",
+      "providerCall": {
+        "provider": "etri",
+        "endpoint": "/tango_generate",
+        "status": "ok",
+        "latencyMs": 2636,
+        "errorCode": null
+      },
+      "assetIds": [],
+      "coachEvidence": {
+        "corrections": [],
+        "hints": [],
+        "focusHint": "continuation",
+        "confidence": 0.6
+      }
+    }
+  },
+  "invariants": [
+    { "path": "response.status", "equals": 200 },
+    { "path": "response.body.assistantText", "type": "string", "equals": "" },
+    { "path": "response.body.deliveredAssistantText", "type": "null" },
+    { "path": "response.body.coachEvidence", "type": "object" },
+    { "path": "response.body.coachEvidence.corrections", "type": "array", "equalsLength": 0 },
+    { "path": "response.body.coachEvidence.confidence", "type": "number" }
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "id": "device-register",
+  "grade": "key-free",
+  "source": "live-server POST /v1/devices/register (authenticated as learner@luma.app)",
+  "recordedAt": "2026-07-21T02:50:13Z",
+  "recordedAgainst": {
+    "component": "luma-api",
+    "host": "http://127.0.0.1:8010"
+  },
+  "request": {
+    "method": "POST",
+    "path": "/v1/devices/register",
+    "headers": {
+      "Authorization": "Bearer <redacted>",
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "label": "contract-fixture-device",
+      "platform": "android",
+      "capabilities": []
+    }
+  },
+  "response": {
+    "status": 200,
+    "body": {
+      "deviceId": "dev_1fa4eb5d21601317",
+      "platform": "android",
+      "label": "contract-fixture-device",
+      "model": null,
+      "appVersion": null,
+      "capabilities": [],
+      "createdAt": "2026-07-21T02:50:13.332591Z",
+      "lastSeenAt": "2026-07-21T02:50:13.332194Z"
+    }
+  },
+  "invariants": [
+    { "path": "response.status", "equals": 200 },
+    { "path": "response.body.deviceId", "type": "string", "minLength": 1 },
+    { "path": "response.body.platform", "type": "string", "equals": "android" },
+    { "path": "response.body.capabilities", "type": "array" }
+  ]
+}

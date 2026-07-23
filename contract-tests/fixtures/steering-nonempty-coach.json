@@ -1,0 +1,85 @@
+{
+  "schemaVersion": 1,
+  "id": "steering-nonempty-coach",
+  "grade": "key-free",
+  "source": "test-client-recorded (fake ETRI branch) - live ETRI /korlings was tried 3x with wrong-answer scenario content against real luma-api and never returned a marker-labelled incorrect dialogue state (non-deterministic / not reproducible key-free). Fell back to luma-api's own pytest ASGI test client (httpx.ASGITransport over the real FastAPI app, real DB, real auth) with only luma_api.services.korean.korean_client.request_json monkeypatched to the exact 'coach-scenario' fake branch already used by tests/test_orchestrator_routes.py::test_coach_mode_scenario_turn_produces_correction_and_hides_text. routeHint=scenario is the FR5 explicit fast path (0 model round-trips), so route selection, coach-evidence distillation (services/orchestrator/coach.py _build_coach_evidence), and response schema are all the REAL server code path; only the ETRI vendor HTTP call is faked, exactly as in the recipe read from tests/test_orchestrator_routes.py.",
+  "recordedAt": "2026-07-21T02:52:19Z",
+  "recordedAgainst": {
+    "component": "luma-api",
+    "host": "asgi-test-client (httpx.ASGITransport, real app, no network)"
+  },
+  "request": {
+    "method": "POST",
+    "path": "/v1/orchestrator/turn",
+    "headers": {
+      "Authorization": "Bearer <redacted>",
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "surface": "glasses",
+      "routeHint": "scenario",
+      "topicHint": "카페 주문",
+      "content": "coach-scenario",
+      "responseMode": "coach"
+    }
+  },
+  "response": {
+    "status": 200,
+    "body": {
+      "session": {
+        "id": "orch_a06fc56e0285a983",
+        "userId": "usr_0eedaf397001ae26",
+        "surface": "glasses",
+        "deviceId": null,
+        "status": "active",
+        "title": "카페 주문 상황 연습",
+        "currentRoute": "scenario",
+        "currentProvider": "etri",
+        "turnCount": 1,
+        "routeChangeCount": 0
+      },
+      "selectedRoute": "scenario",
+      "selectedProvider": "etri",
+      "policyAction": "stay",
+      "routeChanged": false,
+      "deliveredAssistantText": null,
+      "fallbackUsed": false,
+      "fallbackReason": null,
+      "assistantText": "",
+      "legacySessionId": "sess_c8e9982e9bad8bae",
+      "providerCall": {
+        "provider": "etri",
+        "endpoint": "/korlings",
+        "status": "ok",
+        "latencyMs": 1329,
+        "errorCode": null
+      },
+      "assetIds": [],
+      "coachEvidence": {
+        "corrections": [
+          {
+            "original": "coach-scenario",
+            "corrected": "정확한 표현: 두유 라떼 하나 주세요.",
+            "errorType": null,
+            "sourceTurnRef": 1
+          }
+        ],
+        "hints": [
+          "정확한 표현: 두유 라떼 하나 주세요."
+        ],
+        "focusHint": "continuation",
+        "confidence": 0.6
+      }
+    }
+  },
+  "invariants": [
+    { "path": "response.status", "equals": 200 },
+    { "path": "response.body.assistantText", "type": "string", "equals": "" },
+    { "path": "response.body.deliveredAssistantText", "type": "null" },
+    { "path": "response.body.coachEvidence", "type": "object" },
+    { "path": "response.body.coachEvidence.corrections", "type": "array", "minLength": 1 },
+    { "path": "response.body.coachEvidence.corrections[0].original", "type": "string", "minLength": 1 },
+    { "path": "response.body.coachEvidence.corrections[0].corrected", "type": "string", "minLength": 1 },
+    { "path": "response.body.coachEvidence.corrections[0].sourceTurnRef", "type": "number" }
+  ]
+}

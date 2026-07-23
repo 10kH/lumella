@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "id": "error-unauthorized",
+  "grade": "key-free",
+  "source": "live-server POST /v1/orchestrator/turn with no Authorization header",
+  "recordedAt": "2026-07-21T02:50:26Z",
+  "recordedAgainst": {
+    "component": "luma-api",
+    "host": "http://127.0.0.1:8010"
+  },
+  "request": {
+    "method": "POST",
+    "path": "/v1/orchestrator/turn",
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "surface": "glasses",
+      "content": "hello"
+    }
+  },
+  "response": {
+    "status": 401,
+    "body": {
+      "error": {
+        "code": "AUTH_REQUIRED",
+        "message": "Authorization header is required.",
+        "userMessage": "먼저 로그인해 주세요.",
+        "retryable": false
+      },
+      "requestId": "req_66c113f1327427bd"
+    }
+  },
+  "invariants": [
+    { "path": "response.status", "equals": 401 },
+    { "path": "response.body.error.code", "type": "string", "minLength": 1 },
+    { "path": "response.body.error.retryable", "type": "boolean" }
+  ]
+}
