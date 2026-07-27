@@ -135,3 +135,9 @@ server rejects the pinned shape/header combination live, it will surface there e
 unit tests stay green. Record the outcome (clean `READY` vs. an `error` event) in the smoke
 notes; do not assume the pinned unit-test shape is live-correct until this has actually been
 observed once.
+
+## 플랫폼 함정 (필독)
+
+RayNeo 하드웨어에서 실제로 겪은 함정 모음 — 네이티브 앱 등록, 터치패드 구분, AR UI 원칙,
+카메라, 착용 감지 마이크, WiFi 무언 단절, cleartext, Realtime API 함정, 그리고
+"토큰 오류"의 3가지 서로 다른 원인 구분: [`rayneo-platform-notes.md`](rayneo-platform-notes.md)

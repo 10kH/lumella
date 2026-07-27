@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Mac-resident LaunchAgent for the lumella realtime token-service.
+
+  Why this exists: the glasses mint ephemeral OpenAI realtime credentials from
+  this service. Running it by hand in a terminal means it dies with the shell,
+  and the glasses then show TOKEN-FAIL for reasons that look like an API
+  problem but are not (observed repeatedly, 2026-07). launchd keeps it up.
+
+  This is a TEMPLATE: ops/launchd/manage.sh install renders __PLACEHOLDERS__ and
+  writes the result to ~/Library/LaunchAgents/. NO secrets live here — the
+  server reads OPENAI_API_KEY and LUMELLA_LOCAL_TOKEN from
+  token-service/.env.local (gitignored) at startup.
+-->
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.woolab.lumella.token-service</string>
+
+  <key>ProgramArguments</key>
+  <array>
+    <string>__NODE_BIN__</string>
+    <string>__REPO_ROOT__/token-service/server.mjs</string>
+  </array>
+
+  <!-- WorkingDirectory = token-service dir so loadEnvFile finds .env.local. -->
+  <key>WorkingDirectory</key>
+  <string>__REPO_ROOT__/token-service</string>
+
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>PATH</key>
+    <string>__PATH__</string>
+    <!-- Bind on all interfaces: the RayNeo reaches the Mac over LAN, not loopback. -->
+    <key>BIND</key>
+    <string>0.0.0.0</string>
+    <key>PORT</key>
+    <string>8788</string>
+  </dict>
+
+  <key>RunAtLoad</key>
+  <true/>
+
+  <!-- Always-on: launchd restarts the service if it crashes. Stop with `manage.sh uninstall`. -->
+  <key>KeepAlive</key>
+  <true/>
+
+  <key>ThrottleInterval</key>
+  <integer>10</integer>
+
+  <key>ProcessType</key>
+  <string>Background</string>
+
+  <key>StandardOutPath</key>
+  <string>__LOG_DIR__/token-service.out.log</string>
+  <key>StandardErrorPath</key>
+  <string>__LOG_DIR__/token-service.err.log</string>
+</dict>
+</plist>

@@ -351,6 +351,7 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
         RealtimeConnectionStatus.DEGRADED -> "DEGRADED (voice-only)"
         RealtimeConnectionStatus.TOKEN_FAIL -> "TOKEN-FAIL"
         RealtimeConnectionStatus.CLOSED -> "CLOSED"
+        RealtimeConnectionStatus.ACCOUNT_BLOCKED -> "ACCOUNT-BLOCKED"
         RealtimeConnectionStatus.IDLE -> "IDLE"
     }
 
@@ -361,6 +362,7 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
         RealtimeConnectionStatus.DEGRADED -> updateStatus("Voice-only", "#FFC107")
         RealtimeConnectionStatus.TOKEN_FAIL -> updateStatus("Token error", "#FF0000")
         RealtimeConnectionStatus.CLOSED -> updateStatus("Reconnecting...", "#9C27B0")
+        RealtimeConnectionStatus.ACCOUNT_BLOCKED -> updateStatus("No API credit", "#FF0000")
         // Cost-safety idle timeout (Change B): unattended session closed itself; a tap re-wakes it.
         RealtimeConnectionStatus.IDLE -> updateStatus("Idle - tap to wake", "#888888")
     }

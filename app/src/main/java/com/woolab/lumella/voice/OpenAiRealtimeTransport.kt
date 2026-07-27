@@ -8,7 +8,7 @@ import com.woolab.lumella.TokenServiceCredentialProvider
 import com.woolab.lumella.util.MiniJson
 
 /** Coarse connection/session status surfaced to the UI (mirrors LEGACY's status-text states, plan G006). */
-enum class RealtimeConnectionStatus { CONNECTING, READY, DEGRADED, TOKEN_FAIL, CLOSED, IDLE }
+enum class RealtimeConnectionStatus { CONNECTING, READY, DEGRADED, TOKEN_FAIL, CLOSED, IDLE, ACCOUNT_BLOCKED }
 
 /**
  * [RealtimeTransport] implementation wired to OpenAI's Realtime API over WebSocket
@@ -99,6 +99,13 @@ class OpenAiRealtimeTransport(
         }
         /** Idle-timeout default: 10 minutes with no tap/audio activity (plan G006 cost-safety follow-up). */
         internal const val DEFAULT_IDLE_TIMEOUT_MS = 10 * 60 * 1000L
+
+        /** Server error codes that reconnecting cannot fix (account/billing/key level). */
+        internal val FATAL_ACCOUNT_ERROR_CODES = listOf(
+            "insufficient_quota",
+            "invalid_api_key",
+            "account_deactivated",
+        )
 
         private val defaultIdleExecutor: java.util.concurrent.ScheduledExecutorService by lazy {
             java.util.concurrent.Executors.newSingleThreadScheduledExecutor(
@@ -327,10 +334,30 @@ class OpenAiRealtimeTransport(
             RealtimeServerEventKind.INPUT_TRANSCRIPT_COMPLETED -> {
                 MiniJson.string(obj, "transcript")?.let(listener::onInputTranscript)
             }
-            RealtimeServerEventKind.ERROR -> listener.onError(text)
+            RealtimeServerEventKind.ERROR -> {
+                if (isFatalAccountError(text)) {
+                    // Permanent, account-level failure (no credit / bad key / disabled
+                    // account). Retrying cannot fix it and the server closes the socket
+                    // right after, so the reconnect loop would hammer the API forever
+                    // (observed on-device 2026-07-28: CONNECT -> error -> CLOSE every ~4s).
+                    // Stop reconnecting and surface it as its own status.
+                    closedByClient = true
+                    listener.onStatus(RealtimeConnectionStatus.ACCOUNT_BLOCKED)
+                }
+                listener.onError(text)
+            }
             else -> Unit
         }
     }
+
+
+    /**
+     * True for permanent account-level errors that reconnecting cannot resolve.
+     * Kept as substring matching on the server's `code` field so a new sibling code
+     * degrades to the old (retrying) behavior rather than being silently swallowed.
+     */
+    internal fun isFatalAccountError(eventText: String): Boolean =
+        FATAL_ACCOUNT_ERROR_CODES.any { eventText.contains("\"code\":\"$it\"") }
 
     // --- Event JSON composition (internal for unit-test visibility) ---
 

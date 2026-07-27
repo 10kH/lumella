@@ -547,4 +547,57 @@ class OpenAiRealtimeTransportTest {
         reconnectTasks.removeAt(0).invoke()
         assertEquals(2, factory.connectCount) // reconnected despite the idle timer being armed
     }
+
+    // --- Fatal account errors must NOT trigger the reconnect loop ---
+
+    @Test
+    fun insufficientQuotaStopsReconnectingAndReportsAccountBlocked() {
+        // On-device 2026-07-28: an out-of-credit account produced a
+        // CONNECT -> error -> CLOSE cycle every ~4s forever.
+        val factory = CountingFactory()
+        val scheduled = mutableListOf<Long>()
+        val recording = RecordingListener()
+        val transport = OpenAiRealtimeTransport(
+            successProvider(),
+            factory,
+            listener = recording,
+            reconnectScheduler = { delayMs, _ -> scheduled.add(delayMs) },
+        )
+        transport.connect()
+
+        factory.lastListener?.onMessage(
+            """{"type":"error","error":{"type":"invalid_request_error","code":"insufficient_quota","message":"You exceeded your current quota"}}""",
+        )
+        // The server closes right after the error event.
+        factory.lastListener?.onClosed(1000, "insufficient_quota")
+
+        assertTrue(recording.statuses.contains(RealtimeConnectionStatus.ACCOUNT_BLOCKED))
+        assertTrue("must not schedule a reconnect", scheduled.isEmpty())
+        assertEquals(1, factory.connectCount)
+    }
+
+    @Test
+    fun unknownServerErrorStillReconnects() {
+        val factory = CountingFactory()
+        val scheduled = mutableListOf<Long>()
+        val transport = OpenAiRealtimeTransport(
+            successProvider(),
+            factory,
+            reconnectScheduler = { delayMs, _ -> scheduled.add(delayMs) },
+        )
+        transport.connect()
+
+        factory.lastListener?.onMessage("""{"type":"error","error":{"code":"some_transient_thing"}}""")
+        factory.lastListener?.onClosed(1000, "transient")
+
+        assertEquals(1, scheduled.size)
+    }
+
+    @Test
+    fun fatalCodeDetectionCoversKnownAccountErrors() {
+        val transport = OpenAiRealtimeTransport(successProvider(), FakeFactory())
+        assertTrue(transport.isFatalAccountError("""{"error":{"code":"insufficient_quota"}}"""))
+        assertTrue(transport.isFatalAccountError("""{"error":{"code":"invalid_api_key"}}"""))
+        assertFalse(transport.isFatalAccountError("""{"error":{"code":"server_error"}}"""))
+    }
 }
