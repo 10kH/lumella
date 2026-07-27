@@ -109,21 +109,34 @@ LEGACY ELLA와 lumella 양쪽 다 이 방식. 좌표 기반으로 바꾸지 말 
 
 ---
 
-## 4. 카메라 — camera2 직접 구현은 동작하지 않는다
+## 4. 카메라 — **현재 미해결**
 
-직접 만든 camera2 단발 캡처는 카메라를 열기까지는 하지만 **프레임이 오지 않고**,
-약 6초 뒤 시스템이 조용히 연결을 끊는다(에러 콜백도 없음).
+### 확인된 사실
+- 직접 만든 **camera2** 단발 캡처: 카메라는 열리지만 프레임이 오지 않고 약 6초 뒤 시스템이 조용히 연결을 끊는다(에러 콜백 없음).
+- **CameraX**로 교체: 초기화는 성공(`CameraX initialized` 로그)하지만 **캡처가 완료되지 않는다.**
+  logcat: `takePictureInternal` → `TakePictureManager: Issue the next TakePictureRequest.` 이후 성공/실패 콜백 **둘 다 오지 않음**. 30초 이상 대기해도 동일.
+- 헤드리스 `Preview` use case를 함께 바인딩해도(활성 스트림 부재 가설) **변화 없음** — 이 변경은 효과가 없어 되돌렸다.
+- Mercury SDK에는 카메라 API가 **없다**(패키지: api/core/databinding/ext/focus/touch/ui/util). 즉 벤더 대체 경로가 SDK에 노출돼 있지 않다.
+- CameraService 레벨 오류 로그도 없다.
 
-**CameraX를 쓸 것** (이 하드웨어에서 검증된 유일한 경로):
-```kotlin
-ImageCapture.Builder()
-    .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
-    .build()
-provider.bindToLifecycle(lifecycleOwner, CameraSelector.DEFAULT_BACK_CAMERA, capture)
+> ⚠️ 이전 판 문서에는 "CameraX만 동작"이라고 적혀 있었으나 **틀렸다.** 초기화 성공 로그만 보고 캡처 성공으로 단정했던 것이다. 실제 캡처는 한 번도 성공한 적이 없다.
+
+### 재현 방법 (착용 불필요)
+디버그 빌드에 브로드캐스트 훅이 있다 — 좌측 터치패드 탭은 SELinux 때문에 주입할 수 없으므로(§6-1) 이걸 쓴다:
+```bash
+adb shell am start -n com.woolab.lumella/.MainActivity
+adb shell am broadcast -a com.woolab.lumella.DEBUG_CAPTURE_PHOTO
+adb logcat -d --pid=$(adb shell pidof com.woolab.lumella) | grep -iE "lumella|TakePicture"
 ```
-성공 시 로그: `CameraX initialized`.
+액티비티가 **포그라운드**여야 한다(`visibleRequested=true`). 백그라운드면 `Camera is not active`로 즉시 실패한다.
 
----
+### 다음에 시도할 것
+1. 기본 카메라 앱으로 촬영이 되는지 확인 → 기기 자체 문제인지 우리 앱 문제인지 분리
+2. 촬영에 하드웨어 셔터/착용 감지 같은 전제가 있는지 확인(마이크가 착용 게이팅인 것과 유사한 패턴일 수 있음)
+3. RayNeo 개발자 문서/포럼에서 서드파티 앱 카메라 접근 정책 확인
+
+### 파이프라인의 나머지는 정상
+캡처만 막혀 있고 그 뒤 단계는 검증됐다: `/v1/images/analyze`는 **OpenAI 크레딧 없이도** 200 + 유효한 `imageId`를 반환한다(luma 폴백 경로 존재, 2026-07-28 실측 `img_b8f8720…`).
 
 ## 5. 마이크는 착용 감지형이다
 

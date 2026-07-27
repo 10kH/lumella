@@ -1,5 +1,9 @@
 package com.woolab.lumella
 
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
@@ -18,13 +22,13 @@ import com.woolab.lumella.contract.BrainConnectionState
 import com.woolab.lumella.contract.BrainCredentials
 import com.woolab.lumella.contract.BrainCredentialsProvider
 import com.woolab.lumella.contract.SessionPolicy
-import com.woolab.lumella.contract.TurnEvidence
 import com.woolab.lumella.contract.TutorBrain
 import com.woolab.lumella.databinding.ActivityMainBinding
 import com.woolab.lumella.orchestration.StalenessGuard
 import com.woolab.lumella.orchestration.StateGraphOrchestrator
 import com.woolab.lumella.slowpath.SlowPathQueue
 import com.woolab.lumella.slowpath.SlowPathTask
+import com.woolab.lumella.slowpath.TurnEvidenceAssembler
 import com.woolab.lumella.slowpath.TurnTracker
 import com.woolab.lumella.state.LearnerStateStore
 import com.woolab.lumella.voice.OkHttpRealtimeWebSocketFactory
@@ -61,6 +65,8 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
         private const val TAP_MAX_DURATION_MS = 500L
         private const val DOUBLE_TAP_INTERVAL_MS = 400L
         private const val PERMISSION_REQUEST_CODE = 1001
+        /** Debug-only broadcast that triggers the photo path without a touchpad tap. */
+        private const val DEBUG_CAPTURE_ACTION = "com.woolab.lumella.DEBUG_CAPTURE_PHOTO"
     }
 
     private lateinit var config: AppConfig
@@ -80,7 +86,7 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
         Thread(r, "lumella-slowpath").apply { isDaemon = true }
     }
 
-    @Volatile private var pendingImageId: String? = null
+    private val turnEvidenceAssembler = TurnEvidenceAssembler()
     @Volatile private var currentTurnUserTranscript: String = ""
     @Volatile private var voiceTransportUnavailable = false
 
@@ -153,7 +159,7 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
                         recordWhenReady = false
                         audioCapture.start()
                         runOnUiThread {
-                            updateStatus(if (pendingImageId != null) "Listening... (+ Photo)" else "Listening...", "#FF5722")
+                            updateStatus(if (turnEvidenceAssembler.peekPendingImageId() != null) "Listening... (+ Photo)" else "Listening...", "#FF5722")
                         }
                     }
                 }
@@ -199,6 +205,10 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
         )
 
         ensurePermissions()
+
+        debugCaptureReceiver?.let {
+            registerReceiver(it, IntentFilter(DEBUG_CAPTURE_ACTION), Context.RECEIVER_EXPORTED)
+        }
 
         Thread({ bootstrapBrainAndTransport(credentialsProvider) }, "lumella-bootstrap").apply {
             isDaemon = true
@@ -299,7 +309,7 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
             }
         } else {
             audioCapture.start()
-            updateStatus(if (pendingImageId != null) "Listening... (+ Photo)" else "Listening...", "#FF5722")
+            updateStatus(if (turnEvidenceAssembler.peekPendingImageId() != null) "Listening... (+ Photo)" else "Listening...", "#FF5722")
         }
     }
 
@@ -311,7 +321,7 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
                 slowPathExecutor.execute {
                     try {
                         val imageContext = brain.analyzeImage(bytes, "image/jpeg")
-                        pendingImageId = imageContext.imageId.takeIf { it.isNotBlank() }
+                        turnEvidenceAssembler.setPendingImageId(imageContext.imageId)
                         runOnUiThread { updateStatus("Photo ready! Tap to speak", "#9C27B0") }
                     } catch (e: Exception) {
                         Log.w(TAG, "analyzeImage failed: ${e.message}")
@@ -329,9 +339,7 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
     /** On input-transcript completion: submits this turn's evidence (single submitter, fire-and-forget) and drains the slow path. */
     private fun submitCurrentTurnEvidence() {
         val turnId = turnTracker.current().takeIf { it > 0 } ?: return
-        val imageId = pendingImageId
-        pendingImageId = null
-        val evidence = TurnEvidence(turnId = turnId, learnerTranscript = currentTurnUserTranscript, imageId = imageId)
+        val evidence = turnEvidenceAssembler.assemble(turnId = turnId, transcript = currentTurnUserTranscript)
         slowPathExecutor.execute {
             voiceFastPath.submitTurnEvidence(evidence)
             slowPathQueue.enqueue(SlowPathTask(turnId = turnId, userTranscript = evidence.learnerTranscript))
@@ -389,6 +397,31 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
         }
     }
 
+    /**
+     * Debug-only test hook for the photo path.
+     *
+     * The left-touchpad tap cannot be simulated: taps are discriminated by input
+     * device name (`cyttsp6_mt`) and SELinux denies `sendevent` on the /dev/input event nodes
+     * even though the shell user is in the `input` group (verified 2026-07-28,
+     * matching the LEGACY finding). Without this hook the capture -> analyzeImage
+     * -> imageId path could only ever be exercised by a human wearing the glasses,
+     * which is a poor thing to have on the critical path of a release check.
+     *
+     * Registered ONLY in debug builds:
+     *   adb shell am broadcast -a com.woolab.lumella.DEBUG_CAPTURE_PHOTO
+     */
+    private val debugCaptureReceiver: BroadcastReceiver? =
+        if (BuildConfig.DEBUG) {
+            object : BroadcastReceiver() {
+                override fun onReceive(context: Context?, intent: Intent?) {
+                    Log.i(TAG, "debug: capturePhoto triggered via broadcast")
+                    capturePhoto()
+                }
+            }
+        } else {
+            null
+        }
+
     override fun onDestroy() {
         super.onDestroy()
         teardown()
@@ -396,6 +429,7 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
 
     /** Graceful teardown: stop capture/playback/camera, close transport + WS client, end the brain session, stop heartbeat. */
     private fun teardown() {
+        debugCaptureReceiver?.let { r -> runCatching { unregisterReceiver(r) } }
         runCatching { audioCapture.stop() }
         runCatching { audioPlayback.stop() }
         runCatching { camera.shutdown() }

@@ -1,0 +1,7 @@
+{
+  "name": "lumella-api",
+  "private": true,
+  "scripts": {
+    "test": "node --test realtime-token.test.mjs"
+  }
+}

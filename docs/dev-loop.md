@@ -39,6 +39,49 @@ Rotate by changing both sides together; a mismatch fails closed with `401`
 | Android emulator | Host loopback alias | `http://10.0.2.2:<port>` |
 | token-service | — | `:8788` |
 | luma-api | — | `:8010` |
+| public token endpoint (Vercel) | — | `https://lumella-token.vercel.app` |
+
+## Public token endpoint (off-LAN use)
+
+`token-service` also runs as a public Vercel function (`api/realtime-token.js`), deployed
+2026-07-28 (commit `57d4178`), so the glasses work away from the Mac's LAN:
+
+- Contract is identical to the local service: `POST /v1/realtime/token` ->
+  `{token, expiresAt, model}` (`expiresAt` normalized to epoch ms). `vercel.json` rewrites the
+  path so local and remote share one client contract; `.vercelignore` keeps the Android project
+  out of the upload.
+- Auth: same shared secret as local (`X-Lumella-Local-Token`), constant-time compared. The
+  Vercel project's env var `LUMELLA_LOCAL_TOKEN` **must hold the same value** as the device's
+  `local.properties` `lumella.localToken` (and the local `token-service/.env.local`'s
+  `LUMELLA_LOCAL_TOKEN`, if you also run local) — a mismatch fails closed with `401`, unset
+  fails closed with `503`. Unlike the legacy ELLA endpoint it is deliberately **not** anonymous.
+- Choosing local vs. remote: set `local.properties`' `lumella.tokenServiceBaseUrl` to
+  `http://<mac-lan-ip>:8788` when at home (Mac reachable on the same LAN, `launchd`-managed
+  local service — see below) or to `https://lumella-token.vercel.app` when away from home (LAN
+  unreachable, remote required). The `BuildConfig` default baked into `app/build.gradle.kts` is
+  still the emulator-only `http://10.0.2.2:8788` — always override it in `local.properties` for
+  any real-device run; the tracked default alone does not reproduce either working setup.
+- Live-verified (2026-07-28): anonymous request 401, wrong secret 401, `GET` 405, correct secret
+  mints a token with millisecond `expiresAt`. On-device the app reached the WS over the public
+  internet and stopped only at the account's `insufficient_quota` (see smoke-checklist.md).
+
+## Local token-service supervision (launchd)
+
+Running `token-service` by hand ties its lifetime to the shell — closing the terminal kills it
+and the glasses then show `TOKEN-FAIL`, which looks like a credential problem but is just a dead
+local process (observed repeatedly). `ops/launchd/manage.sh` keeps it up as a Mac LaunchAgent:
+
+```bash
+ops/launchd/manage.sh install     # render plist + load + start + health-check
+ops/launchd/manage.sh status      # launchctl state + /healthz
+ops/launchd/manage.sh logs        # tail service logs
+ops/launchd/manage.sh restart     # kickstart the running service
+ops/launchd/manage.sh uninstall   # stop + unload + remove the LaunchAgent
+```
+
+`install` requires `token-service/.env.local` to already hold `OPENAI_API_KEY` +
+`LUMELLA_LOCAL_TOKEN` (fails fast otherwise); secrets stay in that gitignored file, never in the
+script or the rendered plist. Logs land under `tmp/token-service/`.
 
 ## Android app config keys (plan G006)
 
@@ -122,19 +165,28 @@ on the same LAN as the dev Mac needs the Mac's LAN IP added to that file as one 
 Add it inside the existing `<domain-config>` block, rebuild, and remove it again once the
 on-device pass is done (or use an https tunnel instead so no edit here is needed at all — see
 the comment in that file). Never widen this to a subnet/wildcard or set a blanket
-`android:usesCleartextTraffic="true"`.
+`android:usesCleartextTraffic="true"`. (This LAN-IP dance only applies to the token-service
+`http://` path; using the public token endpoint from "Public token endpoint (off-LAN use)" above
+avoids it entirely for token minting, but `luma-api` traffic still needs the same LAN-cleartext
+handling since it has no public equivalent.)
 
-### First keyed live run: watch WS error events (plan G006 P4 follow-up)
+### GA `session.update` shape: live-validated (was: unverified)
 
 The Realtime WS `session.update` payload shape (GA-shaped, paired with the `OpenAI-Beta`
-header) is pinned by `RealtimeProtocolTest`/`OpenAiRealtimeTransportTest` but has not yet been
-validated against a live `OPENAI_API_KEY`. The **first** keyed live smoke run must watch for WS
-`error` events immediately after `session.update` is sent (`adb logcat -d | grep -i lumella`,
-looking for `Realtime transport error:` from `MainActivity`'s `onError` listener) — if the
-server rejects the pinned shape/header combination live, it will surface there even though the
-unit tests stay green. Record the outcome (clean `READY` vs. an `error` event) in the smoke
-notes; do not assume the pinned unit-test shape is live-correct until this has actually been
-observed once.
+header) is pinned by `RealtimeProtocolTest`/`OpenAiRealtimeTransportTest` **and has been
+validated against a live `OPENAI_API_KEY`** — this is no longer an open question:
+
+- 2026-07-22 09:03, real device: clean live `READY` observed, including a `session_expired` →
+  automatic reconnect → fresh-token `READY` cycle (~2.9s total), no WS `error` event on
+  `session.update`. Confirmed again over a 24h+ soak (24+ reconnect cycles, no shape rejection).
+- 2026-07-23, real device, worn: full voice E2E reached a live luma coach turn (session
+  `orch_36bebef`, mode=coach) from real speech — see `smoke-checklist.md` "착용 E2E 실증" for the
+  transcript evidence.
+
+If a future OpenAI API change breaks the shape again, it will surface as a WS `error` event
+right after `session.update` (`adb logcat -d | grep -i lumella`, look for `Realtime transport
+error:` from `MainActivity`'s `onError` listener) even though the unit tests stay green — worth
+knowing, but not an open risk as of this writing.
 
 ## 플랫폼 함정 (필독)
 
