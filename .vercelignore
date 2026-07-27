@@ -1,0 +1,18 @@
+# Only the api/ serverless functions are deployed. Keep the Android project,
+# Gradle caches, local tooling, and secrets out of the upload.
+app/
+tutor-contract/
+luma-adapter/
+contract-tests/
+token-service/
+ops/
+docs/
+gradle/
+gradlew
+gradlew.bat
+build/
+.gradle/
+.kotlin/
+*.properties
+!vercel.json
+.env*

@@ -1,0 +1,9 @@
+{
+  "version": 2,
+  "functions": {
+    "api/realtime-token.js": { "maxDuration": 30 }
+  },
+  "rewrites": [
+    { "source": "/v1/realtime/token", "destination": "/api/realtime-token" }
+  ]
+}
