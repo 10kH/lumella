@@ -1,0 +1,9 @@
+<resources>
+    <!-- BaseMirrorActivity ultimately extends AppCompatActivity (Mercury SDK class
+         hierarchy, verified via javap: BaseMirrorActivity -> BaseEventActivity ->
+         BaseTouchActivity -> BaseActivity -> AppCompatActivity), which requires a
+         Theme.AppCompat descendant or it throws at runtime. -->
+    <style name="Theme.Lumella" parent="Theme.AppCompat.NoActionBar">
+        <item name="android:windowBackground">@android:color/black</item>
+    </style>
+</resources>

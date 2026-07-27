@@ -1,13 +1,12 @@
 package com.woolab.lumella
 
-import androidx.activity.ComponentActivity
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
 import android.view.MotionEvent
-import android.widget.TextView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.ffalcon.mercury.android.sdk.ui.activity.BaseMirrorActivity
 import com.woolab.lumella.agents.SlowPathDispatcher
 import com.woolab.lumella.agents.TutorBrainPedagogyClient
 import com.woolab.lumella.audio.AudioCapture
@@ -21,6 +20,7 @@ import com.woolab.lumella.contract.BrainCredentialsProvider
 import com.woolab.lumella.contract.SessionPolicy
 import com.woolab.lumella.contract.TurnEvidence
 import com.woolab.lumella.contract.TutorBrain
+import com.woolab.lumella.databinding.ActivityMainBinding
 import com.woolab.lumella.orchestration.StalenessGuard
 import com.woolab.lumella.orchestration.StateGraphOrchestrator
 import com.woolab.lumella.slowpath.SlowPathQueue
@@ -40,13 +40,19 @@ import java.util.concurrent.atomic.AtomicReference
  * the [TutorBrain] via [BrainFactory] (runtime reflective lookup — no compile dependency on
  * `:luma-adapter`, see `BrainFactory`'s kdoc), wires RayNeo mic/speaker/touchpad/camera per the
  * `TUTOR/LEGACY/ELLA` MainActivity recipe, and renders a status text view mirroring LEGACY's
- * status-text approach (CONNECTING/READY/DEGRADED/TOKEN-FAIL).
+ * status-text approach (CONNECTING/READY/DEGRADED/TOKEN-FAIL/IDLE).
+ *
+ * Native RayNeo glasses app (not a "virtual machine"/touchpad-relay app): extends
+ * [BaseMirrorActivity] (Mercury SDK; verified hierarchy via javap: BaseMirrorActivity ->
+ * BaseEventActivity -> BaseTouchActivity -> BaseActivity -> AppCompatActivity, so this
+ * activity IS a LifecycleOwner and CameraX's `bindToLifecycle` keeps working unchanged),
+ * with dual-eye rendering via [mBindingPair] (`activity_main.xml` inflated per-eye).
  *
  * Fail-closed: a missing/unreachable token-service or brain never crashes the activity — the
  * status view reports the degrade state and the touch/mic loop stays alive (voice-only when
  * the brain is unavailable; visibly TOKEN-FAIL when no realtime credential can be minted).
  */
-class MainActivity : ComponentActivity() {
+class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
 
     companion object {
         private const val TAG = "lumella"
@@ -57,7 +63,6 @@ class MainActivity : ComponentActivity() {
         private const val PERMISSION_REQUEST_CODE = 1001
     }
 
-    private lateinit var statusView: TextView
     private lateinit var config: AppConfig
     private lateinit var brain: TutorBrain
     private lateinit var socketFactory: OkHttpRealtimeWebSocketFactory
@@ -79,6 +84,14 @@ class MainActivity : ComponentActivity() {
     @Volatile private var currentTurnUserTranscript: String = ""
     @Volatile private var voiceTransportUnavailable = false
 
+    /**
+     * Set when a right-tap arrives while the transport is idle-closed (see
+     * [OpenAiRealtimeTransport.isClosed]): the tap triggers [OpenAiRealtimeTransport.connect]
+     * immediately and recording starts automatically once READY arrives, so a single tap both
+     * wakes and starts listening.
+     */
+    @Volatile private var recordWhenReady = false
+
     private var lastTouchDownTimeMs = 0L
     private var lastTouchDeviceName = ""
     private var lastRightTapTimeMs = 0L
@@ -89,39 +102,8 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // LEGACY-ELLA minimal AR UI (user feedback 2026-07-23): fullscreen BLACK root
-        // (black = transparent on the waveguide display), bold centered status word,
-        // small gray hint at the bottom. No prefixes, no bright backgrounds.
-        val root = android.widget.FrameLayout(this).apply {
-            setBackgroundColor(android.graphics.Color.BLACK)
-        }
-        statusView = TextView(this).apply {
-            textSize = 48f
-            setTypeface(typeface, android.graphics.Typeface.BOLD)
-            setTextColor(android.graphics.Color.WHITE)
-        }
-        root.addView(
-            statusView,
-            android.widget.FrameLayout.LayoutParams(
-                android.widget.FrameLayout.LayoutParams.WRAP_CONTENT,
-                android.widget.FrameLayout.LayoutParams.WRAP_CONTENT,
-                android.view.Gravity.CENTER,
-            ),
-        )
-        val hintView = TextView(this).apply {
-            textSize = 18f
-            setTextColor(android.graphics.Color.parseColor("#888888"))
-            text = "우측 탭: 말하기 · 좌측 탭: 사진"
-        }
-        root.addView(
-            hintView,
-            android.widget.FrameLayout.LayoutParams(
-                android.widget.FrameLayout.LayoutParams.WRAP_CONTENT,
-                android.widget.FrameLayout.LayoutParams.WRAP_CONTENT,
-                android.view.Gravity.CENTER_HORIZONTAL or android.view.Gravity.BOTTOM,
-            ).apply { bottomMargin = (32 * resources.displayMetrics.density).toInt() },
-        )
-        setContentView(root)
+        // BaseMirrorActivity inflates ActivityMainBinding per-eye into mBindingPair — no
+        // setContentView() here (see LEGACY TUTOR/LEGACY/ELLA MainActivity, same base class).
         updateStatus("Connecting...", "#9C27B0")
 
         config = AppConfig.fromBuildConfig()
@@ -167,6 +149,13 @@ class MainActivity : ComponentActivity() {
                 override fun onStatus(status: RealtimeConnectionStatus) {
                     Log.i(TAG, "status=${statusLabel(status)}")
                     runOnUiThread { applyStatus(status) }
+                    if (status == RealtimeConnectionStatus.READY && recordWhenReady) {
+                        recordWhenReady = false
+                        audioCapture.start()
+                        runOnUiThread {
+                            updateStatus(if (pendingImageId != null) "Listening... (+ Photo)" else "Listening...", "#FF5722")
+                        }
+                    }
                 }
 
                 override fun onAudioDelta(base64Pcm16: String) {
@@ -258,6 +247,9 @@ class MainActivity : ComponentActivity() {
                     when {
                         lastTouchDeviceName == RIGHT_TOUCHPAD_DEVICE && duration < TAP_MAX_DURATION_MS -> {
                             val now = System.currentTimeMillis()
+                            // Any tap counts as user activity for the idle-timeout window (Change
+                            // B), independent of which branch below runs.
+                            if (::transport.isInitialized) transport.noteActivity()
                             if (now - lastRightTapTimeMs < DOUBLE_TAP_INTERVAL_MS) {
                                 endSessionAndExit()
                             } else {
@@ -266,6 +258,7 @@ class MainActivity : ComponentActivity() {
                             lastRightTapTimeMs = now
                         }
                         lastTouchDeviceName == LEFT_TOUCHPAD_DEVICE && duration < TAP_MAX_DURATION_MS -> {
+                            if (::transport.isInitialized) transport.noteActivity()
                             capturePhoto()
                         }
                     }
@@ -292,11 +285,19 @@ class MainActivity : ComponentActivity() {
                 voiceFastPath.onTurnStart(turnId)
                 runOnUiThread { updateStatus("Thinking...", "#2196F3") }
             }
-        } else {
-            if (!transport.sessionReady) {
+        } else if (!transport.sessionReady) {
+            if (transport.isClosed) {
+                // Idle-timeout (or a prior client close) left the session closed: wake it with
+                // this tap and start recording automatically once READY arrives (see the
+                // Listener.onStatus READY branch above), so one tap wakes + starts listening.
+                Log.i(TAG, "Right-tap on closed session: reconnecting and recording on READY")
+                recordWhenReady = true
+                updateStatus("Connecting...", "#9C27B0")
+                transport.connect()
+            } else {
                 Log.w(TAG, "Ignoring right-tap: realtime session not ready")
-                return
             }
+        } else {
             audioCapture.start()
             updateStatus(if (pendingImageId != null) "Listening... (+ Photo)" else "Listening...", "#FF5722")
         }
@@ -350,6 +351,7 @@ class MainActivity : ComponentActivity() {
         RealtimeConnectionStatus.DEGRADED -> "DEGRADED (voice-only)"
         RealtimeConnectionStatus.TOKEN_FAIL -> "TOKEN-FAIL"
         RealtimeConnectionStatus.CLOSED -> "CLOSED"
+        RealtimeConnectionStatus.IDLE -> "IDLE"
     }
 
     /** LEGACY-ELLA status/color mapping (user feedback 2026-07-23: minimal, no prefixes). */
@@ -359,12 +361,17 @@ class MainActivity : ComponentActivity() {
         RealtimeConnectionStatus.DEGRADED -> updateStatus("Voice-only", "#FFC107")
         RealtimeConnectionStatus.TOKEN_FAIL -> updateStatus("Token error", "#FF0000")
         RealtimeConnectionStatus.CLOSED -> updateStatus("Reconnecting...", "#9C27B0")
+        // Cost-safety idle timeout (Change B): unattended session closed itself; a tap re-wakes it.
+        RealtimeConnectionStatus.IDLE -> updateStatus("Idle - tap to wake", "#888888")
     }
 
+    /** Dual-eye status update (Mercury SDK mirror rendering): both [mBindingPair] panes in lockstep. */
     private fun updateStatus(text: String, colorHex: String = "#FFFFFF") {
-        if (!::statusView.isInitialized) return
-        statusView.text = text
-        statusView.setTextColor(android.graphics.Color.parseColor(colorHex))
+        val color = android.graphics.Color.parseColor(colorHex)
+        mBindingPair.left.tvStatus.text = text
+        mBindingPair.left.tvStatus.setTextColor(color)
+        mBindingPair.right.tvStatus.text = text
+        mBindingPair.right.tvStatus.setTextColor(color)
     }
 
     private fun ensurePermissions() {

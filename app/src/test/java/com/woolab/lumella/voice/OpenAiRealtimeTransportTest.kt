@@ -467,4 +467,84 @@ class OpenAiRealtimeTransportTest {
         assertEquals(statusCountAfterReady, recording.statuses.size) // no status flash
         assertTrue(scheduledTasks.isEmpty())                     // no extra reconnect
     }
+
+    // --- Idle timeout: unattended sessions must not be kept alive indefinitely (2026-07-26 cost risk) ---
+
+    @Test
+    fun idleTimeoutClosesSessionAndDoesNotScheduleReconnect() {
+        val factory = FakeFactory()
+        val listener = RecordingListener()
+        val idleTasks = mutableListOf<() -> Unit>()
+        val reconnectDelays = mutableListOf<Long>()
+        val transport = OpenAiRealtimeTransport(
+            successProvider(),
+            factory,
+            listener = listener,
+            reconnectScheduler = { delayMs, _ -> reconnectDelays.add(delayMs) },
+            idleScheduler = { _, task -> idleTasks.add(task) },
+        )
+        transport.connect()
+        factory.lastListener?.onOpen()
+        factory.lastListener?.onMessage("""{"type":"session.created"}""")
+        assertTrue(transport.sessionReady)
+
+        // Simulate the idle threshold elapsing (test invokes the captured task directly
+        // instead of waiting on a real clock).
+        idleTasks.last().invoke()
+
+        assertTrue(listener.statuses.contains(RealtimeConnectionStatus.IDLE))
+        assertFalse(transport.sessionReady)
+        assertTrue(factory.socket.closed)
+        assertTrue(transport.isClosed)
+        assertTrue(reconnectDelays.isEmpty())
+    }
+
+    @Test
+    fun userActivityResetsIdleTimerInvalidatingStaleTask() {
+        val factory = FakeFactory()
+        val listener = RecordingListener()
+        val idleTasks = mutableListOf<() -> Unit>()
+        val transport = OpenAiRealtimeTransport(
+            successProvider(),
+            factory,
+            listener = listener,
+            idleScheduler = { _, task -> idleTasks.add(task) },
+        )
+        transport.connect() // idle task #0 armed
+        factory.lastListener?.onOpen()
+
+        transport.appendAudio("QUJD") // user activity -> idle task #1 armed, #0 now stale
+
+        assertEquals(2, idleTasks.size)
+        idleTasks[0].invoke() // stale task fires late -> must be ignored
+        assertFalse(listener.statuses.contains(RealtimeConnectionStatus.IDLE))
+        assertFalse(factory.socket.closed)
+
+        idleTasks[1].invoke() // the reset (latest) task fires -> closes for real
+        assertTrue(listener.statuses.contains(RealtimeConnectionStatus.IDLE))
+        assertTrue(factory.socket.closed)
+    }
+
+    @Test
+    fun serverExpiredSessionStillAutoReconnectsWithIdleTimerArmed() {
+        // Regression: the idle-timeout addition must not interfere with the existing
+        // session_expired self-heal (D-4/W-1 steady state — see reconnect tests above).
+        val factory = CountingFactory()
+        val reconnectTasks = mutableListOf<() -> Unit>()
+        val idleTasks = mutableListOf<() -> Unit>()
+        val transport = OpenAiRealtimeTransport(
+            successProvider(),
+            factory,
+            reconnectScheduler = { _, task -> reconnectTasks.add(task) },
+            idleScheduler = { _, task -> idleTasks.add(task) },
+        )
+        transport.connect()
+        assertEquals(1, factory.connectCount)
+
+        factory.lastListener?.onClosed(1000, "session_expired")
+
+        assertEquals(1, reconnectTasks.size)
+        reconnectTasks.removeAt(0).invoke()
+        assertEquals(2, factory.connectCount) // reconnected despite the idle timer being armed
+    }
 }

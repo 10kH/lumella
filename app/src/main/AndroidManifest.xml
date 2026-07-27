@@ -6,15 +6,27 @@
     <uses-permission android:name="android.permission.CAMERA" />
 
     <application
+        android:name=".LumellaApp"
         android:allowBackup="false"
         android:label="@string/app_name"
         android:networkSecurityConfig="@xml/network_security_config"
+        android:resizeableActivity="false"
         android:supportsRtl="true"
-        android:theme="@android:style/Theme.DeviceDefault">
+        android:theme="@style/Theme.Lumella">
+
+        <!-- Marks LUMELLA as a RayNeo native-glasses app (not a "virtual machine"/
+             touchpad-relay app requiring a paired phone's App Home - Touchpad). -->
+        <meta-data
+            android:name="com.rayneo.mercury.app"
+            android:value="true" />
 
         <activity
             android:name=".MainActivity"
-            android:exported="true">
+            android:configChanges="orientation|screenSize|density|screenLayout"
+            android:exported="true"
+            android:launchMode="singleTask"
+            android:resizeableActivity="false"
+            android:screenOrientation="landscape">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

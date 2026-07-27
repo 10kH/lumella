@@ -44,6 +44,9 @@ android {
 
     buildFeatures {
         buildConfig = true
+        // Required for BaseMirrorActivity<ActivityMainBinding> (Mercury SDK dual-eye
+        // ViewBinding pair, see MainActivity/mBindingPair).
+        viewBinding = true
     }
 
     buildTypes {
@@ -89,6 +92,11 @@ dependencies {
     // Realtime WS connection; :app had no HTTP/WS dependency before this — okhttp is the
     // only new dependency this change adds, version pinned to the ELLA-main baseline).
     implementation(libs.okhttp)
+    implementation(libs.androidx.constraintlayout)
+    // RayNeo Mercury SDK (native-glasses classification; see LumellaApp/MainActivity).
+    // Copied from TUTOR/LEGACY/ELLA/app/libs — same file, not a compile-time coupling
+    // to LEGACY (no source/module dependency, just the shared AAR artifact).
+    implementation(files("libs/MercuryAndroidSDK-v0.2.2-20250717110238_48b655b3.aar"))
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

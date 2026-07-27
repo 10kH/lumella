@@ -8,7 +8,7 @@ import com.woolab.lumella.TokenServiceCredentialProvider
 import com.woolab.lumella.util.MiniJson
 
 /** Coarse connection/session status surfaced to the UI (mirrors LEGACY's status-text states, plan G006). */
-enum class RealtimeConnectionStatus { CONNECTING, READY, DEGRADED, TOKEN_FAIL, CLOSED }
+enum class RealtimeConnectionStatus { CONNECTING, READY, DEGRADED, TOKEN_FAIL, CLOSED, IDLE }
 
 /**
  * [RealtimeTransport] implementation wired to OpenAI's Realtime API over WebSocket
@@ -42,6 +42,20 @@ class OpenAiRealtimeTransport(
      * NORMAL steady-state and MUST self-heal without an app restart.
      */
     private val reconnectScheduler: (delayMs: Long, task: () -> Unit) -> Unit = DEFAULT_SCHEDULER,
+    /**
+     * Idle-timeout safety valve (cost risk observed 2026-07-26: an unattended session held a
+     * realtime WS open ~24h, reconnecting every 60min on `session_expired` — 26 reconnects with
+     * no user activity). After [idleTimeoutMs] with no [noteActivity] call (tap or outbound audio
+     * chunk), the transport closes itself exactly like a client-initiated [close] (no
+     * auto-reconnect); the UI is expected to re-[connect] on the next tap.
+     */
+    private val idleTimeoutMs: Long = DEFAULT_IDLE_TIMEOUT_MS,
+    /**
+     * Schedules the idle-timeout check after `delayMs`. Injectable so unit tests fire it
+     * synchronously with a captured task instead of waiting on a real clock — mirrors
+     * [reconnectScheduler]'s pattern above.
+     */
+    private val idleScheduler: (delayMs: Long, task: () -> Unit) -> Unit = DEFAULT_IDLE_SCHEDULER,
 ) : RealtimeTransport {
 
     interface Listener {
@@ -83,6 +97,20 @@ class OpenAiRealtimeTransport(
         private val DEFAULT_SCHEDULER: (Long, () -> Unit) -> Unit = { delayMs, task ->
             defaultReconnectExecutor.schedule(task, delayMs, java.util.concurrent.TimeUnit.MILLISECONDS)
         }
+        /** Idle-timeout default: 10 minutes with no tap/audio activity (plan G006 cost-safety follow-up). */
+        internal const val DEFAULT_IDLE_TIMEOUT_MS = 10 * 60 * 1000L
+
+        private val defaultIdleExecutor: java.util.concurrent.ScheduledExecutorService by lazy {
+            java.util.concurrent.Executors.newSingleThreadScheduledExecutor(
+                java.util.concurrent.ThreadFactory { r ->
+                    Thread(r, "lumella-realtime-idle").apply { isDaemon = true }
+                },
+            )
+        }
+
+        private val DEFAULT_IDLE_SCHEDULER: (Long, () -> Unit) -> Unit = { delayMs, task ->
+            defaultIdleExecutor.schedule(task, delayMs, java.util.concurrent.TimeUnit.MILLISECONDS)
+        }
     }
 
     @Volatile
@@ -95,10 +123,22 @@ class OpenAiRealtimeTransport(
     @Volatile
     private var closedByClient: Boolean = false
 
+    /** True once [close] (client teardown or idle-timeout) has run and no [connect] has followed. Lets
+     *  [com.woolab.lumella.MainActivity] tell "not ready because reconnecting" from "not ready because
+     *  the idle-timeout (or user) closed it" on tap, so a tap can wake a closed session. */
+    val isClosed: Boolean
+        get() = closedByClient
+
     private val reconnectPending = java.util.concurrent.atomic.AtomicBoolean(false)
 
     @Volatile
     private var reconnectDelayMs: Long = RECONNECT_BASE_DELAY_MS
+    /**
+     * Idle-timeout generation guard, same shape as [socketGeneration]: each [noteActivity] call
+     * bumps this, invalidating any already-scheduled (stale) idle-timeout task so only the most
+     * recent activity's timer can actually fire [onIdleTimeout].
+     */
+    private val idleGeneration = java.util.concurrent.atomic.AtomicInteger(0)
 
     /**
      * Socket generation guard: each [openSocket] supersedes the previous socket.
@@ -111,6 +151,7 @@ class OpenAiRealtimeTransport(
     /** Fetches a token-service credential and opens the realtime WebSocket. Never throws — fail-closed. */
     fun connect() {
         closedByClient = false
+        noteActivity()
         listener.onStatus(RealtimeConnectionStatus.CONNECTING)
         credentialProvider.fetchToken { result ->
             result.fold(
@@ -193,6 +234,7 @@ class OpenAiRealtimeTransport(
     fun appendAudio(base64Pcm16: String) {
         if (sendRaw(buildAudioAppendJson(base64Pcm16))) {
             audioAppendedSinceCommit = true
+            noteActivity()
         }
     }
 
@@ -215,9 +257,36 @@ class OpenAiRealtimeTransport(
     /** Closes the WebSocket. Safe to call repeatedly / before connect. Suppresses auto-reconnect. */
     fun close() {
         closedByClient = true
+        idleGeneration.incrementAndGet() // invalidate any pending idle-timeout task
         socket?.close(1000, "client teardown")
         socket = null
         sessionReady = false
+    }
+
+    /**
+     * Marks "now" as the last user-activity instant (tap or outbound audio chunk) and
+     * (re)arms the idle-timeout task, superseding any previously scheduled one via
+     * [idleGeneration] — the same stale-guard shape [openSocket] uses for sockets. Public so
+     * [com.woolab.lumella.MainActivity] can call it on every touchpad tap (not just audio),
+     * per the "any user activity resets the window" contract.
+     */
+    fun noteActivity() {
+        if (closedByClient) return
+        val generation = idleGeneration.incrementAndGet()
+        idleScheduler(idleTimeoutMs) {
+            if (generation == idleGeneration.get()) onIdleTimeout()
+        }
+    }
+
+    /**
+     * Fires after [idleTimeoutMs] with no [noteActivity] call: reports [RealtimeConnectionStatus.IDLE]
+     * then [close]s exactly like a client-initiated teardown (no auto-reconnect). A subsequent tap
+     * is expected to call [connect] again (see MainActivity's toggleSpeechTurn wake-on-tap path).
+     */
+    private fun onIdleTimeout() {
+        if (closedByClient) return
+        listener.onStatus(RealtimeConnectionStatus.IDLE)
+        close()
     }
 
     /**
