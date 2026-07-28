@@ -88,6 +88,13 @@ dependencies {
     implementation(libs.androidx.camera.core)
     implementation(libs.androidx.camera.camera2)
     implementation(libs.androidx.camera.lifecycle)
+    // Required by the Mercury SDK: BaseEventActivity.mappingAction() resolves
+    // androidx.lifecycle.LifecycleOwnerKt (lifecycleScope) at runtime. Without these the
+    // SDK crashes with NoClassDefFoundError on the first touchpad SLIDE gesture — taps
+    // never hit that path, which is why it survived every tap-only test. LEGACY ELLA
+    // carries the same two artifacts.
+    implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.lifecycle.viewmodel.ktx)
     // WS client for OpenAiRealtimeTransport (plan G006 decision: ELLA used okhttp for its
     // Realtime WS connection; :app had no HTTP/WS dependency before this — okhttp is the
     // only new dependency this change adds, version pinned to the ELLA-main baseline).
