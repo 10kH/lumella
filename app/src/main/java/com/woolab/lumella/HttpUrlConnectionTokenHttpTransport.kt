@@ -13,6 +13,12 @@ class HttpUrlConnectionTokenHttpTransport(
     private val connectTimeoutMs: Int = 8_000,
     private val readTimeoutMs: Int = 8_000,
 ) : TokenHttpTransport, ConfigHttpTransport {
+    /**
+     * WARNING: **SYNCHRONOUS** despite the callback shape — the HTTP round trip runs on the
+     * CALLING thread and the callback is invoked inline before returning. Calling this (or
+     * anything that wraps it, e.g. OpenAiRealtimeTransport.connect) from the Android main
+     * thread throws NetworkOnMainThreadException. Always dispatch to a background executor.
+     */
     override fun post(url: String, headers: Map<String, String>, bodyJson: String, callback: (Result<TokenHttpResponse>) -> Unit) {
         try {
             val connection = URL(url).openConnection() as HttpURLConnection

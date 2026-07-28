@@ -155,7 +155,13 @@ class OpenAiRealtimeTransport(
      */
     private val socketGeneration = java.util.concurrent.atomic.AtomicInteger(0)
 
-    /** Fetches a token-service credential and opens the realtime WebSocket. Never throws — fail-closed. */
+    /**
+     * Fetches a token-service credential and opens the realtime WebSocket. Never throws — fail-closed.
+     *
+     * THREADING: the credential fetch is a **blocking** HTTP call on the calling thread
+     * (see HttpUrlConnectionTokenHttpTransport). Callers MUST invoke this off the Android
+     * main thread or it raises NetworkOnMainThreadException.
+     */
     fun connect() {
         closedByClient = false
         noteActivity()

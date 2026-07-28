@@ -314,13 +314,18 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
             }
         } else if (!transport.sessionReady) {
             if (transport.isClosed) {
-                // Idle-timeout (or a prior client close) left the session closed: wake it with
-                // this tap and start recording automatically once READY arrives (see the
-                // Listener.onStatus READY branch above), so one tap wakes + starts listening.
+                // Idle-timeout, a client close, or a fatal account error left the session
+                // closed: wake it with this tap and start recording once READY arrives (see
+                // the Listener.onStatus READY branch above), so one tap wakes + listens.
+                //
+                // MUST run off the UI thread: connect() -> fetchToken() -> HttpURLConnection
+                // is SYNCHRONOUS despite its callback shape, so calling it here threw
+                // NetworkOnMainThreadException and killed the app on every tap once the
+                // session was closed (which ACCOUNT_BLOCKED makes the normal case).
                 Log.i(TAG, "Right-tap on closed session: reconnecting and recording on READY")
                 recordWhenReady = true
                 updateStatus("Connecting...", "#9C27B0")
-                transport.connect()
+                slowPathExecutor.execute { transport.connect() }
             } else {
                 Log.w(TAG, "Ignoring right-tap: realtime session not ready")
             }
@@ -452,7 +457,15 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
         runCatching { camera.shutdown() }
         runCatching { transport.close() }
         runCatching { socketFactory.shutdown() }
-        runCatching { sessionIdRef.get().takeIf { it.isNotBlank() }?.let { brain.endSession(it) } }
+        // brain.endSession is a blocking HTTP call and teardown() runs on the UI thread
+        // (onDestroy / right-double-tap exit). Calling it inline raised
+        // NetworkOnMainThreadException, which runCatching silently swallowed — so the luma
+        // session was NEVER actually closed and every exit leaked one. Submit it to the
+        // executor first: shutdown() lets already-queued tasks finish.
+        val endingSessionId = sessionIdRef.get().takeIf { it.isNotBlank() }
+        if (endingSessionId != null) {
+            runCatching { slowPathExecutor.execute { runCatching { brain.endSession(endingSessionId) } } }
+        }
         slowPathExecutor.shutdown()
     }
 }
