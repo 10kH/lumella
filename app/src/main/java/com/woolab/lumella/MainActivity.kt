@@ -17,6 +17,7 @@ import com.woolab.lumella.audio.AudioCapture
 import com.woolab.lumella.audio.AudioPlayback
 import com.woolab.lumella.brain.BrainFactory
 import com.woolab.lumella.camera.GlassesCamera
+import com.woolab.lumella.camera.ImageEncoder
 import com.woolab.lumella.config.AblationMode
 import com.woolab.lumella.contract.BrainConnectionState
 import com.woolab.lumella.contract.BrainCredentials
@@ -273,6 +274,7 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
                 }
                 MotionEvent.ACTION_UP -> {
                     val duration = System.currentTimeMillis() - lastTouchDownTimeMs
+                    Log.i(TAG, "touch UP device='${lastTouchDeviceName}' duration=${duration}ms")
                     when {
                         lastTouchDeviceName == RIGHT_TOUCHPAD_DEVICE && duration < TAP_MAX_DURATION_MS -> {
                             val now = System.currentTimeMillis()
@@ -312,7 +314,11 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
         }
         if (audioCapture.isRecording) {
             audioCapture.stop()
-            transport.commitAudio()
+            val chunks = transport.appendedChunksSinceCommit
+            val committed = transport.commitAudio()
+            transport.resetAppendedChunkCounter()
+            Log.i(TAG, "turn end: audioChunks=$chunks committed=$committed")
+            if (chunks == 0) Log.w(TAG, "microphone produced no audio this turn (worn?)")
             val turnId = turnTracker.next()
             // voiceFastPath.onTurnStart does model/network work; offload it to the background
             // executor (mirrors submitCurrentTurnEvidence()) so the touch handler itself returns
@@ -340,6 +346,7 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
             }
         } else {
             audioCapture.start()
+            Log.i(TAG, "turn start: recording=${audioCapture.isRecording}")
             updateStatus(if (turnEvidenceAssembler.peekPendingImageId() != null) "Listening... (+ Photo)" else "Listening...", "#FF5722")
         }
     }
@@ -349,6 +356,19 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
         updateStatus("Capturing...", "#9C27B0")
         camera.captureImage(
             onCaptured = { bytes ->
+                // 1) Let the realtime model SEE it. Without this the tutor answers about
+                //    something else entirely — the luma caption is only steering text on a
+                //    later turn, which is not the same as showing the model the photo.
+                slowPathExecutor.execute {
+                    val base64 = ImageEncoder.toDownscaledBase64Jpeg(bytes)
+                    if (base64 == null) {
+                        Log.w(TAG, "image encode failed; realtime model will not see this photo")
+                    } else {
+                        val ok = transport.sendUserImage(base64)
+                        Log.i(TAG, "photo -> realtime model: chars=${base64.length} sent=$ok")
+                    }
+                }
+                // 2) And send it to luma for the coach's structured visual evidence.
                 slowPathExecutor.execute {
                     try {
                         val imageContext = brain.analyzeImage(bytes, "image/jpeg")

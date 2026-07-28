@@ -243,6 +243,34 @@ class OpenAiRealtimeTransport(
         }
     }
 
+    /**
+     * Puts a captured photo into the conversation as USER input, so the realtime model can
+     * actually see it (LEGACY ELLA's recipe: `conversation.item.create` + `input_image`).
+     *
+     * This is deliberately NOT on [com.woolab.lumella.voice.RealtimeTransport]: that interface
+     * stays single-method so [com.woolab.lumella.voice.VoiceFastPath] structurally cannot push
+     * brain/steering text to speech (D-4). An image is learner input, not brain output, so it
+     * travels on its own channel and only MainActivity — which owns the camera — can send it.
+     *
+     * Without this the model never sees the photo and answers about something else entirely
+     * (reported on-device 2026-07-28); the luma vision caption only reaches it as steering
+     * text on a LATER turn.
+     */
+    fun sendUserImage(base64Jpeg: String): Boolean {
+        val sent = sendRaw(buildImageItemJson(base64Jpeg))
+        if (sent) noteActivity()
+        return sent
+    }
+
+    /** Resets the per-turn audio counter; call after reading it at commit time. */
+    fun resetAppendedChunkCounter() {
+        appendedChunksSinceCommit = 0
+    }
+
+    internal fun buildImageItemJson(base64Jpeg: String): String =
+        """{"type":"conversation.item.create","item":{"type":"message","role":"user",""" +
+            """"content":[{"type":"input_image","image_url":"data:image/jpeg;base64,$base64Jpeg"}]}}"""
+
     /** Appends a base64-encoded PCM16 audio chunk (see [com.woolab.lumella.audio.AudioCapture]) to the input buffer. */
     fun appendAudio(base64Pcm16: String) {
         if (sendRaw(buildAudioAppendJson(base64Pcm16))) {
@@ -266,6 +294,11 @@ class OpenAiRealtimeTransport(
 
     @Volatile
     private var audioAppendedSinceCommit: Boolean = false
+
+    /** Audio chunks appended since the last commit — lets callers spot a silent microphone. */
+    @Volatile
+    var appendedChunksSinceCommit: Int = 0
+        private set
 
     /** Closes the WebSocket. Safe to call repeatedly / before connect. Suppresses auto-reconnect. */
     fun close() {

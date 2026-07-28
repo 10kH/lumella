@@ -600,4 +600,31 @@ class OpenAiRealtimeTransportTest {
         assertTrue(transport.isFatalAccountError("""{"error":{"code":"invalid_api_key"}}"""))
         assertFalse(transport.isFatalAccountError("""{"error":{"code":"server_error"}}"""))
     }
+
+    // --- Image input channel (learner input, NOT brain output) ---
+
+    @Test
+    fun sendUserImageEmitsConversationItemWithInputImage() {
+        val factory = FakeFactory()
+        val transport = OpenAiRealtimeTransport(successProvider(), factory)
+        transport.connect()
+        factory.lastListener?.onOpen()
+
+        assertTrue(transport.sendUserImage("QUJDRA=="))
+        val sent = factory.socket.sent.last()
+        assertTrue(sent.contains("\"type\":\"conversation.item.create\""))
+        assertTrue(sent.contains("\"role\":\"user\""))
+        assertTrue(sent.contains("\"type\":\"input_image\""))
+        assertTrue(sent.contains("data:image/jpeg;base64,QUJDRA=="))
+    }
+
+    @Test
+    fun imageChannelIsNotReachableThroughTheRealtimeTransportInterface() {
+        // D-4: VoiceFastPath sees only RealtimeTransport, which must stay single-method so
+        // brain/steering text can never reach speech outside composed instructions. The image
+        // channel lives on the concrete class, reachable only by MainActivity.
+        val methods = RealtimeTransport::class.java.declaredMethods.filter { !it.isSynthetic }
+        assertEquals(1, methods.size)
+        assertEquals("sendInstructions", methods.first().name)
+    }
 }
