@@ -7,10 +7,12 @@ import android.util.Log
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
+import androidx.camera.core.CameraState
 import androidx.camera.core.ImageProxy
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.Observer
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicBoolean
@@ -51,7 +53,10 @@ class GlassesCamera(context: Context, private val lifecycleOwner: LifecycleOwner
             onError("Capture already in progress")
             return
         }
-        mainHandler.post { bindAndCapture(onCaptured, onError) }
+        mainHandler.post {
+            Log.i(TAG, "capture requested; lifecycle=${lifecycleOwner.lifecycle.currentState}")
+            bindAndCapture(onCaptured, onError)
+        }
     }
 
     private fun bindAndCapture(onCaptured: (ByteArray) -> Unit, onError: (String) -> Unit) {
@@ -64,11 +69,40 @@ class GlassesCamera(context: Context, private val lifecycleOwner: LifecycleOwner
                     .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
                     .build()
                 provider.unbindAll()
-                provider.bindToLifecycle(lifecycleOwner, CameraSelector.DEFAULT_BACK_CAMERA, capture)
+                val camera = provider.bindToLifecycle(lifecycleOwner, CameraSelector.DEFAULT_BACK_CAMERA, capture)
 
-                capture.takePicture(
-                    cameraExecutor,
-                    object : ImageCapture.OnImageCapturedCallback() {
+                // bindToLifecycle returns before the capture session finishes configuring.
+                // Taking the picture immediately produced "Failed to submit capture request"
+                // (on-device 2026-07-28) — with the previous bind-at-startup design the gap
+                // was hidden by minutes of idle time. Wait for CameraState.OPEN instead.
+                awaitCameraOpen(camera.cameraInfo.cameraState) { opened ->
+                    // Not fatal: some devices never publish OPEN for a capture-only session.
+                    // Try anyway — takePicture has its own retry for a not-yet-ready session.
+                    if (!opened) Log.w(TAG, "camera never reported OPEN; attempting capture anyway")
+                    takeWithRetry(capture, provider, attempt = 1, onCaptured = onCaptured, onError = onError)
+                }
+            } catch (e: Exception) {
+                release(provider)
+                onError("Camera bind failed: ${e.message}")
+            }
+        }, ContextCompat.getMainExecutor(appContext))
+    }
+
+    /**
+     * `takePicture` right after bind can fail with "Failed to submit capture request" while the
+     * capture session is still configuring (on-device 2026-07-28). Retry a couple of times
+     * before giving up rather than surfacing a transient race as a user-visible failure.
+     */
+    private fun takeWithRetry(
+        capture: ImageCapture,
+        provider: ProcessCameraProvider?,
+        attempt: Int,
+        onCaptured: (ByteArray) -> Unit,
+        onError: (String) -> Unit,
+    ) {
+        capture.takePicture(
+            cameraExecutor,
+            object : ImageCapture.OnImageCapturedCallback() {
                         override fun onCaptureSuccess(image: ImageProxy) {
                             val bytes = try {
                                 val buffer = image.planes[0].buffer
@@ -82,17 +116,50 @@ class GlassesCamera(context: Context, private val lifecycleOwner: LifecycleOwner
                             if (bytes != null) onCaptured(bytes) else onError("Image read failed")
                         }
 
-                        override fun onError(exception: ImageCaptureException) {
-                            release(provider)
-                            onError("Capture failed: ${exception.message}")
-                        }
-                    },
-                )
-            } catch (e: Exception) {
-                release(provider)
-                onError("Camera bind failed: ${e.message}")
+                override fun onError(exception: ImageCaptureException) {
+                    if (attempt < CAPTURE_MAX_ATTEMPTS) {
+                        Log.w(TAG, "capture attempt $attempt failed (${exception.message}); retrying")
+                        mainHandler.postDelayed(
+                            { takeWithRetry(capture, provider, attempt + 1, onCaptured, onError) },
+                            CAPTURE_RETRY_DELAY_MS,
+                        )
+                        return
+                    }
+                    release(provider)
+                    onError("Capture failed: ${exception.message}")
+                }
+            },
+        )
+    }
+
+
+    /**
+     * Invokes [onResult] once the camera reports [CameraState.Type.OPEN], or with `false`
+     * after [CAMERA_OPEN_TIMEOUT_MS]. Observed on the main thread (LiveData requirement)
+     * and unsubscribed exactly once so a late state change cannot fire the callback twice.
+     */
+    private fun awaitCameraOpen(
+        state: androidx.lifecycle.LiveData<CameraState>,
+        onResult: (Boolean) -> Unit,
+    ) {
+        val settled = java.util.concurrent.atomic.AtomicBoolean(false)
+        lateinit var observer: Observer<CameraState>
+        val timeout = Runnable {
+            if (settled.compareAndSet(false, true)) {
+                state.removeObserver(observer)
+                onResult(false)
             }
-        }, ContextCompat.getMainExecutor(appContext))
+        }
+        observer = Observer { s ->
+            Log.d(TAG, "cameraState=${s?.type} err=${s?.error?.code}")
+            if (s?.type == CameraState.Type.OPEN && settled.compareAndSet(false, true)) {
+                mainHandler.removeCallbacks(timeout)
+                state.removeObserver(observer)
+                onResult(true)
+            }
+        }
+        state.observe(lifecycleOwner, observer)
+        mainHandler.postDelayed(timeout, CAMERA_OPEN_TIMEOUT_MS)
     }
 
     /** Unbinds so other apps (and the next shot) can take the camera. Idempotent. */
@@ -113,5 +180,8 @@ class GlassesCamera(context: Context, private val lifecycleOwner: LifecycleOwner
 
     private companion object {
         const val TAG = "lumella"
+        const val CAMERA_OPEN_TIMEOUT_MS = 5_000L
+        const val CAPTURE_MAX_ATTEMPTS = 3
+        const val CAPTURE_RETRY_DELAY_MS = 600L
     }
 }

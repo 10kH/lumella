@@ -109,49 +109,56 @@ LEGACY ELLA와 lumella 양쪽 다 이 방식. 좌표 기반으로 바꾸지 말 
 
 ---
 
-## 4. 카메라 — 한 번에 한 앱만 잡을 수 있다 (중요)
+## 4. 카메라 — 진짜 원인은 **액티비티 라이프사이클**이었다
 
 ### 증상
-`takePicture()`를 불렀는데 성공/실패 콜백이 **둘 다 오지 않는다.** 화면은 "Capturing..."에서 멈춘다.
-logcat: `takePictureInternal` → `TakePictureManager: Issue the next TakePictureRequest.` 이후 무응답.
+`takePicture()`가 영원히 안 끝나거나(`Issue the next TakePictureRequest` 이후 무응답),
+`Failed to submit capture request`로 실패한다. 화면은 "Capturing..."에서 멈춘다.
 
-### 원인: 카메라 점유 충돌
-글래스에는 카메라가 하나뿐이고 **한 앱만 잡을 수 있다.** CameraX `bindToLifecycle`을 Activity 생성 시점에
-호출하고 유지하면, 그 앱이 살아있는 동안 카메라를 계속 점유한다. 다른 앱이 촬영을 요청하면
-**에러도 없이 큐에만 쌓이고 영원히 안 끝난다.**
+### 근본 원인 (2026-07-28 실측 확정)
+**글래스 디스플레이가 꺼져 있으면 액티비티 Lifecycle이 `CREATED`에 머문다.**
+CameraX `bindToLifecycle`은 **STARTED 이상**일 때만 실제로 카메라를 연다. 그래서:
 
-2026-07-28 실제 사례: ELLA와 LUMELLA를 둘 다 설치했더니 ELLA의 사진 첨부가 "Capturing..."에서 멈췄다.
-두 앱 모두 `onCreate`에서 카메라를 바인딩하고 계속 붙들고 있었기 때문. 먼저 잡은 쪽이 이긴다.
+| 디스플레이 | Lifecycle | cameraState | 결과 |
+|---|---|---|---|
+| 꺼짐 | `CREATED` | (이벤트 없음) | 카메라 미개방 → 촬영 불가 |
+| 켜짐 | `RESUMED` | `CLOSED→OPENING→OPEN` | **정상 촬영** ✅ |
 
-### 원칙: 촬영할 때만 잡고 즉시 놓아라
-```kotlin
-// 촬영 요청 시점에 bind → takePicture → 콜백에서 즉시 unbindAll()
-provider.bindToLifecycle(owner, CameraSelector.DEFAULT_BACK_CAMERA, capture)
-capture.takePicture(executor, object : ImageCapture.OnImageCapturedCallback() {
-    override fun onCaptureSuccess(image: ImageProxy) { /* ... */ provider.unbindAll() }
-    override fun onError(e: ImageCaptureException) { provider.unbindAll() }
-})
-```
-비용은 촬영당 바인드 지연(1초 미만)뿐이고, 배터리에도 유리하다.
-`bindToLifecycle`/`unbindAll`은 **메인 스레드**에서 호출해야 한다.
+`dumpsys media.camera`가 촬영 시도 중에도 `Device 0 is closed, no client instance`를 보이면
+이 상태다 — 앱이 카메라 클라이언트가 되지도 못한 것이다.
+`dumpsys activity activities`의 `visibleRequested=false`도 같은 신호다.
 
-### 그 외 확인된 사실
-- 직접 만든 **camera2** 단발 캡처는 이 기기에서 프레임을 못 받고 약 6초 뒤 조용히 끊긴다 → **CameraX를 쓸 것.**
-- 액티비티가 **포그라운드**여야 한다. 백그라운드면 `Camera2CameraControlImp: Camera is not active`로 실패한다.
-- Mercury SDK에는 카메라 API가 없다(api/core/databinding/ext/focus/touch/ui/util) — AOSP CameraX가 정답 경로다.
+> ⚠️ **이전 판 문서의 두 진단은 틀렸다.**
+> ① "camera2는 실패하고 CameraX만 동작" → 둘 다 같은 라이프사이클 문제였다.
+> ② "CameraX도 이 기기에선 촬영이 안 된다" → 디스플레이 꺼진 상태를 측정한 것이다.
+> 하드웨어 레벨은 `LIMITED`로 정상이고, 화면만 켜져 있으면 4032x3024 촬영이 잘 된다.
 
-### 재현 (착용 불필요)
-좌측 터치패드 탭은 SELinux 때문에 주입할 수 없으므로(§6-1) 디버그 빌드의 브로드캐스트 훅을 쓴다:
+### 그래서 지켜야 할 것
+1. **촬영 전 디스플레이가 켜져 있어야 한다.** adb 테스트 시:
+   ```bash
+   adb shell input keyevent KEYCODE_WAKEUP
+   adb shell svc power stayon true
+   ```
+2. **CameraState를 기다린 뒤 촬영한다.** `bindToLifecycle`은 세션 구성 완료 전에 반환한다 —
+   곧바로 `takePicture`하면 `Failed to submit capture request`가 난다.
+   `camera.cameraInfo.cameraState`가 `OPEN`이 될 때까지 기다리고, 그래도 실패하면 짧게 재시도한다.
+3. **촬영할 때만 bind하고 끝나면 unbind한다.** 카메라는 하나뿐이라 한 앱만 소유할 수 있다.
+   앱 수명 내내 붙들면 다른 앱(ELLA 등)이 촬영을 못 한다. 배터리에도 불리하다.
+
+### 검증된 동작 (2026-07-28)
+글래스 카메라 촬영 → `analyzeImage` → luma `/v1/images/analyze` → 실제 장면 캡션 수신:
+`"A person sitting at a desk with a thoughtful expression..."` + salientElements 3종.
+이어서 coach 턴의 `coachEvidence.visual`로 그대로 전달됨.
+
+### 재현 (착용 불필요, 단 화면은 켜야 함)
+좌측 터치패드 탭은 SELinux 때문에 주입 불가(§6-1) → 디버그 빌드의 브로드캐스트 훅 사용:
 ```bash
-adb shell am start -n com.woolab.lumella/.MainActivity   # 포그라운드 필수
+adb shell input keyevent KEYCODE_WAKEUP && adb shell svc power stayon true
+adb shell am start -n com.woolab.lumella/.MainActivity
 adb shell am broadcast -a com.woolab.lumella.DEBUG_CAPTURE_PHOTO
-adb logcat -d --pid=$(adb shell pidof com.woolab.lumella) | grep -iE "lumella|TakePicture"
+adb logcat -d -s lumella:V | grep -iE "lifecycle|cameraState|capture"
 ```
-**다른 카메라 사용 앱(ELLA 등)을 먼저 force-stop**하고 테스트할 것.
-
-### 파이프라인의 나머지는 검증됨
-촬영 이후 단계는 정상이다: `/v1/images/analyze`는 **OpenAI 크레딧 없이도** 200 + 유효한 `imageId`를
-반환한다(luma 폴백 경로, 2026-07-28 실측 `img_b8f8720…`).
+`lifecycle=RESUMED`와 `cameraState=OPEN`이 보이면 정상 경로다.
 
 ## 5. 마이크는 착용 감지형이다
 
