@@ -322,7 +322,6 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
             audioCapture.stop()
             val chunks = transport.appendedChunksSinceCommit
             val committed = transport.commitAudio()
-            transport.resetAppendedChunkCounter()
             Log.i(TAG, "turn end: audioChunks=$chunks committed=$committed")
             if (chunks == 0) Log.w(TAG, "microphone produced no audio this turn (worn?)")
             val turnId = turnTracker.next()
@@ -351,6 +350,7 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
                 Log.w(TAG, "Ignoring right-tap: realtime session not ready")
             }
         } else {
+            transport.resetAppendedChunkCounter()
             audioCapture.start()
             Log.i(TAG, "turn start: recording=${audioCapture.isRecording}")
             updateStatus(if (turnEvidenceAssembler.peekPendingImageId() != null) "Listening... (+ Photo)" else "Listening...", "#FF5722")
