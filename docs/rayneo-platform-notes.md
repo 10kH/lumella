@@ -224,4 +224,4 @@ targetSdk 34는 평문 HTTP를 전부 막는다. Mac의 token-service/luma-api�
 - 개발 루프/설정: [`dev-loop.md`](dev-loop.md)
 - 스모크 체크리스트: [`smoke-checklist.md`](smoke-checklist.md)
 - token-service 상시 실행: [`../ops/launchd/manage.sh`](../ops/launchd/manage.sh)
-- 검증된 레퍼런스 구현: `TUTOR/LEGACY/ELLA` (Mercury 연동·CameraX·터치 구분의 원본)
+- 검증된 레퍼런스 구현: `TUTOR/ELLA` (Mercury 연동·CameraX·터치 구분의 원본)

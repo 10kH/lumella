@@ -8,7 +8,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * RayNeo microphone capture at 24kHz PCM16 mono — the OpenAI Realtime API's required input
- * format (ported from `TUTOR/LEGACY/ELLA` MainActivity's `SAMPLE_RATE`/`AudioRecord` setup and
+ * format (ported from `TUTOR/ELLA` MainActivity's `SAMPLE_RATE`/`AudioRecord` setup and
  * `streamAudioToAPI` loop). Streams base64-framed chunks to [onChunk] on a dedicated daemon
  * thread; never touches the WS/transport directly, so it stays independently
  * testable/replaceable.

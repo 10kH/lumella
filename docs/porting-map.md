@@ -1,6 +1,6 @@
 # ELLA-MA → lumella porting map (P3)
 
-Source: `TUTOR/LEGACY/ELLA/app/src/main/java/com/woolab/ella/**` (read-only).
+Source: `TUTOR/ELLA/app/src/main/java/com/woolab/ella/**` (read-only).
 Target: `TUTOR/lumella/glasses/app/src/main/java/com/woolab/lumella/**` (all
 ported files land in `:app`, package `com.woolab.lumella.*`, mirroring the
 source sub-package). The `TutorBrain` contract types themselves (interface +
@@ -79,7 +79,7 @@ live in `:tutor-contract`; the classpath/dependency-rule guard
 ### Not a gap: files without dedicated upstream tests
 
 Four of the 15 ported main files have no dedicated test file upstream in
-`TUTOR/LEGACY/ELLA` — this is the pre-existing upstream state, not something
+`TUTOR/ELLA` — this is the pre-existing upstream state, not something
 introduced by the port:
 
 - `state.LearnerState` (only `LearnerStateStoreTest` exists upstream, and it

@@ -9,7 +9,7 @@ import java.util.concurrent.TimeUnit
 
 /**
  * Production [RealtimeWebSocketFactory] backed by okhttp3 (ELLA's proven WS client for the
- * OpenAI Realtime API — see `TUTOR/LEGACY/ELLA` MainActivity's `realtimeWebSocketClient`). A
+ * OpenAI Realtime API — see `TUTOR/ELLA` MainActivity's `realtimeWebSocketClient`). A
  * single client instance is reused across connections; [shutdown] releases its dispatcher
  * executor on final app teardown.
  *

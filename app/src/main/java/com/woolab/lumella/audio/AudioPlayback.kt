@@ -7,7 +7,7 @@ import java.util.Base64
 
 /**
  * RayNeo speaker playback of realtime `response.audio.delta` chunks: 24kHz PCM16 mono,
- * streamed via [AudioTrack.MODE_STREAM] (ported from `TUTOR/LEGACY/ELLA` MainActivity's
+ * streamed via [AudioTrack.MODE_STREAM] (ported from `TUTOR/ELLA` MainActivity's
  * `initAudioTrack`).
  *
  * Not exercised by JVM unit tests (real `android.media.AudioTrack`); verified on-device via

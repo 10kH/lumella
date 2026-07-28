@@ -43,7 +43,7 @@ import java.util.concurrent.atomic.AtomicReference
  * [TokenServiceCredentialProvider] -> [OpenAiRealtimeTransport] -> [VoiceFastPath], DI-binds
  * the [TutorBrain] via [BrainFactory] (runtime reflective lookup — no compile dependency on
  * `:luma-adapter`, see `BrainFactory`'s kdoc), wires RayNeo mic/speaker/touchpad/camera per the
- * `TUTOR/LEGACY/ELLA` MainActivity recipe, and renders a status text view mirroring LEGACY's
+ * `TUTOR/ELLA` MainActivity recipe, and renders a status text view mirroring LEGACY's
  * status-text approach (CONNECTING/READY/DEGRADED/TOKEN-FAIL/IDLE).
  *
  * Native RayNeo glasses app (not a "virtual machine"/touchpad-relay app): extends
@@ -111,7 +111,7 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
         super.onCreate(savedInstanceState)
 
         // BaseMirrorActivity inflates ActivityMainBinding per-eye into mBindingPair — no
-        // setContentView() here (see LEGACY TUTOR/LEGACY/ELLA MainActivity, same base class).
+        // setContentView() here (see LEGACY TUTOR/ELLA MainActivity, same base class).
         updateStatus("Connecting...", "#9C27B0")
 
         config = AppConfig.fromBuildConfig()

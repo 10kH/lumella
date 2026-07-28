@@ -10,7 +10,7 @@ import com.ffalcon.mercury.android.sdk.MercurySDK
  * `com.rayneo.mercury.app` meta-data on the `<application>` tag).
  *
  * [MercurySDK.init] MUST run before any [BaseMirrorActivity]-derived activity starts
- * (ported from LEGACY `TUTOR/LEGACY/ELLA`'s `EllaApp`).
+ * (ported from LEGACY `TUTOR/ELLA`'s `EllaApp`).
  */
 class LumellaApp : Application() {
 
