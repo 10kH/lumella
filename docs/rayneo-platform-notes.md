@@ -109,34 +109,49 @@ LEGACY ELLA와 lumella 양쪽 다 이 방식. 좌표 기반으로 바꾸지 말 
 
 ---
 
-## 4. 카메라 — **현재 미해결**
+## 4. 카메라 — 한 번에 한 앱만 잡을 수 있다 (중요)
 
-### 확인된 사실
-- 직접 만든 **camera2** 단발 캡처: 카메라는 열리지만 프레임이 오지 않고 약 6초 뒤 시스템이 조용히 연결을 끊는다(에러 콜백 없음).
-- **CameraX**로 교체: 초기화는 성공(`CameraX initialized` 로그)하지만 **캡처가 완료되지 않는다.**
-  logcat: `takePictureInternal` → `TakePictureManager: Issue the next TakePictureRequest.` 이후 성공/실패 콜백 **둘 다 오지 않음**. 30초 이상 대기해도 동일.
-- 헤드리스 `Preview` use case를 함께 바인딩해도(활성 스트림 부재 가설) **변화 없음** — 이 변경은 효과가 없어 되돌렸다.
-- Mercury SDK에는 카메라 API가 **없다**(패키지: api/core/databinding/ext/focus/touch/ui/util). 즉 벤더 대체 경로가 SDK에 노출돼 있지 않다.
-- CameraService 레벨 오류 로그도 없다.
+### 증상
+`takePicture()`를 불렀는데 성공/실패 콜백이 **둘 다 오지 않는다.** 화면은 "Capturing..."에서 멈춘다.
+logcat: `takePictureInternal` → `TakePictureManager: Issue the next TakePictureRequest.` 이후 무응답.
 
-> ⚠️ 이전 판 문서에는 "CameraX만 동작"이라고 적혀 있었으나 **틀렸다.** 초기화 성공 로그만 보고 캡처 성공으로 단정했던 것이다. 실제 캡처는 한 번도 성공한 적이 없다.
+### 원인: 카메라 점유 충돌
+글래스에는 카메라가 하나뿐이고 **한 앱만 잡을 수 있다.** CameraX `bindToLifecycle`을 Activity 생성 시점에
+호출하고 유지하면, 그 앱이 살아있는 동안 카메라를 계속 점유한다. 다른 앱이 촬영을 요청하면
+**에러도 없이 큐에만 쌓이고 영원히 안 끝난다.**
 
-### 재현 방법 (착용 불필요)
-디버그 빌드에 브로드캐스트 훅이 있다 — 좌측 터치패드 탭은 SELinux 때문에 주입할 수 없으므로(§6-1) 이걸 쓴다:
+2026-07-28 실제 사례: ELLA와 LUMELLA를 둘 다 설치했더니 ELLA의 사진 첨부가 "Capturing..."에서 멈췄다.
+두 앱 모두 `onCreate`에서 카메라를 바인딩하고 계속 붙들고 있었기 때문. 먼저 잡은 쪽이 이긴다.
+
+### 원칙: 촬영할 때만 잡고 즉시 놓아라
+```kotlin
+// 촬영 요청 시점에 bind → takePicture → 콜백에서 즉시 unbindAll()
+provider.bindToLifecycle(owner, CameraSelector.DEFAULT_BACK_CAMERA, capture)
+capture.takePicture(executor, object : ImageCapture.OnImageCapturedCallback() {
+    override fun onCaptureSuccess(image: ImageProxy) { /* ... */ provider.unbindAll() }
+    override fun onError(e: ImageCaptureException) { provider.unbindAll() }
+})
+```
+비용은 촬영당 바인드 지연(1초 미만)뿐이고, 배터리에도 유리하다.
+`bindToLifecycle`/`unbindAll`은 **메인 스레드**에서 호출해야 한다.
+
+### 그 외 확인된 사실
+- 직접 만든 **camera2** 단발 캡처는 이 기기에서 프레임을 못 받고 약 6초 뒤 조용히 끊긴다 → **CameraX를 쓸 것.**
+- 액티비티가 **포그라운드**여야 한다. 백그라운드면 `Camera2CameraControlImp: Camera is not active`로 실패한다.
+- Mercury SDK에는 카메라 API가 없다(api/core/databinding/ext/focus/touch/ui/util) — AOSP CameraX가 정답 경로다.
+
+### 재현 (착용 불필요)
+좌측 터치패드 탭은 SELinux 때문에 주입할 수 없으므로(§6-1) 디버그 빌드의 브로드캐스트 훅을 쓴다:
 ```bash
-adb shell am start -n com.woolab.lumella/.MainActivity
+adb shell am start -n com.woolab.lumella/.MainActivity   # 포그라운드 필수
 adb shell am broadcast -a com.woolab.lumella.DEBUG_CAPTURE_PHOTO
 adb logcat -d --pid=$(adb shell pidof com.woolab.lumella) | grep -iE "lumella|TakePicture"
 ```
-액티비티가 **포그라운드**여야 한다(`visibleRequested=true`). 백그라운드면 `Camera is not active`로 즉시 실패한다.
+**다른 카메라 사용 앱(ELLA 등)을 먼저 force-stop**하고 테스트할 것.
 
-### 다음에 시도할 것
-1. 기본 카메라 앱으로 촬영이 되는지 확인 → 기기 자체 문제인지 우리 앱 문제인지 분리
-2. 촬영에 하드웨어 셔터/착용 감지 같은 전제가 있는지 확인(마이크가 착용 게이팅인 것과 유사한 패턴일 수 있음)
-3. RayNeo 개발자 문서/포럼에서 서드파티 앱 카메라 접근 정책 확인
-
-### 파이프라인의 나머지는 정상
-캡처만 막혀 있고 그 뒤 단계는 검증됐다: `/v1/images/analyze`는 **OpenAI 크레딧 없이도** 200 + 유효한 `imageId`를 반환한다(luma 폴백 경로 존재, 2026-07-28 실측 `img_b8f8720…`).
+### 파이프라인의 나머지는 검증됨
+촬영 이후 단계는 정상이다: `/v1/images/analyze`는 **OpenAI 크레딧 없이도** 200 + 유효한 `imageId`를
+반환한다(luma 폴백 경로, 2026-07-28 실측 `img_b8f8720…`).
 
 ## 5. 마이크는 착용 감지형이다
 

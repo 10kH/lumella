@@ -1,6 +1,8 @@
 package com.woolab.lumella.camera
 
 import android.content.Context
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
@@ -16,13 +18,20 @@ import java.util.concurrent.atomic.AtomicBoolean
 /**
  * CameraX single-shot JPEG capture for the glasses' left-touchpad photo action.
  *
- * G006 on-device finding (2026-07-23): the previous hand-rolled camera2 flow opened the
- * camera but never delivered a frame on the RayNeo — the system disconnected the client
- * ~6s later with no capture and no error surfaced. This is the LEGACY `TUTOR/LEGACY/ELLA`
- * recipe instead (CameraX 1.3.1, `CAPTURE_MODE_MINIMIZE_LATENCY`, no preview,
- * `bindToLifecycle`), which is proven on this exact hardware.
+ * **The camera is bound only for the duration of one shot.**
  *
- * Not exercised by JVM unit tests (real camera stack); verified via the on-device smoke.
+ * The glasses have a single camera and only one app may hold it. The earlier version bound
+ * `ImageCapture` in `init` and kept it for the whole Activity lifetime, mirroring LEGACY
+ * ELLA's `initCamera()`. With both apps installed that meant whichever launched first owned
+ * the camera forever and the other app's `takePicture()` queued silently — no error, no
+ * callback, just a status stuck on "Capturing..." (reported from the field 2026-07-28 for
+ * ELLA, and the same stall was seen here).
+ *
+ * Binding per shot and unbinding straight after keeps the camera free the rest of the time,
+ * which also avoids holding a power-hungry sensor open on a battery-constrained device. The
+ * cost is the bind latency (~sub-second) on each capture.
+ *
+ * Not exercised by JVM unit tests (real camera stack); verify on device.
  */
 class GlassesCamera(context: Context, private val lifecycleOwner: LifecycleOwner) {
 
@@ -30,59 +39,75 @@ class GlassesCamera(context: Context, private val lifecycleOwner: LifecycleOwner
     private val cameraExecutor: ExecutorService = Executors.newSingleThreadExecutor { r ->
         Thread(r, "lumella-camera").apply { isDaemon = true }
     }
-    private var imageCapture: ImageCapture? = null
-    private val ready = AtomicBoolean(false)
+    private val mainHandler = Handler(Looper.getMainLooper())
+    private val capturing = AtomicBoolean(false)
 
-    init {
+    /**
+     * Captures a single JPEG frame; [onCaptured] receives raw JPEG bytes.
+     * Safe to call from any thread; binding is marshalled to the main thread as CameraX requires.
+     */
+    fun captureImage(onCaptured: (ByteArray) -> Unit, onError: (String) -> Unit) {
+        if (!capturing.compareAndSet(false, true)) {
+            onError("Capture already in progress")
+            return
+        }
+        mainHandler.post { bindAndCapture(onCaptured, onError) }
+    }
+
+    private fun bindAndCapture(onCaptured: (ByteArray) -> Unit, onError: (String) -> Unit) {
         val providerFuture = ProcessCameraProvider.getInstance(appContext)
         providerFuture.addListener({
+            var provider: ProcessCameraProvider? = null
             try {
-                val provider = providerFuture.get()
+                provider = providerFuture.get()
                 val capture = ImageCapture.Builder()
                     .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
                     .build()
                 provider.unbindAll()
                 provider.bindToLifecycle(lifecycleOwner, CameraSelector.DEFAULT_BACK_CAMERA, capture)
-                imageCapture = capture
-                ready.set(true)
-                Log.d(TAG, "CameraX initialized (LEGACY recipe)")
+
+                capture.takePicture(
+                    cameraExecutor,
+                    object : ImageCapture.OnImageCapturedCallback() {
+                        override fun onCaptureSuccess(image: ImageProxy) {
+                            val bytes = try {
+                                val buffer = image.planes[0].buffer
+                                ByteArray(buffer.remaining()).also(buffer::get)
+                            } catch (e: Exception) {
+                                null
+                            } finally {
+                                image.close()
+                            }
+                            release(provider)
+                            if (bytes != null) onCaptured(bytes) else onError("Image read failed")
+                        }
+
+                        override fun onError(exception: ImageCaptureException) {
+                            release(provider)
+                            onError("Capture failed: ${exception.message}")
+                        }
+                    },
+                )
             } catch (e: Exception) {
-                Log.w(TAG, "CameraX init failed: ${e.message}")
+                release(provider)
+                onError("Camera bind failed: ${e.message}")
             }
         }, ContextCompat.getMainExecutor(appContext))
     }
 
-    /** Captures a single JPEG frame; [onCaptured] receives raw JPEG bytes. */
-    fun captureImage(onCaptured: (ByteArray) -> Unit, onError: (String) -> Unit) {
-        val capture = imageCapture
-        if (capture == null || !ready.get()) {
-            onError("Camera not ready")
-            return
+    /** Unbinds so other apps (and the next shot) can take the camera. Idempotent. */
+    private fun release(provider: ProcessCameraProvider?) {
+        mainHandler.post {
+            runCatching { provider?.unbindAll() }
+                .onFailure { Log.w(TAG, "unbind failed: ${it.message}") }
+            capturing.set(false)
         }
-        capture.takePicture(
-            cameraExecutor,
-            object : ImageCapture.OnImageCapturedCallback() {
-                override fun onCaptureSuccess(image: ImageProxy) {
-                    try {
-                        val buffer = image.planes[0].buffer
-                        val bytes = ByteArray(buffer.remaining())
-                        buffer.get(bytes)
-                        onCaptured(bytes)
-                    } catch (e: Exception) {
-                        onError("Image read failed: ${e.message}")
-                    } finally {
-                        image.close()
-                    }
-                }
-
-                override fun onError(exception: ImageCaptureException) {
-                    onError("Capture failed: ${exception.message}")
-                }
-            },
-        )
     }
 
     fun shutdown() {
+        mainHandler.post {
+            runCatching { ProcessCameraProvider.getInstance(appContext).get().unbindAll() }
+        }
         cameraExecutor.shutdown()
     }
 
