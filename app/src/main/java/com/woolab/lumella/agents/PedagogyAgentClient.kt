@@ -35,11 +35,12 @@ class SlowPathUnavailableException(val reason: UnavailableReason) : IllegalState
  * evidence up to 3x per turn.
  *
  * Role-scoped evidence (no fabrication): [SteeringEvidence] only carries
- * `corrections`/`hints`/`focusHint` today (see `tutor-contract/Steering.kt`). Only the
- * grammar role has a real field to consume ([SteeringEvidence.corrections]).
- * Pronunciation and visual have no role-scoped fields yet (pending the W-1 coach
- * schema), so both emit an empty-but-valid body rather than relabeling generic
- * `hints`/`focusHint` text as invented phonemes or a fabricated "seen scene" caption.
+ * `corrections`/`hints`/`focusHint`/`visual` today (see `tutor-contract/Steering.kt`).
+ * Grammar consumes [SteeringEvidence.corrections] and visual consumes
+ * [SteeringEvidence.visual] (real image-analysis-derived evidence, `null` when the
+ * turn has none). Pronunciation has no role-scoped field yet (ETRI pronunciation
+ * assessment isn't wired into luma), so it emits an empty-but-valid body rather
+ * than relabeling generic `hints`/`focusHint` text as invented phonemes.
  *
  * [TutorBrain] calls are blocking (no coroutines, per contract); [analyze] runs them
  * synchronously on the caller's thread and invokes [callback] before returning.
@@ -72,7 +73,7 @@ class TutorBrainPedagogyClient(
         val content = when (role) {
             "grammar" -> buildGrammarContent(evidence, task)
             "pronunciation" -> buildPronunciationContent()
-            "visual" -> buildVisualContent()
+            "visual" -> buildVisualContent(evidence)
             else -> "{}"
         }
         val escaped = content.replace("\\", "\\\\").replace("\"", "\\\"")
@@ -98,15 +99,22 @@ class TutorBrainPedagogyClient(
     private fun buildPronunciationContent(): String = "{}"
 
     /**
-     * No-fake-evidence principle: [SteeringEvidence.focusHint] is a free-form coaching
-     * hint, NOT a seen-scene caption — presenting it as `caption` would fabricate a
-     * claim like "learner is looking at X" the brain never grounded in an image. This
-     * only emits a `caption` once [SteeringEvidence] carries a real
-     * [com.woolab.lumella.contract.ImageContext]-derived caption field; until then it
-     * always returns an empty-but-valid body ([VisualContextAgent] parses it to a no-op
-     * delta).
+     * [SteeringEvidence.visual] carries real image-analysis-derived evidence (see
+     * `tutor-contract`'s [com.woolab.lumella.contract.SteeringVisual] no-fabrication
+     * rule) — when present, its `caption`/`salientElements` are exactly what
+     * [VisualContextAgent] already expects under `caption`/`groundedObjects`. When
+     * `visual` is `null` (no analyzed image for this turn), this still returns an
+     * empty-but-valid body rather than fabricating a caption from
+     * [SteeringEvidence.focusHint] ([VisualContextAgent] parses it to a no-op delta).
+     *
+     * `visibleTextBlocks` is intentionally omitted: [VisualContextAgent] does not
+     * parse it today, so sending it would just be a field the agent silently ignores.
      */
-    private fun buildVisualContent(): String = "{}"
+    private fun buildVisualContent(evidence: com.woolab.lumella.contract.SteeringEvidence): String {
+        val visual = evidence.visual ?: return "{}"
+        val groundedObjects = visual.salientElements.joinToString(",") { "\"${jsonEscape(it)}\"" }
+        return """{"caption":"${jsonEscape(visual.caption)}","groundedObjects":[$groundedObjects]}"""
+    }
 
     private fun jsonEscape(value: String): String =
         value.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n")

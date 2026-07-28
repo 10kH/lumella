@@ -64,6 +64,8 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
         private const val LEFT_TOUCHPAD_DEVICE = "cyttsp6_mt"
         private const val TAP_MAX_DURATION_MS = 500L
         private const val DOUBLE_TAP_INTERVAL_MS = 400L
+        /** Below this, two "taps" are contact bounce from the capacitive pad, not intent. */
+        private const val TAP_BOUNCE_GUARD_MS = 150L
         private const val PERMISSION_REQUEST_CODE = 1001
         /** Debug-only broadcast that triggers the photo path without a touchpad tap. */
         private const val DEBUG_CAPTURE_ACTION = "com.woolab.lumella.DEBUG_CAPTURE_PHOTO"
@@ -274,13 +276,20 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
                     when {
                         lastTouchDeviceName == RIGHT_TOUCHPAD_DEVICE && duration < TAP_MAX_DURATION_MS -> {
                             val now = System.currentTimeMillis()
+                            val sinceLastTap = now - lastRightTapTimeMs
                             // Any tap counts as user activity for the idle-timeout window (Change
                             // B), independent of which branch below runs.
                             if (::transport.isInitialized) transport.noteActivity()
-                            if (now - lastRightTapTimeMs < DOUBLE_TAP_INTERVAL_MS) {
-                                endSessionAndExit()
-                            } else {
-                                toggleSpeechTurn()
+                            when {
+                                // Capacitive-touchpad contact bounce: a human cannot deliberately
+                                // tap twice this fast, and the destructive branch (exit) is the one
+                                // it would otherwise hit. Swallow it entirely.
+                                sinceLastTap < TAP_BOUNCE_GUARD_MS -> {
+                                    Log.d(TAG, "Ignoring bounce tap (${sinceLastTap}ms since last)")
+                                    return super.dispatchTouchEvent(ev)
+                                }
+                                sinceLastTap < DOUBLE_TAP_INTERVAL_MS -> endSessionAndExit()
+                                else -> toggleSpeechTurn()
                             }
                             lastRightTapTimeMs = now
                         }

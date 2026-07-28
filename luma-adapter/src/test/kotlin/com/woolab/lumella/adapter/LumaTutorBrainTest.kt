@@ -237,6 +237,136 @@ class LumaTutorBrainTest {
     }
 
     @Test
+    fun `coach evidence distillation maps a real visual object to SteeringVisual`() {
+        val transport = FakeLumaHttpTransport().apply {
+            wireHappyPath(coach = true)
+            on("POST", "/v1/orchestrator/turn", json(
+                """
+                {
+                  "session": {"id": "sess-1"},
+                  "coachEvidence": {
+                    "corrections": [],
+                    "hints": [],
+                    "confidence": 0.6,
+                    "visual": {
+                      "imageId": "img_abc",
+                      "caption": "a red mug on a desk",
+                      "salientElements": ["mug", "desk"],
+                      "visibleTextBlocks": ["CAUTION HOT"]
+                    }
+                  }
+                }
+                """.trimIndent(),
+            ))
+        }
+        val brain = newBrain(transport)
+        brain.connect(FakeCredentialsProvider())
+        brain.startSession(SessionPolicy.FRESH)
+
+        brain.submitTurnEvidence(TurnEvidence(turnId = 1, learnerTranscript = "hi"))
+        val result = brain.fetchSteering("sess-1")
+
+        assertTrue(result is SteeringResult.Available)
+        val visual = (result as SteeringResult.Available).evidence.visual
+        assertNotNull(visual)
+        assertEquals("img_abc", visual.imageId)
+        assertEquals("a red mug on a desk", visual.caption)
+        assertEquals(listOf("mug", "desk"), visual.salientElements)
+        assertEquals(listOf("CAUTION HOT"), visual.visibleTextBlocks)
+        brain.stopHeartbeat()
+    }
+
+    @Test
+    fun `coach evidence distillation maps missing visual to null`() {
+        val transport = FakeLumaHttpTransport().apply {
+            wireHappyPath(coach = true)
+            on("POST", "/v1/orchestrator/turn", json(
+                """{"session": {"id": "sess-1"}, "coachEvidence": {"corrections": [], "hints": [], "confidence": 0.4}}""",
+            ))
+        }
+        val brain = newBrain(transport)
+        brain.connect(FakeCredentialsProvider())
+        brain.startSession(SessionPolicy.FRESH)
+
+        brain.submitTurnEvidence(TurnEvidence(turnId = 1, learnerTranscript = "hi"))
+        val result = brain.fetchSteering("sess-1")
+
+        assertTrue(result is SteeringResult.Available)
+        assertNull((result as SteeringResult.Available).evidence.visual)
+        brain.stopHeartbeat()
+    }
+
+    @Test
+    fun `coach evidence distillation maps empty caption visual to null`() {
+        val transport = FakeLumaHttpTransport().apply {
+            wireHappyPath(coach = true)
+            on("POST", "/v1/orchestrator/turn", json(
+                """
+                {
+                  "session": {"id": "sess-1"},
+                  "coachEvidence": {
+                    "corrections": [],
+                    "hints": [],
+                    "confidence": 0.4,
+                    "visual": {"imageId": "img_abc", "caption": "", "salientElements": [], "visibleTextBlocks": []}
+                  }
+                }
+                """.trimIndent(),
+            ))
+        }
+        val brain = newBrain(transport)
+        brain.connect(FakeCredentialsProvider())
+        brain.startSession(SessionPolicy.FRESH)
+
+        brain.submitTurnEvidence(TurnEvidence(turnId = 1, learnerTranscript = "hi"))
+        val result = brain.fetchSteering("sess-1")
+
+        assertTrue(result is SteeringResult.Available)
+        assertNull((result as SteeringResult.Available).evidence.visual)
+        brain.stopHeartbeat()
+    }
+
+    @Test
+    fun `coach evidence distillation ignores unknown fields inside visual`() {
+        val transport = FakeLumaHttpTransport().apply {
+            wireHappyPath(coach = true)
+            on("POST", "/v1/orchestrator/turn", json(
+                """
+                {
+                  "session": {"id": "sess-1"},
+                  "coachEvidence": {
+                    "corrections": [],
+                    "hints": [],
+                    "confidence": 0.4,
+                    "visual": {
+                      "imageId": "img_abc",
+                      "caption": "a scene",
+                      "salientElements": ["a"],
+                      "visibleTextBlocks": [],
+                      "unknownField": "ignored",
+                      "boundingBoxes": [{"x": 1, "y": 2}]
+                    }
+                  }
+                }
+                """.trimIndent(),
+            ))
+        }
+        val brain = newBrain(transport)
+        brain.connect(FakeCredentialsProvider())
+        brain.startSession(SessionPolicy.FRESH)
+
+        brain.submitTurnEvidence(TurnEvidence(turnId = 1, learnerTranscript = "hi"))
+        val result = brain.fetchSteering("sess-1")
+
+        assertTrue(result is SteeringResult.Available)
+        val visual = (result as SteeringResult.Available).evidence.visual
+        assertNotNull(visual)
+        assertEquals("a scene", visual.caption)
+        assertEquals(listOf("a"), visual.salientElements)
+        brain.stopHeartbeat()
+    }
+
+    @Test
     fun `malformed turn response fails closed to SLOW_PATH_UNAVAILABLE`() {
         val transport = FakeLumaHttpTransport().apply {
             wireHappyPath(coach = true)

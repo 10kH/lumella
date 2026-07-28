@@ -25,6 +25,28 @@ data class SteeringCorrection(
 )
 
 /**
+ * Visual grounding evidence for a turn, distilled from a real luma
+ * `ImageAnalysis` (`luma-api` `caption`/`salient_elements`/`visible_text_blocks`).
+ *
+ * No-fabrication rule: this MUST only be populated from an actual image
+ * analysis record. NEVER derive it by inference or by parsing generic prose
+ * (e.g. [SteeringEvidence.focusHint]) into a fake "seen scene" — if the brain
+ * has no real image evidence for the turn, [SteeringEvidence.visual] MUST be
+ * `null` rather than a guessed value.
+ *
+ * @param imageId the analyzed image's id.
+ * @param caption the analysis's scene caption.
+ * @param salientElements notable objects/elements the analysis identified.
+ * @param visibleTextBlocks OCR'd text blocks visible in the image.
+ */
+data class SteeringVisual(
+    val imageId: String,
+    val caption: String,
+    val salientElements: List<String> = emptyList(),
+    val visibleTextBlocks: List<String> = emptyList(),
+)
+
+/**
  * Slow-path steering evidence for a turn: corrections plus supporting hints.
  *
  * D-4 rule: [corrections], [hints], and [focusHint] are steering evidence
@@ -38,13 +60,17 @@ data class SteeringCorrection(
  * @param sourceTurnId the turn this evidence was derived from. Numbering
  *   domain: the CLIENT-side [TurnEvidence.turnId] of the submitting turn —
  *   distinct from [SteeringCorrection.sourceTurnId]'s server-side index.
+ * @param visual optional visual grounding evidence for [sourceTurnId], only
+ *   present when a real image analysis backs it — `null` on turns without an
+ *   analyzed image (see [SteeringVisual]'s no-fabrication rule).
  */
 data class SteeringEvidence(
     val corrections: List<SteeringCorrection>,
     val hints: List<String>,
     val focusHint: String? = null,
     val confidence: Double,
-    val sourceTurnId: Int
+    val sourceTurnId: Int,
+    val visual: SteeringVisual? = null,
 )
 
 /**

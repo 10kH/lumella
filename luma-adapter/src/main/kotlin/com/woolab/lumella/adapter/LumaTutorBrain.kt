@@ -11,6 +11,7 @@ import com.woolab.lumella.contract.SessionPolicy
 import com.woolab.lumella.contract.SteeringCorrection
 import com.woolab.lumella.contract.SteeringEvidence
 import com.woolab.lumella.contract.SteeringResult
+import com.woolab.lumella.contract.SteeringVisual
 import com.woolab.lumella.contract.TurnEvidence
 import com.woolab.lumella.contract.TutorBrain
 import com.woolab.lumella.contract.UnavailableReason
@@ -238,6 +239,27 @@ class LumaTutorBrain(
             focusHint = coach.str("focusHint"),
             confidence = coach.num("confidence") ?: 0.0,
             sourceTurnId = turnRef,
+            visual = distillVisual(coach.obj("visual")),
+        )
+    }
+
+    /**
+     * Tolerant [SteeringVisual] mapping: only produces a non-null value when the
+     * `visual` object is present AND carries a non-empty `caption` — a real image
+     * analysis always has a caption, so a missing/blank one signals no real
+     * evidence rather than a caption to fabricate. Unknown fields are ignored.
+     */
+    private fun distillVisual(visual: LumaJson.Obj?): SteeringVisual? {
+        if (visual == null) return null
+        val imageId = visual.str("imageId") ?: return null
+        val caption = visual.str("caption")?.takeIf { it.isNotEmpty() } ?: return null
+        val salientElements = visual.arr("salientElements")?.let { LumaJson.Arr(it).strings() } ?: emptyList()
+        val visibleTextBlocks = visual.arr("visibleTextBlocks")?.let { LumaJson.Arr(it).strings() } ?: emptyList()
+        return SteeringVisual(
+            imageId = imageId,
+            caption = caption,
+            salientElements = salientElements,
+            visibleTextBlocks = visibleTextBlocks,
         )
     }
 

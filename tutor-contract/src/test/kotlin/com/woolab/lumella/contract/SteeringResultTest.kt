@@ -3,6 +3,7 @@ package com.woolab.lumella.contract
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 /**
@@ -59,5 +60,37 @@ class SteeringResultTest {
         assertTrue(evidence.hints.isEmpty())
         assertEquals(0.42, evidence.confidence)
         assertEquals(7, evidence.sourceTurnId)
+        assertNull(evidence.visual)
+    }
+
+    @Test
+    fun `steering evidence defaults visual to null and accepts a real visual value`() {
+        val withoutVisual = SteeringEvidence(
+            corrections = emptyList(),
+            hints = emptyList(),
+            confidence = 0.5,
+            sourceTurnId = 1,
+        )
+        assertNull(withoutVisual.visual)
+
+        val visual = SteeringVisual(
+            imageId = "img_1",
+            caption = "a red mug on a desk",
+            salientElements = listOf("mug", "desk"),
+            visibleTextBlocks = listOf("CAUTION HOT"),
+        )
+        val withVisual = SteeringEvidence(
+            corrections = emptyList(),
+            hints = emptyList(),
+            confidence = 0.5,
+            sourceTurnId = 1,
+            visual = visual,
+        )
+
+        assertEquals(visual, withVisual.visual)
+        assertEquals("img_1", withVisual.visual?.imageId)
+        assertEquals("a red mug on a desk", withVisual.visual?.caption)
+        assertEquals(listOf("mug", "desk"), withVisual.visual?.salientElements)
+        assertEquals(listOf("CAUTION HOT"), withVisual.visual?.visibleTextBlocks)
     }
 }

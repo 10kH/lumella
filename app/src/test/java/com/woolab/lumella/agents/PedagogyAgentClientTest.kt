@@ -145,6 +145,62 @@ class PedagogyAgentClientTest {
     }
 
     @Test
+    fun visualRoleMapsRealVisualEvidenceToCaptionAndGroundedObjects() {
+        val brain = FakeBrain {
+            SteeringResult.Available(
+                SteeringEvidence(
+                    corrections = emptyList(),
+                    hints = emptyList(),
+                    confidence = 0.8,
+                    sourceTurnId = 6,
+                    visual = com.woolab.lumella.contract.SteeringVisual(
+                        imageId = "img_1",
+                        caption = "a red mug on a desk",
+                        salientElements = listOf("mug", "desk"),
+                        visibleTextBlocks = listOf("CAUTION HOT"),
+                    ),
+                ),
+            )
+        }
+        val client = TutorBrainPedagogyClient(brain, sessionId = { "s" })
+        var result: Result<String>? = null
+        client.analyze("visual", SlowPathTask(turnId = 6, userTranscript = "x")) { result = it }
+
+        assertTrue(result!!.isSuccess)
+        val body = result!!.getOrThrow()
+        assertTrue(body.contains("red mug"))
+        assertFalse(body.contains("CAUTION HOT")) // visibleTextBlocks not sent: VisualContextAgent doesn't parse it yet
+
+        val delta = VisualContextAgent().toStateDelta(body, SlowPathTask(turnId = 6, userTranscript = "x"))
+        assertEquals(1, delta.addVisualContext.size)
+        val item = delta.addVisualContext.first()
+        assertEquals("a red mug on a desk", item.caption)
+        assertEquals(listOf("mug", "desk"), item.groundedObjects)
+    }
+
+    @Test
+    fun visualRoleWithoutVisualEvidenceYieldsNoOpDelta() {
+        val brain = FakeBrain {
+            SteeringResult.Available(
+                SteeringEvidence(
+                    corrections = emptyList(),
+                    hints = emptyList(),
+                    confidence = 0.8,
+                    sourceTurnId = 6,
+                ),
+            )
+        }
+        val client = TutorBrainPedagogyClient(brain, sessionId = { "s" })
+        var result: Result<String>? = null
+        client.analyze("visual", SlowPathTask(turnId = 6, userTranscript = "x")) { result = it }
+
+        assertTrue(result!!.isSuccess)
+        val body = result!!.getOrThrow()
+        val delta = VisualContextAgent().toStateDelta(body, SlowPathTask(turnId = 6, userTranscript = "x"))
+        assertTrue(delta.addVisualContext.isEmpty())
+    }
+
+    @Test
     fun unavailableSteeringYieldsFailureCarryingReason() {
         val brain = FakeBrain { SteeringResult.Unavailable(UnavailableReason.SLOW_PATH_UNAVAILABLE) }
         val client = TutorBrainPedagogyClient(brain, sessionId = { "s" })

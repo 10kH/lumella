@@ -9,8 +9,8 @@ what capabilities it can and cannot rely on yet.
 
 | Field | Value |
 |---|---|
-| luma commit | `d61ad3d` (`10kH/luma` main) |
-| Verified | 2026-07-23 — key-free fixture suite 7/7 live pass against this SHA (post PR#2 merge) |
+| luma commit | `a327ae8` (`10kH/luma` main) |
+| Verified | 2026-07-28 — key-free fixture suite 7/7 live pass against this SHA (W-1 visual evidence) |
 | Schema rev | `v1-coach` |
 | Coach capability (`response_mode=coach`) | **PRESENT** — W-1 landed (`dd7c19e`). Live-verified: assistantText suppression + `coachEvidence` on free_chat/scenario; prose routes emit empty corrections (no fabrication). `fetchSteering` degrade path (`COACH_UNSUPPORTED`) remains the fallback for older luma. |
 | `/v1/capabilities` | **PRESENT** — W-2 landed (`dd7c19e`). Public, no auth; `{schemaRev, coach:true, routes[]}` live-verified. |
@@ -19,6 +19,7 @@ what capabilities it can and cannot rely on yet.
 
 | Pin | Verified | Note |
 |---|---|---|
+| `a327ae8` | 2026-07-28 | W-1 visual: coachEvidence.visual from stored ImageAnalysis (additive) |
 | `d61ad3d` | 2026-07-23 | PR#2 merge: skill-metadata Epics 1–3 (snapshot/scrub/feedback) — additive; coach/capabilities contract unchanged |
 | `dd7c19e` | 2026-07-23 | W-1 coach + W-2 capabilities (schema `v1-coach`) |
 | `da111e5` | 2026-07-21 | Initial pin at migration (`v1-initial`, coach/capabilities absent) |
