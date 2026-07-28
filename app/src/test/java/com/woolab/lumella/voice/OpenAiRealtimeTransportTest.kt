@@ -627,4 +627,41 @@ class OpenAiRealtimeTransportTest {
         assertEquals(1, methods.size)
         assertEquals("sendInstructions", methods.first().name)
     }
+
+    @Test
+    fun clientInitiatedCloseEmitsNoMisleadingReconnectingStatus() {
+        // Idle timeout / teardown / fatal account error all suppress reconnect, so surfacing
+        // CLOSED (rendered as "Reconnecting...") would claim a recovery that never comes and
+        // overwrite the accurate idle text.
+        val factory = FakeFactory()
+        val recording = RecordingListener()
+        val transport = OpenAiRealtimeTransport(successProvider(), factory, listener = recording)
+        transport.connect()
+        factory.lastListener?.onOpen()
+        transport.close()
+        val before = recording.statuses.size
+
+        factory.lastListener?.onClosing(1000, "client teardown")
+        factory.lastListener?.onClosed(1000, "client teardown")
+
+        assertEquals(before, recording.statuses.size)
+    }
+
+    @Test
+    fun serverInitiatedCloseStillReportsClosedAndReconnects() {
+        val factory = FakeFactory()
+        val recording = RecordingListener()
+        val scheduled = mutableListOf<Long>()
+        val transport = OpenAiRealtimeTransport(
+            successProvider(), factory, listener = recording,
+            reconnectScheduler = { d, _ -> scheduled.add(d) },
+        )
+        transport.connect()
+        factory.lastListener?.onOpen()
+
+        factory.lastListener?.onClosed(1000, "session_expired")
+
+        assertTrue(recording.statuses.contains(RealtimeConnectionStatus.CLOSED))
+        assertEquals(1, scheduled.size)
+    }
 }

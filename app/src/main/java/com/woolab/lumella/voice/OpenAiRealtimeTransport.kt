@@ -213,16 +213,12 @@ class OpenAiRealtimeTransport(
 
                 override fun onClosing(code: Int, reason: String) {
                     if (stale()) return
-                    sessionReady = false
-                    listener.onStatus(RealtimeConnectionStatus.CLOSED)
-                    scheduleReconnect()
+                    reportClose()
                 }
 
                 override fun onClosed(code: Int, reason: String) {
                     if (stale()) return
-                    sessionReady = false
-                    listener.onStatus(RealtimeConnectionStatus.CLOSED)
-                    scheduleReconnect()
+                    reportClose()
                 }
 
                 override fun onFailure(t: Throwable) {
@@ -299,6 +295,19 @@ class OpenAiRealtimeTransport(
     @Volatile
     var appendedChunksSinceCommit: Int = 0
         private set
+
+    /**
+     * Reports a socket close. A client-initiated close (idle timeout, teardown, a fatal
+     * account error) emits NO status: reconnect is suppressed for those, and CLOSED is
+     * rendered as "Reconnecting..." — which would sit on screen claiming a recovery that is
+     * never coming, overwriting the accurate "Idle - tap to wake" the idle path just showed.
+     */
+    private fun reportClose() {
+        sessionReady = false
+        if (closedByClient) return
+        listener.onStatus(RealtimeConnectionStatus.CLOSED)
+        scheduleReconnect()
+    }
 
     /** Closes the WebSocket. Safe to call repeatedly / before connect. Suppresses auto-reconnect. */
     fun close() {
