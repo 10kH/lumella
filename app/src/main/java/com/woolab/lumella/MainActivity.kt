@@ -65,11 +65,15 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
         private const val LEFT_TOUCHPAD_DEVICE = "cyttsp6_mt"
         private const val TAP_MAX_DURATION_MS = 500L
         private const val DOUBLE_TAP_INTERVAL_MS = 400L
-        /** Below this, two "taps" are contact bounce from the capacitive pad, not intent. */
-        private const val TAP_BOUNCE_GUARD_MS = 250L
+        /** Contact shorter than this is capacitive noise, not a finger (observed bounce: 6ms). */
+        private const val MIN_TAP_DURATION_MS = 40L
         private const val PERMISSION_REQUEST_CODE = 1001
         /** Debug-only broadcast that triggers the photo path without a touchpad tap. */
         private const val DEBUG_CAPTURE_ACTION = "com.woolab.lumella.DEBUG_CAPTURE_PHOTO"
+        /** Debug-only broadcast that toggles a speech turn without a touchpad tap. */
+        private const val DEBUG_SPEECH_ACTION = "com.woolab.lumella.DEBUG_TOGGLE_SPEECH"
+        /** Debug-only broadcast that plays a 1s tone to exercise the speaker path. */
+        private const val DEBUG_PLAYBACK_ACTION = "com.woolab.lumella.DEBUG_PLAYBACK"
         /** Short timeout for the boot-time remote config fetch — must never stall app boot. */
         private const val REMOTE_CONFIG_TIMEOUT_MS = 3_000
     }
@@ -188,6 +192,14 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
                 }
 
                 override fun onError(message: String) {
+                    // Server VAD found no speech in the committed buffer. Not a fault: the
+                    // wear-gated microphone returns near-silence when the glasses are off, and
+                    // a raw transport error told the wearer nothing actionable.
+                    if (message.contains("input_audio_buffer_commit_empty")) {
+                        Log.i(TAG, "no speech detected in this turn")
+                        runOnUiThread { updateStatus("Didn't catch that", "#FFC107") }
+                        return
+                    }
                     Log.w(TAG, "Realtime transport error: $message")
                 }
             },
@@ -212,7 +224,15 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
         ensurePermissions()
 
         debugCaptureReceiver?.let {
-            registerReceiver(it, IntentFilter(DEBUG_CAPTURE_ACTION), Context.RECEIVER_EXPORTED)
+            registerReceiver(
+                it,
+                IntentFilter().apply {
+                    addAction(DEBUG_CAPTURE_ACTION)
+                    addAction(DEBUG_SPEECH_ACTION)
+                    addAction(DEBUG_PLAYBACK_ACTION)
+                },
+                Context.RECEIVER_EXPORTED,
+            )
         }
 
         Thread({ bootstrapBrainAndTransport(credentialsProvider) }, "lumella-bootstrap").apply {
@@ -282,20 +302,17 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
                             // Any tap counts as user activity for the idle-timeout window (Change
                             // B), independent of which branch below runs.
                             if (::transport.isInitialized) transport.noteActivity()
-                            val recording = ::audioCapture.isInitialized && audioCapture.isRecording
                             when {
-                                // Capacitive-touchpad contact bounce: a human cannot deliberately
-                                // tap twice this fast, and the destructive branch (exit) is the one
-                                // it would otherwise hit. Swallow it entirely.
-                                sinceLastTap < TAP_BOUNCE_GUARD_MS -> {
-                                    Log.d(TAG, "Ignoring bounce tap (${sinceLastTap}ms since last)")
+                                // Contact bounce, not intent. The real discriminator is CONTACT
+                                // DURATION, not the gap between taps: the bounce that killed the
+                                // app mid-turn was 6ms of contact, while every deliberate tap in
+                                // the same session measured 87-222ms. Gating on the gap instead
+                                // made the deliberate double-tap unreachable, because the first
+                                // tap always starts a turn.
+                                duration < MIN_TAP_DURATION_MS -> {
+                                    Log.d(TAG, "Ignoring contact bounce (${duration}ms contact)")
                                     return super.dispatchTouchEvent(ev)
                                 }
-                                // NEVER exit while a turn is being recorded. On-device a bounce
-                                // 193ms after "start recording" was read as a double-tap and killed
-                                // the app mid-sentence. While recording, a second tap can only mean
-                                // "stop" — the destructive gesture is not reachable from here.
-                                recording -> toggleSpeechTurn()
                                 sinceLastTap < DOUBLE_TAP_INTERVAL_MS -> endSessionAndExit()
                                 else -> toggleSpeechTurn()
                             }
@@ -471,8 +488,30 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
         if (BuildConfig.DEBUG) {
             object : BroadcastReceiver() {
                 override fun onReceive(context: Context?, intent: Intent?) {
-                    Log.i(TAG, "debug: capturePhoto triggered via broadcast")
-                    capturePhoto()
+                    when (intent?.action) {
+                        DEBUG_CAPTURE_ACTION -> {
+                            Log.i(TAG, "debug: capturePhoto triggered via broadcast")
+                            capturePhoto()
+                        }
+                        DEBUG_SPEECH_ACTION -> {
+                            Log.i(TAG, "debug: toggleSpeechTurn triggered via broadcast")
+                            toggleSpeechTurn()
+                        }
+                        DEBUG_PLAYBACK_ACTION -> {
+                            // Exercises the speaker path without a live turn, so the media-stack
+                            // side effects of playback can be observed on demand.
+                            Log.i(TAG, "debug: playback tone triggered via broadcast")
+                            val samples = ShortArray(24_000) { i ->
+                                (Math.sin(2.0 * Math.PI * 440.0 * i / 24_000.0) * 6000).toInt().toShort()
+                            }
+                            val pcm = ByteArray(samples.size * 2)
+                            for (i in samples.indices) {
+                                pcm[i * 2] = (samples[i].toInt() and 0xFF).toByte()
+                                pcm[i * 2 + 1] = ((samples[i].toInt() shr 8) and 0xFF).toByte()
+                            }
+                            audioPlayback.playDelta(android.util.Base64.encodeToString(pcm, android.util.Base64.NO_WRAP))
+                        }
+                    }
                 }
             }
         } else {

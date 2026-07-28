@@ -130,6 +130,10 @@ class OpenAiRealtimeTransport(
     @Volatile
     private var closedByClient: Boolean = false
 
+    /** True between `response.created` and `response.done`; guards against overlapping responses. */
+    @Volatile
+    private var responseActive: Boolean = false
+
     /** True once [close] (client teardown or idle-timeout) has run and no [connect] has followed. Lets
      *  [com.woolab.lumella.MainActivity] tell "not ready because reconnecting" from "not ready because
      *  the idle-timeout (or user) closed it" on tap, so a tap can wake a closed session. */
@@ -234,6 +238,13 @@ class OpenAiRealtimeTransport(
 
     /** D-4 ONLY channel: composes `response.create` with [instructions] and sends it. */
     override fun sendInstructions(instructions: String) {
+        // Tapping to speak while the tutor is still answering produced
+        // `conversation_already_has_active_response` and the new turn was dropped. A tap
+        // during a response means "interrupt", so cancel the in-flight one first.
+        if (responseActive) {
+            sendRaw("""{"type":"response.cancel"}""")
+            responseActive = false
+        }
         if (!sendRaw(buildResponseCreateJson(instructions))) {
             listener.onError("sendInstructions failed: socket unavailable")
         }
@@ -270,7 +281,7 @@ class OpenAiRealtimeTransport(
     /** Appends a base64-encoded PCM16 audio chunk (see [com.woolab.lumella.audio.AudioCapture]) to the input buffer. */
     fun appendAudio(base64Pcm16: String) {
         if (sendRaw(buildAudioAppendJson(base64Pcm16))) {
-            audioAppendedSinceCommit = true
+            appendedChunksSinceCommit++
             noteActivity()
         }
     }
@@ -281,15 +292,21 @@ class OpenAiRealtimeTransport(
      * `input_audio_buffer_commit_empty` server errors): a commit with no appended audio
      * since the last commit is skipped client-side.
      */
+    /**
+     * Commits the input buffer, but only when this turn actually captured audio — an empty
+     * commit makes the server raise `input_audio_buffer_commit_empty`.
+     *
+     * [appendedChunksSinceCommit] is the single source of truth. A separate boolean used to
+     * track "has audio" alongside the counter, and resetting only the counter left the two
+     * disagreeing: turns logged `audioChunks=0 committed=true`, which is impossible and made
+     * the log useless for telling a silent microphone from a bookkeeping bug.
+     */
     fun commitAudio(): Boolean {
-        if (!audioAppendedSinceCommit) return false
+        if (appendedChunksSinceCommit <= 0) return false
         val sent = sendRaw("""{"type":"input_audio_buffer.commit"}""")
-        if (sent) audioAppendedSinceCommit = false
+        if (sent) appendedChunksSinceCommit = 0
         return sent
     }
-
-    @Volatile
-    private var audioAppendedSinceCommit: Boolean = false
 
     /** Audio chunks appended since the last commit — lets callers spot a silent microphone. */
     @Volatile
@@ -382,6 +399,8 @@ class OpenAiRealtimeTransport(
             RealtimeServerEventKind.INPUT_TRANSCRIPT_COMPLETED -> {
                 MiniJson.string(obj, "transcript")?.let(listener::onInputTranscript)
             }
+            RealtimeServerEventKind.RESPONSE_CREATED -> responseActive = true
+            RealtimeServerEventKind.RESPONSE_DONE -> responseActive = false
             RealtimeServerEventKind.ERROR -> {
                 if (isFatalAccountError(text)) {
                     // Permanent, account-level failure (no credit / bad key / disabled

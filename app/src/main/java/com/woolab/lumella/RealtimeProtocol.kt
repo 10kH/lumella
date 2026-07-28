@@ -18,6 +18,7 @@ enum class RealtimeServerEventKind {
     SESSION_UPDATED,
     AUDIO_DELTA,
     AUDIO_DONE,
+    RESPONSE_CREATED,
     RESPONSE_DONE,
     ERROR,
     SPEECH_STARTED,
@@ -38,6 +39,7 @@ object RealtimeServerEventTypes {
         "response.output_audio.delta" -> RealtimeServerEventKind.AUDIO_DELTA
         "response.audio.done",
         "response.output_audio.done" -> RealtimeServerEventKind.AUDIO_DONE
+        "response.created" -> RealtimeServerEventKind.RESPONSE_CREATED
         "response.done" -> RealtimeServerEventKind.RESPONSE_DONE
         "error" -> RealtimeServerEventKind.ERROR
         "input_audio_buffer.speech_started" -> RealtimeServerEventKind.SPEECH_STARTED

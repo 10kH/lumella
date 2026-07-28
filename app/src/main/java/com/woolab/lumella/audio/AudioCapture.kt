@@ -69,14 +69,27 @@ class AudioCapture(
 
     private fun streamLoop(record: AudioRecord, bufferSize: Int) {
         val buffer = ByteArray(bufferSize)
+        var reported = false
         while (recording.get()) {
             val read = try {
                 record.read(buffer, 0, buffer.size)
-            } catch (_: Exception) {
-                0
+            } catch (e: Exception) {
+                onError("AudioRecord.read threw: ${e.message}")
+                return
             }
-            if (read > 0) {
-                onChunk(Base64.getEncoder().encodeToString(buffer.copyOf(read)))
+            when {
+                read > 0 -> onChunk(Base64.getEncoder().encodeToString(buffer.copyOf(read)))
+                // Negative values are AudioRecord error codes (ERROR_INVALID_OPERATION -3,
+                // ERROR_BAD_VALUE -2, ERROR_DEAD_OBJECT -6). These were silently treated as
+                // "no data", so a dead mic looked identical to a quiet room and turns just
+                // reported zero audio with no explanation. Report once per session.
+                read < 0 -> {
+                    if (!reported) {
+                        reported = true
+                        onError("AudioRecord.read error code $read")
+                    }
+                    return
+                }
             }
         }
     }
