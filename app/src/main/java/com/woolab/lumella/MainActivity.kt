@@ -67,6 +67,8 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
         private const val PERMISSION_REQUEST_CODE = 1001
         /** Debug-only broadcast that triggers the photo path without a touchpad tap. */
         private const val DEBUG_CAPTURE_ACTION = "com.woolab.lumella.DEBUG_CAPTURE_PHOTO"
+        /** Short timeout for the boot-time remote config fetch — must never stall app boot. */
+        private const val REMOTE_CONFIG_TIMEOUT_MS = 3_000
     }
 
     private lateinit var config: AppConfig
@@ -216,8 +218,23 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
         }
     }
 
-    /** Runs off the UI thread: brain.connect/startSession (best-effort) then realtime transport connect. */
+    /**
+     * Runs off the UI thread: resolves the remote luma config (short-timeout, silently
+     * falls back to BuildConfig on any failure — see [RemoteConfigResolver]) so the tunnel
+     * URL can change without an APK rebuild, then brain.connect/startSession (best-effort),
+     * then realtime transport connect.
+     */
     private fun bootstrapBrainAndTransport(credentialsProvider: BrainCredentialsProvider) {
+        val buildConfigLumaBaseUrl = config.lumaBaseUrl
+        config = AppConfig.withResolvedLumaBaseUrl(
+            config,
+            HttpUrlConnectionTokenHttpTransport(connectTimeoutMs = REMOTE_CONFIG_TIMEOUT_MS, readTimeoutMs = REMOTE_CONFIG_TIMEOUT_MS),
+        )
+        if (config.lumaBaseUrl != buildConfigLumaBaseUrl) {
+            Log.i(TAG, "Resolved lumaBaseUrl from remote config (was BuildConfig fallback $buildConfigLumaBaseUrl)")
+        } else {
+            Log.i(TAG, "Using BuildConfig lumaBaseUrl (remote config unavailable or unchanged)")
+        }
         val connection = try {
             brain.connect(credentialsProvider)
         } catch (e: Exception) {

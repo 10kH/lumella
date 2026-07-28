@@ -12,7 +12,7 @@ import java.net.URL
 class HttpUrlConnectionTokenHttpTransport(
     private val connectTimeoutMs: Int = 8_000,
     private val readTimeoutMs: Int = 8_000,
-) : TokenHttpTransport {
+) : TokenHttpTransport, ConfigHttpTransport {
     override fun post(url: String, headers: Map<String, String>, bodyJson: String, callback: (Result<TokenHttpResponse>) -> Unit) {
         try {
             val connection = URL(url).openConnection() as HttpURLConnection
@@ -24,6 +24,26 @@ class HttpUrlConnectionTokenHttpTransport(
                 connection.setRequestProperty("Content-Type", "application/json")
                 headers.forEach { (key, value) -> connection.setRequestProperty(key, value) }
                 connection.outputStream.use { it.write(bodyJson.toByteArray(Charsets.UTF_8)) }
+
+                val code = connection.responseCode
+                val stream = if (code in 200..299) connection.inputStream else connection.errorStream
+                val text = stream?.bufferedReader(Charsets.UTF_8)?.use { it.readText() }.orEmpty()
+                callback(Result.success(TokenHttpResponse(code, text)))
+            } finally {
+                connection.disconnect()
+            }
+        } catch (e: Exception) {
+            callback(Result.failure(e))
+        }
+    }
+    override fun get(url: String, headers: Map<String, String>, callback: (Result<TokenHttpResponse>) -> Unit) {
+        try {
+            val connection = URL(url).openConnection() as HttpURLConnection
+            try {
+                connection.requestMethod = "GET"
+                connection.connectTimeout = connectTimeoutMs
+                connection.readTimeout = readTimeoutMs
+                headers.forEach { (key, value) -> connection.setRequestProperty(key, value) }
 
                 val code = connection.responseCode
                 val stream = if (code in 200..299) connection.inputStream else connection.errorStream

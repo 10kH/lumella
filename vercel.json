@@ -1,9 +1,11 @@
 {
   "version": 2,
   "functions": {
-    "api/realtime-token.js": { "maxDuration": 30 }
+    "api/realtime-token.js": { "maxDuration": 30 },
+    "api/config.js": { "maxDuration": 10 }
   },
   "rewrites": [
-    { "source": "/v1/realtime/token", "destination": "/api/realtime-token" }
+    { "source": "/v1/realtime/token", "destination": "/api/realtime-token" },
+    { "source": "/v1/config", "destination": "/api/config" }
   ]
 }

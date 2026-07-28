@@ -2,6 +2,6 @@
   "name": "lumella-api",
   "private": true,
   "scripts": {
-    "test": "node --test realtime-token.test.mjs"
+    "test": "node --test realtime-token.test.mjs config.test.mjs"
   }
 }

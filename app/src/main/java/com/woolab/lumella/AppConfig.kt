@@ -42,5 +42,26 @@ data class AppConfig(
             brainEmail = props["lumella.brainEmail"].orEmpty(),
             brainPassword = props["lumella.brainPassword"].orEmpty(),
         )
+
+        /**
+         * Resolves the effective `lumaBaseUrl` for [config]: remote config
+         * (`<tokenServiceBaseUrl>/v1/config`) first, BuildConfig/properties-sourced
+         * `config.lumaBaseUrl` as the fallback on any remote failure — see
+         * [RemoteConfigResolver] for the exact fallback conditions. This breaks the
+         * "quick-tunnel URL baked into the APK" coupling: the tunnel URL can change on every
+         * `ops/luma-tunnel.sh` restart without requiring a rebuild.
+         *
+         * MUST be called off the UI thread (performs blocking I/O via [transport]); never
+         * throws, so a failed/unreachable remote config never blocks or crashes app boot.
+         */
+        fun withResolvedLumaBaseUrl(config: AppConfig, transport: ConfigHttpTransport): AppConfig {
+            val resolved = RemoteConfigResolver.resolveLumaBaseUrl(
+                transport = transport,
+                tokenServiceBaseUrl = config.tokenServiceBaseUrl,
+                localToken = config.localToken,
+                buildConfigFallback = config.lumaBaseUrl,
+            )
+            return config.copy(lumaBaseUrl = resolved)
+        }
     }
 }

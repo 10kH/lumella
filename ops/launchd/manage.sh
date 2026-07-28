@@ -15,6 +15,10 @@
 #   ops/launchd/manage.sh restart     # kickstart the running service
 #   ops/launchd/manage.sh status      # launchctl state + /healthz
 #   ops/launchd/manage.sh logs        # tail the service logs
+#
+#   ops/launchd/manage.sh tunnel-install    # keep luma-api reachable off-LAN
+#   ops/launchd/manage.sh tunnel-status
+#   ops/launchd/manage.sh tunnel-uninstall
 set -euo pipefail
 
 LABEL="com.woolab.lumella.token-service"
@@ -89,6 +93,33 @@ case "${1:-}" in
     ;;
   logs)
     tail -n 40 "$LOG_DIR"/token-service.*.log 2>/dev/null || echo "no logs at $LOG_DIR"
+    ;;
+  tunnel-install)
+    # Public tunnel for luma-api so the glasses keep the coach outside the LAN.
+    TLABEL="com.woolab.lumella.luma-tunnel"
+    TTEMPLATE="$SCRIPT_DIR/$TLABEL.plist.template"
+    TPLIST="$HOME/Library/LaunchAgents/$TLABEL.plist"
+    command -v cloudflared >/dev/null || { echo "ERROR: cloudflared not found" >&2; exit 1; }
+    command -v vercel >/dev/null || { echo "ERROR: vercel CLI not found (needed to republish the URL)" >&2; exit 1; }
+    mkdir -p "$LOG_DIR" "$(dirname "$TPLIST")"
+    node_bin="$(command -v node)"
+    sed -e "s#__REPO_ROOT__#${REPO_ROOT}#g" \
+        -e "s#__PATH__#$(dirname "$node_bin"):$(dirname "$(command -v cloudflared)"):/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin#g" \
+        -e "s#__HOME__#${HOME}#g" \
+        -e "s#__LOG_DIR__#${LOG_DIR}#g" \
+        "$TTEMPLATE" > "$TPLIST"
+    launchctl bootout "$GUI/$TLABEL" 2>/dev/null || true
+    launchctl bootstrap "$GUI" "$TPLIST"
+    echo "installed $TLABEL — the tunnel URL is republished to Vercel on each start; watch $LOG_DIR/luma-tunnel.out.log"
+    ;;
+  tunnel-uninstall)
+    launchctl bootout "$GUI/com.woolab.lumella.luma-tunnel" 2>/dev/null || true
+    rm -f "$HOME/Library/LaunchAgents/com.woolab.lumella.luma-tunnel.plist"
+    echo "removed the luma tunnel agent"
+    ;;
+  tunnel-status)
+    launchctl print "$GUI/com.woolab.lumella.luma-tunnel" 2>/dev/null | grep -E "state|pid" || echo "not loaded"
+    tail -n 5 "$LOG_DIR"/luma-tunnel.out.log 2>/dev/null || echo "no tunnel log yet"
     ;;
   *)
     sed -n '12,18p' "$0"

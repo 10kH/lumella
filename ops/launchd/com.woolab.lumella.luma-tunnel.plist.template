@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Mac-resident LaunchAgent for the luma public tunnel.
+
+  Why: luma-api listens on the Mac's LAN address, so the glasses lose the coach
+  (slow path) the moment they leave the house. This agent runs
+  ops/luma-tunnel.sh, which opens a cloudflared quick tunnel to luma-api AND
+  republishes the fresh URL to LUMA_BASE_URL on the lumella-token Vercel
+  project — the glasses read that at boot, so a rotated tunnel URL reaches
+  already-installed APKs without a rebuild.
+
+  NOTE: quick-tunnel hostnames are random and change on every restart. That is
+  why the republish step exists. For a permanently stable hostname, move to a
+  named tunnel (needs a Cloudflare account + a domain) and then this republish
+  becomes unnecessary.
+
+  TEMPLATE: ops/launchd/manage.sh tunnel-install renders __PLACEHOLDERS__.
+  No secrets here — vercel auth lives in the CLI's own config, luma keys in
+  luma-api/.env.
+-->
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.woolab.lumella.luma-tunnel</string>
+
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/bash</string>
+    <string>__REPO_ROOT__/ops/luma-tunnel.sh</string>
+  </array>
+
+  <key>WorkingDirectory</key>
+  <string>__REPO_ROOT__</string>
+
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>PATH</key>
+    <string>__PATH__</string>
+    <key>HOME</key>
+    <string>__HOME__</string>
+  </dict>
+
+  <key>RunAtLoad</key>
+  <true/>
+
+  <!-- Restart if cloudflared drops; each restart republishes the new URL. -->
+  <key>KeepAlive</key>
+  <true/>
+
+  <key>ThrottleInterval</key>
+  <integer>30</integer>
+
+  <key>ProcessType</key>
+  <string>Background</string>
+
+  <key>StandardOutPath</key>
+  <string>__LOG_DIR__/luma-tunnel.out.log</string>
+  <key>StandardErrorPath</key>
+  <string>__LOG_DIR__/luma-tunnel.err.log</string>
+</dict>
+</plist>
