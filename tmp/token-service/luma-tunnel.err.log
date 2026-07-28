@@ -1,0 +1,33 @@
+Vercel CLI 58.0.0 (Node.js 26.0.0)
+Retrieving project…
+Saving…
+
+✓ Added           LUMA_BASE_URL
+  Project         woojin-lees-projects-5091053c/lumella-token
+  Environments    Production
+  Type            Sensitive
+Vercel CLI 58.0.0 (Node.js 26.0.0)
+Retrieving project…
+Deploying woojin-lees-projects-5091053c/lumella-token
+Uploading [--------------------] (0.0B/2.6KB)
+Uploading [====================] (2.6KB/2.6KB)
+  Inspect         https://vercel.com/woojin-lees-projects-5091053c/lumella-token/GCYfn5FTHTn5f5JvmtVes15eNCBy
+  Production      https://lumella-token-hy9kd864d-woojin-lees-projects-5091053c.vercel.app
+Building…
+Building…
+Running build in Washington, D.C., USA (East) – iad1
+Build machine configuration: 2 cores, 8 GB
+Retrieving list of deployment files...
+Previous build caches not available.
+Downloading 23 deployment files...
+Running "vercel build"
+Vercel CLI 56.5.0
+Installing dependencies...
+up to date in 565ms
+Build Completed in /vercel/output [1s]
+Deploying outputs...
+[2K[1A[2K[G  Production      https://lumella-token-hy9kd864d-woojin-lees-projects-5091053c.vercel.app
+Completing…
+▲ Aliased         https://lumella-token.vercel.app
+
+✓ Ready in 9s

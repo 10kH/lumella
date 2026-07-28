@@ -11,27 +11,34 @@
 
 | 항목 | HEAD (이동 전=후 검증됨) | 원격 | 사유 |
 |---|---|---|---|
-| `luma-codex/` | `4104729` (clean) | https://github.com/10kH/luma-codex.git | luma의 1개월 전 사본. 현행 luma는 `TUTOR/lumella/luma`로 이관 예정(P2). |
 | `ELLAs/` | `abdfb8e` (clean) | https://github.com/10kH/ELLAs.git | 단일 에이전트 ELLA 동결 백업. **GitHub에서도 archived 처리됨(2026-07-28)** — 원격이 읽기 전용이라 실수로 못 바꾼다. |
-| `ELLAL/` | `8c6c1c5` (clean) | https://github.com/10kH/ELLAL.git | 완전 로컬 변종(Whisper/Ollama/Kokoro) 프로토타입, 5개월 휴면. |
 
 > `ELLA/`는 2026-07-28에 **`TUTOR/ELLA`로 나갔다** — 현역으로 다시 쓰고 있어서 아카이브 대상이 아니다.
->
-> `ELLA-hermes/`는 2026-07-28에 **로컬에서 삭제**했다(hermes 브레인 실험 중단 판정). 로컬에만 있던
-> 커밋 11건을 먼저 푸시해 원격 `31bff64`로 보존한 뒤, HEAD와 원격 SHA 일치를 확인하고 지웠다.
-> 되살리려면 `git clone https://github.com/10kH/ELLA-hermes.git`. launchd 에이전트
-> `com.woolab.ella.hermes-local-api`는 삭제 전에 정상 제거했다(포트 8787 해제 확인).
+
+## 2026-07-28에 완전 폐기한 것 (복구 불가)
+
+아래는 로컬과 GitHub **양쪽 모두** 삭제했다. 사용자 판단으로 되살릴 필요가 없다고 결정한 것들이며,
+사본이 남아있지 않다.
+
+| 저장소 | 마지막 HEAD | 폐기 사유 |
+|---|---|---|
+| `ELLA-hermes` (id 1272852074) | `31bff64` (2026-07-28) | hermes 브레인 실험 중단. 로컬 전용 커밋 11건을 먼저 푸시해 보존한 뒤, launchd 에이전트 `com.woolab.ella.hermes-local-api` 제거(포트 8787 해제 확인) → 로컬 삭제 → 원격 삭제 순으로 진행. |
+| `ELLAL` (id 1144695381) | `8c6c1c5` (2026-01-29) | 완전 로컬 변종(Whisper/Ollama/Kokoro) 프로토타입, 6개월 휴면. 고유 데이터는 `server/data/ellal_memory.db`(2.5MB, 1월 기록)뿐이었고 함께 폐기. |
+
+`luma-codex`는 **삭제하지 않는다.** 독립 저장소가 아니라 현행 `10kH/luma`로 이름이 바뀐 뒤 남은
+리다이렉트다(API가 `Moved Permanently` 반환, `ls-remote`에 luma의 브랜치·PR이 그대로 보인다).
+그 이름으로 삭제를 시도하면 **현행 엔진 저장소가 지워진다.**
 
 ## 복원 절차
 
 ```bash
-# 남아있는 트리는 이동만 하면 된다 (각자 독립 repo다)
+# 남아있는 트리(ELLAs)는 이동만 하면 된다 — 독립 repo다
 mv ~/workspace/TUTOR/LEGACY/ELLAs ~/workspace/ELLAs
 git -C ~/workspace/ELLAs rev-parse --short HEAD   # abdfb8e 확인
-
-# 이미 삭제한 트리는 원격에서 다시 받는다
-git clone https://github.com/10kH/ELLA-hermes.git ~/workspace/ELLA-hermes
 ```
+
+`ELLAs`의 GitHub 저장소는 archived 상태다. 수정하려면 먼저 unarchive해야 한다 —
+"동결 baseline, 내용 불변" 원칙을 플랫폼이 강제하도록 일부러 걸어둔 것이다.
 
 ## 이동 시 참조 감사 기록 (2026-07-21)
 
