@@ -193,3 +193,12 @@ knowing, but not an open risk as of this writing.
 RayNeo 하드웨어에서 실제로 겪은 함정 모음 — 네이티브 앱 등록, 터치패드 구분, AR UI 원칙,
 카메라, 착용 감지 마이크, WiFi 무언 단절, cleartext, Realtime API 함정, 그리고
 "토큰 오류"의 3가지 서로 다른 원인 구분: [`rayneo-platform-notes.md`](rayneo-platform-notes.md)
+
+## 프로젝트 문서 지도
+
+- [`STATUS.md`](STATUS.md) — 두 레포(luma/glasses) 현황과 과제 계층
+- [`lumella-overview.md`](lumella-overview.md) — 2-레포 구조와 결합 규칙(HTTP `/v1` 계약 + COMPAT 핀)
+- [`legacy-archive.md`](legacy-archive.md) — `TUTOR/LEGACY` 보존 트리 목록과 복원 절차
+- [`rayneo-platform-notes.md`](rayneo-platform-notes.md) — RayNeo 하드웨어 함정 모음(필독)
+- [`porting-map.md`](porting-map.md) — ELLA-MA에서 가져온 구성요소 대응표
+- [`smoke-checklist.md`](smoke-checklist.md) — 릴리스 전 확인 항목
