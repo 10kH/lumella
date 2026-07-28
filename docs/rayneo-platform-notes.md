@@ -187,6 +187,33 @@ implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2")
 unzip -p app-debug.apk classes.dex | strings | grep LifecycleOwnerKt
 ```
 
+## 4-2. 오디오는 USAGE_ASSISTANT로 선언할 것 (안 그러면 음악 앱이 깨어난다)
+
+RayNeo에는 BLE 미디어 브리지(`BleMusicEventAdapter`, `MusicStateMachine`, `MusicEventRepositoryImpl`)가
+있어서 **미디어 재생을 감지하면 폰의 음악 앱을 띄운다.**
+
+`AudioTrack`을 `USAGE_MEDIA`로 선언하고 `onCreate`에서 `play()`까지 호출하면,
+이 브리지 입장에서는 "음악 플레이어가 재생을 시작함"과 구별되지 않는다 →
+**앱을 켤 때마다 유튜브 뮤직이 같이 뜬다**(2026-07-28 실사용 리포트).
+
+```kotlin
+AudioAttributes.Builder()
+    .setUsage(AudioAttributes.USAGE_ASSISTANT)   // ❌ USAGE_MEDIA
+    .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
+    .build()
+```
+그리고 **`play()`는 첫 오디오 청크가 올 때까지 미룬다.** 트랙 생성만으로는 무해하지만
+PLAYING 상태 진입 자체가 신호가 된다.
+
+확인법:
+```bash
+adb logcat -c && adb shell am start -n <pkg>/.MainActivity && sleep 15
+adb logcat -d | grep -icE "BleMusicEventAdapter|MusicStateMachine"   # 0이어야 정상
+```
+
+> LEGACY ELLA는 `USAGE_MEDIA`를 쓰지만 `onCreate`에서 `play()`를 부르지 않아 증상이 없었다.
+> 튜터 음성은 의미상 미디어가 아니므로 `USAGE_ASSISTANT`가 맞다.
+
 ## 5. 마이크는 착용 감지형이다
 
 안경을 **쓰지 않으면 마이크가 0.00ms 오디오**를 반환한다. adb로는 음성 턴을 흉내낼 수 없다.
