@@ -160,6 +160,33 @@ adb logcat -d -s lumella:V | grep -iE "lifecycle|cameraState|capture"
 ```
 `lifecycle=RESUMED`와 `cameraState=OPEN`이 보이면 정상 경로다.
 
+## 4-1. Mercury SDK가 요구하는 런타임 의존성 (누락 시 슬라이드에서 크래시)
+
+`BaseMirrorActivity`를 상속하면 SDK의 터치 파이프라인(`BaseEventActivity.mappingAction`)이
+**`androidx.lifecycle.LifecycleOwnerKt`(lifecycleScope)를 런타임에 해석**한다. APK에 없으면
+**첫 슬라이드 제스처에서** 즉사한다:
+
+```
+NoClassDefFoundError: Landroidx/lifecycle/LifecycleOwnerKt;
+  at BaseEventActivity.mappingAction
+  at BaseEventActivity.onSlideContinuous
+  at TouchDispatcherX3.onMotionEvent
+```
+
+```kotlin
+implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
+implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2")
+```
+
+**탭은 이 경로를 타지 않는다.** 그래서 adb 탭 테스트로는 절대 안 잡히고, 실제로 착용한
+손가락이 미세하게 미끄러질 때만 터진다(2026-07-28 필드 리포트로 발견). LEGACY ELLA는
+처음부터 이 둘을 갖고 있어서 무사했다.
+
+확인법:
+```bash
+unzip -p app-debug.apk classes.dex | strings | grep LifecycleOwnerKt
+```
+
 ## 5. 마이크는 착용 감지형이다
 
 안경을 **쓰지 않으면 마이크가 0.00ms 오디오**를 반환한다. adb로는 음성 턴을 흉내낼 수 없다.
