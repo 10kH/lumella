@@ -214,6 +214,8 @@ RayNeo 하드웨어에서 실제로 겪은 함정 모음 — 네이티브 앱 �
 
 ## 프로젝트 문서 지도
 
+- [`requirements-native-friend-agent.md`](requirements-native-friend-agent.md) — 황금하 박사 요구사항 원문(2026-07-28)
+- [`requirements-feasibility.md`](requirements-feasibility.md) — 위 요구사항의 실현가능성 검증(근거·판정·권고순서)
 - [`operations.md`](operations.md) — 재부팅 자동기동·백업·비밀 파일·알려진 취약점
 - [`STATUS.md`](STATUS.md) — 두 레포(luma/glasses) 현황과 과제 계층
 - [`lumella-overview.md`](lumella-overview.md) — 2-레포 구조와 결합 규칙(HTTP `/v1` 계약 + COMPAT 핀)
