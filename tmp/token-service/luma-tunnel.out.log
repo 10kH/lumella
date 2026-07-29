@@ -8,3 +8,13 @@ glasses app resolves this automatically via GET /v1/config at boot.
 ===================================================================
 
 tunnel running in foreground (pid=51408) — Ctrl-C to stop.
+waiting for cloudflared quick tunnel URL (pid=26676, log=/Users/woody/workspace/TUTOR/lumella/glasses/tmp/luma-tunnel/cloudflared.log)...
+tunnel URL: https://conventions-acres-copper-hayes.trycloudflare.com
+publishing LUMA_BASE_URL=https://conventions-acres-copper-hayes.trycloudflare.com to Vercel project lumella-token (production)...
+https://lumella-token-6uu67uahe-woojin-lees-projects-5091053c.vercel.app
+===================================================================
+luma-api reachable outside the LAN via: https://conventions-acres-copper-hayes.trycloudflare.com
+glasses app resolves this automatically via GET /v1/config at boot.
+===================================================================
+
+tunnel running in foreground (pid=26676) — Ctrl-C to stop.

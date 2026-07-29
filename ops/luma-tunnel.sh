@@ -33,7 +33,12 @@ command -v vercel >/dev/null 2>&1 || { echo "ERROR: vercel CLI not found on PATH
 mkdir -p "$LOG_DIR"
 : > "$CF_LOG"
 
-cloudflared tunnel --url "$LOCAL_URL" >>"$CF_LOG" 2>&1 &
+# Hold an idle-sleep assertion for as long as the tunnel lives. This Mac is configured to
+# sleep after 1 minute idle (`pmset -g` -> `sleep 1`), and a sleeping Mac takes luma offline,
+# so the glasses lose the coach the moment nobody is at the desk — exactly when the tunnel
+# matters most. `caffeinate -i` blocks idle sleep only; the lid/power button still work, and
+# the assertion is released automatically when cloudflared exits.
+caffeinate -i cloudflared tunnel --url "$LOCAL_URL" >>"$CF_LOG" 2>&1 &
 CF_PID=$!
 
 cleanup() {
