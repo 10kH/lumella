@@ -187,15 +187,19 @@ implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2")
 unzip -p app-debug.apk classes.dex | strings | grep LifecycleOwnerKt
 ```
 
-## 4-2. 오디오는 USAGE_ASSISTANT로 선언할 것 (안 그러면 음악 앱이 깨어난다)
+## 4-2. 오디오는 USAGE_ASSISTANT로 선언할 것 (음악 앱 소환 방지)
 
 RayNeo에는 BLE 미디어 브리지(`BleMusicEventAdapter`, `MusicStateMachine`, `MusicEventRepositoryImpl`)가
-있어서 **미디어 재생을 감지하면 폰의 음악 앱을 띄운다.**
+있고, 페어링된 폰의 AVRCP 재생 상태를 **3초마다 폴링**한다.
 
-`AudioTrack`을 `USAGE_MEDIA`로 선언하고 `onCreate`에서 `play()`까지 호출하면,
-이 브리지 입장에서는 "음악 플레이어가 재생을 시작함"과 구별되지 않는다 →
-**앱을 켤 때마다 유튜브 뮤직이 같이 뜬다**(2026-07-28 실사용 리포트).
+```
+BleMusicEventAdapter$startAutoRefreshLoop: 音乐定时刷新---
+handlePlaybackStateChanged[true]: PlaybackState {state=2, ...}
+  from artist[true]: album:, title:<폰에서 마지막에 틀던 곡>
+  albumArtUri: content://com.android.bluetooth.avrcpcontroller.AvrcpCoverArtProvider?device=<폰 MAC>
+```
 
+### 규칙
 ```kotlin
 AudioAttributes.Builder()
     .setUsage(AudioAttributes.USAGE_ASSISTANT)   // ❌ USAGE_MEDIA
@@ -203,16 +207,23 @@ AudioAttributes.Builder()
     .build()
 ```
 그리고 **`play()`는 첫 오디오 청크가 올 때까지 미룬다.** 트랙 생성만으로는 무해하지만
-PLAYING 상태 진입 자체가 신호가 된다.
+PLAYING 진입 자체가 신호가 된다.
 
-확인법:
+`USAGE_MEDIA`로 선언한 스트림이 재생을 시작하면 이 브리지가 "플레이어가 재생 시작"으로 해석해
+폰에 AVRCP play를 중계하고, 폰에서 음악 앱이 열린다(2026-07-28 실사용 리포트).
+튜터 음성은 의미상 미디어가 아니므로 `USAGE_ASSISTANT`가 맞다.
+
+### ⚠️ 로그 해석 주의 — 저자의 오판 기록
+초판에 "수정 후 미디어 이벤트 0건"이라고 적었으나 **그 측정은 무의미했다.**
+위 폴링 루프는 **우리 앱과 무관하게 자체 타이머로 돌며**, 폰 블루투스가 연결돼 있지 않으면
+로그가 아예 안 나온다. 즉 "0건"은 고쳐서가 아니라 **폰이 안 붙어 있어서** 나온 숫자였다.
+
+폰이 붙은 상태에서 다시 재면 3초마다 이벤트가 쌓인다(60초에 약 56건). 그러나 이는 정상이며,
+판단 기준은 이벤트 수가 아니라 **`ActivityTaskManager: START`에 음악 앱이 뜨는가**다.
+
 ```bash
-adb logcat -c && adb shell am start -n <pkg>/.MainActivity && sleep 15
-adb logcat -d | grep -icE "BleMusicEventAdapter|MusicStateMachine"   # 0이어야 정상
+adb logcat -d | grep -iE "ActivityTaskManager.*START"   # 우리 앱만 있어야 정상
 ```
-
-> LEGACY ELLA는 `USAGE_MEDIA`를 쓰지만 `onCreate`에서 `play()`를 부르지 않아 증상이 없었다.
-> 튜터 음성은 의미상 미디어가 아니므로 `USAGE_ASSISTANT`가 맞다.
 
 ## 5. 마이크는 착용 감지형이다
 
