@@ -16,6 +16,8 @@
 #   ops/launchd/manage.sh status      # launchctl state + /healthz
 #   ops/launchd/manage.sh logs        # tail the service logs
 #
+#   ops/launchd/manage.sh backup-install    # nightly backup of luma's data
+#   ops/launchd/manage.sh backup-now        # take one right now
 #   ops/launchd/manage.sh luma-install      # run luma-api itself (the coach engine)
 #   ops/launchd/manage.sh luma-status
 #   ops/launchd/manage.sh tunnel-install    # keep luma-api reachable off-LAN
@@ -95,6 +97,29 @@ case "${1:-}" in
     ;;
   logs)
     tail -n 40 "$LOG_DIR"/token-service.*.log 2>/dev/null || echo "no logs at $LOG_DIR"
+    ;;
+  backup-install)
+    BLABEL="com.woolab.lumella.luma-backup"
+    BTEMPLATE="$SCRIPT_DIR/$BLABEL.plist.template"
+    BPLIST="$HOME/Library/LaunchAgents/$BLABEL.plist"
+    command -v sqlite3 >/dev/null || { echo "ERROR: sqlite3 not found" >&2; exit 1; }
+    mkdir -p "$LOG_DIR" "$(dirname "$BPLIST")"
+    sed -e "s#__REPO_ROOT__#${REPO_ROOT}#g" \
+        -e "s#__PATH__#/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin#g" \
+        -e "s#__HOME__#${HOME}#g" \
+        -e "s#__LOG_DIR__#${LOG_DIR}#g" \
+        "$BTEMPLATE" > "$BPLIST"
+    launchctl bootout "$GUI/$BLABEL" 2>/dev/null || true
+    launchctl bootstrap "$GUI" "$BPLIST"
+    echo "installed $BLABEL — runs daily at 04:30; run now with: $0 backup-now"
+    ;;
+  backup-now)
+    bash "$REPO_ROOT/ops/backup-luma.sh"
+    ;;
+  backup-uninstall)
+    launchctl bootout "$GUI/com.woolab.lumella.luma-backup" 2>/dev/null || true
+    rm -f "$HOME/Library/LaunchAgents/com.woolab.lumella.luma-backup.plist"
+    echo "removed the backup agent"
     ;;
   luma-install)
     # luma-api itself — the tunnel is useless if nothing is listening behind it.

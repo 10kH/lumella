@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Nightly backup of luma's SQLite database and uploaded media.
+
+  Everything else in this project can be rebuilt from git; this data cannot. It had no backup
+  at all until 2026-07-29.
+
+  StartCalendarInterval (not StartInterval) so it runs at a predictable hour, and launchd
+  fires it soon after wake if the machine was asleep at the scheduled time.
+
+  TEMPLATE: ops/launchd/manage.sh backup-install renders __PLACEHOLDERS__.
+-->
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.woolab.lumella.luma-backup</string>
+
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/bash</string>
+    <string>__REPO_ROOT__/ops/backup-luma.sh</string>
+  </array>
+
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>PATH</key>
+    <string>__PATH__</string>
+    <key>HOME</key>
+    <string>__HOME__</string>
+  </dict>
+
+  <key>StartCalendarInterval</key>
+  <dict>
+    <key>Hour</key>
+    <integer>4</integer>
+    <key>Minute</key>
+    <integer>30</integer>
+  </dict>
+
+  <!-- One-shot job: it must not be restarted after it finishes. -->
+  <key>KeepAlive</key>
+  <false/>
+  <key>RunAtLoad</key>
+  <false/>
+
+  <key>ProcessType</key>
+  <string>Background</string>
+
+  <key>StandardOutPath</key>
+  <string>__LOG_DIR__/luma-backup.out.log</string>
+  <key>StandardErrorPath</key>
+  <string>__LOG_DIR__/luma-backup.err.log</string>
+</dict>
+</plist>
