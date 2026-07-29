@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Mac-resident LaunchAgent for luma-api, the engine behind the glasses' coach.
+
+  Why this exists: the tunnel and the token-service already survive a reboot, but luma-api
+  itself was only ever a hand-started `nohup uvicorn` process. After a restart the tunnel
+  would come up and forward to 127.0.0.1:8010 with nothing listening — the glasses would
+  silently lose the coach and fall back to voice-only, with no error pointing at the cause.
+
+  This agent lives in the glasses repo on purpose: it starts luma-api WITHOUT modifying the
+  luma repository, whose code and layout stay untouched.
+
+  TEMPLATE: ops/launchd/manage.sh luma-install renders __PLACEHOLDERS__. No secrets here —
+  luma reads its own luma-api/.env at startup.
+-->
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.woolab.lumella.luma-api</string>
+
+  <key>ProgramArguments</key>
+  <array>
+    <string>__VENV_PYTHON__</string>
+    <string>-m</string>
+    <string>uvicorn</string>
+    <string>luma_api.main:app</string>
+    <!-- 0.0.0.0 so both the LAN (at home) and the tunnel (127.0.0.1) can reach it. -->
+    <string>--host</string>
+    <string>0.0.0.0</string>
+    <string>--port</string>
+    <string>8010</string>
+  </array>
+
+  <!-- WorkingDirectory = luma-api so relative data/, uploads/ and .env resolve as they do
+       when started by hand. -->
+  <key>WorkingDirectory</key>
+  <string>__LUMA_API_DIR__</string>
+
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>PATH</key>
+    <string>__PATH__</string>
+    <key>HOME</key>
+    <string>__HOME__</string>
+  </dict>
+
+  <key>RunAtLoad</key>
+  <true/>
+
+  <key>KeepAlive</key>
+  <true/>
+
+  <key>ThrottleInterval</key>
+  <integer>15</integer>
+
+  <key>ProcessType</key>
+  <string>Background</string>
+
+  <key>StandardOutPath</key>
+  <string>__LOG_DIR__/luma-api.out.log</string>
+  <key>StandardErrorPath</key>
+  <string>__LOG_DIR__/luma-api.err.log</string>
+</dict>
+</plist>

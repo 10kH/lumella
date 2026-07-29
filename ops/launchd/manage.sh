@@ -16,6 +16,8 @@
 #   ops/launchd/manage.sh status      # launchctl state + /healthz
 #   ops/launchd/manage.sh logs        # tail the service logs
 #
+#   ops/launchd/manage.sh luma-install      # run luma-api itself (the coach engine)
+#   ops/launchd/manage.sh luma-status
 #   ops/launchd/manage.sh tunnel-install    # keep luma-api reachable off-LAN
 #   ops/launchd/manage.sh tunnel-status
 #   ops/launchd/manage.sh tunnel-uninstall
@@ -93,6 +95,41 @@ case "${1:-}" in
     ;;
   logs)
     tail -n 40 "$LOG_DIR"/token-service.*.log 2>/dev/null || echo "no logs at $LOG_DIR"
+    ;;
+  luma-install)
+    # luma-api itself — the tunnel is useless if nothing is listening behind it.
+    LLABEL="com.woolab.lumella.luma-api"
+    LTEMPLATE="$SCRIPT_DIR/$LLABEL.plist.template"
+    LPLIST="$HOME/Library/LaunchAgents/$LLABEL.plist"
+    LUMA_API_DIR="$(cd "$REPO_ROOT/../luma/luma-api" 2>/dev/null && pwd)"
+    [ -n "$LUMA_API_DIR" ] || { echo "ERROR: luma-api directory not found next to this repo" >&2; exit 1; }
+    VENV_PY="$LUMA_API_DIR/.venv/bin/python"
+    [ -x "$VENV_PY" ] || { echo "ERROR: $VENV_PY missing — create the venv first" >&2; exit 1; }
+    mkdir -p "$LOG_DIR" "$(dirname "$LPLIST")"
+    sed -e "s#__VENV_PYTHON__#${VENV_PY}#g" \
+        -e "s#__LUMA_API_DIR__#${LUMA_API_DIR}#g" \
+        -e "s#__PATH__#$(dirname "$VENV_PY"):/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin#g" \
+        -e "s#__HOME__#${HOME}#g" \
+        -e "s#__LOG_DIR__#${LOG_DIR}#g" \
+        "$LTEMPLATE" > "$LPLIST"
+    # Free the port: a hand-started uvicorn would keep launchd's copy crash-looping.
+    pids="$(lsof -ti tcp:8010 -sTCP:LISTEN 2>/dev/null || true)"
+    [ -n "$pids" ] && { echo "stopping existing luma-api on :8010 -> $pids"; kill $pids 2>/dev/null || true; sleep 2; }
+    launchctl bootout "$GUI/$LLABEL" 2>/dev/null || true
+    launchctl bootstrap "$GUI" "$LPLIST"
+    sleep 4
+    curl -fsS -m 5 http://127.0.0.1:8010/v1/health >/dev/null 2>&1 \
+      && echo "OK: luma-api healthy on :8010" \
+      || echo "WARN: not healthy yet — check $LOG_DIR/luma-api.err.log" >&2
+    ;;
+  luma-uninstall)
+    launchctl bootout "$GUI/com.woolab.lumella.luma-api" 2>/dev/null || true
+    rm -f "$HOME/Library/LaunchAgents/com.woolab.lumella.luma-api.plist"
+    echo "removed the luma-api agent"
+    ;;
+  luma-status)
+    launchctl print "$GUI/com.woolab.lumella.luma-api" 2>/dev/null | grep -E "state|pid" || echo "not loaded"
+    curl -fsS -m 5 http://127.0.0.1:8010/v1/health 2>/dev/null || echo "healthz: unreachable"
     ;;
   tunnel-install)
     # Public tunnel for luma-api so the glasses keep the coach outside the LAN.

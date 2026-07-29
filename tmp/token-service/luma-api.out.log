@@ -1,0 +1,11 @@
+INFO:     127.0.0.1:57094 - "GET /v1/health HTTP/1.1" 200 OK
+INFO:     114.207.22.16:0 - "POST /v1/devices/dev_7f4c84c170d4a1aa/heartbeat HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57107 - "GET /v1/health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57110 - "GET /v1/health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57118 - "GET /v1/health HTTP/1.1" 200 OK
+INFO:     114.207.22.16:0 - "POST /v1/devices/dev_7f4c84c170d4a1aa/heartbeat HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57130 - "GET /v1/health HTTP/1.1" 200 OK
+INFO:     114.207.22.16:0 - "POST /v1/devices/dev_7f4c84c170d4a1aa/heartbeat HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57142 - "GET /v1/health HTTP/1.1" 200 OK
+INFO:     114.207.22.16:0 - "GET /v1/health HTTP/1.1" 200 OK
+INFO:     114.207.22.16:0 - "GET /v1/health HTTP/1.1" 200 OK
