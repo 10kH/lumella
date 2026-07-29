@@ -8,3 +8,7 @@ build/
 token-service/.env.local
 !.env.example
 .vercel
+
+# launchd service logs (luma-api / tunnel / token-service). Runtime output, not source:
+# tracking it made every service restart show up as a working-tree change.
+tmp/
