@@ -63,6 +63,7 @@ class OpenAiRealtimeTransport(
         fun onAudioDelta(base64Pcm16: String) {}
         fun onAudioDone() {}
         fun onInputTranscript(text: String) {}
+        fun onTranscriptDelta(text: String) {}
         fun onError(message: String) {}
 
         companion object {
@@ -394,6 +395,9 @@ class OpenAiRealtimeTransport(
             }
             RealtimeServerEventKind.AUDIO_DELTA -> {
                 MiniJson.string(obj, "delta")?.let(listener::onAudioDelta)
+            }
+            RealtimeServerEventKind.AUDIO_TRANSCRIPT_DELTA -> {
+                MiniJson.string(obj, "delta")?.let(listener::onTranscriptDelta)
             }
             RealtimeServerEventKind.AUDIO_DONE -> listener.onAudioDone()
             RealtimeServerEventKind.INPUT_TRANSCRIPT_COMPLETED -> {

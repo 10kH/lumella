@@ -40,9 +40,15 @@ class OpenAiRealtimeTransportTest {
         val errors = mutableListOf<String>()
         var lastAudioDelta: String? = null
         var lastTranscript: String? = null
+        var lastTranscriptDelta: String? = null
+        val transcriptDeltas = mutableListOf<String>()
         override fun onStatus(status: RealtimeConnectionStatus) { statuses.add(status) }
         override fun onAudioDelta(base64Pcm16: String) { lastAudioDelta = base64Pcm16 }
         override fun onInputTranscript(text: String) { lastTranscript = text }
+        override fun onTranscriptDelta(text: String) {
+            lastTranscriptDelta = text
+            transcriptDeltas.add(text)
+        }
         override fun onError(message: String) { errors.add(message) }
     }
 
@@ -226,6 +232,46 @@ class OpenAiRealtimeTransportTest {
         factory.lastListener?.onMessage("""{"type":"response.output_audio.delta","delta":"WFla"}""")
 
         assertEquals("WFla", listener.lastAudioDelta)
+    }
+
+    @Test
+    fun audioTranscriptDeltaEventForwardsTextToListener() {
+        val factory = FakeFactory()
+        val listener = RecordingListener()
+        val transport = OpenAiRealtimeTransport(successProvider(), factory, listener = listener)
+        transport.connect()
+        factory.lastListener?.onOpen()
+
+        factory.lastListener?.onMessage("""{"type":"response.audio_transcript.delta","delta":"hel"}""")
+
+        assertEquals("hel", listener.lastTranscriptDelta)
+    }
+
+    @Test
+    fun gaAudioTranscriptDeltaEventAliasAlsoForwardsToListener() {
+        val factory = FakeFactory()
+        val listener = RecordingListener()
+        val transport = OpenAiRealtimeTransport(successProvider(), factory, listener = listener)
+        transport.connect()
+        factory.lastListener?.onOpen()
+
+        factory.lastListener?.onMessage("""{"type":"response.output_audio_transcript.delta","delta":"lo"}""")
+
+        assertEquals("lo", listener.lastTranscriptDelta)
+    }
+
+    @Test
+    fun multipleAudioTranscriptDeltasAccumulateInOrder() {
+        val factory = FakeFactory()
+        val listener = RecordingListener()
+        val transport = OpenAiRealtimeTransport(successProvider(), factory, listener = listener)
+        transport.connect()
+        factory.lastListener?.onOpen()
+
+        factory.lastListener?.onMessage("""{"type":"response.audio_transcript.delta","delta":"안"}""")
+        factory.lastListener?.onMessage("""{"type":"response.audio_transcript.delta","delta":"녕"}""")
+
+        assertEquals(listOf("안", "녕"), listener.transcriptDeltas)
     }
 
     @Test

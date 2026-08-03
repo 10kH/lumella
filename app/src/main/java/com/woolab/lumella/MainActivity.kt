@@ -98,6 +98,8 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
     private val turnEvidenceAssembler = TurnEvidenceAssembler()
     @Volatile private var currentTurnUserTranscript: String = ""
     @Volatile private var voiceTransportUnavailable = false
+    /** Accumulates AUDIO_TRANSCRIPT_DELTA chunks for the current tutor turn (UI-thread only). */
+    private val subtitleAccumulator = StringBuilder()
 
     /**
      * Set when a right-tap arrives while the transport is idle-closed (see
@@ -169,6 +171,7 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
                         audioCapture.start()
                         runOnUiThread {
                             updateStatus(if (turnEvidenceAssembler.peekPendingImageId() != null) "Listening... (+ Photo)" else "Listening...", "#FF5722")
+                            clearSubtitle()
                         }
                     }
                 }
@@ -188,7 +191,15 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
 
                 override fun onInputTranscript(text: String) {
                     currentTurnUserTranscript = text
+                    runOnUiThread { updateUserEcho(text) }
                     submitCurrentTurnEvidence()
+                }
+
+                override fun onTranscriptDelta(text: String) {
+                    runOnUiThread {
+                        subtitleAccumulator.append(text)
+                        updateSubtitle(subtitleAccumulator.toString())
+                    }
                 }
 
                 override fun onError(message: String) {
@@ -371,6 +382,7 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
             audioCapture.start()
             Log.i(TAG, "turn start: recording=${audioCapture.isRecording}")
             updateStatus(if (turnEvidenceAssembler.peekPendingImageId() != null) "Listening... (+ Photo)" else "Listening...", "#FF5722")
+            clearSubtitle()
         }
     }
 
@@ -456,6 +468,28 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
         mBindingPair.left.tvStatus.setTextColor(color)
         mBindingPair.right.tvStatus.text = text
         mBindingPair.right.tvStatus.setTextColor(color)
+    }
+
+    /** Dual-eye tutor-subtitle update (tvSubtitle): live AUDIO_TRANSCRIPT_DELTA accumulation for the current turn. */
+    private fun updateSubtitle(text: String) {
+        mBindingPair.left.tvSubtitle.text = text
+        mBindingPair.right.tvSubtitle.text = text
+    }
+
+    /** Dual-eye learner-echo update (tvUserEcho): the learner's own completed transcript for the current turn. */
+    private fun updateUserEcho(text: String) {
+        mBindingPair.left.tvUserEcho.text = text
+        mBindingPair.right.tvUserEcho.text = text
+    }
+
+    /**
+     * Clears the tutor subtitle accumulator and view. Call when a new turn starts (right tap
+     * begins listening) so the previous turn's subtitle doesn't linger and read as part of the
+     * new one — must run on the UI thread.
+     */
+    private fun clearSubtitle() {
+        subtitleAccumulator.setLength(0)
+        updateSubtitle("")
     }
 
     private fun ensurePermissions() {
