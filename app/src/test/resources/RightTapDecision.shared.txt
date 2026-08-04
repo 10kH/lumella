@@ -1,0 +1,80 @@
+package PKG
+
+/**
+ * What a tap on the right touchpad means.
+ *
+ * Pure so the rules are testable on a plain JVM: the real gesture arrives as a MotionEvent on
+ * a device with no way to inject one, and this is the path a wearer reported the app closing
+ * on them from. It had no coverage at all.
+ */
+sealed interface RightTap {
+    /**
+     * Not a tap: the pad bouncing, or a press/swipe held too long. Ignored entirely — the
+     * time is not even recorded, because doing so would make a bounce the first half of a
+     * phantom double tap.
+     */
+    data object Ignore : RightTap
+
+    /** Publish the current turn: "I have finished speaking." */
+    data object EndTurn : RightTap
+
+    /** A double tap, but exit was not armed. Ask before doing something irreversible. */
+    data object ArmExit : RightTap
+
+    /** A tap inside the confirmation window. Quit. */
+    data object ConfirmExit : RightTap
+}
+
+object RightTapRules {
+    /**
+     * Contact shorter than this is the pad bouncing, not a person.
+     *
+     * The discriminator is CONTACT DURATION, not the gap between taps. The bounce that used to
+     * kill the app mid-turn measured 6ms of contact while every deliberate tap in the same
+     * session measured 87-222ms. Gating on the gap instead made the deliberate double tap
+     * unreachable, because the first tap always started a turn.
+     */
+    const val MIN_CONTACT_MS = 40L
+
+    /** Longer contact is a press or a swipe, not a tap. */
+    const val MAX_CONTACT_MS = 500L
+
+    /** Two taps closer together than this are one gesture. */
+    const val DOUBLE_TAP_INTERVAL_MS = 400L
+
+    /** How long an armed exit waits for its confirming tap. */
+    const val EXIT_CONFIRM_WINDOW_MS = 2_500L
+
+    /**
+     * @param contactMs how long the finger was down
+     * @param sinceLastTapMs gap since the previous accepted right tap
+     * @param nowMs current time
+     * @param exitArmedUntilMs deadline set by a previous [RightTap.ArmExit], 0 when unarmed
+     */
+    fun decide(
+        contactMs: Long,
+        sinceLastTapMs: Long,
+        nowMs: Long,
+        exitArmedUntilMs: Long,
+    ): RightTap = when {
+        contactMs < MIN_CONTACT_MS || contactMs >= MAX_CONTACT_MS -> RightTap.Ignore
+        // Armed is checked BEFORE the double-tap gap. Below it the window could never bind:
+        // reaching it required a gap under 400ms, and the deadline was set from that same
+        // tap, so 2.5s was unreachable by construction — the screen promised one more tap
+        // while the code only honoured it for 400ms. Someone reading the prompt and tapping
+        // at a normal 500-800ms reaction got a turn instead, prompt silently gone.
+        // Checked before the gap, so a wearer reading the prompt and reacting at a normal
+        // human pace is honoured rather than silently given a turn. Bounded here rather than
+        // trusting the caller to clear a deadline.
+        //
+        // The danger of checking it first is that it swallows ordinary taps too, and the
+        // ordinary tap in hands-free is "I have finished speaking" — so an accidental double
+        // tap could be followed by a perfectly normal turn-ending tap and quit the app
+        // mid-conversation. The caller therefore disarms the moment the wearer speaks: someone
+        // who is talking to the tutor is not trying to leave. That is an intent signal, and it
+        // is more reliable than any amount of time.
+        nowMs < exitArmedUntilMs && sinceLastTapMs <= EXIT_CONFIRM_WINDOW_MS -> RightTap.ConfirmExit
+        sinceLastTapMs >= DOUBLE_TAP_INTERVAL_MS -> RightTap.EndTurn
+        else -> RightTap.ArmExit
+    }
+}
