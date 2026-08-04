@@ -646,6 +646,14 @@ class OpenAiRealtimeTransport(
      * the update the app sent was rejected or silently trimmed — the persona and the
      * capture_photo tool are both load-bearing, so either gap leaves the session on server
      * defaults with no visible symptom (review finding 5).
+     *
+     * The echo shape is the risky assumption here: a false positive is not benign, because
+     * DEGRADED is emitted after READY and so wins on screen, nothing un-degrades it until the
+     * next reconnect up to an hour later, and "Voice-only" is also what a dead brain looks
+     * like. So it was checked rather than assumed — three fresh sessions against the live
+     * server on 2026-08-05, zero demotions, i.e. session.updated really does echo both
+     * instructions and tools. Re-check this after any Realtime API version bump; the GA
+     * rename absorbed in RealtimeProtocol is precedent for the shape moving.
      */
     internal fun missingConfirmedSessionFields(session: Map<String, Any?>?): List<String> {
         if (session == null) return listOf("session")
