@@ -516,12 +516,17 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
         // A tool call leaves the model waiting: its response already ended when it emitted
         // the call, so nothing resumes until the app answers and asks for a continuation.
         // Every exit from here has to do that, including the failures.
+        //
+        // Sent straight from the calling thread, NOT through slowPathExecutor. That executor
+        // is single-threaded and the luma image analysis is queued on it right behind this
+        // capture, with a 45s ceiling — so queuing the answer there put the model's tool
+        // result in line behind the slow path and the wearer waited for it. Measured before
+        // this change: 7.8s from photo sent to first audio. The websocket send is
+        // non-blocking and thread-safe, so it needs no executor of its own.
         fun answerToolCall(result: String) {
             val callId = toolCallId ?: return
-            slowPathExecutor.execute {
-                transport.sendFunctionCallOutput(callId, result)
-                transport.requestResponseContinuation()
-            }
+            transport.sendFunctionCallOutput(callId, result)
+            transport.requestResponseContinuation()
         }
         camera.captureImage(
             onCaptured = { bytes ->
@@ -545,7 +550,18 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
                     try {
                         val imageContext = brain.analyzeImage(bytes, "image/jpeg")
                         turnEvidenceAssembler.setPendingImageId(imageContext.imageId)
-                        runOnUiThread { updateStatus("Photo ready! Tap to speak", "#9C27B0") }
+                        runOnUiThread {
+                            // What to do next depends on who asked for the photo. A voice
+                            // request means the tutor is already answering; telling the
+                            // wearer to tap sends them to a tap that now does nothing, and
+                            // a second one closes the app. A tap-captured photo just needs
+                            // them to talk — hands-free needs no second tap either.
+                            if (toolCallId != null) {
+                                updateStatus("사진 보는 중", "#9C27B0")
+                            } else {
+                                updateStatus("사진 준비됨 · 그냥 말하세요", "#9C27B0")
+                            }
+                        }
                     } catch (e: Exception) {
                         Log.w(TAG, "analyzeImage failed: ${e.message}")
                         runOnUiThread { updateStatus("Capture failed", "#FF0000") }
