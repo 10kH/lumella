@@ -949,11 +949,23 @@ class OpenAiRealtimeTransportTest {
 
     @Test
     fun toolCallAnswerOrderingAndBareContinuation() {
+        // Answering a tool call for the response that JUST emitted it must NOT cancel that
+        // response — response.done has not arrived yet, so it is still "active" only because
+        // the app answered inline, on the reader thread, before response.done showed up
+        // (review finding, HIGH: cancelling here used to cancel the very response being
+        // answered, and the model's next response.create was rejected with
+        // conversation_already_has_active_response).
         val factory = FakeFactory()
         val transport = OpenAiRealtimeTransport(successProvider(), factory)
         transport.connect()
         factory.lastListener?.onOpen()
         factory.socket.sent.clear()
+
+        factory.lastListener?.onMessage("""{"type":"response.created","response":{"id":"resp_1"}}""")
+        factory.lastListener?.onMessage(
+            """{"type":"response.output_item.done","response_id":"resp_1",""" +
+                """"item":{"type":"function_call","name":"capture_photo","call_id":"call_abc"}}""",
+        )
 
         transport.sendFunctionCallOutput("call_abc", "ok")
         transport.requestResponseContinuation()
@@ -967,8 +979,44 @@ class OpenAiRealtimeTransportTest {
         val second = MiniJson.asObject(MiniJson.parse(factory.socket.sent[1]))
         assertEquals("response.create", MiniJson.string(second, "type"))
         assertTrue(
-            "continuation must be bare — the original response already ended",
+            "continuation must be bare — the response it is continuing has no fresh steering",
             second != null && !second.containsKey("response"),
+        )
+        assertTrue(
+            "answering the response that emitted the call must not cancel it",
+            factory.socket.sent.none { it.contains("response.cancel") },
+        )
+    }
+
+    @Test
+    fun toolCallContinuationCancelsADifferentResponseThanTheOneThatEmittedTheCall() {
+        // Server VAD opened a genuinely NEW response while the tool-call answer was still
+        // pending (the 1-5s camera window). That new response IS a different one from the one
+        // the continuation is answering, so it must be cancelled first — unlike the "same
+        // response" case above.
+        val factory = FakeFactory()
+        val transport = OpenAiRealtimeTransport(successProvider(), factory)
+        transport.connect()
+        factory.lastListener?.onOpen()
+
+        factory.lastListener?.onMessage("""{"type":"response.created","response":{"id":"resp_1"}}""")
+        factory.lastListener?.onMessage(
+            """{"type":"response.output_item.done","response_id":"resp_1",""" +
+                """"item":{"type":"function_call","name":"capture_photo","call_id":"call_abc"}}""",
+        )
+        // A second, unrelated response starts before the photo answer is ready.
+        factory.lastListener?.onMessage("""{"type":"response.created","response":{"id":"resp_2"}}""")
+        factory.socket.sent.clear()
+
+        val sent = transport.requestResponseContinuation()
+
+        assertTrue(sent)
+        assertEquals(listOf("""{"type":"response.cancel"}"""), factory.socket.sent.dropLast(1))
+        val last = MiniJson.asObject(MiniJson.parse(factory.socket.sent.last()))
+        assertEquals("response.create", MiniJson.string(last, "type"))
+        assertTrue(
+            "continuation must stay a bare response.create even when it cancelled first",
+            last != null && !last.containsKey("response"),
         )
     }
 
@@ -1059,8 +1107,10 @@ class OpenAiRealtimeTransportTest {
         val transport = OpenAiRealtimeTransport(successProvider(), factory)
         transport.connect()
         factory.lastListener?.onOpen()
-        // Server VAD opened a new turn while the photo answer was still pending.
-        factory.lastListener?.onMessage("""{"type":"response.created"}""")
+        // Server VAD opened a new turn while the photo answer was still pending — no tool
+        // call has been dispatched on this transport at all, so it differs by identity from
+        // whatever (nonexistent) response the continuation would be answering.
+        factory.lastListener?.onMessage("""{"type":"response.created","response":{"id":"resp_vad"}}""")
         factory.socket.sent.clear()
 
         val sent = transport.requestResponseContinuation()
@@ -1097,6 +1147,58 @@ class OpenAiRealtimeTransportTest {
 
         assertFalse(sent)
         assertTrue(listener.errors.any { it.contains("requestResponseContinuation failed") })
+    }
+
+    @Test
+    fun sendUserTextFailureReportsErrorInsteadOfDiscardingTheBoolean() {
+        val listener = RecordingListener()
+        val transport = OpenAiRealtimeTransport(successProvider(), FakeFactory(), listener = listener)
+
+        // No connect()/onOpen(): the socket is null, so sendRaw fails closed.
+        val sent = transport.sendUserText("hello")
+
+        assertFalse(sent)
+        assertTrue(listener.errors.any { it.contains("sendUserText failed") })
+    }
+
+    @Test
+    fun racingThreadsThroughTheEmitterProduceAtMostOneCancelPerActiveResponse() {
+        // sendInstructions (e.g. a tap, CameraX-thread-adjacent) and requestResponseContinuation
+        // (websocket reader thread answering a tool call) can now both run concurrently. Without
+        // routing cancel-then-create through one lock, both threads can observe the same active
+        // response, both cancel it, and the server accepts only one of the two response.creates
+        // that follow — dropping the other (review finding, HIGH). A CountDownLatch forces both
+        // threads to arrive at the emitter at the same instant instead of hoping a race shows up.
+        val factory = FakeFactory()
+        val transport = OpenAiRealtimeTransport(successProvider(), factory)
+        transport.connect()
+        factory.lastListener?.onOpen()
+        factory.lastListener?.onMessage("""{"type":"response.created","response":{"id":"resp_1"}}""")
+        factory.socket.sent.clear()
+
+        val ready = java.util.concurrent.CountDownLatch(2)
+        val go = java.util.concurrent.CountDownLatch(1)
+        val threads = listOf(
+            Thread {
+                ready.countDown()
+                go.await()
+                transport.sendInstructions("steer")
+            },
+            Thread {
+                ready.countDown()
+                go.await()
+                transport.requestResponseContinuation()
+            },
+        )
+        threads.forEach { it.isDaemon = true; it.start() }
+        ready.await()
+        go.countDown()
+        threads.forEach { it.join(5_000) }
+
+        val cancels = factory.socket.sent.count { it == """{"type":"response.cancel"}""" }
+        val creates = factory.socket.sent.count { MiniJson.string(MiniJson.asObject(MiniJson.parse(it)), "type") == "response.create" }
+        assertTrue("at most one response.cancel for the one response.created", cancels <= 1)
+        assertEquals("both callers must still each get their response.create", 2, creates)
     }
 
     @Test

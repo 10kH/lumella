@@ -433,7 +433,14 @@ class OpenAiRealtimeTransport(
             // the whole event while the socket stays open.
             """"content":[{"type":"input_image","image_url":${jsonString("data:image/jpeg;base64,$base64Jpeg")}}]}}"""
 
-    /** Appends a base64-encoded PCM16 audio chunk (see [com.woolab.lumella.audio.AudioCapture]) to the input buffer. */
+    /**
+     * Appends a base64-encoded PCM16 audio chunk (see [com.woolab.lumella.audio.AudioCapture])
+     * to the input buffer. Deliberately silent on a failed send unlike [sendUserText] /
+     * [sendFunctionCallOutput] / [sendUserImage]: this fires ~20 times/second while the mic is
+     * open, so routing every dropped chunk through `listener.onError` would flood the UI/logs
+     * with one error per chunk for the whole outage instead of the ONE error the socket-level
+     * `onFailure`/`onClosed` callback already reports for the same underlying disconnect.
+     */
     fun appendAudio(base64Pcm16: String) {
         if (sendRaw(buildAudioAppendJson(base64Pcm16))) {
             appendedChunksSinceCommit++
@@ -482,7 +489,7 @@ class OpenAiRealtimeTransport(
         // response_cancel_not_active, which reaches the wearer as an error on a turn that
         // was perfectly fine — seen on-device 2026-08-05 after a ping timeout dropped the
         // socket mid-reply. The new connection carries nothing in flight.
-        responseActive = false
+        responseActive.set(false)
         if (closedByClient) return
         listener.onStatus(RealtimeConnectionStatus.CLOSED)
         scheduleReconnect()
