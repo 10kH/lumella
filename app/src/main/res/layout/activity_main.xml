@@ -66,7 +66,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="32dp"
-        android:text="우측 탭: 말하기 · 좌측 탭: 사진"
+        android:text="핸즈프리 대화 중 · 우측 탭: 지금 말 끝 · 좌측 탭: 사진"
         android:textColor="#888888"
         android:textSize="18sp"
         app:layout_constraintBottom_toBottomOf="parent"

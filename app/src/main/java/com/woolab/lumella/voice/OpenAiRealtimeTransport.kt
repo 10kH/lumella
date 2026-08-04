@@ -66,6 +66,17 @@ class OpenAiRealtimeTransport(
         fun onTranscriptDelta(text: String) {}
         fun onError(message: String) {}
 
+        /** Server VAD heard the learner start talking. */
+        fun onSpeechStarted() {}
+
+        /**
+         * Server VAD heard the learner stop, which ends the turn. The server has already
+         * committed the audio buffer by this point, so a listener must ask for a response
+         * without committing again — committing twice leaves the server rejecting an empty
+         * buffer, and the wearer sees an error for a turn that was actually fine.
+         */
+        fun onSpeechStopped() {}
+
         companion object {
             val NONE: Listener = object : Listener {}
         }
@@ -82,6 +93,20 @@ class OpenAiRealtimeTransport(
                 "short and conversational. Weave corrections in gently as part of the dialogue. " +
                 "Do not switch to English unless the learner is completely stuck — then give a " +
                 "brief Korean scaffold instead."
+
+        /**
+         * How long the server waits for silence before deciding the learner has finished.
+         *
+         * This used to sit at 10 seconds, which was not a tuning choice: turns were taken by
+         * tapping, and the only job of that number was to keep VAD from cutting a tap-driven
+         * turn in half. Hands-free makes VAD the thing that ends a turn, so it becomes a real
+         * latency budget — the wearer waits this long after their last word before the tutor
+         * starts thinking.
+         *
+         * 700ms is what the English app settled on in live use: short enough that the pause
+         * does not read as being ignored, long enough to survive the gap between clauses.
+         */
+        internal const val VAD_SILENCE_DURATION_MS = 700
 
         /** Reconnect backoff: 1s, 2s, 4s, … capped at 30s; reset on READY. */
         internal const val RECONNECT_BASE_DELAY_MS = 1_000L
@@ -229,6 +254,9 @@ class OpenAiRealtimeTransport(
                 override fun onFailure(t: Throwable) {
                     if (stale()) return
                     sessionReady = false
+                    // Same reason as reportClose(): whatever was mid-flight went down with
+                    // the socket, and a stale flag makes the next turn cancel a ghost.
+                    responseActive = false
                     listener.onStatus(RealtimeConnectionStatus.DEGRADED)
                     listener.onError(t.message ?: t.javaClass.simpleName)
                     scheduleReconnect()
@@ -269,6 +297,23 @@ class OpenAiRealtimeTransport(
         if (sent) noteActivity()
         return sent
     }
+
+    /**
+     * Puts typed text into the conversation as learner input. Used by the debug broadcast
+     * that drives a turn with no wearer and no microphone, which is the only way to exercise
+     * the live path from a laptop. Like [sendUserImage] this is learner input rather than
+     * brain output, so it stays off the single-method transport interface that keeps steering
+     * text on one channel.
+     */
+    fun sendUserText(text: String): Boolean {
+        val sent = sendRaw(buildTextItemJson(text))
+        if (sent) noteActivity()
+        return sent
+    }
+
+    internal fun buildTextItemJson(text: String): String =
+        """{"type":"conversation.item.create","item":{"type":"message","role":"user",""" +
+            """"content":[{"type":"input_text","text":${jsonString(text)}}]}}"""
 
     /** Resets the per-turn audio counter; call after reading it at commit time. */
     fun resetAppendedChunkCounter() {
@@ -322,6 +367,13 @@ class OpenAiRealtimeTransport(
      */
     private fun reportClose() {
         sessionReady = false
+        // A response in flight when the socket dies never gets its response.done, so this
+        // flag would stay set across the reconnect and every later turn would open by
+        // cancelling a response that no longer exists. The server answers that with
+        // response_cancel_not_active, which reaches the wearer as an error on a turn that
+        // was perfectly fine — seen on-device 2026-08-05 after a ping timeout dropped the
+        // socket mid-reply. The new connection carries nothing in flight.
+        responseActive = false
         if (closedByClient) return
         listener.onStatus(RealtimeConnectionStatus.CLOSED)
         scheduleReconnect()
@@ -403,6 +455,8 @@ class OpenAiRealtimeTransport(
             RealtimeServerEventKind.INPUT_TRANSCRIPT_COMPLETED -> {
                 MiniJson.string(obj, "transcript")?.let(listener::onInputTranscript)
             }
+            RealtimeServerEventKind.SPEECH_STARTED -> listener.onSpeechStarted()
+            RealtimeServerEventKind.SPEECH_STOPPED -> listener.onSpeechStopped()
             RealtimeServerEventKind.RESPONSE_CREATED -> responseActive = true
             RealtimeServerEventKind.RESPONSE_DONE -> responseActive = false
             RealtimeServerEventKind.ERROR -> {
@@ -438,7 +492,7 @@ class OpenAiRealtimeTransport(
             """"instructions":${jsonString(sessionInstructions)},""" +
             """"audio":{"input":{"format":$format,"transcription":{"model":"whisper-1"},""" +
             """"turn_detection":{"type":"server_vad","threshold":0.5,"prefix_padding_ms":300,""" +
-            """"silence_duration_ms":10000,"create_response":false}},""" +
+            """"silence_duration_ms":$VAD_SILENCE_DURATION_MS,"create_response":false}},""" +
             """"output":{"format":$format,"voice":${jsonString(voice)}}}}"""
         return """{"type":"session.update","session":$session}"""
     }

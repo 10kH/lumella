@@ -50,6 +50,10 @@ class OpenAiRealtimeTransportTest {
             transcriptDeltas.add(text)
         }
         override fun onError(message: String) { errors.add(message) }
+        var speechStarted = 0
+        var speechStopped = 0
+        override fun onSpeechStarted() { speechStarted++ }
+        override fun onSpeechStopped() { speechStopped++ }
     }
 
     private fun successProvider(token: String = "ek_test_token"): TokenServiceCredentialProvider =
@@ -709,5 +713,73 @@ class OpenAiRealtimeTransportTest {
 
         assertTrue(recording.statuses.contains(RealtimeConnectionStatus.CLOSED))
         assertEquals(1, scheduled.size)
+    }
+
+    // --- Hands-free: server VAD, not taps, decides where a turn ends ---
+
+    @Test
+    fun sessionAsksTheServerToDetectTurnsQuicklyEnoughToFeelHandsFree() {
+        val transport = OpenAiRealtimeTransport(successProvider(), FakeFactory())
+        val session = transport.buildSessionUpdateJson()
+
+        assertTrue("server VAD must be on", session.contains(""""type":"server_vad""""))
+        assertTrue(
+            "silence window is the wearer's wait before the tutor answers",
+            session.contains(""""silence_duration_ms":700"""),
+        )
+        // Letting the server auto-reply would remove the one place per-turn teaching
+        // instructions can be carried, so it stays off even hands-free.
+        assertTrue("""create_response must stay false""", session.contains(""""create_response":false"""))
+    }
+
+    @Test
+    fun speechEventsAreDeliveredSoTheAppCanCloseTheTurnItself() {
+        val factory = FakeFactory()
+        val listener = RecordingListener()
+        val transport = OpenAiRealtimeTransport(successProvider(), factory, listener = listener)
+        transport.connect()
+        factory.lastListener?.onOpen()
+
+        factory.lastListener?.onMessage("""{"type":"input_audio_buffer.speech_started"}""")
+        factory.lastListener?.onMessage("""{"type":"input_audio_buffer.speech_stopped"}""")
+
+        assertEquals(1, listener.speechStarted)
+        assertEquals(1, listener.speechStopped)
+    }
+
+    @Test
+    fun aDroppedSocketDoesNotLeaveTheNextTurnCancellingAGhostResponse() {
+        // A reply was in flight when a ping timeout killed the socket, so response.done
+        // never arrived. Without clearing the flag the next turn opened with a cancel and
+        // the server answered response_cancel_not_active, which the wearer saw as an error.
+        val factory = FakeFactory()
+        val transport = OpenAiRealtimeTransport(successProvider(), factory)
+        transport.connect()
+        factory.lastListener?.onOpen()
+        factory.lastListener?.onMessage("""{"type":"response.created"}""")
+
+        factory.lastListener?.onFailure(RuntimeException("sent ping but didn't receive pong"))
+
+        factory.socket.sent.clear()
+        transport.sendInstructions("keep going")
+        assertTrue(
+            "must not cancel a response that died with the socket",
+            factory.socket.sent.none { it.contains("response.cancel") },
+        )
+    }
+
+    @Test
+    fun aClosedSocketClearsTheInFlightResponseToo() {
+        val factory = FakeFactory()
+        val transport = OpenAiRealtimeTransport(successProvider(), factory)
+        transport.connect()
+        factory.lastListener?.onOpen()
+        factory.lastListener?.onMessage("""{"type":"response.created"}""")
+
+        factory.lastListener?.onClosed(1006, "abnormal")
+
+        factory.socket.sent.clear()
+        transport.sendInstructions("keep going")
+        assertTrue(factory.socket.sent.none { it.contains("response.cancel") })
     }
 }

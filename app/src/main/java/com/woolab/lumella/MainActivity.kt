@@ -76,6 +76,8 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
         private const val DEBUG_PLAYBACK_ACTION = "com.woolab.lumella.DEBUG_PLAYBACK"
         /** Fills the subtitles with sample text so the layout can be checked with no wearer. */
         private const val DEBUG_SUBTITLE_ACTION = "com.woolab.lumella.DEBUG_SUBTITLE"
+        /** Drives one real turn with no wearer and no microphone. See ops/screen-dump.sh. */
+        private const val DEBUG_SAY_ACTION = "com.woolab.lumella.DEBUG_SAY"
         /** Short timeout for the boot-time remote config fetch — must never stall app boot. */
         private const val REMOTE_CONFIG_TIMEOUT_MS = 3_000
     }
@@ -109,7 +111,6 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
      * immediately and recording starts automatically once READY arrives, so a single tap both
      * wakes and starts listening.
      */
-    @Volatile private var recordWhenReady = false
 
     private var lastTouchDownTimeMs = 0L
     private var lastTouchDeviceName = ""
@@ -117,6 +118,8 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
 
     @Volatile
     private var speaking = false
+    /** When the current turn was closed, so time-to-first-audio can be measured. */
+    @Volatile private var turnEndedAtMs = 0L
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -168,11 +171,17 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
                 override fun onStatus(status: RealtimeConnectionStatus) {
                     Log.i(TAG, "status=${statusLabel(status)}")
                     runOnUiThread { applyStatus(status) }
-                    if (status == RealtimeConnectionStatus.READY && recordWhenReady) {
-                        recordWhenReady = false
-                        audioCapture.start()
+                    if (status == RealtimeConnectionStatus.READY) {
+                        // Hands-free: the microphone stays open for the whole session, so a
+                        // wearer can simply talk. Recording is no longer something a tap
+                        // turns on, which also means a reconnect resumes listening without
+                        // the wearer having to notice it happened.
+                        if (!audioCapture.isRecording) {
+                            audioCapture.start()
+                            Log.i(TAG, "연속 청취 시작 (핸즈프리): recording=${audioCapture.isRecording}")
+                        }
                         runOnUiThread {
-                            updateStatus(if (turnEvidenceAssembler.peekPendingImageId() != null) "Listening... (+ Photo)" else "Listening...", "#FF5722")
+                            updateStatus(listeningLabel(), "#FF5722")
                             clearSubtitle()
                         }
                     }
@@ -181,14 +190,36 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
                 override fun onAudioDelta(base64Pcm16: String) {
                     if (!speaking) {
                         speaking = true
+                        // Time to first audio: what the wearer actually experiences as the
+                        // pause after they stop talking. Also marks where the tutor's own
+                        // voice starts, which is the window an echo loop would show up in.
+                        val since = if (turnEndedAtMs > 0) System.currentTimeMillis() - turnEndedAtMs else -1
+                        Log.i(TAG, "튜터 발화 시작 (TTFA ${since}ms)")
                         runOnUiThread { updateStatus("Speaking...", "#4CAF50") }
                     }
                     audioPlayback.playDelta(base64Pcm16)
                 }
 
                 override fun onAudioDone() {
+                    // Marks the end of the tutor's own voice. Any VAD trigger between this
+                    // and the start of speaking is the microphone hearing the tutor, which
+                    // is the failure hands-free lives or dies on.
+                    Log.i(TAG, "튜터 발화 끝")
                     speaking = false
                     runOnUiThread { updateStatus("Ready") }
+                }
+
+                override fun onSpeechStarted() {
+                    Log.i(TAG, "음성 감지됨 (VAD)")
+                    runOnUiThread {
+                        updateStatus(listeningLabel(), "#FF5722")
+                        clearSubtitle()
+                    }
+                }
+
+                override fun onSpeechStopped() {
+                    Log.i(TAG, "음성 종료됨 (VAD) - 턴 종료")
+                    beginTurn(vadDriven = true)
                 }
 
                 override fun onInputTranscript(text: String) {
@@ -244,6 +275,7 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
                     addAction(DEBUG_SPEECH_ACTION)
                     addAction(DEBUG_PLAYBACK_ACTION)
                     addAction(DEBUG_SUBTITLE_ACTION)
+                    addAction(DEBUG_SAY_ACTION)
                 },
                 Context.RECEIVER_EXPORTED,
             )
@@ -343,26 +375,22 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
         return super.dispatchTouchEvent(ev)
     }
 
-    /** Right tap: start/stop the current speech turn. Returns immediately — never blocks the touch/UI thread. */
+    /**
+     * Right tap. Hands-free took turn-taking away from this gesture — VAD ends a turn now —
+     * so the tap means "I have finished speaking", for the wearer who does not want to wait
+     * out the silence window. It never means "say something": tapping without having spoken
+     * used to make the tutor start talking to itself, so a tap with no captured audio does
+     * nothing at all.
+     *
+     * Returns immediately — never blocks the touch/UI thread.
+     */
     private fun toggleSpeechTurn() {
         if (voiceTransportUnavailable) {
             Log.w(TAG, "Ignoring right-tap: realtime transport unavailable (TOKEN-FAIL)")
             return
         }
         if (audioCapture.isRecording) {
-            audioCapture.stop()
-            val chunks = transport.appendedChunksSinceCommit
-            val committed = transport.commitAudio()
-            Log.i(TAG, "turn end: audioChunks=$chunks committed=$committed")
-            if (chunks == 0) Log.w(TAG, "microphone produced no audio this turn (worn?)")
-            val turnId = turnTracker.next()
-            // voiceFastPath.onTurnStart does model/network work; offload it to the background
-            // executor (mirrors submitCurrentTurnEvidence()) so the touch handler itself returns
-            // immediately, then post the status update back to the UI thread.
-            slowPathExecutor.execute {
-                voiceFastPath.onTurnStart(turnId)
-                runOnUiThread { updateStatus("Thinking...", "#2196F3") }
-            }
+            beginTurn(vadDriven = false)
         } else if (!transport.sessionReady) {
             if (transport.isClosed) {
                 // Idle-timeout, a client close, or a fatal account error left the session
@@ -373,8 +401,7 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
                 // is SYNCHRONOUS despite its callback shape, so calling it here threw
                 // NetworkOnMainThreadException and killed the app on every tap once the
                 // session was closed (which ACCOUNT_BLOCKED makes the normal case).
-                Log.i(TAG, "Right-tap on closed session: reconnecting and recording on READY")
-                recordWhenReady = true
+                Log.i(TAG, "Right-tap on closed session: reconnecting; READY resumes listening")
                 updateStatus("Connecting...", "#9C27B0")
                 slowPathExecutor.execute { transport.connect() }
             } else {
@@ -384,8 +411,49 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
             transport.resetAppendedChunkCounter()
             audioCapture.start()
             Log.i(TAG, "turn start: recording=${audioCapture.isRecording}")
-            updateStatus(if (turnEvidenceAssembler.peekPendingImageId() != null) "Listening... (+ Photo)" else "Listening...", "#FF5722")
+            updateStatus(listeningLabel(), "#FF5722")
             clearSubtitle()
+        }
+    }
+
+    /** "Listening...", plus a note when a photo is waiting to go out with this turn. */
+    private fun listeningLabel(): String =
+        if (turnEvidenceAssembler.peekPendingImageId() != null) "Listening... (+ Photo)" else "Listening..."
+
+    /**
+     * Ends the current turn and asks for a reply. Reached two ways: server VAD hearing the
+     * learner stop ([vadDriven] = true), or a tap from someone who does not want to wait out
+     * the silence window.
+     *
+     * The microphone is deliberately left running either way — hands-free means the next
+     * utterance is caught without anyone doing anything.
+     */
+    private fun beginTurn(vadDriven: Boolean) {
+        val chunks = transport.appendedChunksSinceCommit
+        if (!vadDriven && chunks == 0) {
+            // A tap before saying anything used to ask for a response anyway, and the tutor
+            // would start talking to itself. A tap means "I am done", not "your turn".
+            Log.i(TAG, "tap with nothing captured yet; not asking for a response")
+            return
+        }
+        if (vadDriven) {
+            // The server commits the buffer itself when VAD closes a turn. Committing again
+            // asks it to commit an empty buffer, which it rejects — and the wearer sees an
+            // error for a turn that was actually fine.
+            transport.resetAppendedChunkCounter()
+            turnEndedAtMs = System.currentTimeMillis()
+            Log.i(TAG, "turn end (VAD): audioChunks=$chunks")
+        } else {
+            val committed = transport.commitAudio()
+            turnEndedAtMs = System.currentTimeMillis()
+            Log.i(TAG, "turn end (tap): audioChunks=$chunks committed=$committed")
+        }
+        val turnId = turnTracker.next()
+        // voiceFastPath.onTurnStart does model/network work; keep it off the caller's thread
+        // (a touch handler, or the websocket reader) and post the status back to the UI.
+        slowPathExecutor.execute {
+            voiceFastPath.onTurnStart(turnId)
+            runOnUiThread { updateStatus("Thinking...", "#2196F3") }
         }
     }
 
@@ -550,6 +618,18 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
             object : BroadcastReceiver() {
                 override fun onReceive(context: Context?, intent: Intent?) {
                     when (intent?.action) {
+                        DEBUG_SAY_ACTION -> {
+                            val said = intent.getStringExtra("text") ?: "이 방에 대해 이야기해 줘."
+                            Log.i(TAG, "debug: 학습자 발화 주입 = $said")
+                            // Without this the TTFA log would measure from some unrelated
+                            // earlier turn and print a number that means nothing.
+                            turnEndedAtMs = System.currentTimeMillis()
+                            slowPathExecutor.execute {
+                                transport.sendUserText(said)
+                                voiceFastPath.onTurnStart(turnTracker.next())
+                            }
+                            runOnUiThread { updateUserEcho(said) }
+                        }
                         DEBUG_SUBTITLE_ACTION -> {
                             val tutor = intent.getStringExtra("tutor")
                                 ?: "네, 벽에 붙어 있는 건 에어컨 실내기예요. 아래로 전선이 늘어져 있는 걸 보니 아직 연결이 덜 된 것 같네요. 설치하는 중이신가요?"

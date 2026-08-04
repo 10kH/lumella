@@ -41,7 +41,12 @@ class AudioCapture(
                 return
             }
             val record = AudioRecord(
-                MediaRecorder.AudioSource.MIC,
+                // Hands-free keeps the microphone open while the tutor is speaking, so a
+                // plain MIC source feeds the tutor's own voice back in and server VAD treats
+                // it as the learner talking. VOICE_COMMUNICATION applies the platform's
+                // echo canceller and noise suppression in hardware, which the glasses
+                // declare support for in /vendor/etc/audio_effects.xml.
+                MediaRecorder.AudioSource.VOICE_COMMUNICATION,
                 sampleRateHz,
                 AudioFormat.CHANNEL_IN_MONO,
                 AudioFormat.ENCODING_PCM_16BIT,
