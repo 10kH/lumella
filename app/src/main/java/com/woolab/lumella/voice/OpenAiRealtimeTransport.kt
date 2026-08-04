@@ -66,6 +66,9 @@ class OpenAiRealtimeTransport(
         fun onTranscriptDelta(text: String) {}
         fun onError(message: String) {}
 
+        /** The model asked the app to run a tool, e.g. capture_photo. */
+        fun onToolCall(name: String, callId: String) {}
+
         /** Server VAD heard the learner start talking. */
         fun onSpeechStarted() {}
 
@@ -92,7 +95,17 @@ class OpenAiRealtimeTransport(
                 "Speak in natural, clear Korean matched to the learner's level; keep replies " +
                 "short and conversational. Weave corrections in gently as part of the dialogue. " +
                 "Do not switch to English unless the learner is completely stuck — then give a " +
-                "brief Korean scaffold instead."
+                "brief Korean scaffold instead. " +
+                // Without this the model does not know a camera exists. Asked what was in
+                // front of the learner it invented a desk scene — a laptop, a coffee cup, a
+                // notebook — and described it with complete confidence, having photographed
+                // nothing (2026-08-05). Confident invention is worse than saying nothing.
+                "The learner is wearing camera glasses and you can look through them. When " +
+                "they ask you to look at something, ask what something is, or say anything " +
+                "like \"이거 뭐야\", \"이거 봐봐\", \"사진 찍어서 알려줘\" — call the " +
+                "capture_photo tool and talk about what you actually see. NEVER describe " +
+                "their surroundings from imagination: if you have not captured a photo this " +
+                "turn, say you will take a look and call the tool."
 
         /**
          * How long the server waits for silence before deciding the learner has finished.
@@ -315,6 +328,22 @@ class OpenAiRealtimeTransport(
         """{"type":"conversation.item.create","item":{"type":"message","role":"user",""" +
             """"content":[{"type":"input_text","text":${jsonString(text)}}]}}"""
 
+    /**
+     * Answers a tool call. Like [sendUserImage] this is not brain output, so it stays off the
+     * single-method transport interface that keeps steering text on one channel.
+     */
+    fun sendFunctionCallOutput(callId: String, output: String): Boolean =
+        sendRaw(
+            """{"type":"conversation.item.create","item":{"type":"function_call_output",""" +
+                """"call_id":${jsonString(callId)},"output":${jsonString(output)}}}""",
+        )
+
+    /**
+     * Resumes a response after a tool call. The original response already reached
+     * response.done when it emitted the function_call item, so nothing continues on its own.
+     */
+    fun requestResponseContinuation(): Boolean = sendRaw("""{"type":"response.create"}""")
+
     /** Resets the per-turn audio counter; call after reading it at commit time. */
     fun resetAppendedChunkCounter() {
         appendedChunksSinceCommit = 0
@@ -455,6 +484,14 @@ class OpenAiRealtimeTransport(
             RealtimeServerEventKind.INPUT_TRANSCRIPT_COMPLETED -> {
                 MiniJson.string(obj, "transcript")?.let(listener::onInputTranscript)
             }
+            RealtimeServerEventKind.RESPONSE_OUTPUT_ITEM_DONE -> {
+                val item = MiniJson.asObject(obj["item"])
+                if (item != null && MiniJson.string(item, "type") == "function_call") {
+                    val name = MiniJson.string(item, "name")
+                    val callId = MiniJson.string(item, "call_id")
+                    if (name != null && callId != null) listener.onToolCall(name, callId)
+                }
+            }
             RealtimeServerEventKind.SPEECH_STARTED -> listener.onSpeechStarted()
             RealtimeServerEventKind.SPEECH_STOPPED -> listener.onSpeechStopped()
             RealtimeServerEventKind.RESPONSE_CREATED -> responseActive = true
@@ -493,7 +530,15 @@ class OpenAiRealtimeTransport(
             """"audio":{"input":{"format":$format,"transcription":{"model":"whisper-1"},""" +
             """"turn_detection":{"type":"server_vad","threshold":0.5,"prefix_padding_ms":300,""" +
             """"silence_duration_ms":$VAD_SILENCE_DURATION_MS,"create_response":false}},""" +
-            """"output":{"format":$format,"voice":${jsonString(voice)}}}}"""
+            """"output":{"format":$format,"voice":${jsonString(voice)}}},""" +
+            // Hands-free means the wearer's hands are busy, so "look at this" has to work
+            // by voice too. The model asks for a photo; MainActivity owns the camera and
+            // answers with function_call_output.
+            """"tools":[{"type":"function","name":"capture_photo",""" +
+            """"description":"Capture a photo through the glasses camera when the learner """ +
+            """asks you to look at something in front of them.",""" +
+            """"parameters":{"type":"object","properties":{},"required":[]}}],""" +
+            """"tool_choice":"auto"}"""
         return """{"type":"session.update","session":$session}"""
     }
 

@@ -28,6 +28,7 @@ enum class RealtimeServerEventKind {
     INPUT_TRANSCRIPT_COMPLETED,
     INPUT_TRANSCRIPT_DELTA,
     INPUT_TRANSCRIPT_FAILED,
+    RESPONSE_OUTPUT_ITEM_DONE,
     OTHER
 }
 
@@ -45,6 +46,7 @@ object RealtimeServerEventTypes {
         "input_audio_buffer.speech_started" -> RealtimeServerEventKind.SPEECH_STARTED
         "input_audio_buffer.speech_stopped" -> RealtimeServerEventKind.SPEECH_STOPPED
         "input_audio_buffer.committed" -> RealtimeServerEventKind.INPUT_AUDIO_COMMITTED
+        "response.output_item.done" -> RealtimeServerEventKind.RESPONSE_OUTPUT_ITEM_DONE
         "response.audio_transcript.delta",
         "response.output_audio_transcript.delta" -> RealtimeServerEventKind.AUDIO_TRANSCRIPT_DELTA
         "conversation.item.input_audio_transcription.completed" ->

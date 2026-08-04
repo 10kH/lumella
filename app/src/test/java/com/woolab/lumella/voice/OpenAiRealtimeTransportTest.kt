@@ -54,6 +54,8 @@ class OpenAiRealtimeTransportTest {
         var speechStopped = 0
         override fun onSpeechStarted() { speechStarted++ }
         override fun onSpeechStopped() { speechStopped++ }
+        val toolCalls = mutableListOf<Pair<String, String>>()
+        override fun onToolCall(name: String, callId: String) { toolCalls.add(name to callId) }
     }
 
     private fun successProvider(token: String = "ek_test_token"): TokenServiceCredentialProvider =
@@ -781,5 +783,81 @@ class OpenAiRealtimeTransportTest {
         factory.socket.sent.clear()
         transport.sendInstructions("keep going")
         assertTrue(factory.socket.sent.none { it.contains("response.cancel") })
+    }
+
+    // --- Voice-driven photo capture ---
+
+    @Test
+    fun theSessionOffersCapturePhotoSoTheWearerCanAskInsteadOfTapping() {
+        val session = OpenAiRealtimeTransport(successProvider(), FakeFactory()).buildSessionUpdateJson()
+        assertTrue(session.contains(""""name":"capture_photo""""))
+        assertTrue(session.contains(""""tool_choice":"auto""""))
+    }
+
+    @Test
+    fun aFinishedToolCallReachesTheApp() {
+        val factory = FakeFactory()
+        val listener = RecordingListener()
+        val transport = OpenAiRealtimeTransport(successProvider(), factory, listener = listener)
+        transport.connect()
+        factory.lastListener?.onOpen()
+
+        factory.lastListener?.onMessage(
+            """{"type":"response.output_item.done","item":{"type":"function_call",""" +
+                """"name":"capture_photo","call_id":"call_abc"}}""",
+        )
+
+        assertEquals(listOf("capture_photo" to "call_abc"), listener.toolCalls)
+    }
+
+    @Test
+    fun ordinaryOutputItemsAreNotMistakenForToolCalls() {
+        val factory = FakeFactory()
+        val listener = RecordingListener()
+        val transport = OpenAiRealtimeTransport(successProvider(), factory, listener = listener)
+        transport.connect()
+        factory.lastListener?.onOpen()
+
+        factory.lastListener?.onMessage(
+            """{"type":"response.output_item.done","item":{"type":"message","role":"assistant"}}""",
+        )
+
+        assertTrue(listener.toolCalls.isEmpty())
+    }
+
+    @Test
+    fun answeringAToolCallCarriesTheCallIdAndResumesTheReply() {
+        val factory = FakeFactory()
+        val transport = OpenAiRealtimeTransport(successProvider(), factory)
+        transport.connect()
+        factory.lastListener?.onOpen()
+        factory.socket.sent.clear()
+
+        transport.sendFunctionCallOutput("call_abc", """{"status":"ok"}""")
+        transport.requestResponseContinuation()
+
+        assertTrue(factory.socket.sent[0].contains(""""call_id":"call_abc""""))
+        assertTrue(factory.socket.sent[0].contains("function_call_output"))
+        // The response that emitted the call is already done; without this nothing resumes.
+        assertEquals("""{"type":"response.create"}""", factory.socket.sent[1])
+    }
+
+    @Test
+    fun theSessionUpdateIsValidJson() {
+        // A malformed session.update is rejected wholesale and the socket stays open, so the
+        // session silently keeps SERVER DEFAULTS: no persona, no tools, no VAD tuning. It
+        // looks like the model ignoring instructions rather than a syntax error. That is
+        // exactly what one stray brace did on 2026-08-05, and nothing here noticed.
+        val json = OpenAiRealtimeTransport(successProvider(), FakeFactory()).buildSessionUpdateJson()
+        val root = com.woolab.lumella.util.MiniJson.asObject(com.woolab.lumella.util.MiniJson.parse(json))
+        assertTrue("session.update did not parse: $json", root != null)
+
+        val session = com.woolab.lumella.util.MiniJson.asObject(root!!["session"])
+        assertTrue("session object missing", session != null)
+        // Everything the app relies on has to survive the round trip, not just parse.
+        assertTrue("instructions lost", com.woolab.lumella.util.MiniJson.string(session!!, "instructions") != null)
+        assertTrue("tools lost", session["tools"] != null)
+        assertEquals("auto", com.woolab.lumella.util.MiniJson.string(session, "tool_choice"))
+        assertTrue("audio config lost", com.woolab.lumella.util.MiniJson.asObject(session["audio"]) != null)
     }
 }

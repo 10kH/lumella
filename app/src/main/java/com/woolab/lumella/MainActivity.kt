@@ -78,6 +78,8 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
         private const val DEBUG_SUBTITLE_ACTION = "com.woolab.lumella.DEBUG_SUBTITLE"
         /** Drives one real turn with no wearer and no microphone. See ops/screen-dump.sh. */
         private const val DEBUG_SAY_ACTION = "com.woolab.lumella.DEBUG_SAY"
+        /** Shows the model a picture from a file path, bypassing the camera. */
+        private const val DEBUG_SEE_ACTION = "com.woolab.lumella.DEBUG_SEE"
         /** Short timeout for the boot-time remote config fetch — must never stall app boot. */
         private const val REMOTE_CONFIG_TIMEOUT_MS = 3_000
     }
@@ -209,6 +211,15 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
                     runOnUiThread { updateStatus("Ready") }
                 }
 
+                override fun onToolCall(name: String, callId: String) {
+                    if (name != "capture_photo") {
+                        Log.w(TAG, "알 수 없는 도구 호출: $name")
+                        return
+                    }
+                    Log.i(TAG, "음성 명령: 사진 촬영 (call_id=$callId)")
+                    runOnUiThread { capturePhoto(toolCallId = callId) }
+                }
+
                 override fun onSpeechStarted() {
                     Log.i(TAG, "음성 감지됨 (VAD)")
                     runOnUiThread {
@@ -276,6 +287,7 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
                     addAction(DEBUG_PLAYBACK_ACTION)
                     addAction(DEBUG_SUBTITLE_ACTION)
                     addAction(DEBUG_SAY_ACTION)
+                    addAction(DEBUG_SEE_ACTION)
                 },
                 Context.RECEIVER_EXPORTED,
             )
@@ -457,9 +469,36 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
         }
     }
 
+    /**
+     * Keeps the exact frame handed to the model, so a description can be checked against what
+     * was really in front of the camera. Without it there is no way to separate an accurate
+     * answer from a confident invention — the failure this path exists to prevent, and one
+     * this app actually shipped (2026-08-05: a desk scene described from a pitch-dark room).
+     * The downscaled frame is saved rather than the raw capture because that is what the
+     * model is shown. Debug builds only.
+     */
+    private fun saveFrameTheModelSaw(base64Jpeg: String) {
+        if (!BuildConfig.DEBUG) return
+        runCatching {
+            java.io.File(getExternalFilesDir(null), "model-saw.jpg")
+                .also { it.writeBytes(android.util.Base64.decode(base64Jpeg, android.util.Base64.NO_WRAP)) }
+                .also { Log.i(TAG, "debug: 모델이 본 프레임 저장 ${it.absolutePath}") }
+        }
+    }
+
     /** Left tap: photo capture. Analysis is async (45s ceiling tolerated by TutorBrain callers); the fast path keeps talking. */
-    private fun capturePhoto() {
+    private fun capturePhoto(toolCallId: String? = null) {
         updateStatus("Capturing...", "#9C27B0")
+        // A tool call leaves the model waiting: its response already ended when it emitted
+        // the call, so nothing resumes until the app answers and asks for a continuation.
+        // Every exit from here has to do that, including the failures.
+        fun answerToolCall(result: String) {
+            val callId = toolCallId ?: return
+            slowPathExecutor.execute {
+                transport.sendFunctionCallOutput(callId, result)
+                transport.requestResponseContinuation()
+            }
+        }
         camera.captureImage(
             onCaptured = { bytes ->
                 // 1) Let the realtime model SEE it. Without this the tutor answers about
@@ -469,9 +508,12 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
                     val base64 = ImageEncoder.toDownscaledBase64Jpeg(bytes)
                     if (base64 == null) {
                         Log.w(TAG, "image encode failed; realtime model will not see this photo")
+                        answerToolCall("""{"status":"error","reason":"encode_failed"}""")
                     } else {
+                        saveFrameTheModelSaw(base64)
                         val ok = transport.sendUserImage(base64)
                         Log.i(TAG, "photo -> realtime model: chars=${base64.length} sent=$ok")
+                        answerToolCall("""{"status":"ok"}""")
                     }
                 }
                 // 2) And send it to luma for the coach's structured visual evidence.
@@ -489,6 +531,7 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
             onError = { message ->
                 Log.w(TAG, "Camera capture failed: $message")
                 runOnUiThread { updateStatus("Capture error", "#FF0000") }
+                answerToolCall("""{"status":"error","reason":"camera_failed"}""")
             },
         )
     }
@@ -506,6 +549,9 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
 
     /** Right double-tap: end the session and exit, mirroring LEGACY's exitApp(). */
     private fun endSessionAndExit() {
+        // The only way this app closes. Logged because a wearer reporting "it just quit"
+        // otherwise leaves no way to tell a deliberate double-tap from a real fault.
+        Log.i(TAG, "우측 더블탭으로 종료")
         teardown()
         finishAffinity()
     }
@@ -629,6 +675,36 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
                                 voiceFastPath.onTurnStart(turnTracker.next())
                             }
                             runOnUiThread { updateUserEcho(said) }
+                        }
+                        DEBUG_SEE_ACTION -> {
+                            // Shows the model a known picture from a file, so "does it
+                            // describe what it was actually shown" can be checked without
+                            // depending on what happens to be in front of the glasses.
+                            val path = intent.getStringExtra("path") ?: return
+                            slowPathExecutor.execute {
+                                val bytes = runCatching { java.io.File(path).readBytes() }.getOrNull()
+                                if (bytes == null) {
+                                    Log.w(TAG, "debug: 이미지 파일 없음 $path")
+                                    return@execute
+                                }
+                                val base64 = ImageEncoder.toDownscaledBase64Jpeg(bytes)
+                                if (base64 == null) {
+                                    Log.w(TAG, "debug: 이미지 인코딩 실패")
+                                    return@execute
+                                }
+                                saveFrameTheModelSaw(base64)
+                                val ok = transport.sendUserImage(base64)
+                                Log.i(TAG, "debug: 이미지 주입 ${bytes.size}B -> ${base64.length} chars sent=$ok")
+                                // Must forbid a fresh capture explicitly: asked to "look",
+                                // the persona correctly calls capture_photo and answers about
+                                // the live scene instead of the picture just handed over.
+                                transport.sendUserText(
+                                    intent.getStringExtra("ask")
+                                        ?: "방금 보낸 이미지 안에 있는 도형과 색을 그대로 말해줘. 새로 사진 찍지 말고 그 이미지만 보고 답해.",
+                                )
+                                turnEndedAtMs = System.currentTimeMillis()
+                                voiceFastPath.onTurnStart(turnTracker.next())
+                            }
                         }
                         DEBUG_SUBTITLE_ACTION -> {
                             val tutor = intent.getStringExtra("tutor")
