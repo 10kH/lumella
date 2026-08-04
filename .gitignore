@@ -12,3 +12,6 @@ token-service/.env.local
 # launchd service logs (luma-api / tunnel / token-service). Runtime output, not source:
 # tracking it made every service restart show up as a working-tree change.
 tmp/
+
+# Generated snapshot of the glasses display; regenerate with ops/screen-dump.sh --svg
+ops/glasses-preview.svg
