@@ -137,16 +137,8 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
     /** When the current turn was closed, so time-to-first-audio can be measured. */
     @Volatile private var turnEndedAtMs = 0L
 
-    /**
-     * Whether server VAD has reported speech since the last turn closed.
-     *
-     * The obvious test — did we upload any audio — is useless once the microphone never
-     * stops: it accumulates chunks of silence too, so it is never zero and the guard it
-     * backs never fires. Measured on-device: a tap during silence still committed 244
-     * chunks, the server answered "no speech detected", and the tutor replied to nothing.
-     * Only VAD can tell speech from an open mic in a quiet room.
-     */
-    private val heardSpeechThisTurn = java.util.concurrent.atomic.AtomicBoolean(false)
+    /** Speech and exit-arm state, shared by the touch, websocket and camera threads. */
+    private val turnGate = TurnGate()
 
     /**
      * Starts a learner turn: clears the look-again budget and asks for a response.
@@ -166,8 +158,6 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
         }
     }
 
-    /** Deadline until which a further right tap means "yes, really quit". */
-    private var exitArmedUntilMs = 0L
 
     /** Answers the model's tool calls and keeps repeated looking bounded. @see CapturePolicy */
     private val capturePolicy = CapturePolicy()
@@ -229,11 +219,7 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
                     // passes the guard and the tutor answers nothing, which is the bug the
                     // guard exists to close.
                     if (status != RealtimeConnectionStatus.READY) {
-                        heardSpeechThisTurn.set(false)
-                        // The arm goes with it. A session that is gone cannot deliver the
-                        // speech that would have disarmed it, so an arm left over from before
-                        // the drop would greet the wearer on the next tap after reconnecting.
-                        exitArmedUntilMs = 0L
+                        turnGate.onSessionLost()
                         // Same leak, one field over: `speaking` is cleared only by
                         // response.output_audio.done, which a socket dying mid-reply never
                         // delivers — and it gates the "nothing heard yet" message, so a
@@ -293,11 +279,7 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
 
                 override fun onSpeechStarted() {
                     Log.i(TAG, "음성 감지됨 (VAD)")
-                    heardSpeechThisTurn.set(true)
-                    // Talking to the tutor is not trying to leave. Without this an accidental
-                    // double tap stays armed while the wearer speaks, and the ordinary tap
-                    // that ends their turn quits the app instead.
-                    exitArmedUntilMs = 0L
+                    turnGate.onSpeechDetected()
                     runOnUiThread {
                         updateStatus(listeningLabel(), "#FF5722")
                         clearSubtitle()
@@ -450,7 +432,7 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
                                     contactMs = duration,
                                     sinceLastTapMs = now - lastRightTapTimeMs,
                                     nowMs = now,
-                                    exitArmedUntilMs = exitArmedUntilMs,
+                                    exitArmedUntilMs = turnGate.exitDeadlineMs(),
                                 )
                             ) {
                                 RightTap.Ignore -> {
@@ -460,7 +442,7 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
                                     return super.dispatchTouchEvent(ev)
                                 }
                                 RightTap.ArmExit -> {
-                                    exitArmedUntilMs = now + RightTapRules.EXIT_CONFIRM_WINDOW_MS
+                                    turnGate.armExit(now + RightTapRules.EXIT_CONFIRM_WINDOW_MS)
                                     Log.i(TAG, "종료 확인 대기")
                                     updateStatus("한 번 더 누르면 종료", "#FF5252")
                                 }
@@ -472,7 +454,7 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
                                     // An arm dies at the first ordinary tap rather than
                                     // waiting out its timer, so an accidental double tap
                                     // cannot quit the app minutes later.
-                                    exitArmedUntilMs = 0L
+                                    turnGate.disarmExit()
                                     toggleSpeechTurn()
                                 }
                             }
@@ -558,7 +540,7 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
         // instant the 700ms silence window expires. Checking and clearing separately let both
         // through, and the second response.create cancels the reply already in flight — the
         // tutor starts a sentence, cuts itself off, and starts again.
-        val hadSpeech = heardSpeechThisTurn.getAndSet(false)
+        val hadSpeech = turnGate.claimSpeech()
         if (!vadDriven && !hadSpeech) {
             // A tap before saying anything used to ask for a response anyway, and the tutor
             // would start talking to itself. A tap means "I am done", not "your turn".
