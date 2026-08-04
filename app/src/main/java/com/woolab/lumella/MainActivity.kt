@@ -230,6 +230,10 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
                     // guard exists to close.
                     if (status != RealtimeConnectionStatus.READY) {
                         heardSpeechThisTurn.set(false)
+                        // The arm goes with it. A session that is gone cannot deliver the
+                        // speech that would have disarmed it, so an arm left over from before
+                        // the drop would greet the wearer on the next tap after reconnecting.
+                        exitArmedUntilMs = 0L
                         // Same leak, one field over: `speaking` is cleared only by
                         // response.output_audio.done, which a socket dying mid-reply never
                         // delivers — and it gates the "nothing heard yet" message, so a
