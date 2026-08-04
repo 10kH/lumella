@@ -752,7 +752,18 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
     }
 
     /** Dual-eye status update (Mercury SDK mirror rendering): both [mBindingPair] panes in lockstep. */
+    /**
+     * Safe from any thread.
+     *
+     * Callers reach this from the websocket reader, the camera executor, the voice queue and
+     * the touch handler, and remembering to wrap each one is a losing game — the guarantee
+     * belongs here, once, rather than in every call site.
+     */
     private fun updateStatus(text: String, colorHex: String = "#FFFFFF") {
+        if (android.os.Looper.myLooper() != android.os.Looper.getMainLooper()) {
+            runOnUiThread { updateStatus(text, colorHex) }
+            return
+        }
         val color = android.graphics.Color.parseColor(colorHex)
         mBindingPair.left.tvStatus.text = text
         mBindingPair.left.tvStatus.setTextColor(color)
