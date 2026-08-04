@@ -67,6 +67,10 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
         private const val DOUBLE_TAP_INTERVAL_MS = 400L
         /** Contact shorter than this is capacitive noise, not a finger (observed bounce: 6ms). */
         private const val MIN_TAP_DURATION_MS = 40L
+        private const val SUBTITLE_MAX_LINES = 4
+        private const val USER_ECHO_MAX_LINES = 2
+        /** Measured: 640dp per eye minus 24dp margins, ~13dp per 24sp glyph. */
+        private const val SUBTITLE_CHARS_PER_LINE = 42
         private const val PERMISSION_REQUEST_CODE = 1001
         /** Debug-only broadcast that triggers the photo path without a touchpad tap. */
         private const val DEBUG_CAPTURE_ACTION = "com.woolab.lumella.DEBUG_CAPTURE_PHOTO"
@@ -472,14 +476,36 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
 
     /** Dual-eye tutor-subtitle update (tvSubtitle): live AUDIO_TRANSCRIPT_DELTA accumulation for the current turn. */
     private fun updateSubtitle(text: String) {
-        mBindingPair.left.tvSubtitle.text = text
-        mBindingPair.right.tvSubtitle.text = text
+        val shown = tailForDisplay(text, SUBTITLE_MAX_LINES)
+        mBindingPair.left.tvSubtitle.text = shown
+        mBindingPair.right.tvSubtitle.text = shown
+    }
+
+    /**
+     * Keeps the END of [text] so the newest words stay on screen.
+     *
+     * A TextView with maxLines shows the FIRST lines, so feeding it a long transcript would
+     * pin the opening of the sentence and hide everything the tutor just said. Android's
+     * ellipsize="start" only trims reliably on a single line, so the cut is computed here and
+     * snapped to a word boundary rather than slicing mid-word.
+     *
+     * Budget is measured, not guessed: the framebuffer is 1280x480 at density 160, i.e. 640dp
+     * per eye; minus 24dp margins each side leaves 592dp, and 24sp glyphs run about 13dp wide,
+     * so roughly 45 characters fit on a line.
+     */
+    private fun tailForDisplay(text: String, maxLines: Int): String {
+        val budget = maxLines * SUBTITLE_CHARS_PER_LINE
+        if (text.length <= budget) return text
+        val cut = text.length - budget
+        val boundary = text.indexOf(' ', cut).let { if (it in cut until text.length) it + 1 else cut }
+        return "…" + text.substring(boundary)
     }
 
     /** Dual-eye learner-echo update (tvUserEcho): the learner's own completed transcript for the current turn. */
     private fun updateUserEcho(text: String) {
-        mBindingPair.left.tvUserEcho.text = text
-        mBindingPair.right.tvUserEcho.text = text
+        val shown = tailForDisplay(text, USER_ECHO_MAX_LINES)
+        mBindingPair.left.tvUserEcho.text = shown
+        mBindingPair.right.tvUserEcho.text = shown
     }
 
     /**
