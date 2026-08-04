@@ -172,8 +172,11 @@ adb logcat -d -s lumella:V | grep -iE "lifecycle|cameraState|capture"
 adb shell am broadcast -a com.woolab.lumella.DEBUG_SAY --es text "'이 방에 대해 이야기해 줘.'"
 
 # 카메라 대신 파일의 사진을 모델에게 보여준다
-adb shell am broadcast -a com.woolab.lumella.DEBUG_SEE --es path /sdcard/test.jpg
-adb shell am broadcast -a com.woolab.lumella.DEBUG_SEE --es path /sdcard/test.jpg --es ask "'사진 속 색을 말해줘.'"
+# 앱 전용 디렉터리로 먼저 밀어넣는다. 리시버가 exported라 임의 경로를 읽게 두면
+# 아무 앱이나 lumella의 uid로 파일을 읽어 올릴 수 있어, 경로는 파일명만 취한다.
+adb push scene.jpg /storage/emulated/0/Android/data/com.woolab.lumella/files/
+adb shell am broadcast -a com.woolab.lumella.DEBUG_SEE --es path scene.jpg
+adb shell am broadcast -a com.woolab.lumella.DEBUG_SEE --es path scene.jpg --es ask "'이 첨부 그림 속 도형과 색만 말해줘. 새로 찍지 말고.'"
 
 # 착용자 없이 자막 레이아웃만 확인한다 (샘플 텍스트로 채움)
 adb shell am broadcast -a com.woolab.lumella.DEBUG_SUBTITLE

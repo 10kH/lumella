@@ -41,6 +41,21 @@ class RightTapDecisionTest {
     }
 
     @Test
+    fun `the window really is the advertised length, not the double-tap gap`() {
+        // The screen says "한 번 더 누르면 종료". A human reaction is 500-800ms, which is well
+        // outside the 400ms double-tap gap — so if the armed check sits below that gap the
+        // prompt is a lie and the tap becomes an ordinary turn.
+        val armedUntil = 10_000L + RightTapRules.EXIT_CONFIRM_WINDOW_MS
+        for (reactionMs in listOf(500L, 800L, 1_500L, 2_400L)) {
+            assertEquals(
+                "a tap ${reactionMs}ms after the prompt must still confirm",
+                RightTap.ConfirmExit,
+                decide(contact = 100, gap = reactionMs, now = 10_000 + reactionMs, armedUntil = armedUntil),
+            )
+        }
+    }
+
+    @Test
     fun `the confirmation expires rather than lingering`() {
         val armed = 12_000L
         // Same gesture, after the window: asks again instead of quitting on an old intent.
@@ -48,12 +63,13 @@ class RightTapDecisionTest {
     }
 
     @Test
-    fun `an armed exit does not hijack an ordinary later tap`() {
+    fun `an armed exit does not outlive its window`() {
         // Someone who armed exit by accident and then goes back to talking must not quit by
-        // tapping to end their next turn.
+        // tapping to end their next turn. The caller clears the arm on EndTurn; past the
+        // deadline the rules refuse on their own.
         assertEquals(
             RightTap.EndTurn,
-            decide(contact = 100, gap = 5_000, now = 11_000, armedUntil = 12_000),
+            decide(contact = 100, gap = 5_000, now = 13_000, armedUntil = 12_000),
         )
     }
 

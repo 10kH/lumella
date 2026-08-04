@@ -63,7 +63,6 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
         private const val TAG = "lumella"
         private const val RIGHT_TOUCHPAD_DEVICE = "cyttsp5_mt"
         private const val LEFT_TOUCHPAD_DEVICE = "cyttsp6_mt"
-        /** Contact shorter than this is capacitive noise, not a finger (observed bounce: 6ms). */
         private const val PERMISSION_REQUEST_CODE = 1001
         /** Debug-only broadcast that triggers the photo path without a touchpad tap. */
         private const val DEBUG_CAPTURE_ACTION = "com.woolab.lumella.DEBUG_CAPTURE_PHOTO"
@@ -131,6 +130,24 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
      */
     private val heardSpeechThisTurn = java.util.concurrent.atomic.AtomicBoolean(false)
 
+    /**
+     * Starts a learner turn: clears the look-again budget and asks for a response.
+     *
+     * Every path that puts a learner utterance into the conversation goes through here. The
+     * budget used to be reset in one place while two other paths published real turns without
+     * it, so a couple of photos permanently exhausted the allowance for everything after —
+     * including the debug hooks that are the documented way to verify this app without a
+     * wearer.
+     */
+    private fun publishLearnerTurn() {
+        capturePolicy.onLearnerSpoke()
+        val turnId = turnTracker.next()
+        slowPathExecutor.execute {
+            voiceFastPath.onTurnStart(turnId)
+            runOnUiThread { updateStatus("Thinking...", "#2196F3") }
+        }
+    }
+
     /** Deadline until which a further right tap means "yes, really quit". */
     private var exitArmedUntilMs = 0L
 
@@ -187,6 +204,13 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
                 override fun onStatus(status: RealtimeConnectionStatus) {
                     Log.i(TAG, "status=${statusLabel(status)}")
                     runOnUiThread { applyStatus(status) }
+                    // A new or broken session has heard nothing by definition. Without this
+                    // the flag survives a reconnect: the socket can die between speech_started
+                    // and speech_stopped — a ping timeout, or the hourly session_expired the
+                    // transport calls normal steady state — and the next tap in silence then
+                    // passes the guard and the tutor answers nothing, which is the bug the
+                    // guard exists to close.
+                    if (status != RealtimeConnectionStatus.READY) heardSpeechThisTurn.set(false)
                     if (status == RealtimeConnectionStatus.READY) {
                         // Hands-free: the microphone stays open for the whole session, so a
                         // wearer can simply talk. Recording is no longer something a tap
@@ -401,7 +425,13 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
                                     Log.i(TAG, "종료 확인됨")
                                     endSessionAndExit()
                                 }
-                                RightTap.EndTurn -> toggleSpeechTurn()
+                                RightTap.EndTurn -> {
+                                    // An arm dies at the first ordinary tap rather than
+                                    // waiting out its timer, so an accidental double tap
+                                    // cannot quit the app minutes later.
+                                    exitArmedUntilMs = 0L
+                                    toggleSpeechTurn()
+                                }
                             }
                             lastRightTapTimeMs = now
                         }
@@ -493,16 +523,21 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
             // Silence is its own trap though: a tap that does nothing visible reads as a tap
             // that did not register, so the wearer taps again — and a second right tap
             // inside DOUBLE_TAP_INTERVAL_MS quits the app. Say why nothing happened.
+            // Only tell the wearer when nothing is in flight. Losing the race to VAD is not
+            // the same as never having spoken, and an amber "I have not heard anything" over
+            // a turn that is at that moment being answered is worse than silence — it invites
+            // exactly the second tap the message was added to prevent.
             Log.i(TAG, "tap without any detected speech; not asking for a response")
-            runOnUiThread { updateStatus("아직 들은 말이 없어요", "#FFC107") }
+            if (!speaking) runOnUiThread { updateStatus("아직 들은 말이 없어요", "#FFC107") }
             return
         }
         if (vadDriven && !hadSpeech) {
             // VAD closed a turn the gate had already handed to a tap. One utterance, one turn.
+            // Says nothing on screen: the winner's status is already the truthful one.
             Log.i(TAG, "이미 발행된 턴 - VAD 종료 중복 무시")
             return
         }
-        capturePolicy.onLearnerSpoke()
+        publishLearnerTurn()
         if (vadDriven) {
             // The server commits the buffer itself when VAD closes a turn. Committing again
             // asks it to commit an empty buffer, which it rejects — and the wearer sees an
@@ -514,13 +549,6 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
             val committed = transport.commitAudio()
             turnEndedAtMs = System.currentTimeMillis()
             Log.i(TAG, "turn end (tap): audioChunks=$chunks committed=$committed")
-        }
-        val turnId = turnTracker.next()
-        // voiceFastPath.onTurnStart does model/network work; keep it off the caller's thread
-        // (a touch handler, or the websocket reader) and post the status back to the UI.
-        slowPathExecutor.execute {
-            voiceFastPath.onTurnStart(turnId)
-            runOnUiThread { updateStatus("Thinking...", "#2196F3") }
         }
     }
 
@@ -583,6 +611,11 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
                         Log.i(TAG, "photo -> realtime model: chars=${base64.length} sent=$ok")
                         // Reporting ok on a failed send puts the model in exactly the state
                         // this path exists to prevent: told it looked, with nothing to look at.
+                        if (!ok) {
+                            // The model has just been told the photo did not arrive; telling
+                            // the wearer it did would be the same lie in the other direction.
+                            runOnUiThread { updateStatus("사진을 못 보냈어요", "#FF5252") }
+                        }
                         answerToolCall(
                             if (ok) """{"status":"ok"}""" else """{"status":"error","reason":"send_failed"}""",
                         )
@@ -607,10 +640,15 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
                         }
                     } catch (e: Exception) {
                         // Only the coach's caption failed. The photo already reached the
-                        // realtime model and the tutor is about to describe it correctly, so
-                        // showing the wearer a red "capture failed" describes nothing they
-                        // experienced. Degrade quietly, exactly as a luma outage does elsewhere.
+                        // realtime model, so a red "capture failed" describes nothing the
+                        // wearer experienced. But saying nothing is not free either: on the
+                        // tap path the tutor is not speaking yet, so nothing else repaints and
+                        // the glasses sat on "Capturing..." for good — the same failure this
+                        // block fixes a few lines above.
                         Log.w(TAG, "analyzeImage failed (voice answer unaffected): ${e.message}")
+                        if (toolCallId == null) {
+                            runOnUiThread { updateStatus("사진 준비됨 · 그냥 말하세요", "#9C27B0") }
+                        }
                     }
                 }
             },
@@ -756,10 +794,8 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
                             // Without this the TTFA log would measure from some unrelated
                             // earlier turn and print a number that means nothing.
                             turnEndedAtMs = System.currentTimeMillis()
-                            slowPathExecutor.execute {
-                                transport.sendUserText(said)
-                                voiceFastPath.onTurnStart(turnTracker.next())
-                            }
+                            slowPathExecutor.execute { transport.sendUserText(said) }
+                            runOnUiThread { publishLearnerTurn() }
                             runOnUiThread { updateUserEcho(said) }
                         }
                         DEBUG_SEE_ACTION -> {
@@ -795,7 +831,7 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
                                         ?: "방금 보낸 이미지 안에 있는 도형과 색을 그대로 말해줘. 새로 사진 찍지 말고 그 이미지만 보고 답해.",
                                 )
                                 turnEndedAtMs = System.currentTimeMillis()
-                                voiceFastPath.onTurnStart(turnTracker.next())
+                                runOnUiThread { publishLearnerTurn() }
                             }
                         }
                         DEBUG_SUBTITLE_ACTION -> {

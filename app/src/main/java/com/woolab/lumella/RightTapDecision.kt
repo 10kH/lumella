@@ -58,8 +58,13 @@ object RightTapRules {
         exitArmedUntilMs: Long,
     ): RightTap = when {
         contactMs < MIN_CONTACT_MS || contactMs >= MAX_CONTACT_MS -> RightTap.Ignore
-        sinceLastTapMs >= DOUBLE_TAP_INTERVAL_MS -> RightTap.EndTurn
+        // Armed is checked BEFORE the double-tap gap. Below it the window could never bind:
+        // reaching it required a gap under 400ms, and the deadline was set from that same
+        // tap, so 2.5s was unreachable by construction — the screen promised one more tap
+        // while the code only honoured it for 400ms. Someone reading the prompt and tapping
+        // at a normal 500-800ms reaction got a turn instead, prompt silently gone.
         nowMs < exitArmedUntilMs -> RightTap.ConfirmExit
+        sinceLastTapMs >= DOUBLE_TAP_INTERVAL_MS -> RightTap.EndTurn
         else -> RightTap.ArmExit
     }
 }

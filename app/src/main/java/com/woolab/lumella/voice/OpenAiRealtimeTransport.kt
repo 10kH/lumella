@@ -175,9 +175,35 @@ class OpenAiRealtimeTransport(
     @Volatile
     private var closedByClient: Boolean = false
 
-    /** True between `response.created` and `response.done`; guards against overlapping responses. */
+    /**
+     * True between `response.created` and `response.done`; guards against overlapping
+     * responses. An `AtomicBoolean`, not `@Volatile`: the cancel-then-create pair this guards
+     * ([sendInstructions], [requestResponseContinuation]) is reachable from two threads at
+     * once — the websocket reader thread and the CameraX callback thread — and `@Volatile`
+     * only gives visibility, not the check-then-act atomicity a "cancel exactly once" guard
+     * needs. Two threads could both observe it true, both cancel, and both create; the server
+     * accepts only one of the two response.creates and drops the other (review finding, HIGH —
+     * this is the "tutor cuts itself off and restarts" symptom).
+     */
+    private val responseActive = java.util.concurrent.atomic.AtomicBoolean(false)
+
+    /** `response.id` of the currently active response (set on `response.created`, stale once
+     *  `response.done` clears [responseActive]). Used to tell a tool-call continuation racing an
+     *  intervening VAD turn apart from a continuation answering the response that emitted the
+     *  call — see [requestResponseContinuation]. */
     @Volatile
-    private var responseActive: Boolean = false
+    private var activeResponseId: String? = null
+
+    /** `response_id` captured from the `response.output_item.done` event that carried the most
+     *  recently dispatched tool call. Compared against [activeResponseId] by
+     *  [requestResponseContinuation] to decide whether the currently active response is the one
+     *  that emitted the call (no cancel needed) or a different one (VAD race, cancel it). */
+    @Volatile
+    private var toolCallResponseId: String? = null
+
+    /** Serializes the cancel-then-create pair emitted by [sendInstructions] and
+     *  [requestResponseContinuation] so the two calls can never interleave — see [responseActive]. */
+    private val responseEmitLock = Any()
 
     /** True once [close] (client teardown or idle-timeout) has run and no [connect] has followed. Lets
      *  [com.woolab.lumella.MainActivity] tell "not ready because reconnecting" from "not ready because
@@ -275,7 +301,7 @@ class OpenAiRealtimeTransport(
                     sessionReady = false
                     // Same reason as reportClose(): whatever was mid-flight went down with
                     // the socket, and a stale flag makes the next turn cancel a ghost.
-                    responseActive = false
+                    responseActive.set(false)
                     listener.onStatus(RealtimeConnectionStatus.DEGRADED)
                     listener.onError(t.message ?: t.javaClass.simpleName)
                     scheduleReconnect()
@@ -286,24 +312,28 @@ class OpenAiRealtimeTransport(
 
     /** D-4 ONLY channel: composes `response.create` with [instructions] and sends it. */
     override fun sendInstructions(instructions: String) {
-        cancelActiveResponseIfAny()
-        if (!sendRaw(buildResponseCreateJson(instructions))) {
+        if (!emitCancelThenCreate(instructions) { true }) {
             listener.onError("sendInstructions failed: socket unavailable")
         }
     }
 
     /**
-     * Cancels an in-flight response before a new `response.create` goes out. Tapping to speak
-     * (or a tool-call continuation, see [requestResponseContinuation]) while the tutor is still
-     * answering produced `conversation_already_has_active_response` and the new turn/answer was
-     * silently dropped — both callers mean "interrupt", so both cancel first.
+     * Cancels the currently active response (if [shouldCancel] says the one active right now is
+     * not the one this call is continuing) and sends a `response.create` for [instructions], as
+     * one indivisible pair under [responseEmitLock]. [sendInstructions] (tap, CameraX/UI thread)
+     * and [requestResponseContinuation] (tool-call answer, websocket reader thread) both funnel
+     * through here so the two can never interleave — without the lock, two threads can each
+     * observe an active response, each cancel, and each create; the server accepts only the
+     * second create and silently drops the first, which reaches the wearer as the tutor cutting
+     * itself off mid-sentence and restarting (review finding, HIGH).
      */
-    private fun cancelActiveResponseIfAny() {
-        if (responseActive) {
-            sendRaw("""{"type":"response.cancel"}""")
-            responseActive = false
+    private fun emitCancelThenCreate(instructions: String, shouldCancel: (activeId: String?) -> Boolean): Boolean =
+        synchronized(responseEmitLock) {
+            if (shouldCancel(activeResponseId) && responseActive.getAndSet(false)) {
+                sendRaw("""{"type":"response.cancel"}""")
+            }
+            sendRaw(buildResponseCreateJson(instructions))
         }
-    }
 
     /**
      * Puts a captured photo into the conversation as USER input, so the realtime model can
@@ -333,7 +363,11 @@ class OpenAiRealtimeTransport(
      */
     fun sendUserText(text: String): Boolean {
         val sent = sendRaw(buildTextItemJson(text))
-        if (sent) noteActivity()
+        if (sent) {
+            noteActivity()
+        } else {
+            listener.onError("sendUserText failed: socket unavailable")
+        }
         return sent
     }
 
@@ -359,20 +393,26 @@ class OpenAiRealtimeTransport(
     }
 
     /**
-     * Resumes a response after a tool call. The original response already reached
-     * response.done when it emitted the function_call item, so nothing continues on its own.
+     * Resumes a response after a tool call. The response that emitted the `function_call` item
+     * is NOT necessarily done — the protocol order is `response.created` →
+     * `response.output_item.done` (the tool call) → `response.done`, and the app now answers the
+     * tool call inline, on the websocket reader thread, still inside that `output_item.done`
+     * dispatch. `response.done` has not happened yet, so [responseActive] is still true and
+     * [activeResponseId] is still THIS response's id.
      *
-     * Server VAD can open a NEW turn (`response.created`) during the 1-5s camera window before
-     * this fires — without the same in-flight guard [sendInstructions] uses, the continuation's
-     * `response.create` collides with it and the server answers
-     * `conversation_already_has_active_response`, silently dropping the photo answer (review
-     * finding 4). Routed through [buildResponseCreateJson] with blank instructions so the
-     * emitted event stays a BARE `response.create` — the original response already ended, so
-     * there is nothing to steer.
+     * Cancelling by "is a response active" alone would therefore cancel the very response that
+     * just emitted the call the app is answering — the following `response.create` then collides
+     * with the cancel's aftermath and the server answers `conversation_already_has_active_response`,
+     * exactly the failure this refusal path exists to prevent (review finding, HIGH). Cancel by
+     * IDENTITY instead: only cancel when the response active right now differs from
+     * [toolCallResponseId], the id captured off the `response.output_item.done` event that
+     * carried this tool call — that is the case where server VAD opened a genuinely NEW turn
+     * (`response.created`) during the 1-5s camera window before this fires (review finding 4).
+     * Routed through [buildResponseCreateJson] with blank instructions so the emitted event
+     * stays a BARE `response.create` regardless of which branch ran.
      */
     fun requestResponseContinuation(): Boolean {
-        cancelActiveResponseIfAny()
-        val sent = sendRaw(buildResponseCreateJson(""))
+        val sent = emitCancelThenCreate("") { activeId -> activeId != toolCallResponseId }
         if (!sent) {
             listener.onError("requestResponseContinuation failed: socket unavailable")
         }
@@ -546,13 +586,22 @@ class OpenAiRealtimeTransport(
                 if (item != null && MiniJson.string(item, "type") == "function_call") {
                     val name = MiniJson.string(item, "name")
                     val callId = MiniJson.string(item, "call_id")
+                    // Which response this tool call belongs to, so a later
+                    // requestResponseContinuation() can tell "I'm answering the response that
+                    // just emitted this call" (no cancel needed — it's still in-flight only
+                    // because response.done has not arrived yet) apart from "a NEW response
+                    // started while I was thinking" (review finding, HIGH).
+                    toolCallResponseId = MiniJson.string(obj, "response_id")
                     if (name != null && callId != null) listener.onToolCall(name, callId)
                 }
             }
             RealtimeServerEventKind.SPEECH_STARTED -> listener.onSpeechStarted()
             RealtimeServerEventKind.SPEECH_STOPPED -> listener.onSpeechStopped()
-            RealtimeServerEventKind.RESPONSE_CREATED -> responseActive = true
-            RealtimeServerEventKind.RESPONSE_DONE -> responseActive = false
+            RealtimeServerEventKind.RESPONSE_CREATED -> {
+                responseActive.set(true)
+                activeResponseId = MiniJson.string(MiniJson.asObject(obj["response"]), "id")
+            }
+            RealtimeServerEventKind.RESPONSE_DONE -> responseActive.set(false)
             RealtimeServerEventKind.ERROR -> {
                 if (isFatalAccountError(text)) {
                     // Permanent, account-level failure (no credit / bad key / disabled
