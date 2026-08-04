@@ -123,6 +123,17 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
     /** When the current turn was closed, so time-to-first-audio can be measured. */
     @Volatile private var turnEndedAtMs = 0L
 
+    /**
+     * Whether server VAD has reported speech since the last turn closed.
+     *
+     * The obvious test — did we upload any audio — is useless once the microphone never
+     * stops: it accumulates chunks of silence too, so it is never zero and the guard it
+     * backs never fires. Measured on-device: a tap during silence still committed 244
+     * chunks, the server answered "no speech detected", and the tutor replied to nothing.
+     * Only VAD can tell speech from an open mic in a quiet room.
+     */
+    private val heardSpeechThisTurn = java.util.concurrent.atomic.AtomicBoolean(false)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -222,6 +233,7 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
 
                 override fun onSpeechStarted() {
                     Log.i(TAG, "음성 감지됨 (VAD)")
+                    heardSpeechThisTurn.set(true)
                     runOnUiThread {
                         updateStatus(listeningLabel(), "#FF5722")
                         clearSubtitle()
@@ -371,7 +383,13 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
                                     Log.d(TAG, "Ignoring contact bounce (${duration}ms contact)")
                                     return super.dispatchTouchEvent(ev)
                                 }
-                                sinceLastTap < DOUBLE_TAP_INTERVAL_MS -> endSessionAndExit()
+                                sinceLastTap < DOUBLE_TAP_INTERVAL_MS -> {
+                                    // Recorded with the measured gap: a wearer reporting the
+                                    // app "just quit" is otherwise indistinguishable from a
+                                    // fault, and this is the only path that closes it.
+                                    Log.i(TAG, "우측 더블탭 (간격 ${sinceLastTap}ms) - 종료")
+                                    endSessionAndExit()
+                                }
                                 else -> toggleSpeechTurn()
                             }
                             lastRightTapTimeMs = now
@@ -442,12 +460,18 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
      */
     private fun beginTurn(vadDriven: Boolean) {
         val chunks = transport.appendedChunksSinceCommit
-        if (!vadDriven && chunks == 0) {
+        if (!vadDriven && !heardSpeechThisTurn.get()) {
             // A tap before saying anything used to ask for a response anyway, and the tutor
             // would start talking to itself. A tap means "I am done", not "your turn".
-            Log.i(TAG, "tap with nothing captured yet; not asking for a response")
+            //
+            // Silence is its own trap though: a tap that does nothing visible reads as a tap
+            // that did not register, so the wearer taps again — and a second right tap
+            // inside DOUBLE_TAP_INTERVAL_MS quits the app. Say why nothing happened.
+            Log.i(TAG, "tap without any detected speech; not asking for a response")
+            runOnUiThread { updateStatus("아직 들은 말이 없어요", "#FFC107") }
             return
         }
+        heardSpeechThisTurn.set(false)
         if (vadDriven) {
             // The server commits the buffer itself when VAD closes a turn. Committing again
             // asks it to commit an empty buffer, which it rejects — and the wearer sees an

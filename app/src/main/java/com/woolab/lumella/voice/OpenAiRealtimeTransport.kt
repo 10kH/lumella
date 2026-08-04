@@ -351,7 +351,12 @@ class OpenAiRealtimeTransport(
 
     internal fun buildImageItemJson(base64Jpeg: String): String =
         """{"type":"conversation.item.create","item":{"type":"message","role":"user",""" +
-            """"content":[{"type":"input_image","image_url":"data:image/jpeg;base64,$base64Jpeg"}]}}"""
+            // Escaped rather than interpolated. Real base64 cannot contain a quote or a
+            // backslash, so this is unreachable through the camera today — but an encoder
+            // change or an upstream bug leaking raw bytes would desync the JSON exactly the
+            // way a stray brace already did once, and the server answers that by discarding
+            // the whole event while the socket stays open.
+            """"content":[{"type":"input_image","image_url":${jsonString("data:image/jpeg;base64,$base64Jpeg")}}]}}"""
 
     /** Appends a base64-encoded PCM16 audio chunk (see [com.woolab.lumella.audio.AudioCapture]) to the input buffer. */
     fun appendAudio(base64Pcm16: String) {

@@ -2,6 +2,7 @@ package com.woolab.lumella.voice
 
 import com.woolab.lumella.TokenHttpResponse
 import com.woolab.lumella.TokenServiceCredentialProvider
+import com.woolab.lumella.util.MiniJson
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
@@ -859,5 +860,194 @@ class OpenAiRealtimeTransportTest {
         assertTrue("tools lost", session["tools"] != null)
         assertEquals("auto", com.woolab.lumella.util.MiniJson.string(session, "tool_choice"))
         assertTrue("audio config lost", com.woolab.lumella.util.MiniJson.asObject(session["audio"]) != null)
+    }
+    // --- Red-team: hostile tool-call round trip and session payload (ultragoal QA) ---
+
+    @Test
+    fun hostileToolCallItemsNeverReachOnToolCallOrCrash() {
+        val factory = FakeFactory()
+        val listener = RecordingListener()
+        val transport = OpenAiRealtimeTransport(successProvider(), factory, listener = listener)
+        transport.connect()
+        factory.lastListener?.onOpen()
+
+        // missing call_id
+        factory.lastListener?.onMessage(
+            """{"type":"response.output_item.done","item":{"type":"function_call","name":"capture_photo"}}""",
+        )
+        // missing name
+        factory.lastListener?.onMessage(
+            """{"type":"response.output_item.done","item":{"type":"function_call","call_id":"call_x"}}""",
+        )
+        // item absent entirely
+        factory.lastListener?.onMessage("""{"type":"response.output_item.done"}""")
+        // item is a string instead of an object
+        factory.lastListener?.onMessage(
+            """{"type":"response.output_item.done","item":"not-an-object"}""",
+        )
+        // type is something other than function_call
+        factory.lastListener?.onMessage(
+            """{"type":"response.output_item.done","item":{"type":"reasoning","name":"capture_photo","call_id":"call_y"}}""",
+        )
+
+        assertTrue("no hostile item may crash the socket loop", true) // reaching here IS the crash assertion
+        assertTrue("none of these may reach onToolCall", listener.toolCalls.isEmpty())
+    }
+
+    @Test
+    fun functionCallOutputSurvivesHostileCallIdAndOutputThroughMiniJson() {
+        val factory = FakeFactory()
+        val transport = OpenAiRealtimeTransport(successProvider(), factory)
+        transport.connect()
+        factory.lastListener?.onOpen()
+        factory.socket.sent.clear()
+
+        val hostileCallId = "call_\"'\\\n\t 한글 \uD83D\uDE00"
+        val hostileOutput = "{\"nested\":\"json\"}\nwith\\backslash and \"quotes\" 한국어 결과"
+
+        transport.sendFunctionCallOutput(hostileCallId, hostileOutput)
+
+        val sent = factory.socket.sent.single()
+        val root = MiniJson.asObject(MiniJson.parse(sent))
+        assertTrue("payload must parse as valid JSON: $sent", root != null)
+        val item = MiniJson.asObject(root!!["item"])
+        assertEquals("function_call_output", MiniJson.string(item, "type"))
+        assertEquals(hostileCallId, MiniJson.string(item, "call_id"))
+        assertEquals(hostileOutput, MiniJson.string(item, "output"))
+    }
+
+    @Test
+    fun sessionUpdateSurvivesHostilePersonaInstructionsByteIdentically() {
+        // Guard for the stray-brace class of bug: a hostile persona MUST NOT be able to
+        // desync the JSON, and every field the app relies on must survive the round trip.
+        val hostileInstructions = "Line1\nLine2\ttab \"quoted\" \\backslash\\ 한국어 대화 조사 을/를 \u0001\u001f 끝"
+        val transport = OpenAiRealtimeTransport(
+            successProvider(),
+            FakeFactory(),
+            sessionInstructions = hostileInstructions,
+        )
+
+        val json = transport.buildSessionUpdateJson()
+        val root = MiniJson.asObject(MiniJson.parse(json))
+        assertTrue("session.update did not parse: $json", root != null)
+        val session = MiniJson.asObject(root!!["session"])
+        assertTrue("session object missing", session != null)
+
+        assertEquals(hostileInstructions, MiniJson.string(session, "instructions"))
+
+        val tools = MiniJson.asArray(session!!["tools"])
+        assertTrue("tools missing", tools != null && tools.isNotEmpty())
+        val tool = MiniJson.asObject(tools!!.first())
+        assertEquals("capture_photo", MiniJson.string(tool, "name"))
+        assertEquals("auto", MiniJson.string(session, "tool_choice"))
+
+        val audio = MiniJson.asObject(session["audio"])
+        val input = MiniJson.asObject(audio?.get("input"))
+        val turnDetection = MiniJson.asObject(input?.get("turn_detection"))
+        assertEquals(false, turnDetection?.get("create_response"))
+        assertEquals(700.0, turnDetection?.get("silence_duration_ms"))
+    }
+
+    @Test
+    fun toolCallAnswerOrderingAndBareContinuation() {
+        val factory = FakeFactory()
+        val transport = OpenAiRealtimeTransport(successProvider(), factory)
+        transport.connect()
+        factory.lastListener?.onOpen()
+        factory.socket.sent.clear()
+
+        transport.sendFunctionCallOutput("call_abc", "ok")
+        transport.requestResponseContinuation()
+
+        assertEquals(2, factory.socket.sent.size)
+        val first = MiniJson.asObject(MiniJson.parse(factory.socket.sent[0]))
+        assertEquals("conversation.item.create", MiniJson.string(first, "type"))
+        val item = MiniJson.asObject(first?.get("item"))
+        assertEquals("function_call_output", MiniJson.string(item, "type"))
+
+        val second = MiniJson.asObject(MiniJson.parse(factory.socket.sent[1]))
+        assertEquals("response.create", MiniJson.string(second, "type"))
+        assertTrue(
+            "continuation must be bare — the original response already ended",
+            second != null && !second.containsKey("response"),
+        )
+    }
+
+    @Test
+    fun sendUserImageWithHugeBase64ProducesParseableUserMessage() {
+        val factory = FakeFactory()
+        val transport = OpenAiRealtimeTransport(successProvider(), factory)
+        transport.connect()
+        factory.lastListener?.onOpen()
+
+        val hugeBase64 = "A".repeat(500_000)
+        assertTrue(transport.sendUserImage(hugeBase64))
+
+        val root = MiniJson.asObject(MiniJson.parse(factory.socket.sent.last()))
+        assertTrue("huge image payload must still parse", root != null)
+        val item = MiniJson.asObject(root!!["item"])
+        assertEquals("user", MiniJson.string(item, "role"))
+        val content = MiniJson.asArray(item?.get("content"))
+        val part = MiniJson.asObject(content?.firstOrNull())
+        assertEquals("input_image", MiniJson.string(part, "type"))
+        assertTrue(MiniJson.string(part, "image_url")?.endsWith(hugeBase64) == true)
+    }
+
+    @Test
+    fun sendUserTextWithHostileKoreanProducesParseableUserMessage() {
+        val factory = FakeFactory()
+        val transport = OpenAiRealtimeTransport(successProvider(), factory)
+        transport.connect()
+        factory.lastListener?.onOpen()
+
+        val hostileText = "\"이거 뭐야\"\n줄바꿈과 \\backslash\\ 포함, 탭\t끝"
+        assertTrue(transport.sendUserText(hostileText))
+
+        val root = MiniJson.asObject(MiniJson.parse(factory.socket.sent.last()))
+        assertTrue(root != null)
+        val item = MiniJson.asObject(root!!["item"])
+        assertEquals("user", MiniJson.string(item, "role"))
+        val content = MiniJson.asArray(item?.get("content"))
+        val part = MiniJson.asObject(content?.firstOrNull())
+        assertEquals(hostileText, MiniJson.string(part, "text"))
+    }
+
+    @Test
+    fun toolCallAfterSocketLossDoesNotResurrectStaleResponseActiveCancel() {
+        val factory = FakeFactory()
+        val listener = RecordingListener()
+        val transport = OpenAiRealtimeTransport(successProvider(), factory, listener = listener)
+        transport.connect()
+        factory.lastListener?.onOpen()
+        factory.lastListener?.onMessage("""{"type":"response.created"}""")
+
+        factory.lastListener?.onFailure(RuntimeException("dropped mid-response"))
+
+        // A racing tool-call event still lands after the failure callback.
+        factory.lastListener?.onMessage(
+            """{"type":"response.output_item.done","item":{"type":"function_call",""" +
+                """"name":"capture_photo","call_id":"call_late"}}""",
+        )
+        assertEquals(listOf("capture_photo" to "call_late"), listener.toolCalls)
+
+        factory.socket.sent.clear()
+        transport.sendInstructions("continue")
+
+        assertTrue(
+            "a tool call landing after socket loss must not resurrect a stale response.cancel",
+            factory.socket.sent.none { it.contains("response.cancel") },
+        )
+    }
+
+    @Test
+    fun aCorruptImagePayloadCannotDesyncTheEventJson() {
+        // Not reachable through the camera — base64 has no quotes — but the failure mode is
+        // the one that already cost a session: malformed JSON is discarded server-side while
+        // the socket stays open, so nothing looks wrong locally.
+        val transport = OpenAiRealtimeTransport(successProvider(), FakeFactory())
+        val json = transport.buildImageItemJson("""abc"injected\\and\nnewline""")
+
+        val root = com.woolab.lumella.util.MiniJson.asObject(com.woolab.lumella.util.MiniJson.parse(json))
+        assertTrue("image item did not parse: $json", root != null)
     }
 }
