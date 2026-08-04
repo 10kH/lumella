@@ -63,7 +63,10 @@ object RightTapRules {
         // tap, so 2.5s was unreachable by construction — the screen promised one more tap
         // while the code only honoured it for 400ms. Someone reading the prompt and tapping
         // at a normal 500-800ms reaction got a turn instead, prompt silently gone.
-        nowMs < exitArmedUntilMs -> RightTap.ConfirmExit
+        // The arm's lifetime is part of the rule, not something the caller is trusted to
+        // enforce. Bounded here too, a confirm cannot be reached by a tap that arrives long
+        // after the prompt — including from a caller that forgets to clear the deadline.
+        nowMs < exitArmedUntilMs && sinceLastTapMs <= EXIT_CONFIRM_WINDOW_MS -> RightTap.ConfirmExit
         sinceLastTapMs >= DOUBLE_TAP_INTERVAL_MS -> RightTap.EndTurn
         else -> RightTap.ArmExit
     }
