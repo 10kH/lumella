@@ -890,7 +890,6 @@ class OpenAiRealtimeTransportTest {
             """{"type":"response.output_item.done","item":{"type":"reasoning","name":"capture_photo","call_id":"call_y"}}""",
         )
 
-        assertTrue("no hostile item may crash the socket loop", true) // reaching here IS the crash assertion
         assertTrue("none of these may reach onToolCall", listener.toolCalls.isEmpty())
     }
 
@@ -1049,5 +1048,199 @@ class OpenAiRealtimeTransportTest {
 
         val root = com.woolab.lumella.util.MiniJson.asObject(com.woolab.lumella.util.MiniJson.parse(json))
         assertTrue("image item did not parse: $json", root != null)
+    }
+
+    // --- Continuation in-flight guard (review finding 4): server VAD can open a new turn
+    // during the camera window before the tool-call continuation fires. ---
+
+    @Test
+    fun requestResponseContinuationCancelsAnActiveResponseFirstAndStaysBare() {
+        val factory = FakeFactory()
+        val transport = OpenAiRealtimeTransport(successProvider(), factory)
+        transport.connect()
+        factory.lastListener?.onOpen()
+        // Server VAD opened a new turn while the photo answer was still pending.
+        factory.lastListener?.onMessage("""{"type":"response.created"}""")
+        factory.socket.sent.clear()
+
+        val sent = transport.requestResponseContinuation()
+
+        assertTrue(sent)
+        assertEquals(listOf("""{"type":"response.cancel"}"""), factory.socket.sent.dropLast(1))
+        val last = MiniJson.asObject(MiniJson.parse(factory.socket.sent.last()))
+        assertEquals("response.create", MiniJson.string(last, "type"))
+        assertTrue(
+            "continuation must stay a bare response.create even when it cancelled first",
+            last != null && !last.containsKey("response"),
+        )
+    }
+
+    @Test
+    fun requestResponseContinuationWithNoActiveResponseSkipsCancel() {
+        val factory = FakeFactory()
+        val transport = OpenAiRealtimeTransport(successProvider(), factory)
+        transport.connect()
+        factory.lastListener?.onOpen()
+        factory.socket.sent.clear()
+
+        assertTrue(transport.requestResponseContinuation())
+
+        assertEquals("""{"type":"response.create"}""", factory.socket.sent.single())
+    }
+
+    @Test
+    fun requestResponseContinuationFailureReportsErrorInsteadOfDiscardingTheBoolean() {
+        val listener = RecordingListener()
+        val transport = OpenAiRealtimeTransport(successProvider(), FakeFactory(), listener = listener)
+
+        val sent = transport.requestResponseContinuation()
+
+        assertFalse(sent)
+        assertTrue(listener.errors.any { it.contains("requestResponseContinuation failed") })
+    }
+
+    @Test
+    fun sendFunctionCallOutputCountsAsActivityAndReportsSendFailure() {
+        val factory = FakeFactory()
+        val listener = RecordingListener()
+        val idleTasks = mutableListOf<() -> Unit>()
+        val transport = OpenAiRealtimeTransport(
+            successProvider(),
+            factory,
+            listener = listener,
+            idleScheduler = { _, task -> idleTasks.add(task) },
+        )
+        transport.connect() // idle task #0 armed by connect()/noteActivity()
+        factory.lastListener?.onOpen()
+
+        transport.sendFunctionCallOutput("call_abc", "ok")
+
+        // A tool round trip is activity: a fresh idle task must have been armed on top of
+        // connect()'s, invalidating the earlier one.
+        assertTrue(idleTasks.size >= 2)
+
+        val failingListener = RecordingListener()
+        val disconnected = OpenAiRealtimeTransport(successProvider(), FakeFactory(), listener = failingListener)
+        val sent = disconnected.sendFunctionCallOutput("call_abc", "ok")
+
+        assertFalse(sent)
+        assertTrue(failingListener.errors.any { it.contains("sendFunctionCallOutput failed") })
+    }
+
+    // --- session.updated confirmation (review finding 5): session.created fires BEFORE the
+    // server has processed session.update, so a rejected update must not stay invisible. ---
+
+    @Test
+    fun sessionUpdatedEchoingInstructionsAndToolsKeepsTheSessionHealthy() {
+        val factory = FakeFactory()
+        val listener = RecordingListener()
+        val transport = OpenAiRealtimeTransport(successProvider(), factory, listener = listener)
+        transport.connect()
+        factory.lastListener?.onOpen()
+
+        factory.lastListener?.onMessage(
+            """{"type":"session.updated","session":{"instructions":"be a tutor",""" +
+                """"tools":[{"type":"function","name":"capture_photo"}]}}""",
+        )
+
+        assertTrue(transport.sessionReady)
+        assertTrue(listener.statuses.contains(RealtimeConnectionStatus.READY))
+        assertFalse(listener.statuses.contains(RealtimeConnectionStatus.DEGRADED))
+        assertTrue(listener.errors.isEmpty())
+    }
+
+    @Test
+    fun sessionUpdatedMissingInstructionsAndToolsReportsDegradedNamingWhatsMissing() {
+        val factory = FakeFactory()
+        val listener = RecordingListener()
+        val transport = OpenAiRealtimeTransport(successProvider(), factory, listener = listener)
+        transport.connect()
+        factory.lastListener?.onOpen()
+
+        // The stray-brace class of bug: the server accepted the socket message but the
+        // echoed session carries no persona and no tools.
+        factory.lastListener?.onMessage(
+            """{"type":"session.updated","session":{"instructions":"","tools":[]}}""",
+        )
+
+        assertTrue(listener.statuses.contains(RealtimeConnectionStatus.DEGRADED))
+        assertTrue(
+            "error must name what's missing",
+            listener.errors.any { it.contains("instructions") && it.contains("tools") },
+        )
+        // Additive, not a hard gate: the socket/session are not torn down over this.
+        assertTrue(transport.sessionReady)
+    }
+
+    @Test
+    fun sessionUpdatedMissingOnlyToolsNamesOnlyTools() {
+        val factory = FakeFactory()
+        val listener = RecordingListener()
+        val transport = OpenAiRealtimeTransport(successProvider(), factory, listener = listener)
+        transport.connect()
+        factory.lastListener?.onOpen()
+
+        factory.lastListener?.onMessage(
+            """{"type":"session.updated","session":{"instructions":"be a tutor","tools":[]}}""",
+        )
+
+        val message = listener.errors.single { it.contains("session.update confirmation incomplete") }
+        assertTrue(message.contains("tools"))
+        assertFalse(message.contains("instructions"))
+    }
+
+    @Test
+    fun sessionCreatedOnlyStillReachesReadyWithoutAnySessionUpdatedTests() {
+        // Regression: several existing tests drive session.created only, never session.updated
+        // — the new confirmation check must not turn those into DEGRADED/stalled sessions.
+        val factory = FakeFactory()
+        val listener = RecordingListener()
+        val transport = OpenAiRealtimeTransport(successProvider(), factory, listener = listener)
+        transport.connect()
+        factory.lastListener?.onOpen()
+
+        factory.lastListener?.onMessage("""{"type":"session.created"}""")
+
+        assertTrue(transport.sessionReady)
+        assertTrue(listener.statuses.contains(RealtimeConnectionStatus.READY))
+        assertFalse(listener.statuses.contains(RealtimeConnectionStatus.DEGRADED))
+        assertTrue(listener.errors.isEmpty())
+    }
+
+    @Test
+    fun errorEventEchoingTheSessionUpdateEventIdReportsDegraded() {
+        // The server can also reject the session.update by answering an `error` event whose
+        // inner event_id names the client event that failed, rather than by omitting fields
+        // from session.updated.
+        val factory = FakeFactory()
+        val listener = RecordingListener()
+        val transport = OpenAiRealtimeTransport(successProvider(), factory, listener = listener)
+        transport.connect()
+        factory.lastListener?.onOpen()
+        val sentSessionUpdate = MiniJson.asObject(MiniJson.parse(factory.socket.sent.single()))
+        val eventId = MiniJson.string(sentSessionUpdate, "event_id")
+        assertTrue(eventId != null)
+
+        factory.lastListener?.onMessage(
+            """{"type":"error","error":{"type":"invalid_request_error","code":"invalid_session_config",""" +
+                """"message":"bad session.update","event_id":"$eventId"}}""",
+        )
+
+        assertTrue(listener.statuses.contains(RealtimeConnectionStatus.DEGRADED))
+    }
+
+    @Test
+    fun errorEventForAnUnrelatedEventIdDoesNotReportDegraded() {
+        val factory = FakeFactory()
+        val listener = RecordingListener()
+        val transport = OpenAiRealtimeTransport(successProvider(), factory, listener = listener)
+        transport.connect()
+        factory.lastListener?.onOpen()
+
+        factory.lastListener?.onMessage(
+            """{"type":"error","error":{"code":"some_transient_thing","event_id":"unrelated_evt"}}""",
+        )
+
+        assertFalse(listener.statuses.contains(RealtimeConnectionStatus.DEGRADED))
     }
 }

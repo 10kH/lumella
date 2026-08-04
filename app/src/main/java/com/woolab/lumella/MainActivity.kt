@@ -134,6 +134,9 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
      */
     private val heardSpeechThisTurn = java.util.concurrent.atomic.AtomicBoolean(false)
 
+    /** Answers the model's tool calls and keeps repeated looking bounded. @see CapturePolicy */
+    private val capturePolicy = CapturePolicy()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -223,12 +226,16 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
                 }
 
                 override fun onToolCall(name: String, callId: String) {
-                    if (name != "capture_photo") {
-                        Log.w(TAG, "알 수 없는 도구 호출: $name")
-                        return
+                    when (val decision = capturePolicy.decide(name)) {
+                        is CapturePolicy.Decision.Refuse -> {
+                            Log.w(TAG, "도구 호출 거절: $name (${decision.reason})")
+                            answerToolCall(callId, decision.payload)
+                        }
+                        CapturePolicy.Decision.Capture -> {
+                            Log.i(TAG, "음성 명령: 사진 촬영 (call_id=$callId)")
+                            runOnUiThread { capturePhoto(toolCallId = callId) }
+                        }
                     }
-                    Log.i(TAG, "음성 명령: 사진 촬영 (call_id=$callId)")
-                    runOnUiThread { capturePhoto(toolCallId = callId) }
                 }
 
                 override fun onSpeechStarted() {
@@ -416,7 +423,12 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
      */
     private fun toggleSpeechTurn() {
         if (voiceTransportUnavailable) {
+            // Every right-tap branch must show something. A tap that changes nothing reads as
+            // a tap that missed, so the wearer taps again — and a second right tap inside
+            // DOUBLE_TAP_INTERVAL_MS quits the app. Silence here is how a routine state turns
+            // into "it just closed on me".
             Log.w(TAG, "Ignoring right-tap: realtime transport unavailable (TOKEN-FAIL)")
+            runOnUiThread { updateStatus("연결 정보를 못 받았어요", "#FF5252") }
             return
         }
         if (audioCapture.isRecording) {
@@ -435,7 +447,10 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
                 updateStatus("Connecting...", "#9C27B0")
                 slowPathExecutor.execute { transport.connect() }
             } else {
+                // Reconnecting is routine — the realtime session recycles every 60 minutes —
+                // so this is the branch a wearer is most likely to tap into repeatedly.
                 Log.w(TAG, "Ignoring right-tap: realtime session not ready")
+                runOnUiThread { updateStatus("연결 중이에요 · 잠시만", "#9C27B0") }
             }
         } else {
             transport.resetAppendedChunkCounter()
@@ -460,7 +475,14 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
      */
     private fun beginTurn(vadDriven: Boolean) {
         val chunks = transport.appendedChunksSinceCommit
-        if (!vadDriven && !heardSpeechThisTurn.get()) {
+        // One atomic gate for both callers. beginTurn is reached from the websocket reader
+        // thread (VAD closing a turn) and the touch thread (a tap), and the common case is
+        // precisely the race: the wearer taps because they have finished talking, the same
+        // instant the 700ms silence window expires. Checking and clearing separately let both
+        // through, and the second response.create cancels the reply already in flight — the
+        // tutor starts a sentence, cuts itself off, and starts again.
+        val hadSpeech = heardSpeechThisTurn.getAndSet(false)
+        if (!vadDriven && !hadSpeech) {
             // A tap before saying anything used to ask for a response anyway, and the tutor
             // would start talking to itself. A tap means "I am done", not "your turn".
             //
@@ -471,7 +493,12 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
             runOnUiThread { updateStatus("아직 들은 말이 없어요", "#FFC107") }
             return
         }
-        heardSpeechThisTurn.set(false)
+        if (vadDriven && !hadSpeech) {
+            // VAD closed a turn the gate had already handed to a tap. One utterance, one turn.
+            Log.i(TAG, "이미 발행된 턴 - VAD 종료 중복 무시")
+            return
+        }
+        capturePolicy.onLearnerSpoke()
         if (vadDriven) {
             // The server commits the buffer itself when VAD closes a turn. Committing again
             // asks it to commit an empty buffer, which it rejects — and the wearer sees an
@@ -494,6 +521,23 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
     }
 
     /**
+     * Answers a tool call and lets the reply resume.
+     *
+     * A tool call ends the response that emitted it, so the model waits until this arrives —
+     * every exit from a tool-driven path has to reach here, failures included.
+     *
+     * Sent straight from the calling thread, NOT through slowPathExecutor. That executor is
+     * single-threaded with luma's image analysis queued on it behind each capture, ceiling
+     * 45s, so answering there put the model's tool result in line behind the slow path and
+     * the wearer waited for it: 7.8s from photo sent to first audio, against 0.6s once it was
+     * moved off. The websocket send is non-blocking and thread-safe and needs no executor.
+     */
+    private fun answerToolCall(callId: String, result: String) {
+        transport.sendFunctionCallOutput(callId, result)
+        transport.requestResponseContinuation()
+    }
+
+    /**
      * Keeps the exact frame handed to the model, so a description can be checked against what
      * was really in front of the camera. Without it there is no way to separate an accurate
      * answer from a confident invention — the failure this path exists to prevent, and one
@@ -513,20 +557,9 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
     /** Left tap: photo capture. Analysis is async (45s ceiling tolerated by TutorBrain callers); the fast path keeps talking. */
     private fun capturePhoto(toolCallId: String? = null) {
         updateStatus("Capturing...", "#9C27B0")
-        // A tool call leaves the model waiting: its response already ended when it emitted
-        // the call, so nothing resumes until the app answers and asks for a continuation.
-        // Every exit from here has to do that, including the failures.
-        //
-        // Sent straight from the calling thread, NOT through slowPathExecutor. That executor
-        // is single-threaded and the luma image analysis is queued on it right behind this
-        // capture, with a 45s ceiling — so queuing the answer there put the model's tool
-        // result in line behind the slow path and the wearer waited for it. Measured before
-        // this change: 7.8s from photo sent to first audio. The websocket send is
-        // non-blocking and thread-safe, so it needs no executor of its own.
         fun answerToolCall(result: String) {
             val callId = toolCallId ?: return
-            transport.sendFunctionCallOutput(callId, result)
-            transport.requestResponseContinuation()
+            answerToolCall(callId, result)
         }
         camera.captureImage(
             onCaptured = { bytes ->
@@ -537,12 +570,18 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
                     val base64 = ImageEncoder.toDownscaledBase64Jpeg(bytes)
                     if (base64 == null) {
                         Log.w(TAG, "image encode failed; realtime model will not see this photo")
+                        // Left with no status update the glasses sat on "Capturing..." for good.
+                        runOnUiThread { updateStatus("사진을 못 만들었어요", "#FF5252") }
                         answerToolCall("""{"status":"error","reason":"encode_failed"}""")
                     } else {
                         saveFrameTheModelSaw(base64)
                         val ok = transport.sendUserImage(base64)
                         Log.i(TAG, "photo -> realtime model: chars=${base64.length} sent=$ok")
-                        answerToolCall("""{"status":"ok"}""")
+                        // Reporting ok on a failed send puts the model in exactly the state
+                        // this path exists to prevent: told it looked, with nothing to look at.
+                        answerToolCall(
+                            if (ok) """{"status":"ok"}""" else """{"status":"error","reason":"send_failed"}""",
+                        )
                     }
                 }
                 // 2) And send it to luma for the coach's structured visual evidence.
@@ -563,8 +602,11 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
                             }
                         }
                     } catch (e: Exception) {
-                        Log.w(TAG, "analyzeImage failed: ${e.message}")
-                        runOnUiThread { updateStatus("Capture failed", "#FF0000") }
+                        // Only the coach's caption failed. The photo already reached the
+                        // realtime model and the tutor is about to describe it correctly, so
+                        // showing the wearer a red "capture failed" describes nothing they
+                        // experienced. Degrade quietly, exactly as a luma outage does elsewhere.
+                        Log.w(TAG, "analyzeImage failed (voice answer unaffected): ${e.message}")
                     }
                 }
             },

@@ -160,6 +160,41 @@ adb logcat -d -s lumella:V | grep -iE "lifecycle|cameraState|capture"
 ```
 `lifecycle=RESUMED`와 `cameraState=OPEN`이 보이면 정상 경로다.
 
+## 3-1. 착용·마이크 없이 검증하는 법 (디버그 브로드캐스트 3종 + `model-saw.jpg`)
+
+`adb shell screencap`이 이 기기에서 검은 화면만 준다는 것(`ops/screen-dump.sh` 헤더 참고)과
+안경을 쓰지 않으면 마이크가 0.00ms 오디오를 반환한다는 것(§5)을 합치면, 착용도 발화도 못 하는
+상태에서 음성 대화 로직을 어떻게 검증하냐는 문제가 남는다. 디버그 빌드에만 등록되는 브로드캐스트
+훅 3종이 그 답이다. `DEBUG_CAPTURE_PHOTO`(§3) 외에 세 개가 더 있다:
+
+```bash
+# 학습자 발화 없이 한 턴을 실제로 돌린다 (마이크 우회, 실제 모델 호출)
+adb shell am broadcast -a com.woolab.lumella.DEBUG_SAY --es text "'이 방에 대해 이야기해 줘.'"
+
+# 카메라 대신 파일의 사진을 모델에게 보여준다
+adb shell am broadcast -a com.woolab.lumella.DEBUG_SEE --es path /sdcard/test.jpg
+adb shell am broadcast -a com.woolab.lumella.DEBUG_SEE --es path /sdcard/test.jpg --es ask "'사진 속 색을 말해줘.'"
+
+# 착용자 없이 자막 레이아웃만 확인한다 (샘플 텍스트로 채움)
+adb shell am broadcast -a com.woolab.lumella.DEBUG_SUBTITLE
+```
+
+**안쪽 따옴표는 필수다.** `am`은 인자를 공백 기준으로 쪼개므로, `--es text` 값 안에 공백이
+있으면 `'...'`로 한 번 더 감싸지 않으면 첫 단어만 전달된다.
+
+`DEBUG_SEE`(그리고 실제 `capture_photo` 경로)를 쓰는 디버그 빌드는 모델에게 실제로 보여준
+다운스케일 프레임을 매 턴 `/storage/emulated/0/Android/data/com.woolab.lumella/files/model-saw.jpg`에
+저장한다. `adb pull`로 이 파일을 받아 눈으로 보는 것이, 모델이 **정확하게 묘사한 것**인지
+**자신 있게 지어낸 것**인지 구분하는 유일한 방법이다 — 로그의 캡션 텍스트만으로는 둘을 구별할
+수 없다. 실제로 2026-08-05에 이 실패를 그대로 겪었다: 캄캄한 방에서 사진 한 장 찍지 않고도
+"책상 위에 노트북과 커피잔이 있다"는 캡션을 완전한 확신으로 냈다. 이 실패가 `capture_photo`를
+언급하고 지어낸 묘사를 금지하는 페르소나 문구(`OpenAiRealtimeTransport.DEFAULT_SESSION_INSTRUCTIONS`)의
+직접적인 계기였다.
+
+```bash
+adb pull /storage/emulated/0/Android/data/com.woolab.lumella/files/model-saw.jpg
+```
+
 ## 4-1. Mercury SDK가 요구하는 런타임 의존성 (누락 시 슬라이드에서 크래시)
 
 `BaseMirrorActivity`를 상속하면 SDK의 터치 파이프라인(`BaseEventActivity.mappingAction`)이

@@ -145,6 +145,12 @@ class OpenAiRealtimeTransport(
             "invalid_api_key",
             "account_deactivated",
         )
+        /**
+         * `event_id` stamped on the one `session.update` sent per socket open, so a server
+         * `error` event that echoes it back can be recognized as "the persona/tools update
+         * itself was rejected" rather than an unrelated turn-level error (review finding 5).
+         */
+        internal const val SESSION_UPDATE_EVENT_ID = "lumella_session_update"
 
         private val defaultIdleExecutor: java.util.concurrent.ScheduledExecutorService by lazy {
             java.util.concurrent.Executors.newSingleThreadScheduledExecutor(
@@ -280,15 +286,22 @@ class OpenAiRealtimeTransport(
 
     /** D-4 ONLY channel: composes `response.create` with [instructions] and sends it. */
     override fun sendInstructions(instructions: String) {
-        // Tapping to speak while the tutor is still answering produced
-        // `conversation_already_has_active_response` and the new turn was dropped. A tap
-        // during a response means "interrupt", so cancel the in-flight one first.
+        cancelActiveResponseIfAny()
+        if (!sendRaw(buildResponseCreateJson(instructions))) {
+            listener.onError("sendInstructions failed: socket unavailable")
+        }
+    }
+
+    /**
+     * Cancels an in-flight response before a new `response.create` goes out. Tapping to speak
+     * (or a tool-call continuation, see [requestResponseContinuation]) while the tutor is still
+     * answering produced `conversation_already_has_active_response` and the new turn/answer was
+     * silently dropped — both callers mean "interrupt", so both cancel first.
+     */
+    private fun cancelActiveResponseIfAny() {
         if (responseActive) {
             sendRaw("""{"type":"response.cancel"}""")
             responseActive = false
-        }
-        if (!sendRaw(buildResponseCreateJson(instructions))) {
-            listener.onError("sendInstructions failed: socket unavailable")
         }
     }
 
@@ -332,17 +345,39 @@ class OpenAiRealtimeTransport(
      * Answers a tool call. Like [sendUserImage] this is not brain output, so it stays off the
      * single-method transport interface that keeps steering text on one channel.
      */
-    fun sendFunctionCallOutput(callId: String, output: String): Boolean =
-        sendRaw(
+    fun sendFunctionCallOutput(callId: String, output: String): Boolean {
+        val sent = sendRaw(
             """{"type":"conversation.item.create","item":{"type":"function_call_output",""" +
                 """"call_id":${jsonString(callId)},"output":${jsonString(output)}}}""",
         )
+        if (sent) {
+            noteActivity()
+        } else {
+            listener.onError("sendFunctionCallOutput failed: socket unavailable")
+        }
+        return sent
+    }
 
     /**
      * Resumes a response after a tool call. The original response already reached
      * response.done when it emitted the function_call item, so nothing continues on its own.
+     *
+     * Server VAD can open a NEW turn (`response.created`) during the 1-5s camera window before
+     * this fires — without the same in-flight guard [sendInstructions] uses, the continuation's
+     * `response.create` collides with it and the server answers
+     * `conversation_already_has_active_response`, silently dropping the photo answer (review
+     * finding 4). Routed through [buildResponseCreateJson] with blank instructions so the
+     * emitted event stays a BARE `response.create` — the original response already ended, so
+     * there is nothing to steer.
      */
-    fun requestResponseContinuation(): Boolean = sendRaw("""{"type":"response.create"}""")
+    fun requestResponseContinuation(): Boolean {
+        cancelActiveResponseIfAny()
+        val sent = sendRaw(buildResponseCreateJson(""))
+        if (!sent) {
+            listener.onError("requestResponseContinuation failed: socket unavailable")
+        }
+        return sent
+    }
 
     /** Resets the per-turn audio counter; call after reading it at commit time. */
     fun resetAppendedChunkCounter() {
@@ -472,12 +507,29 @@ class OpenAiRealtimeTransport(
         val obj = MiniJson.asObject(MiniJson.parse(text)) ?: return
         val type = MiniJson.string(obj, "type") ?: return
         when (RealtimeServerEventTypes.kindOf(type)) {
-            RealtimeServerEventKind.SESSION_CREATED,
-            RealtimeServerEventKind.SESSION_UPDATED,
-            -> {
+            RealtimeServerEventKind.SESSION_CREATED -> {
                 sessionReady = true
                 reconnectDelayMs = RECONNECT_BASE_DELAY_MS
                 listener.onStatus(RealtimeConnectionStatus.READY)
+            }
+            RealtimeServerEventKind.SESSION_UPDATED -> {
+                // session.created (above) fires BEFORE the server has even looked at the
+                // session.update we sent on open, so READY there means only "socket is up",
+                // not "persona/tools/VAD actually landed". A rejected update (one stray brace
+                // shipped this exact bug on 2026-08-05) leaves the session running on server
+                // defaults while the UI still says "Ready" — additive, not a hard gate: this
+                // can only ever demote an already-READY session, never block it.
+                sessionReady = true
+                reconnectDelayMs = RECONNECT_BASE_DELAY_MS
+                listener.onStatus(RealtimeConnectionStatus.READY)
+                val missing = missingConfirmedSessionFields(MiniJson.asObject(obj["session"]))
+                if (missing.isNotEmpty()) {
+                    listener.onStatus(RealtimeConnectionStatus.DEGRADED)
+                    listener.onError(
+                        "session.update confirmation incomplete: missing " +
+                            "${missing.joinToString(", ")} — session may be running on server defaults",
+                    )
+                }
             }
             RealtimeServerEventKind.AUDIO_DELTA -> {
                 MiniJson.string(obj, "delta")?.let(listener::onAudioDelta)
@@ -511,6 +563,12 @@ class OpenAiRealtimeTransport(
                     closedByClient = true
                     listener.onStatus(RealtimeConnectionStatus.ACCOUNT_BLOCKED)
                 }
+                if (MiniJson.string(MiniJson.asObject(obj["error"]), "event_id") == SESSION_UPDATE_EVENT_ID) {
+                    // The server rejected the one session.update we sent on open — same
+                    // "Ready but on server defaults" failure as an incomplete session.updated,
+                    // just surfaced from the error side instead of the confirmation side.
+                    listener.onStatus(RealtimeConnectionStatus.DEGRADED)
+                }
                 listener.onError(text)
             }
             else -> Unit
@@ -525,6 +583,21 @@ class OpenAiRealtimeTransport(
      */
     internal fun isFatalAccountError(eventText: String): Boolean =
         FATAL_ACCOUNT_ERROR_CODES.any { eventText.contains("\"code\":\"$it\"") }
+
+    /**
+     * Checks a `session.updated` event's echoed `session` object for the fields the app
+     * actually relies on. Missing/blank `instructions` or an empty/absent `tools` array means
+     * the update the app sent was rejected or silently trimmed — the persona and the
+     * capture_photo tool are both load-bearing, so either gap leaves the session on server
+     * defaults with no visible symptom (review finding 5).
+     */
+    internal fun missingConfirmedSessionFields(session: Map<String, Any?>?): List<String> {
+        if (session == null) return listOf("session")
+        val missing = mutableListOf<String>()
+        if (MiniJson.string(session, "instructions").isNullOrBlank()) missing.add("instructions")
+        if (MiniJson.asArray(session["tools"]).isNullOrEmpty()) missing.add("tools")
+        return missing
+    }
 
     // --- Event JSON composition (internal for unit-test visibility) ---
 
@@ -544,7 +617,7 @@ class OpenAiRealtimeTransport(
             """asks you to look at something in front of them.",""" +
             """"parameters":{"type":"object","properties":{},"required":[]}}],""" +
             """"tool_choice":"auto"}"""
-        return """{"type":"session.update","session":$session}"""
+        return """{"type":"session.update","event_id":${jsonString(SESSION_UPDATE_EVENT_ID)},"session":$session}"""
     }
 
     internal fun buildResponseCreateJson(instructions: String): String =
