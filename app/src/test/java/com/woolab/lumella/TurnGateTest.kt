@@ -88,13 +88,21 @@ class TurnGateTest {
     }
 
     @Test
-    fun `arming does not fabricate speech, and speech does not arm an exit`() {
+    fun `arming an exit does not fabricate speech`() {
         val gate = TurnGate()
         gate.armExit(deadlineMs = 10_000L)
-        assertFalse(gate.claimSpeech())
+        assertFalse("a pending exit is not an utterance", gate.claimSpeech())
+    }
 
-        val other = TurnGate()
-        other.onSpeechDetected()
-        assertEquals(0L, other.exitDeadlineMs())
+    @Test
+    fun `speech cancels an arm that is already pending, not merely one set later`() {
+        // The weaker version of this asserted that a fresh gate has no deadline after speech,
+        // which is true whether or not onSpeechDetected clears anything — it could not fail
+        // for the mutation it looked like it was guarding.
+        val gate = TurnGate()
+        gate.armExit(deadlineMs = 10_000L)
+        assertEquals(10_000L, gate.exitDeadlineMs())
+        gate.onSpeechDetected()
+        assertEquals("speaking must cancel a pending exit", 0L, gate.exitDeadlineMs())
     }
 }

@@ -76,6 +76,7 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
         private const val DEBUG_SAY_ACTION = "com.woolab.lumella.DEBUG_SAY"
         /** Shows the model a picture from a file path, bypassing the camera. */
         private const val DEBUG_SEE_ACTION = "com.woolab.lumella.DEBUG_SEE"
+        private const val DEBUG_EVENT_ACTION = "com.woolab.lumella.DEBUG_EVENT"
         /** Short timeout for the boot-time remote config fetch — must never stall app boot. */
         private const val REMOTE_CONFIG_TIMEOUT_MS = 3_000
     }
@@ -346,6 +347,7 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
                     addAction(DEBUG_SUBTITLE_ACTION)
                     addAction(DEBUG_SAY_ACTION)
                     addAction(DEBUG_SEE_ACTION)
+                    addAction(DEBUG_EVENT_ACTION)
                 },
                 // Only a sender holding DUMP may reach these. The receiver has to stay
                 // exported — `adb shell am broadcast` is the whole point of it, and the glasses
@@ -853,6 +855,21 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
                                 runOnUiThread { publishLearnerTurn() }
                             }
                             runOnUiThread { updateUserEcho(said) }
+                        }
+                        DEBUG_EVENT_ACTION -> {
+                            // Drives the VAD path without a wearer, so the speech gate can be
+                            // shown to OPEN and not merely to stay shut.
+                            when (intent.getStringExtra("json")) {
+                                "speech_started" -> {
+                                    Log.i(TAG, "debug: 음성 감지 주입")
+                                    turnGate.onSpeechDetected()
+                                }
+                                "speech_stopped" -> {
+                                    Log.i(TAG, "debug: 음성 종료 주입")
+                                    beginTurn(vadDriven = true)
+                                }
+                                else -> Log.w(TAG, "debug: 알 수 없는 이벤트")
+                            }
                         }
                         DEBUG_SEE_ACTION -> {
                             // Shows the model a known picture from a file, so "does it
