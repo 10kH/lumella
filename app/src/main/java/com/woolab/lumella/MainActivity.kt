@@ -290,6 +290,10 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
                 override fun onSpeechStarted() {
                     Log.i(TAG, "음성 감지됨 (VAD)")
                     heardSpeechThisTurn.set(true)
+                    // Talking to the tutor is not trying to leave. Without this an accidental
+                    // double tap stays armed while the wearer speaks, and the ordinary tap
+                    // that ends their turn quits the app instead.
+                    exitArmedUntilMs = 0L
                     runOnUiThread {
                         updateStatus(listeningLabel(), "#FF5722")
                         clearSubtitle()

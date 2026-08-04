@@ -63,9 +63,16 @@ object RightTapRules {
         // tap, so 2.5s was unreachable by construction — the screen promised one more tap
         // while the code only honoured it for 400ms. Someone reading the prompt and tapping
         // at a normal 500-800ms reaction got a turn instead, prompt silently gone.
-        // The arm's lifetime is part of the rule, not something the caller is trusted to
-        // enforce. Bounded here too, a confirm cannot be reached by a tap that arrives long
-        // after the prompt — including from a caller that forgets to clear the deadline.
+        // Checked before the gap, so a wearer reading the prompt and reacting at a normal
+        // human pace is honoured rather than silently given a turn. Bounded here rather than
+        // trusting the caller to clear a deadline.
+        //
+        // The danger of checking it first is that it swallows ordinary taps too, and the
+        // ordinary tap in hands-free is "I have finished speaking" — so an accidental double
+        // tap could be followed by a perfectly normal turn-ending tap and quit the app
+        // mid-conversation. The caller therefore disarms the moment the wearer speaks: someone
+        // who is talking to the tutor is not trying to leave. That is an intent signal, and it
+        // is more reliable than any amount of time.
         nowMs < exitArmedUntilMs && sinceLastTapMs <= EXIT_CONFIRM_WINDOW_MS -> RightTap.ConfirmExit
         sinceLastTapMs >= DOUBLE_TAP_INTERVAL_MS -> RightTap.EndTurn
         else -> RightTap.ArmExit
