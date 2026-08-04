@@ -63,10 +63,7 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
         private const val TAG = "lumella"
         private const val RIGHT_TOUCHPAD_DEVICE = "cyttsp5_mt"
         private const val LEFT_TOUCHPAD_DEVICE = "cyttsp6_mt"
-        private const val TAP_MAX_DURATION_MS = 500L
-        private const val DOUBLE_TAP_INTERVAL_MS = 400L
         /** Contact shorter than this is capacitive noise, not a finger (observed bounce: 6ms). */
-        private const val MIN_TAP_DURATION_MS = 40L
         private const val PERMISSION_REQUEST_CODE = 1001
         /** Debug-only broadcast that triggers the photo path without a touchpad tap. */
         private const val DEBUG_CAPTURE_ACTION = "com.woolab.lumella.DEBUG_CAPTURE_PHOTO"
@@ -133,6 +130,9 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
      * Only VAD can tell speech from an open mic in a quiet room.
      */
     private val heardSpeechThisTurn = java.util.concurrent.atomic.AtomicBoolean(false)
+
+    /** Deadline until which a further right tap means "yes, really quit". */
+    private var exitArmedUntilMs = 0L
 
     /** Answers the model's tool calls and keeps repeated looking bounded. @see CapturePolicy */
     private val capturePolicy = CapturePolicy()
@@ -373,35 +373,39 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
                     val duration = System.currentTimeMillis() - lastTouchDownTimeMs
                     Log.i(TAG, "touch UP device='${lastTouchDeviceName}' duration=${duration}ms")
                     when {
-                        lastTouchDeviceName == RIGHT_TOUCHPAD_DEVICE && duration < TAP_MAX_DURATION_MS -> {
+                        lastTouchDeviceName == RIGHT_TOUCHPAD_DEVICE -> {
                             val now = System.currentTimeMillis()
-                            val sinceLastTap = now - lastRightTapTimeMs
-                            // Any tap counts as user activity for the idle-timeout window (Change
-                            // B), independent of which branch below runs.
+                            // Any tap counts as user activity for the idle-timeout window,
+                            // independent of which branch below runs.
                             if (::transport.isInitialized) transport.noteActivity()
-                            when {
-                                // Contact bounce, not intent. The real discriminator is CONTACT
-                                // DURATION, not the gap between taps: the bounce that killed the
-                                // app mid-turn was 6ms of contact, while every deliberate tap in
-                                // the same session measured 87-222ms. Gating on the gap instead
-                                // made the deliberate double-tap unreachable, because the first
-                                // tap always starts a turn.
-                                duration < MIN_TAP_DURATION_MS -> {
+                            when (
+                                RightTapRules.decide(
+                                    contactMs = duration,
+                                    sinceLastTapMs = now - lastRightTapTimeMs,
+                                    nowMs = now,
+                                    exitArmedUntilMs = exitArmedUntilMs,
+                                )
+                            ) {
+                                RightTap.Ignore -> {
+                                    // Not recorded as a tap: doing so would make the bounce
+                                    // the first half of a phantom double tap.
                                     Log.d(TAG, "Ignoring contact bounce (${duration}ms contact)")
                                     return super.dispatchTouchEvent(ev)
                                 }
-                                sinceLastTap < DOUBLE_TAP_INTERVAL_MS -> {
-                                    // Recorded with the measured gap: a wearer reporting the
-                                    // app "just quit" is otherwise indistinguishable from a
-                                    // fault, and this is the only path that closes it.
-                                    Log.i(TAG, "우측 더블탭 (간격 ${sinceLastTap}ms) - 종료")
+                                RightTap.ArmExit -> {
+                                    exitArmedUntilMs = now + RightTapRules.EXIT_CONFIRM_WINDOW_MS
+                                    Log.i(TAG, "종료 확인 대기")
+                                    updateStatus("한 번 더 누르면 종료", "#FF5252")
+                                }
+                                RightTap.ConfirmExit -> {
+                                    Log.i(TAG, "종료 확인됨")
                                     endSessionAndExit()
                                 }
-                                else -> toggleSpeechTurn()
+                                RightTap.EndTurn -> toggleSpeechTurn()
                             }
                             lastRightTapTimeMs = now
                         }
-                        lastTouchDeviceName == LEFT_TOUCHPAD_DEVICE && duration < TAP_MAX_DURATION_MS -> {
+                        lastTouchDeviceName == LEFT_TOUCHPAD_DEVICE && duration < RightTapRules.MAX_CONTACT_MS -> {
                             if (::transport.isInitialized) transport.noteActivity()
                             capturePhoto()
                         }
@@ -762,11 +766,17 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
                             // Shows the model a known picture from a file, so "does it
                             // describe what it was actually shown" can be checked without
                             // depending on what happens to be in front of the glasses.
-                            val path = intent.getStringExtra("path") ?: return
+                            // Confined to this app's own external files dir. The receiver is
+                            // exported and unpermissioned, so an arbitrary path here would let
+                            // any installed app make lumella read a file with lumella's uid
+                            // and upload it. Debug builds are what runs on the glasses daily.
+                            val name = intent.getStringExtra("path")?.substringAfterLast('/')
+                                ?: return
+                            val file = java.io.File(getExternalFilesDir(null), name)
                             slowPathExecutor.execute {
-                                val bytes = runCatching { java.io.File(path).readBytes() }.getOrNull()
+                                val bytes = runCatching { file.readBytes() }.getOrNull()
                                 if (bytes == null) {
-                                    Log.w(TAG, "debug: 이미지 파일 없음 $path")
+                                    Log.w(TAG, "debug: 이미지 파일 없음 ${file.absolutePath}")
                                     return@execute
                                 }
                                 val base64 = ImageEncoder.toDownscaledBase64Jpeg(bytes)
