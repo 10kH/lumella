@@ -353,6 +353,14 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
                     addAction(DEBUG_SAY_ACTION)
                     addAction(DEBUG_SEE_ACTION)
                 },
+                // Only a sender holding DUMP may reach these. The receiver has to stay
+                // exported — `adb shell am broadcast` is the whole point of it, and the glasses
+                // cannot be screencapped or spoken into remotely — but unpermissioned exported
+                // meant any installed app could trigger the camera, inject an utterance into a
+                // live tutoring session, or make this app upload a file with its own uid. The
+                // shell holds DUMP; an ordinary app cannot get it.
+                android.Manifest.permission.DUMP,
+                null,
                 Context.RECEIVER_EXPORTED,
             )
         }
