@@ -201,6 +201,17 @@ class OpenAiRealtimeTransport(
     @Volatile
     private var toolCallResponseId: String? = null
 
+    /**
+     * Which socket the outstanding tool call arrived on.
+     *
+     * Identity alone cannot answer "is this call still real". After a reconnect the ids are
+     * gone, and treating unknown as "cancel to be safe" kills the live response that started
+     * on the new socket — the very symptom identity tracking exists to prevent, reached by the
+     * machinery meant to prevent it. A call from a dead socket has nothing left to answer, so
+     * the answer is dropped rather than aimed at whatever is running now.
+     */
+    private var toolCallGeneration = -1
+
     /** Serializes the cancel-then-create pair emitted by [sendInstructions] and
      *  [requestResponseContinuation] so the two calls can never interleave — see [responseActive]. */
     private val responseEmitLock = Any()
@@ -338,7 +349,17 @@ class OpenAiRealtimeTransport(
             if (shouldCancel(activeResponseId) && responseActive.getAndSet(false)) {
                 sendRaw("""{"type":"response.cancel"}""")
             }
-            sendRaw(buildResponseCreateJson(instructions))
+            // Claim the slot before sending. The lock alone keeps a cancel with its create,
+            // but it does not stop two callers each emitting one — and the server accepts
+            // exactly one, dropping the other with conversation_already_has_active_response.
+            // Marking the response active here means the second caller sees it and cancels
+            // first, which is the ordering the server actually requires. Now that the voice
+            // and coach paths run on separate queues this is genuinely reachable: a tool-call
+            // refusal answers on the websocket reader thread while a turn publishes on the
+            // voice queue.
+            val sent = sendRaw(buildResponseCreateJson(instructions))
+            if (sent) responseActive.set(true)
+            sent
         }
 
     /**
@@ -385,7 +406,17 @@ class OpenAiRealtimeTransport(
      * Answers a tool call. Like [sendUserImage] this is not brain output, so it stays off the
      * single-method transport interface that keeps steering text on one channel.
      */
+    /** True when the outstanding tool call belongs to a socket that is already gone. */
+    private fun toolCallIsFromADeadSocket(): Boolean =
+        toolCallGeneration >= 0 && toolCallGeneration != socketGeneration.get()
+
     fun sendFunctionCallOutput(callId: String, output: String): Boolean {
+        if (toolCallIsFromADeadSocket()) {
+            // The conversation that asked no longer exists. Answering into the new one would
+            // reference a call id it never issued.
+            listener.onError("sendFunctionCallOutput dropped: tool call belongs to a closed session")
+            return false
+        }
         val sent = sendRaw(
             """{"type":"conversation.item.create","item":{"type":"function_call_output",""" +
                 """"call_id":${jsonString(callId)},"output":${jsonString(output)}}}""",
@@ -421,8 +452,22 @@ class OpenAiRealtimeTransport(
         // Both ids must be known to claim "same response". Unknown means unknown: fall back
         // to cancelling, which is the behaviour before identity tracking and merely wasteful,
         // whereas guessing "same" would skip a cancel that was genuinely needed.
+        if (toolCallIsFromADeadSocket()) {
+            // Nothing to resume: the response that emitted the call died with its socket.
+            // Cancelling here would kill whatever legitimately started on the new one.
+            listener.onError("requestResponseContinuation dropped: tool call belongs to a closed session")
+            return false
+        }
         val sent = emitCancelThenCreate("") { activeId ->
-            activeId == null || toolCallResponseId == null || activeId != toolCallResponseId
+            // Skip the cancel only when it can be PROVEN that the active response is the one
+            // that emitted the call being answered — it is "active" merely because
+            // response.done has not landed yet. Anything else, including an id the server did
+            // not give us, gets cancelled: a wasted cancel is cheap, a skipped one drops the
+            // reply. The dead-socket case that used to poison this is handled above, so the
+            // conservative branch can no longer fire at a response from a later session.
+            val provablySameResponse =
+                activeId != null && toolCallResponseId != null && activeId == toolCallResponseId
+            !provablySameResponse
         }
         if (!sent) {
             listener.onError("requestResponseContinuation failed: socket unavailable")
@@ -618,6 +663,7 @@ class OpenAiRealtimeTransport(
                         // guard, a malformed item would overwrite the id of a call still
                         // being answered and turn a needed cancel into a skipped one.
                         toolCallResponseId = MiniJson.string(obj, "response_id")
+                        toolCallGeneration = socketGeneration.get()
                         listener.onToolCall(name, callId)
                     }
                 }

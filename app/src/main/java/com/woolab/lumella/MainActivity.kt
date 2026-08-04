@@ -97,6 +97,20 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
         Thread(r, "lumella-slowpath").apply { isDaemon = true }
     }
 
+    /**
+     * Everything the voice loop waits on, kept off [slowPathExecutor].
+     *
+     * The rule this app is built around is that the brain never lands on the voice path, and
+     * a single shared queue quietly broke it twice. luma's image analysis blocks up to 20s
+     * connecting plus 20s reading, and anything queued behind it inherits that wait: first the
+     * tool answer (measured at 7.8s to first audio, against 0.6s once moved), then the next
+     * turn's response.create, and a second photo in one utterance would have hit it again.
+     * Two queues, so a slow coach can only ever delay the coach.
+     */
+    private val voicePathExecutor = Executors.newSingleThreadExecutor { r ->
+        Thread(r, "lumella-voicepath").apply { isDaemon = true }
+    }
+
     private val turnEvidenceAssembler = TurnEvidenceAssembler()
     @Volatile private var currentTurnUserTranscript: String = ""
     @Volatile private var voiceTransportUnavailable = false
@@ -142,7 +156,7 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
     private fun publishLearnerTurn() {
         capturePolicy.onLearnerSpoke()
         val turnId = turnTracker.next()
-        slowPathExecutor.execute {
+        voicePathExecutor.execute {
             voiceFastPath.onTurnStart(turnId)
             runOnUiThread { updateStatus("Thinking...", "#2196F3") }
         }
@@ -618,7 +632,10 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
                 // 1) Let the realtime model SEE it. Without this the tutor answers about
                 //    something else entirely — the luma caption is only steering text on a
                 //    later turn, which is not the same as showing the model the photo.
-                slowPathExecutor.execute {
+                //    On the voice queue: this is what the wearer is waiting to hear about,
+                //    and a second photo in one utterance used to queue behind the first
+                //    photo's coach analysis and inherit its 45-second ceiling.
+                voicePathExecutor.execute {
                     val base64 = ImageEncoder.toDownscaledBase64Jpeg(bytes)
                     if (base64 == null) {
                         Log.w(TAG, "image encode failed; realtime model will not see this photo")
@@ -915,5 +932,6 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
             runCatching { slowPathExecutor.execute { runCatching { brain.endSession(endingSessionId) } } }
         }
         slowPathExecutor.shutdown()
+        voicePathExecutor.shutdown()
     }
 }

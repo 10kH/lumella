@@ -1197,7 +1197,23 @@ class OpenAiRealtimeTransportTest {
 
         val cancels = factory.socket.sent.count { it == """{"type":"response.cancel"}""" }
         val creates = factory.socket.sent.count { MiniJson.string(MiniJson.asObject(MiniJson.parse(it)), "type") == "response.create" }
-        assertTrue("at most one response.cancel for the one response.created", cancels <= 1)
+        // Each create supersedes the one before it, so N callers produce N creates and N-1
+        // cancels. That IS the protocol: without the cancel the server rejects the newcomer
+        // with conversation_already_has_active_response and drops it silently. What must
+        // never happen is a cancel stranded without the create it was clearing the way for.
+        val ordered = factory.socket.sent.filter {
+            it == """{"type":"response.cancel"}""" ||
+                MiniJson.string(MiniJson.asObject(MiniJson.parse(it)), "type") == "response.create"
+        }
+        ordered.forEachIndexed { i, e ->
+            if (e == """{"type":"response.cancel"}""") {
+                assertTrue(
+                    "a cancel at index $i with no create after it strands the turn",
+                    ordered.getOrNull(i + 1)?.contains("response.create") == true,
+                )
+            }
+        }
+        assertTrue("every cancel is paired with a create, so it can never outnumber them", cancels <= creates)
         assertEquals("both callers must still each get their response.create", 2, creates)
     }
 
@@ -1386,7 +1402,7 @@ class OpenAiRealtimeTransportTest {
         factory.socket.sent.clear()
         transport.requestResponseContinuation()
         assertTrue(
-            "unknown identity must cancel, not assume it is the same response",
+            "an unprovable match must cancel rather than assume it is the same response",
             factory.socket.sent.any { it.contains("response.cancel") },
         )
     }
@@ -1434,19 +1450,19 @@ class OpenAiRealtimeTransportTest {
     // --- Red-team: reconnect storms ---
 
     @Test
-    fun onFailureLeavesToolCallIdentityStaleAndACoincidentalReconnectWronglyCancelsANewResponse() {
-        // DEFECT (see report): onFailure() clears responseActive but, unlike reportClose()
-        // (OpenAiRealtimeTransport.kt ~line 489-501), it does NOT clear activeResponseId /
-        // toolCallResponseId (~line 299-308). A tool-call continuation for a call that died
-        // with the old socket survives the reconnect and, if a genuinely new response starts
-        // on the fresh socket, wrongly cancels it -- the exact "tutor cuts itself off and
-        // restarts" symptom the identity-tracking machinery exists to prevent.
+    fun aToolCallThatDiedWithItsSocketCannotCancelAResponseOnTheNewOne() {
+        // The reason identity tracking exists, reached through the machinery meant to prevent
+        // it: a ping timeout kills the socket mid-capture, the camera finishes after the
+        // reconnect, and the app answers a call from a conversation that no longer exists.
+        // Comparing ids cannot help — they are gone — so "unknown, cancel to be safe" killed
+        // whatever legitimately started on the new socket.
         val factory = FakeFactory()
-        val reconnectTasks = mutableListOf<() -> Unit>()
+        val listener = RecordingListener()
         val transport = OpenAiRealtimeTransport(
             successProvider(),
             factory,
-            reconnectScheduler = { _, task -> reconnectTasks.add(task) },
+            listener = listener,
+            reconnectScheduler = { _, task -> task() },
         )
         transport.connect()
         factory.lastListener?.onOpen()
@@ -1456,35 +1472,35 @@ class OpenAiRealtimeTransportTest {
                 """"item":{"type":"function_call","name":"capture_photo","call_id":"call_1"}}""",
         )
 
-        // Socket dies mid-flight; reconnect fires and opens a fresh socket.
-        factory.lastListener?.onFailure(RuntimeException("dropped mid-response"))
-        reconnectTasks.removeAt(0).invoke()
+        factory.lastListener?.onFailure(RuntimeException("sent ping but didn't receive pong"))
         factory.lastListener?.onOpen()
-
-        // A genuinely new turn starts on the fresh socket -- unrelated to the dead call_1.
+        // A genuinely new, unrelated reply is under way on the fresh socket.
         factory.lastListener?.onMessage("""{"type":"response.created","response":{"id":"resp_2"}}""")
 
         factory.socket.sent.clear()
-        // The (late/stale) answer for the dead call_1 arrives and asks to resume.
-        transport.requestResponseContinuation()
+        val answered = transport.sendFunctionCallOutput("call_1", """{"status":"ok"}""")
+        val resumed = transport.requestResponseContinuation()
 
+        assertFalse("the call belongs to a session that is gone", answered)
+        assertFalse("there is nothing to resume", resumed)
         assertTrue(
-            "current behavior: the live resp_2 gets wrongly cancelled by a stale identity " +
-                "left over from before the failed socket",
-            factory.socket.sent.any { it.contains("response.cancel") },
+            "the live reply on the new socket must survive",
+            factory.socket.sent.none { it.contains("response.cancel") },
         )
+        assertTrue(listener.errors.any { it.contains("closed session") })
     }
 
     @Test
-    fun answeringAStaleToolCallAfterAReconnectWithNoNewResponseSendsCleanlyToTheNewSocket() {
-        // Contrast case: same reconnect, but nothing new started on the fresh socket. The
-        // stale identity happens to still agree with itself, so no ghost cancel is emitted.
+    fun aStaleToolCallIsDroppedEvenWhenTheNewSocketIsIdle() {
+        // Nothing is running on the new socket, so a cancel would be harmless — but the
+        // function_call_output would still reference a call id this conversation never issued.
         val factory = FakeFactory()
-        val reconnectTasks = mutableListOf<() -> Unit>()
+        val listener = RecordingListener()
         val transport = OpenAiRealtimeTransport(
             successProvider(),
             factory,
-            reconnectScheduler = { _, task -> reconnectTasks.add(task) },
+            listener = listener,
+            reconnectScheduler = { _, task -> task() },
         )
         transport.connect()
         factory.lastListener?.onOpen()
@@ -1494,20 +1510,12 @@ class OpenAiRealtimeTransportTest {
                 """"item":{"type":"function_call","name":"capture_photo","call_id":"call_1"}}""",
         )
 
-        factory.lastListener?.onFailure(RuntimeException("dropped mid-response"))
-        reconnectTasks.removeAt(0).invoke()
+        factory.lastListener?.onFailure(RuntimeException("socket died"))
         factory.lastListener?.onOpen()
 
         factory.socket.sent.clear()
-        val outputSent = transport.sendFunctionCallOutput("call_1", """{"status":"ok"}""")
-        val continuationSent = transport.requestResponseContinuation()
-
-        assertTrue(outputSent)
-        assertTrue(continuationSent)
-        assertTrue(
-            "nothing is genuinely active on the new socket; must not cancel a ghost",
-            factory.socket.sent.none { it.contains("response.cancel") },
-        )
+        assertFalse(transport.sendFunctionCallOutput("call_1", """{"status":"ok"}"""))
+        assertTrue(factory.socket.sent.none { it.contains("function_call_output") })
     }
 
     @Test
@@ -1690,7 +1698,23 @@ class OpenAiRealtimeTransportTest {
         }
         val cancels = factory.socket.sent.count { it == """{"type":"response.cancel"}""" }
         assertEquals("every caller gets its own response.create", threadCount, creates)
-        assertTrue("at most one cancel for the single response that was ever active", cancels <= 1)
+        // Each create supersedes the one before it, so N callers produce N creates and N-1
+        // cancels. That IS the protocol: without the cancel the server rejects the newcomer
+        // with conversation_already_has_active_response and drops it silently. What must
+        // never happen is a cancel stranded without the create it was clearing the way for.
+        val ordered = factory.socket.sent.filter {
+            it == """{"type":"response.cancel"}""" ||
+                MiniJson.string(MiniJson.asObject(MiniJson.parse(it)), "type") == "response.create"
+        }
+        ordered.forEachIndexed { i, e ->
+            if (e == """{"type":"response.cancel"}""") {
+                assertTrue(
+                    "a cancel at index $i with no create after it strands the turn",
+                    ordered.getOrNull(i + 1)?.contains("response.create") == true,
+                )
+            }
+        }
+        assertTrue("every cancel is paired with a create, so it can never outnumber them", cancels <= creates)
     }
 
     @Test
