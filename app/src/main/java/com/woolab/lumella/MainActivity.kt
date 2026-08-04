@@ -397,15 +397,17 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
             val deviceName = event.device?.name.orEmpty()
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
-                    lastTouchDownTimeMs = System.currentTimeMillis()
+                    // Monotonic, not wall clock: a gesture is a duration, and an NTP step
+                    // mid-tap would otherwise make a contact look 6ms or an hour long.
+                    lastTouchDownTimeMs = android.os.SystemClock.elapsedRealtime()
                     lastTouchDeviceName = deviceName
                 }
                 MotionEvent.ACTION_UP -> {
-                    val duration = System.currentTimeMillis() - lastTouchDownTimeMs
+                    val duration = android.os.SystemClock.elapsedRealtime() - lastTouchDownTimeMs
                     Log.i(TAG, "touch UP device='${lastTouchDeviceName}' duration=${duration}ms")
                     when {
                         lastTouchDeviceName == RIGHT_TOUCHPAD_DEVICE -> {
-                            val now = System.currentTimeMillis()
+                            val now = android.os.SystemClock.elapsedRealtime()
                             // Any tap counts as user activity for the idle-timeout window,
                             // independent of which branch below runs.
                             if (::transport.isInitialized) transport.noteActivity()
