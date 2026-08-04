@@ -29,7 +29,13 @@ class CapturePolicy(private val maxCapturesPerUtterance: Int = DEFAULT_MAX_CAPTU
 
         /** Do not capture; answer the model immediately with [payload]. */
         data class Refuse(val reason: String) : Decision {
-            val payload: String get() = """{"status":"error","reason":"$reason"}"""
+            /**
+             * Escaped rather than interpolated. The reasons are fixed literals today, so this
+             * is unreachable — but raw interpolation into JSON is the habit that produced the
+             * stray brace which voided an entire session, and it costs nothing to not have it.
+             */
+            val payload: String get() =
+                """{"status":"error","reason":${com.woolab.lumella.voice.jsonString(reason)}}"""
         }
     }
 
@@ -40,8 +46,14 @@ class CapturePolicy(private val maxCapturesPerUtterance: Int = DEFAULT_MAX_CAPTU
         capturesSinceLearnerSpoke.set(0)
     }
 
-    /** Current consecutive-capture count, for logging and tests. */
-    fun capturesSoFar(): Int = capturesSinceLearnerSpoke.get()
+    /**
+     * Consecutive capture_photo calls seen since the learner last spoke, refusals included.
+     *
+     * Named for what it counts. It reads attempts, not photos taken — five calls against a
+     * ceiling of two report five — which is the useful number when the question is "is the
+     * model looping", and a misleading one if you read it as "photos taken".
+     */
+    fun attemptsSoFar(): Int = capturesSinceLearnerSpoke.get()
 
     fun decide(toolName: String): Decision = when {
         toolName != CAPTURE_PHOTO -> Decision.Refuse(REASON_UNKNOWN_TOOL)

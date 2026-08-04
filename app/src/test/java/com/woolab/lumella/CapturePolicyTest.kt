@@ -25,7 +25,7 @@ class CapturePolicyTest {
     fun `an unimplemented tool does not consume the retry budget`() {
         val policy = CapturePolicy(maxCapturesPerUtterance = 2)
         repeat(5) { policy.decide("send_email") }
-        assertEquals(0, policy.capturesSoFar())
+        assertEquals("refusals must not burn the budget", 0, policy.attemptsSoFar())
         assertEquals(CapturePolicy.Decision.Capture, policy.decide("capture_photo"))
     }
 
@@ -64,5 +64,19 @@ class CapturePolicyTest {
             assertTrue("payload not JSON-ish: $payload", payload.startsWith("{") && payload.endsWith("}"))
             assertTrue(payload.contains(decision.reason))
         }
+    }
+
+    @Test
+    fun `the attempt count reports attempts, loops included`() {
+        // The number is here to answer "is the model looping", so refused attempts count.
+        val policy = CapturePolicy(maxCapturesPerUtterance = 2)
+        repeat(5) { policy.decide("capture_photo") }
+        assertEquals(5, policy.attemptsSoFar())
+    }
+
+    @Test
+    fun `a refusal payload stays valid JSON`() {
+        val payload = (CapturePolicy().decide("nope") as CapturePolicy.Decision.Refuse).payload
+        assertEquals("""{"status":"error","reason":"unknown_tool"}""", payload)
     }
 }
