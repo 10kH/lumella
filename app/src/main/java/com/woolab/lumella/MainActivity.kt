@@ -210,7 +210,14 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
                     // transport calls normal steady state — and the next tap in silence then
                     // passes the guard and the tutor answers nothing, which is the bug the
                     // guard exists to close.
-                    if (status != RealtimeConnectionStatus.READY) heardSpeechThisTurn.set(false)
+                    if (status != RealtimeConnectionStatus.READY) {
+                        heardSpeechThisTurn.set(false)
+                        // Same leak, one field over: `speaking` is cleared only by
+                        // response.output_audio.done, which a socket dying mid-reply never
+                        // delivers — and it gates the "nothing heard yet" message, so a
+                        // stuck true makes silent taps silent again for the rest of the run.
+                        speaking = false
+                    }
                     if (status == RealtimeConnectionStatus.READY) {
                         // Hands-free: the microphone stays open for the whole session, so a
                         // wearer can simply talk. Recording is no longer something a tap
@@ -537,7 +544,6 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
             Log.i(TAG, "이미 발행된 턴 - VAD 종료 중복 무시")
             return
         }
-        publishLearnerTurn()
         if (vadDriven) {
             // The server commits the buffer itself when VAD closes a turn. Committing again
             // asks it to commit an empty buffer, which it rejects — and the wearer sees an
@@ -550,6 +556,11 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
             turnEndedAtMs = System.currentTimeMillis()
             Log.i(TAG, "turn end (tap): audioChunks=$chunks committed=$committed")
         }
+        // Only after the buffer is closed. Consolidating the turn start briefly hoisted this
+        // above the commit, which swapped an ordering guaranteed by construction for a race
+        // between the touch thread and the executor — and the losing side asks the model to
+        // answer speech it has not been given yet.
+        publishLearnerTurn()
     }
 
     /**

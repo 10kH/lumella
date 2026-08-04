@@ -1345,4 +1345,89 @@ class OpenAiRealtimeTransportTest {
 
         assertFalse(listener.statuses.contains(RealtimeConnectionStatus.DEGRADED))
     }
+
+    // --- Response identity survives hostile and lossy servers ---
+
+    @Test
+    fun aMalformedToolCallItemCannotStealTheIdOfOneStillBeingAnswered() {
+        val factory = FakeFactory()
+        val transport = OpenAiRealtimeTransport(successProvider(), factory)
+        transport.connect()
+        factory.lastListener?.onOpen()
+
+        factory.lastListener?.onMessage("""{"type":"response.created","response":{"id":"resp_1"}}""")
+        factory.lastListener?.onMessage(
+            """{"type":"response.output_item.done","response_id":"resp_1",""" +
+                """"item":{"type":"function_call","name":"capture_photo","call_id":"call_1"}}""",
+        )
+        // A second item with no call_id: not dispatched, so it must not touch the id either.
+        factory.lastListener?.onMessage(
+            """{"type":"response.output_item.done","response_id":"resp_9",""" +
+                """"item":{"type":"function_call","name":"capture_photo"}}""",
+        )
+
+        factory.socket.sent.clear()
+        transport.requestResponseContinuation()
+        assertTrue(
+            "answering resp_1 must not cancel resp_1",
+            factory.socket.sent.none { it.contains("response.cancel") },
+        )
+    }
+
+    @Test
+    fun anUnknownIdFallsBackToCancellingRatherThanGuessing() {
+        val factory = FakeFactory()
+        val transport = OpenAiRealtimeTransport(successProvider(), factory)
+        transport.connect()
+        factory.lastListener?.onOpen()
+        // A response with no id at all, and no tool call ever dispatched.
+        factory.lastListener?.onMessage("""{"type":"response.created","response":{}}""")
+
+        factory.socket.sent.clear()
+        transport.requestResponseContinuation()
+        assertTrue(
+            "unknown identity must cancel, not assume it is the same response",
+            factory.socket.sent.any { it.contains("response.cancel") },
+        )
+    }
+
+    @Test
+    fun aDoneForAnOlderResponseDoesNotClearTheCurrentOne() {
+        val factory = FakeFactory()
+        val transport = OpenAiRealtimeTransport(successProvider(), factory)
+        transport.connect()
+        factory.lastListener?.onOpen()
+
+        factory.lastListener?.onMessage("""{"type":"response.created","response":{"id":"resp_2"}}""")
+        factory.lastListener?.onMessage("""{"type":"response.done","response":{"id":"resp_1"}}""")
+
+        factory.socket.sent.clear()
+        transport.sendInstructions("next turn")
+        assertTrue(
+            "resp_2 is still running and must be cancelled first",
+            factory.socket.sent.any { it.contains("response.cancel") },
+        )
+    }
+
+    @Test
+    fun aDroppedSocketForgetsWhichResponseWasRunning() {
+        val factory = FakeFactory()
+        val transport = OpenAiRealtimeTransport(successProvider(), factory)
+        transport.connect()
+        factory.lastListener?.onOpen()
+        factory.lastListener?.onMessage("""{"type":"response.created","response":{"id":"resp_1"}}""")
+        factory.lastListener?.onMessage(
+            """{"type":"response.output_item.done","response_id":"resp_1",""" +
+                """"item":{"type":"function_call","name":"capture_photo","call_id":"call_1"}}""",
+        )
+
+        factory.lastListener?.onClosed(1006, "abnormal")
+
+        factory.socket.sent.clear()
+        transport.sendInstructions("after reconnect")
+        assertTrue(
+            "nothing was in flight; a stale id must not produce a cancel",
+            factory.socket.sent.none { it.contains("response.cancel") },
+        )
+    }
 }

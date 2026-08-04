@@ -412,7 +412,12 @@ class OpenAiRealtimeTransport(
      * stays a BARE `response.create` regardless of which branch ran.
      */
     fun requestResponseContinuation(): Boolean {
-        val sent = emitCancelThenCreate("") { activeId -> activeId != toolCallResponseId }
+        // Both ids must be known to claim "same response". Unknown means unknown: fall back
+        // to cancelling, which is the behaviour before identity tracking and merely wasteful,
+        // whereas guessing "same" would skip a cancel that was genuinely needed.
+        val sent = emitCancelThenCreate("") { activeId ->
+            activeId == null || toolCallResponseId == null || activeId != toolCallResponseId
+        }
         if (!sent) {
             listener.onError("requestResponseContinuation failed: socket unavailable")
         }
@@ -490,6 +495,10 @@ class OpenAiRealtimeTransport(
         // was perfectly fine — seen on-device 2026-08-05 after a ping timeout dropped the
         // socket mid-reply. The new connection carries nothing in flight.
         responseActive.set(false)
+        // The ids belonged to a conversation that no longer exists; a new socket starts a new
+        // one. Left behind, they would let a stale match skip a cancel that is needed.
+        activeResponseId = null
+        toolCallResponseId = null
         if (closedByClient) return
         listener.onStatus(RealtimeConnectionStatus.CLOSED)
         scheduleReconnect()
@@ -598,8 +607,13 @@ class OpenAiRealtimeTransport(
                     // just emitted this call" (no cancel needed — it's still in-flight only
                     // because response.done has not arrived yet) apart from "a NEW response
                     // started while I was thinking" (review finding, HIGH).
-                    toolCallResponseId = MiniJson.string(obj, "response_id")
-                    if (name != null && callId != null) listener.onToolCall(name, callId)
+                    if (name != null && callId != null) {
+                        // Recorded only when the call is actually dispatched. Set before the
+                        // guard, a malformed item would overwrite the id of a call still
+                        // being answered and turn a needed cancel into a skipped one.
+                        toolCallResponseId = MiniJson.string(obj, "response_id")
+                        listener.onToolCall(name, callId)
+                    }
                 }
             }
             RealtimeServerEventKind.SPEECH_STARTED -> listener.onSpeechStarted()
@@ -608,7 +622,16 @@ class OpenAiRealtimeTransport(
                 responseActive.set(true)
                 activeResponseId = MiniJson.string(MiniJson.asObject(obj["response"]), "id")
             }
-            RealtimeServerEventKind.RESPONSE_DONE -> responseActive.set(false)
+            RealtimeServerEventKind.RESPONSE_DONE -> {
+                // A response.done for an older response must not clear the flag for the one
+                // currently running. Falls back to clearing when either id is unknown, so a
+                // server that stops sending ids cannot wedge the transport permanently.
+                val doneId = MiniJson.string(MiniJson.asObject(obj["response"]), "id")
+                if (doneId == null || activeResponseId == null || doneId == activeResponseId) {
+                    responseActive.set(false)
+                    activeResponseId = null
+                }
+            }
             RealtimeServerEventKind.ERROR -> {
                 if (isFatalAccountError(text)) {
                     // Permanent, account-level failure (no credit / bad key / disabled
