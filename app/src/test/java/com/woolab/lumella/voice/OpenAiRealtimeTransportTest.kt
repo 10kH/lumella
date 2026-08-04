@@ -1842,4 +1842,56 @@ class OpenAiRealtimeTransportTest {
         factory.lastListener?.onOpen()
         assertTrue(factory.socket.sent.size > socketBefore)
     }
+
+    @Test
+    fun aSecondTurnRightAfterTheFirstStillCancelsIt() {
+        // Deterministic, not a race: two sequential emissions with no server events between
+        // them. Before the emitter claimed the slot as it sent, the second call saw no active
+        // response, skipped its cancel, and the server dropped its turn with
+        // conversation_already_has_active_response. Reverting that one line fails this.
+        val factory = FakeFactory()
+        val transport = OpenAiRealtimeTransport(successProvider(), factory)
+        transport.connect()
+        factory.lastListener?.onOpen()
+        factory.socket.sent.clear()
+
+        transport.sendInstructions("first turn")
+        transport.sendInstructions("second turn")
+
+        val kinds = factory.socket.sent.mapNotNull {
+            MiniJson.string(MiniJson.asObject(MiniJson.parse(it)), "type")
+        }
+        assertEquals(
+            "the second turn must clear the first before creating its own",
+            listOf("response.create", "response.cancel", "response.create"),
+            kinds,
+        )
+    }
+
+    @Test
+    fun aPhotoIsNotDeliveredIntoAConversationThatNeverAskedForOne() {
+        val factory = FakeFactory()
+        val listener = RecordingListener()
+        val transport = OpenAiRealtimeTransport(
+            successProvider(),
+            factory,
+            listener = listener,
+            reconnectScheduler = { _, task -> task() },
+        )
+        transport.connect()
+        factory.lastListener?.onOpen()
+        factory.lastListener?.onMessage("""{"type":"response.created","response":{"id":"resp_1"}}""")
+        factory.lastListener?.onMessage(
+            """{"type":"response.output_item.done","response_id":"resp_1",""" +
+                """"item":{"type":"function_call","name":"capture_photo","call_id":"call_1"}}""",
+        )
+
+        factory.lastListener?.onFailure(RuntimeException("socket died mid-capture"))
+        factory.lastListener?.onOpen()
+
+        factory.socket.sent.clear()
+        assertFalse("the photo belongs to a session that is gone", transport.sendUserImage("QUJD"))
+        assertTrue(factory.socket.sent.none { it.contains("input_image") })
+        assertTrue(listener.errors.any { it.contains("closed session") })
+    }
 }

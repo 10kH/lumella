@@ -105,7 +105,11 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
      * connecting plus 20s reading, and anything queued behind it inherits that wait: first the
      * tool answer (measured at 7.8s to first audio, against 0.6s once moved), then the next
      * turn's response.create, and a second photo in one utterance would have hit it again.
-     * Two queues, so a slow coach can only ever delay the coach.
+     * Two queues, so the coach's 45-second image analysis can only ever delay the coach.
+     *
+     * Not "no brain on this lane": [VoiceFastPath.onTurnStart] still waits up to 1.5s here for
+     * steering before it publishes. That bound is deliberate and the shipped adapter reads it
+     * from memory, but the wait is real and sits ahead of a photo answer in the same queue.
      */
     private val voicePathExecutor = Executors.newSingleThreadExecutor { r ->
         Thread(r, "lumella-voicepath").apply { isDaemon = true }
@@ -839,8 +843,14 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
                             // Without this the TTFA log would measure from some unrelated
                             // earlier turn and print a number that means nothing.
                             turnEndedAtMs = System.currentTimeMillis()
-                            slowPathExecutor.execute { transport.sendUserText(said) }
-                            runOnUiThread { publishLearnerTurn() }
+                            // Same queue, in order. Splitting the executors put the text on
+                            // one and the response.create on the other, so the model could be
+                            // asked to answer a turn whose words had not been sent — in the
+                            // very harness this feature's on-device evidence comes from.
+                            voicePathExecutor.execute {
+                                transport.sendUserText(said)
+                                runOnUiThread { publishLearnerTurn() }
+                            }
                             runOnUiThread { updateUserEcho(said) }
                         }
                         DEBUG_SEE_ACTION -> {

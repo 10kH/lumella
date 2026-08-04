@@ -210,6 +210,7 @@ class OpenAiRealtimeTransport(
      * machinery meant to prevent it. A call from a dead socket has nothing left to answer, so
      * the answer is dropped rather than aimed at whatever is running now.
      */
+    @Volatile
     private var toolCallGeneration = -1
 
     /** Serializes the cancel-then-create pair emitted by [sendInstructions] and
@@ -358,7 +359,15 @@ class OpenAiRealtimeTransport(
             // refusal answers on the websocket reader thread while a turn publishes on the
             // voice queue.
             val sent = sendRaw(buildResponseCreateJson(instructions))
-            if (sent) responseActive.set(true)
+            if (sent) {
+                responseActive.set(true)
+                // The id must go with the claim. Left in place it still names the response
+                // just cancelled, so that response's own response.done matches it and clears
+                // the flag this line just set — before the new response has even started. A
+                // caller arriving in that window skips its cancel and loses its turn, which
+                // is the failure claiming the slot exists to prevent.
+                activeResponseId = null
+            }
             sent
         }
 
@@ -376,6 +385,12 @@ class OpenAiRealtimeTransport(
      * text on a LATER turn.
      */
     fun sendUserImage(base64Jpeg: String): Boolean {
+        if (toolCallIsFromADeadSocket()) {
+            // Answering the call was already dropped; letting the photo through anyway drops
+            // it into a conversation that never asked for one.
+            listener.onError("sendUserImage dropped: tool call belongs to a closed session")
+            return false
+        }
         val sent = sendRaw(buildImageItemJson(base64Jpeg))
         if (sent) noteActivity() else listener.onError("sendUserImage failed: socket unavailable")
         return sent
