@@ -1,6 +1,7 @@
 package com.woolab.lumella
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class RightTapDecisionTest {
@@ -97,5 +98,77 @@ class RightTapDecisionTest {
             }
         }
         assertEquals(false, confirmed)
+    }
+
+    // --- Exhaustive-ish state walk (regression guard, item 5): no reachable sequence of up
+    // to four taps with fewer than three deliberate (accepted, non-bounce, non-long-press)
+    // contacts may reach ConfirmExit. Contact classes: bounce, boundary-low-deliberate,
+    // mid-deliberate, boundary-high-deliberate. Gap classes: fast (double-tap window) and
+    // slow (ordinary turn gap). armedUntil/lastAcceptedGap are threaded exactly the way the
+    // one production caller (MainActivity#dispatchTouchEvent) threads them: EndTurn/ArmExit
+    // update the "since last accepted tap" clock, Ignore does not (a bounce is never recorded
+    // as a tap), and a cold session's very first tap is always compared against a same-huge
+    // gap (lastRightTapTimeMs starts at 0, real device time does not).
+    @Test
+    fun `no sequence of up to four taps with fewer than three deliberate contacts reaches ConfirmExit`() {
+        val contacts = listOf(6L, RightTapRules.MIN_CONTACT_MS, 120L, RightTapRules.MAX_CONTACT_MS - 1)
+        val gaps = listOf(150L, RightTapRules.DOUBLE_TAP_INTERVAL_MS, 1_000L)
+
+        val combos = contacts.flatMap { c -> gaps.map { g -> c to g } }
+
+        fun sequencesUpTo(maxLen: Int): List<List<Pair<Long, Long>>> {
+            var frontier: List<List<Pair<Long, Long>>> = listOf(emptyList())
+            val all = mutableListOf<List<Pair<Long, Long>>>()
+            repeat(maxLen) {
+                val next = mutableListOf<List<Pair<Long, Long>>>()
+                for (seq in frontier) {
+                    for (combo in combos) {
+                        val extended = seq + combo
+                        all.add(extended)
+                        next.add(extended)
+                    }
+                }
+                frontier = next
+            }
+            return all
+        }
+
+        var checked = 0
+        for (sequence in sequencesUpTo(4)) {
+            var now = 0L
+            var armedUntil = 0L
+            // A cold session's first tap has no real predecessor: lastRightTapTimeMs starts
+            // at 0 in MainActivity while nowMs is real device time, so the gap is enormous.
+            var sinceLastAccepted = Long.MAX_VALUE / 2
+            var deliberateCount = 0
+            for ((contact, gap) in sequence) {
+                now += gap
+                sinceLastAccepted += gap
+                val result = RightTapRules.decide(contact, sinceLastAccepted, now, armedUntil)
+                when (result) {
+                    RightTap.Ignore -> Unit // not recorded as a tap
+                    RightTap.EndTurn -> {
+                        deliberateCount++
+                        armedUntil = 0L
+                        sinceLastAccepted = 0L
+                    }
+                    RightTap.ArmExit -> {
+                        deliberateCount++
+                        armedUntil = now + RightTapRules.EXIT_CONFIRM_WINDOW_MS
+                        sinceLastAccepted = 0L
+                    }
+                    RightTap.ConfirmExit -> {
+                        deliberateCount++
+                        sinceLastAccepted = 0L
+                        assertTrue(
+                            "reached ConfirmExit after only $deliberateCount deliberate contact(s): $sequence",
+                            deliberateCount >= 3,
+                        )
+                    }
+                }
+            }
+            checked++
+        }
+        assertTrue("the enumeration must actually run sequences", checked > 0)
     }
 }

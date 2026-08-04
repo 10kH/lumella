@@ -1430,4 +1430,392 @@ class OpenAiRealtimeTransportTest {
             factory.socket.sent.none { it.contains("response.cancel") },
         )
     }
+
+    // --- Red-team: reconnect storms ---
+
+    @Test
+    fun onFailureLeavesToolCallIdentityStaleAndACoincidentalReconnectWronglyCancelsANewResponse() {
+        // DEFECT (see report): onFailure() clears responseActive but, unlike reportClose()
+        // (OpenAiRealtimeTransport.kt ~line 489-501), it does NOT clear activeResponseId /
+        // toolCallResponseId (~line 299-308). A tool-call continuation for a call that died
+        // with the old socket survives the reconnect and, if a genuinely new response starts
+        // on the fresh socket, wrongly cancels it -- the exact "tutor cuts itself off and
+        // restarts" symptom the identity-tracking machinery exists to prevent.
+        val factory = FakeFactory()
+        val reconnectTasks = mutableListOf<() -> Unit>()
+        val transport = OpenAiRealtimeTransport(
+            successProvider(),
+            factory,
+            reconnectScheduler = { _, task -> reconnectTasks.add(task) },
+        )
+        transport.connect()
+        factory.lastListener?.onOpen()
+        factory.lastListener?.onMessage("""{"type":"response.created","response":{"id":"resp_1"}}""")
+        factory.lastListener?.onMessage(
+            """{"type":"response.output_item.done","response_id":"resp_1",""" +
+                """"item":{"type":"function_call","name":"capture_photo","call_id":"call_1"}}""",
+        )
+
+        // Socket dies mid-flight; reconnect fires and opens a fresh socket.
+        factory.lastListener?.onFailure(RuntimeException("dropped mid-response"))
+        reconnectTasks.removeAt(0).invoke()
+        factory.lastListener?.onOpen()
+
+        // A genuinely new turn starts on the fresh socket -- unrelated to the dead call_1.
+        factory.lastListener?.onMessage("""{"type":"response.created","response":{"id":"resp_2"}}""")
+
+        factory.socket.sent.clear()
+        // The (late/stale) answer for the dead call_1 arrives and asks to resume.
+        transport.requestResponseContinuation()
+
+        assertTrue(
+            "current behavior: the live resp_2 gets wrongly cancelled by a stale identity " +
+                "left over from before the failed socket",
+            factory.socket.sent.any { it.contains("response.cancel") },
+        )
+    }
+
+    @Test
+    fun answeringAStaleToolCallAfterAReconnectWithNoNewResponseSendsCleanlyToTheNewSocket() {
+        // Contrast case: same reconnect, but nothing new started on the fresh socket. The
+        // stale identity happens to still agree with itself, so no ghost cancel is emitted.
+        val factory = FakeFactory()
+        val reconnectTasks = mutableListOf<() -> Unit>()
+        val transport = OpenAiRealtimeTransport(
+            successProvider(),
+            factory,
+            reconnectScheduler = { _, task -> reconnectTasks.add(task) },
+        )
+        transport.connect()
+        factory.lastListener?.onOpen()
+        factory.lastListener?.onMessage("""{"type":"response.created","response":{"id":"resp_1"}}""")
+        factory.lastListener?.onMessage(
+            """{"type":"response.output_item.done","response_id":"resp_1",""" +
+                """"item":{"type":"function_call","name":"capture_photo","call_id":"call_1"}}""",
+        )
+
+        factory.lastListener?.onFailure(RuntimeException("dropped mid-response"))
+        reconnectTasks.removeAt(0).invoke()
+        factory.lastListener?.onOpen()
+
+        factory.socket.sent.clear()
+        val outputSent = transport.sendFunctionCallOutput("call_1", """{"status":"ok"}""")
+        val continuationSent = transport.requestResponseContinuation()
+
+        assertTrue(outputSent)
+        assertTrue(continuationSent)
+        assertTrue(
+            "nothing is genuinely active on the new socket; must not cancel a ghost",
+            factory.socket.sent.none { it.contains("response.cancel") },
+        )
+    }
+
+    @Test
+    fun reconnectStormOpenCreatedToolCallFailureReconnectOpenAnswerNeverDuplicatesTheSessionUpdate() {
+        val factory = FakeFactory()
+        val reconnectTasks = mutableListOf<() -> Unit>()
+        val transport = OpenAiRealtimeTransport(
+            successProvider(),
+            factory,
+            reconnectScheduler = { _, task -> reconnectTasks.add(task) },
+        )
+        transport.connect()
+        factory.lastListener?.onOpen()
+        factory.lastListener?.onMessage("""{"type":"session.created"}""")
+        factory.lastListener?.onMessage("""{"type":"response.created","response":{"id":"resp_1"}}""")
+
+        factory.lastListener?.onFailure(RuntimeException("first drop"))
+        reconnectTasks.removeAt(0).invoke()
+        factory.lastListener?.onOpen()
+        factory.lastListener?.onMessage("""{"type":"session.created"}""")
+
+        // A second storm on the SAME fresh socket, before anything answers the first one.
+        factory.lastListener?.onFailure(RuntimeException("second drop"))
+        reconnectTasks.removeAt(0).invoke()
+        factory.lastListener?.onOpen()
+
+        val sessionUpdates = factory.socket.sent.count { it.contains("\"type\":\"session.update\"") }
+        assertEquals("one session.update per socket open, never batched or skipped", 3, sessionUpdates)
+        assertTrue(transport.isClosed.not())
+    }
+
+    // --- Red-team: out-of-order / duplicate server events ---
+
+    @Test
+    fun duplicateResponseCreatedEventsWithTheSameIdDoNotDesyncTheGuard() {
+        val factory = FakeFactory()
+        val transport = OpenAiRealtimeTransport(successProvider(), factory)
+        transport.connect()
+        factory.lastListener?.onOpen()
+
+        factory.lastListener?.onMessage("""{"type":"response.created","response":{"id":"resp_1"}}""")
+        factory.lastListener?.onMessage("""{"type":"response.created","response":{"id":"resp_1"}}""")
+
+        factory.socket.sent.clear()
+        transport.sendInstructions("next")
+        assertTrue(
+            "a response is active (even duplicated) and must be cancelled first",
+            factory.socket.sent.any { it.contains("response.cancel") },
+        )
+
+        // One response.done for that id is enough to clear it, even though created fired twice.
+        factory.lastListener?.onMessage("""{"type":"response.done","response":{"id":"resp_1"}}""")
+        factory.socket.sent.clear()
+        transport.sendInstructions("after done")
+        assertTrue(
+            "response.done cleared the flag; nothing left to cancel",
+            factory.socket.sent.none { it.contains("response.cancel") },
+        )
+    }
+
+    @Test
+    fun responseDoneBeforeResponseCreatedDoesNotWedgeOrThrow() {
+        val factory = FakeFactory()
+        val transport = OpenAiRealtimeTransport(successProvider(), factory)
+        transport.connect()
+        factory.lastListener?.onOpen()
+
+        // A response.done with no prior response.created at all.
+        factory.lastListener?.onMessage("""{"type":"response.done","response":{"id":"resp_1"}}""")
+
+        factory.socket.sent.clear()
+        transport.sendInstructions("turn")
+        assertTrue(
+            "no response was ever active; nothing to cancel",
+            factory.socket.sent.none { it.contains("response.cancel") },
+        )
+
+        // The real response.created for a NEW response arrives; tracking must still work.
+        factory.lastListener?.onMessage("""{"type":"response.created","response":{"id":"resp_2"}}""")
+        factory.socket.sent.clear()
+        transport.sendInstructions("interrupt")
+        assertTrue(
+            "resp_2 is genuinely active and must be cancelled",
+            factory.socket.sent.any { it.contains("response.cancel") },
+        )
+    }
+
+    @Test
+    fun toolCallResponseIdNamingAResponseThatNeverStartedIsRecordedButCannotForceACancel() {
+        val factory = FakeFactory()
+        val listener = RecordingListener()
+        val transport = OpenAiRealtimeTransport(successProvider(), factory, listener = listener)
+        transport.connect()
+        factory.lastListener?.onOpen()
+
+        // No response.created at all -- response_id names a response the transport never saw.
+        factory.lastListener?.onMessage(
+            """{"type":"response.output_item.done","response_id":"resp_ghost",""" +
+                """"item":{"type":"function_call","name":"capture_photo","call_id":"call_g"}}""",
+        )
+        assertEquals(listOf("capture_photo" to "call_g"), listener.toolCalls)
+
+        factory.socket.sent.clear()
+        val sent = transport.requestResponseContinuation()
+        assertTrue(sent)
+        // activeResponseId is null (no response.created ever happened), so responseActive is
+        // false and the cancel-guard's getAndSet(false) makes any cancel a no-op regardless
+        // of the identity comparison.
+        assertTrue(
+            "nothing was ever active; a dangling response_id cannot manufacture a cancel",
+            factory.socket.sent.none { it.contains("response.cancel") },
+        )
+        assertEquals("""{"type":"response.create"}""", factory.socket.sent.single())
+    }
+
+    @Test
+    fun sessionUpdatedArrivingTwiceIsIdempotentAndStaysReady() {
+        val factory = FakeFactory()
+        val listener = RecordingListener()
+        val transport = OpenAiRealtimeTransport(successProvider(), factory, listener = listener)
+        transport.connect()
+        factory.lastListener?.onOpen()
+
+        val healthy = """{"type":"session.updated","session":{"instructions":"be a tutor",""" +
+            """"tools":[{"type":"function","name":"capture_photo"}]}}"""
+        factory.lastListener?.onMessage(healthy)
+        factory.lastListener?.onMessage(healthy)
+
+        assertTrue(transport.sessionReady)
+        assertFalse(listener.statuses.contains(RealtimeConnectionStatus.DEGRADED))
+        assertTrue(listener.errors.isEmpty())
+    }
+
+    @Test
+    fun aHealthySessionUpdatedAfterAnUnrelatedErrorStillReachesReady() {
+        val factory = FakeFactory()
+        val listener = RecordingListener()
+        val transport = OpenAiRealtimeTransport(successProvider(), factory, listener = listener)
+        transport.connect()
+        factory.lastListener?.onOpen()
+
+        factory.lastListener?.onMessage("""{"type":"error","error":{"code":"some_transient_thing"}}""")
+        factory.lastListener?.onMessage(
+            """{"type":"session.updated","session":{"instructions":"be a tutor",""" +
+                """"tools":[{"type":"function","name":"capture_photo"}]}}""",
+        )
+
+        assertEquals(RealtimeConnectionStatus.READY, listener.statuses.last())
+        assertTrue(transport.sessionReady)
+    }
+
+    // --- Red-team: concurrency through the emitter with server events interleaving ---
+
+    @Test
+    fun manyConcurrentSendInstructionsCallsEachProduceExactlyOneCreateAndAtMostOneCancel() {
+        val factory = FakeFactory()
+        val transport = OpenAiRealtimeTransport(successProvider(), factory)
+        transport.connect()
+        factory.lastListener?.onOpen()
+        factory.lastListener?.onMessage("""{"type":"response.created","response":{"id":"resp_1"}}""")
+        factory.socket.sent.clear()
+
+        val threadCount = 8
+        val ready = java.util.concurrent.CountDownLatch(threadCount)
+        val go = java.util.concurrent.CountDownLatch(1)
+        val threads = (0 until threadCount).map { i ->
+            Thread {
+                ready.countDown()
+                go.await()
+                transport.sendInstructions("turn $i")
+            }
+        }
+        threads.forEach { it.isDaemon = true; it.start() }
+        ready.await()
+        go.countDown()
+        threads.forEach { it.join(5_000) }
+
+        val creates = factory.socket.sent.count {
+            MiniJson.string(MiniJson.asObject(MiniJson.parse(it)), "type") == "response.create"
+        }
+        val cancels = factory.socket.sent.count { it == """{"type":"response.cancel"}""" }
+        assertEquals("every caller gets its own response.create", threadCount, creates)
+        assertTrue("at most one cancel for the single response that was ever active", cancels <= 1)
+    }
+
+    @Test
+    fun sendInstructionsRacingServerLifecycleEventsNeverProducesACancelSeparatedFromItsCreate() {
+        // A thread hammering sendInstructions (taps) races the websocket reader thread
+        // delivering response.created/response.done for a DIFFERENT, unrelated response --
+        // the invariant is that every cancel this test observes is immediately followed by
+        // a create in the same emitted pair (they are emitted together, under one lock, so
+        // no observer can see one without the other appearing right after it in the log).
+        val factory = FakeFactory()
+        val transport = OpenAiRealtimeTransport(successProvider(), factory)
+        transport.connect()
+        factory.lastListener?.onOpen()
+        factory.socket.sent.clear()
+
+        val iterations = 200
+        val emitter = Thread {
+            repeat(iterations) { i -> transport.sendInstructions("turn $i") }
+        }
+        val serverEvents = Thread {
+            repeat(iterations) { i ->
+                factory.lastListener?.onMessage("""{"type":"response.created","response":{"id":"resp_$i"}}""")
+                factory.lastListener?.onMessage("""{"type":"response.done","response":{"id":"resp_$i"}}""")
+            }
+        }
+        emitter.isDaemon = true; serverEvents.isDaemon = true
+        emitter.start(); serverEvents.start()
+        emitter.join(10_000); serverEvents.join(10_000)
+
+        // Walk the sent log: every response.cancel must be immediately followed by a
+        // response.create (the two are emitted as one pair under responseEmitLock; nothing
+        // else runs sendRaw between them).
+        val sent = factory.socket.sent
+        for (i in sent.indices) {
+            if (sent[i] == """{"type":"response.cancel"}""") {
+                assertTrue(
+                    "a cancel at index $i must be immediately followed by its paired create",
+                    i + 1 < sent.size &&
+                        MiniJson.string(MiniJson.asObject(MiniJson.parse(sent[i + 1])), "type") == "response.create",
+                )
+            }
+        }
+    }
+
+    // --- Red-team: idle timeout racing an in-flight tool call (the camera window) ---
+
+    @Test
+    fun anIdleTimeoutDuringTheCameraWindowClosesTheSocketAndLeavesTheToolCallUnanswerable() {
+        val factory = FakeFactory()
+        val listener = RecordingListener()
+        val idleTasks = mutableListOf<() -> Unit>()
+        val transport = OpenAiRealtimeTransport(
+            successProvider(),
+            factory,
+            listener = listener,
+            idleScheduler = { _, task -> idleTasks.add(task) },
+        )
+        transport.connect()
+        factory.lastListener?.onOpen()
+        factory.lastListener?.onMessage("""{"type":"response.created","response":{"id":"resp_1"}}""")
+        factory.lastListener?.onMessage(
+            """{"type":"response.output_item.done","response_id":"resp_1",""" +
+                """"item":{"type":"function_call","name":"capture_photo","call_id":"call_1"}}""",
+        )
+        // Nobody touched anything through the whole camera-bind/photo/upload window -- the
+        // idle timer armed on connect() (nothing mid-capture resets it) fires before the
+        // photo is even ready, closing the socket exactly like a client teardown.
+        idleTasks.last().invoke()
+        assertTrue(transport.isClosed)
+        listener.errors.clear()
+
+        // The camera finishes AFTER the socket is gone and the app still tries to answer.
+        val imageSent = transport.sendUserImage("QUJD")
+        val outputSent = transport.sendFunctionCallOutput("call_1", """{"status":"ok"}""")
+        val continuationSent = transport.requestResponseContinuation()
+
+        assertFalse("the model is gone; the photo cannot be delivered", imageSent)
+        assertFalse("the model is gone; the tool call cannot be answered", outputSent)
+        assertFalse("the model is gone; nothing can resume", continuationSent)
+        // The app DOES notice for the function-call-output/continuation half of the answer --
+        // both report onError, matching sendInstructions/sendUserText's pattern.
+        assertTrue(listener.errors.any { it.contains("sendFunctionCallOutput failed") })
+        assertTrue(listener.errors.any { it.contains("requestResponseContinuation failed") })
+        // The photo half reports too. It used to be the one send* method on this class with
+        // no onError branch, which made a listener watching only onError believe the photo
+        // had reached the model. The single production call site checked the boolean, so it
+        // was never a live break — just a trap laid for the next caller.
+        assertTrue(
+            "a photo that never left must not look delivered",
+            listener.errors.any { it.contains("sendUserImage") },
+        )
+    }
+
+    @Test
+    fun idleTimeoutFiringMidCameraWindowNeverSchedulesAReconnectSoTheAppMustWakeOnATap() {
+        // The model is left holding an unanswered tool call and no reconnect is coming --
+        // per design (idle timeout suppresses auto-reconnect), the wearer's next tap is the
+        // only path back to a working session, and that tap starts a BRAND NEW realtime
+        // session with no memory of the abandoned call, which is what actually keeps this
+        // safe rather than leaving the model stuck waiting forever.
+        val factory = FakeFactory()
+        val idleTasks = mutableListOf<() -> Unit>()
+        val reconnectDelays = mutableListOf<Long>()
+        val transport = OpenAiRealtimeTransport(
+            successProvider(),
+            factory,
+            reconnectScheduler = { d, _ -> reconnectDelays.add(d) },
+            idleScheduler = { _, task -> idleTasks.add(task) },
+        )
+        transport.connect()
+        factory.lastListener?.onOpen()
+        factory.lastListener?.onMessage("""{"type":"response.created","response":{"id":"resp_1"}}""")
+        factory.lastListener?.onMessage(
+            """{"type":"response.output_item.done","response_id":"resp_1",""" +
+                """"item":{"type":"function_call","name":"capture_photo","call_id":"call_1"}}""",
+        )
+
+        idleTasks.last().invoke()
+
+        assertTrue(reconnectDelays.isEmpty())
+        assertTrue(transport.isClosed)
+        // A tap-driven wake calls connect() again -- must actually open a fresh socket.
+        val socketBefore = factory.socket.sent.size
+        transport.connect()
+        factory.lastListener?.onOpen()
+        assertTrue(factory.socket.sent.size > socketBefore)
+    }
 }

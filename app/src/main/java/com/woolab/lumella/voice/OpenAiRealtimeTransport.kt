@@ -300,8 +300,14 @@ class OpenAiRealtimeTransport(
                     if (stale()) return
                     sessionReady = false
                     // Same reason as reportClose(): whatever was mid-flight went down with
-                    // the socket, and a stale flag makes the next turn cancel a ghost.
+                    // the socket, and stale state makes the next turn cancel a ghost. The ids
+                    // have to go too — a tool call that died with the old socket, answered
+                    // after the reconnect, would otherwise compare against a genuinely new
+                    // response, mismatch, and cancel it. That is the very symptom the
+                    // identity tracking exists to prevent.
                     responseActive.set(false)
+                    activeResponseId = null
+                    toolCallResponseId = null
                     listener.onStatus(RealtimeConnectionStatus.DEGRADED)
                     listener.onError(t.message ?: t.javaClass.simpleName)
                     scheduleReconnect()
@@ -350,7 +356,7 @@ class OpenAiRealtimeTransport(
      */
     fun sendUserImage(base64Jpeg: String): Boolean {
         val sent = sendRaw(buildImageItemJson(base64Jpeg))
-        if (sent) noteActivity()
+        if (sent) noteActivity() else listener.onError("sendUserImage failed: socket unavailable")
         return sent
     }
 

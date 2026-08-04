@@ -576,8 +576,15 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
      * moved off. The websocket send is non-blocking and thread-safe and needs no executor.
      */
     private fun answerToolCall(callId: String, result: String) {
-        transport.sendFunctionCallOutput(callId, result)
-        transport.requestResponseContinuation()
+        val answered = transport.sendFunctionCallOutput(callId, result)
+        val resumed = transport.requestResponseContinuation()
+        if (!answered || !resumed) {
+            // The transport logs this, but the wearer is the one left in silence: the model
+            // is waiting on a result it will never get, so nothing further arrives. Say so
+            // rather than leaving the last status standing.
+            Log.w(TAG, "도구 응답 전송 실패 (answered=$answered resumed=$resumed)")
+            runOnUiThread { updateStatus("연결이 끊겼어요", "#FF5252") }
+        }
     }
 
     /**
