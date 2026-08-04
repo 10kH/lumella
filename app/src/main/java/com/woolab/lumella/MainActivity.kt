@@ -67,10 +67,6 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
         private const val DOUBLE_TAP_INTERVAL_MS = 400L
         /** Contact shorter than this is capacitive noise, not a finger (observed bounce: 6ms). */
         private const val MIN_TAP_DURATION_MS = 40L
-        private const val SUBTITLE_MAX_LINES = 4
-        private const val USER_ECHO_MAX_LINES = 2
-        /** Measured: 640dp per eye minus 24dp margins, ~13dp per 24sp glyph. */
-        private const val SUBTITLE_CHARS_PER_LINE = 42
         private const val PERMISSION_REQUEST_CODE = 1001
         /** Debug-only broadcast that triggers the photo path without a touchpad tap. */
         private const val DEBUG_CAPTURE_ACTION = "com.woolab.lumella.DEBUG_CAPTURE_PHOTO"
@@ -78,6 +74,8 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
         private const val DEBUG_SPEECH_ACTION = "com.woolab.lumella.DEBUG_TOGGLE_SPEECH"
         /** Debug-only broadcast that plays a 1s tone to exercise the speaker path. */
         private const val DEBUG_PLAYBACK_ACTION = "com.woolab.lumella.DEBUG_PLAYBACK"
+        /** Fills the subtitles with sample text so the layout can be checked with no wearer. */
+        private const val DEBUG_SUBTITLE_ACTION = "com.woolab.lumella.DEBUG_SUBTITLE"
         /** Short timeout for the boot-time remote config fetch — must never stall app boot. */
         private const val REMOTE_CONFIG_TIMEOUT_MS = 3_000
     }
@@ -245,6 +243,7 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
                     addAction(DEBUG_CAPTURE_ACTION)
                     addAction(DEBUG_SPEECH_ACTION)
                     addAction(DEBUG_PLAYBACK_ACTION)
+                    addAction(DEBUG_SUBTITLE_ACTION)
                 },
                 Context.RECEIVER_EXPORTED,
             )
@@ -476,36 +475,38 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
 
     /** Dual-eye tutor-subtitle update (tvSubtitle): live AUDIO_TRANSCRIPT_DELTA accumulation for the current turn. */
     private fun updateSubtitle(text: String) {
-        val shown = tailForDisplay(text, SUBTITLE_MAX_LINES)
+        val shown = tailForDisplay(text, SubtitleFit.SUBTITLE_MAX_LINES)
         mBindingPair.left.tvSubtitle.text = shown
         mBindingPair.right.tvSubtitle.text = shown
+        warnIfClipped(mBindingPair.left.tvSubtitle, "tvSubtitle")
     }
 
     /**
-     * Keeps the END of [text] so the newest words stay on screen.
-     *
-     * A TextView with maxLines shows the FIRST lines, so feeding it a long transcript would
-     * pin the opening of the sentence and hide everything the tutor just said. Android's
-     * ellipsize="start" only trims reliably on a single line, so the cut is computed here and
-     * snapped to a word boundary rather than slicing mid-word.
-     *
-     * Budget is measured, not guessed: the framebuffer is 1280x480 at density 160, i.e. 640dp
-     * per eye; minus 24dp margins each side leaves 592dp, and 24sp glyphs run about 13dp wide,
-     * so roughly 45 characters fit on a line.
+     * The per-line character budget is an estimate, and Hangul is roughly twice as wide as
+     * Latin at the same size, so a shaped string can overflow the view's maxLines and lose
+     * its closing words with nothing to show for it. These glasses cannot be screencapped —
+     * the AR overlay never reaches the framebuffer — so this makes the loss audible in the
+     * log instead of invisible. Debug builds only, after layout, off the audio path.
      */
-    private fun tailForDisplay(text: String, maxLines: Int): String {
-        val budget = maxLines * SUBTITLE_CHARS_PER_LINE
-        if (text.length <= budget) return text
-        val cut = text.length - budget
-        val boundary = text.indexOf(' ', cut).let { if (it in cut until text.length) it + 1 else cut }
-        return "…" + text.substring(boundary)
+    private fun warnIfClipped(view: android.widget.TextView, name: String) {
+        if (!BuildConfig.DEBUG) return
+        view.post {
+            val lines = view.layout?.lineCount ?: return@post
+            if (lines > view.maxLines) {
+                Log.w(TAG, "$name 잘림: ${lines}줄로 감겼으나 ${view.maxLines}줄만 보임 - 뒷부분 유실")
+            }
+        }
     }
+
+    /** @see SubtitleFit — budgeted by display width so Hangul cannot overflow the view. */
+    private fun tailForDisplay(text: String, maxLines: Int): String = SubtitleFit.tail(text, maxLines)
 
     /** Dual-eye learner-echo update (tvUserEcho): the learner's own completed transcript for the current turn. */
     private fun updateUserEcho(text: String) {
-        val shown = tailForDisplay(text, USER_ECHO_MAX_LINES)
+        val shown = tailForDisplay(text, SubtitleFit.USER_ECHO_MAX_LINES)
         mBindingPair.left.tvUserEcho.text = shown
         mBindingPair.right.tvUserEcho.text = shown
+        warnIfClipped(mBindingPair.left.tvUserEcho, "tvUserEcho")
     }
 
     /**
@@ -549,6 +550,15 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
             object : BroadcastReceiver() {
                 override fun onReceive(context: Context?, intent: Intent?) {
                     when (intent?.action) {
+                        DEBUG_SUBTITLE_ACTION -> {
+                            val tutor = intent.getStringExtra("tutor")
+                                ?: "네, 벽에 붙어 있는 건 에어컨 실내기예요. 아래로 전선이 늘어져 있는 걸 보니 아직 연결이 덜 된 것 같네요. 설치하는 중이신가요?"
+                            val user = intent.getStringExtra("user") ?: "저 벽에 있는 거 뭐야?"
+                            runOnUiThread {
+                                updateSubtitle(tutor)
+                                updateUserEcho(user)
+                            }
+                        }
                         DEBUG_CAPTURE_ACTION -> {
                             Log.i(TAG, "debug: capturePhoto triggered via broadcast")
                             capturePhoto()
