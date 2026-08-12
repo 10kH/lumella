@@ -122,6 +122,9 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
     /** Accumulates AUDIO_TRANSCRIPT_DELTA chunks for the current tutor turn (UI-thread only). */
     private val subtitleAccumulator = StringBuilder()
 
+    /** 08/05 requirement 1: a speech start retains the tutor's last subtitle for a window instead of blanking it. */
+    private val subtitleRetention = SubtitleRetention()
+
     /**
      * Set when a right-tap arrives while the transport is idle-closed (see
      * [OpenAiRealtimeTransport.isClosed]): the tap triggers [OpenAiRealtimeTransport.connect]
@@ -238,6 +241,9 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
                         }
                         runOnUiThread {
                             updateStatus(listeningLabel(), "#FF5722")
+                            // New/resumed session: nothing to retain, and no old timer may
+                            // reach into it either.
+                            subtitleRetention.onSessionReset()
                             clearSubtitle()
                         }
                     }
@@ -280,11 +286,7 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
 
                 override fun onSpeechStarted() {
                     Log.i(TAG, "음성 감지됨 (VAD)")
-                    turnGate.onSpeechDetected()
-                    runOnUiThread {
-                        updateStatus(listeningLabel(), "#FF5722")
-                        clearSubtitle()
-                    }
+                    handleSpeechStarted()
                 }
 
                 override fun onSpeechStopped() {
@@ -518,7 +520,34 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
             audioCapture.start()
             Log.i(TAG, "turn start: recording=${audioCapture.isRecording}")
             updateStatus(listeningLabel(), "#FF5722")
-            clearSubtitle()
+            // Tap-driven turn start, same mid-conversation shape as VAD's onSpeechStarted: retain
+            // the tutor's last subtitle instead of blanking it immediately.
+            val retentionToken = subtitleRetention.onSpeechStarted()
+            mBindingPair.left.tvSubtitle.postDelayed({
+                if (subtitleRetention.mayClear(retentionToken)) {
+                    clearSubtitle()
+                }
+            }, subtitleRetention.retentionMs)
+        }
+    }
+
+    /**
+     * Everything a learner-speech-start means, in one place: the turn gate, the status, and
+     * the subtitle retention window (08/05 requirement 1 — the tutor's last subtitle stays up
+     * while the learner answers; only a timer still holding the current token may blank it).
+     * Called by the VAD listener and by the DEBUG_EVENT injection, so what the tests drive is
+     * what the wearer gets.
+     */
+    private fun handleSpeechStarted() {
+        turnGate.onSpeechDetected()
+        val retentionToken = subtitleRetention.onSpeechStarted()
+        runOnUiThread {
+            updateStatus(listeningLabel(), "#FF5722")
+            mBindingPair.left.tvSubtitle.postDelayed({
+                if (subtitleRetention.mayClear(retentionToken)) {
+                    clearSubtitle()
+                }
+            }, subtitleRetention.retentionMs)
         }
     }
 
@@ -769,6 +798,11 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
         mBindingPair.left.tvSubtitle.text = shown
         mBindingPair.right.tvSubtitle.text = shown
         warnIfClipped(mBindingPair.left.tvSubtitle, "tvSubtitle")
+        // Non-blank text on screen is new tutor content: any pending retained-clear timer now
+        // refers to text that no longer exists, so it must not fire.
+        if (text.isNotEmpty()) {
+            subtitleRetention.onNewTutorText()
+        }
     }
 
     /**
@@ -862,7 +896,10 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
                             when (intent.getStringExtra("json")) {
                                 "speech_started" -> {
                                     Log.i(TAG, "debug: 음성 감지 주입")
-                                    turnGate.onSpeechDetected()
+                                    // The injected event walks the SAME path as the real one.
+                                    // An earlier version called turnGate directly, which made
+                                    // a retention test pass while the timer was never armed.
+                                    handleSpeechStarted()
                                 }
                                 "speech_stopped" -> {
                                     Log.i(TAG, "debug: 음성 종료 주입")
