@@ -22,7 +22,10 @@ import java.util.concurrent.atomic.AtomicLong
  */
 class SubtitleRetention(val retentionMs: Long = DEFAULT_RETENTION_MS) {
 
-    private val generation = AtomicLong(0L)
+    // Seeded at MIN_VALUE so a never-armed instance refuses every forgeable token. Seeded at
+    // zero, mayClear(0) was TRUE on a fresh instance — and 0 is exactly what a Kotlin default
+    // or lateinit-adjacent refactor would hand a runnable. Found by the red-team lane.
+    private val generation = AtomicLong(Long.MIN_VALUE)
 
     /**
      * The learner started talking. Returns the token the scheduled clear must present when it

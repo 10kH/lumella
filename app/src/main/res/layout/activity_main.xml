@@ -9,7 +9,7 @@
     android:background="#000000"
     tools:context=".MainActivity">
 
-    <!-- 상태 표시 텍스트 (화면 중앙) -->
+    <!-- 상태 표시 (좌상단 소형 - 시야를 가리지 않도록, 08/05 요구사항 1) -->
     <TextView
         android:id="@+id/tvStatus"
         android:layout_width="wrap_content"
@@ -23,7 +23,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <!-- 튜터 발화 자막 (tvStatus 아래, 최대 3줄, 넘치면 앞을 잘라 최신 내용 표시) -->
+    <!-- 튜터 발화 자막 (화면 세로 30% 지점 고정, 최대 4줄, 넘치면 앞을 잘라 최신 유지) -->
     <TextView
         android:id="@+id/tvSubtitle"
         android:layout_width="0dp"

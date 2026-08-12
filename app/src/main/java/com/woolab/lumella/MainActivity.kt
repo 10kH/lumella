@@ -520,15 +520,32 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
             audioCapture.start()
             Log.i(TAG, "turn start: recording=${audioCapture.isRecording}")
             updateStatus(listeningLabel(), "#FF5722")
-            // Tap-driven turn start, same mid-conversation shape as VAD's onSpeechStarted: retain
-            // the tutor's last subtitle instead of blanking it immediately.
-            val retentionToken = subtitleRetention.onSpeechStarted()
-            mBindingPair.left.tvSubtitle.postDelayed({
-                if (subtitleRetention.mayClear(retentionToken)) {
-                    clearSubtitle()
-                }
-            }, subtitleRetention.retentionMs)
+            // Tap-driven turn start: same arm as the VAD path, one helper (a lesson this
+            // codebase keeps relearning — two copies of the same block drift).
+            runOnUiThread { armSubtitleRetention() }
         }
+    }
+
+    /**
+     * Arms the subtitle retention window. Must run on the UI thread.
+     *
+     * Three things belong together and came apart once each:
+     * - The accumulator resets HERE, not when the view blanks. The old clearSubtitle() did
+     *   both at once, so removing the immediate clear silently removed the buffer reset too,
+     *   and every reply arriving inside the window concatenated onto the previous one.
+     * - The token is taken on the SAME thread that bumps the generation (UI), or an in-flight
+     *   delta redraw can bump it between acquisition and posting, and the fresh timer is
+     *   refused — the cross-thread check-then-act the retention class exists to eliminate.
+     * - The view is left untouched: retaining the old text is the whole point.
+     */
+    private fun armSubtitleRetention() {
+        subtitleAccumulator.setLength(0)
+        val retentionToken = subtitleRetention.onSpeechStarted()
+        mBindingPair.left.tvSubtitle.postDelayed({
+            if (subtitleRetention.mayClear(retentionToken)) {
+                clearSubtitle()
+            }
+        }, subtitleRetention.retentionMs)
     }
 
     /**
@@ -540,14 +557,9 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
      */
     private fun handleSpeechStarted() {
         turnGate.onSpeechDetected()
-        val retentionToken = subtitleRetention.onSpeechStarted()
         runOnUiThread {
             updateStatus(listeningLabel(), "#FF5722")
-            mBindingPair.left.tvSubtitle.postDelayed({
-                if (subtitleRetention.mayClear(retentionToken)) {
-                    clearSubtitle()
-                }
-            }, subtitleRetention.retentionMs)
+            armSubtitleRetention()
         }
     }
 
@@ -880,6 +892,11 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
                             // Without this the TTFA log would measure from some unrelated
                             // earlier turn and print a number that means nothing.
                             turnEndedAtMs = System.currentTimeMillis()
+                            // An injected utterance is a learner turn, so it arms retention
+                            // and resets the accumulator exactly like a spoken one — a debug
+                            // path that skips the real turn shape is how a "verified" pass
+                            // verified nothing earlier in this story.
+                            runOnUiThread { armSubtitleRetention() }
                             // Same queue, in order. Splitting the executors put the text on
                             // one and the response.create on the other, so the model could be
                             // asked to answer a turn whose words had not been sent — in the
