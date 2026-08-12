@@ -6,6 +6,7 @@ import com.woolab.lumella.contract.BrainConnectionState
 import com.woolab.lumella.contract.BrainCredentialsProvider
 import com.woolab.lumella.contract.BrainSession
 import com.woolab.lumella.contract.ImageContext
+import com.woolab.lumella.contract.CoachIndicator
 import com.woolab.lumella.contract.ResumableSession
 import com.woolab.lumella.contract.SessionPolicy
 import com.woolab.lumella.contract.SteeringCorrection
@@ -64,6 +65,7 @@ class LumaTutorBrain(
     private var lastSubmittedTurnId: Int? = null
     @Volatile private var lastEvidence: SteeringEvidence? = null
     @Volatile private var steeringUnavailable: UnavailableReason? = null
+    @Volatile private var coachIndicatorField: CoachIndicator? = null
 
     private val pendingSessionCounter = AtomicLong(0)
     private var heartbeatThread: Thread? = null
@@ -114,6 +116,7 @@ class LumaTutorBrain(
             lastSubmittedTurnId = null
             lastEvidence = null
             steeringUnavailable = null
+            coachIndicatorField = null
             return BrainSession(sessionId = resumable.sessionId, resumed = true)
         }
 
@@ -122,6 +125,7 @@ class LumaTutorBrain(
         lastSubmittedTurnId = null
         lastEvidence = null
         steeringUnavailable = null
+        coachIndicatorField = null
         return BrainSession(sessionId = pendingId, resumed = false)
     }
 
@@ -146,11 +150,13 @@ class LumaTutorBrain(
             val response = postJson("/v1/orchestrator/turn", LumaJson.Obj(fields))
             if (response.code !in 200..299) {
                 steeringUnavailable = UnavailableReason.SLOW_PATH_UNAVAILABLE
+                coachIndicatorField = null
                 return
             }
             val json = LumaJsonParser.parseOrNull(response.body) as? LumaJson.Obj
             if (json == null) {
                 steeringUnavailable = UnavailableReason.SLOW_PATH_UNAVAILABLE
+                coachIndicatorField = null
                 return
             }
 
@@ -165,11 +171,29 @@ class LumaTutorBrain(
                 // via the null lastEvidence check in fetchSteering).
                 lastEvidence = null
             }
+
+            // 08/05 requirement 3: honest per-turn coach indicator. Store only when the wire
+            // carries BOTH fields (see luma-api schemas/orchestrator.py OrchestratorTurnResponse
+            // — selectedRoute/selectedProvider are camelCase, non-optional on that model, but
+            // this adapter stays tolerant of a response that omits them). Clear when there is
+            // neither coachEvidence nor a route — stale routing must never outlive the turn it
+            // described.
+            val route = json.str("selectedRoute")
+            val provider = json.str("selectedProvider")
+            if (route != null && provider != null) {
+                coachIndicatorField = CoachIndicator(route = route, provider = provider)
+            } else if (coach == null && route == null) {
+                coachIndicatorField = null
+            }
+
             steeringUnavailable = null
         } catch (_: Exception) {
             steeringUnavailable = UnavailableReason.SLOW_PATH_UNAVAILABLE
+            coachIndicatorField = null
         }
     }
+
+    override fun coachIndicator(): CoachIndicator? = coachIndicatorField
 
     override fun fetchSteering(sessionId: String): SteeringResult {
         if (!capabilities.coach) return SteeringResult.Unavailable(UnavailableReason.COACH_UNSUPPORTED)

@@ -37,6 +37,16 @@ data class TurnEvidence(
 )
 
 /**
+ * Which model/service coached a submitted turn — an honest per-turn indicator (08/05
+ * requirement 3). [route] is the luma orchestrator's selected route for that turn (e.g.
+ * `"free_chat"`); [provider] is the provider luma used to serve that route (e.g. `"etri"`,
+ * `"openai"`). This describes the SLOW-path coach only — the realtime VOICE the learner
+ * hears is a separate, always-on model; see `CoachIndicatorLabel` in `:app` for the display
+ * mapping and why the voice segment is never derived from this type.
+ */
+data class CoachIndicator(val route: String, val provider: String)
+
+/**
  * Slow-path coach brain contract. Pure Kotlin, blocking (no coroutines) —
  * callers are responsible for dispatching off the caller's own hot path.
  *
@@ -78,4 +88,12 @@ interface TutorBrain {
 
     /** End the session identified by [sessionId]. */
     fun endSession(sessionId: String)
+
+    /**
+     * Which model/service coached the most recently submitted turn, or `null` when no
+     * coach routing data is available (brain reports nothing, or the data is stale/absent).
+     * Additive default (D-4/contract-module rule): existing [TutorBrain] implementations
+     * compile unchanged and simply show no indicator.
+     */
+    fun coachIndicator(): CoachIndicator? = null
 }

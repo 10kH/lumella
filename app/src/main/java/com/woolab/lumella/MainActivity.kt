@@ -25,6 +25,7 @@ import com.woolab.lumella.config.AblationMode
 import com.woolab.lumella.contract.BrainConnectionState
 import com.woolab.lumella.contract.BrainCredentials
 import com.woolab.lumella.contract.BrainCredentialsProvider
+import com.woolab.lumella.contract.CoachIndicator
 import com.woolab.lumella.contract.SessionPolicy
 import com.woolab.lumella.contract.TutorBrain
 import com.woolab.lumella.databinding.ActivityMainBinding
@@ -90,6 +91,13 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
         private const val LANGUAGE_SWITCH_DELAY_MS = 1_200L
         /** Short timeout for the boot-time remote config fetch — must never stall app boot. */
         private const val REMOTE_CONFIG_TIMEOUT_MS = 3_000
+        /**
+         * Base hint text, mirrored from `activity_main.xml`'s `tvHint` — the layout's literal
+         * is the pre-first-turn default (no coach indicator yet to prefix); [updateHint]
+         * reproduces it here so [CoachIndicatorLabel.hintLine] has the same base to prefix
+         * onto after every turn (08/05 requirement 3).
+         */
+        private const val BASE_HINT = "핸즈프리 대화 중 · 우측 탭: 지금 말 끝 · 좌측 탭: 사진"
     }
 
     private lateinit var config: AppConfig
@@ -334,9 +342,7 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
                 }
 
                 override fun onInputTranscript(text: String) {
-                    currentTurnUserTranscript = text
-                    runOnUiThread { updateUserEcho(text) }
-                    submitCurrentTurnEvidence()
+                    handleInputTranscript(text)
                 }
 
                 override fun onResponseStarted() {
@@ -921,11 +927,27 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
     }
 
     /** On input-transcript completion: submits this turn's evidence (single submitter, fire-and-forget) and drains the slow path. */
+    /**
+     * Everything a completed learner transcription means, in one place — called by the real
+     * transcription event and by the DEBUG_EVENT injection, so what tests drive is what the
+     * wearer gets (the handleSpeechStarted lesson, third application).
+     */
+    private fun handleInputTranscript(text: String) {
+        currentTurnUserTranscript = text
+        runOnUiThread { updateUserEcho(text) }
+        submitCurrentTurnEvidence()
+    }
+
     private fun submitCurrentTurnEvidence() {
         val turnId = turnTracker.current().takeIf { it > 0 } ?: return
         val evidence = turnEvidenceAssembler.assemble(turnId = turnId, transcript = currentTurnUserTranscript)
         slowPathExecutor.execute {
             voiceFastPath.submitTurnEvidence(evidence)
+            // 08/05 requirement 3: brain.submitTurnEvidence (inside voiceFastPath above) is
+            // what populates coachIndicator() for this turn; read it only after that call
+            // returns, then push the honest per-turn label to both eye panes.
+            val indicator = brain.coachIndicator()
+            runOnUiThread { updateHint(indicator) }
             slowPathQueue.enqueue(SlowPathTask(turnId = turnId, userTranscript = evidence.learnerTranscript))
             slowPathDispatcher.drain(slowPathQueue)
         }
@@ -1024,6 +1046,19 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
     }
 
     /**
+     * Dual-eye hint-line update: sets [CoachIndicatorLabel.hintLine]'s result (08/05
+     * requirement 3) as `tvHint`'s text on both eye panes. Text only — visibility stays
+     * [DisplaySettings]' territory (see [applyDisplayState]'s kdoc); a hidden hint's text
+     * updates fine off-screen, and a null [indicator] leaves the text at [BASE_HINT].
+     * Must run on the UI thread.
+     */
+    private fun updateHint(indicator: CoachIndicator?) {
+        val text = CoachIndicatorLabel.hintLine(indicator, BASE_HINT)
+        mBindingPair.left.tvHint.text = text
+        mBindingPair.right.tvHint.text = text
+    }
+
+    /**
      * Clears the tutor subtitle accumulator and view. Call when a new turn starts (right tap
      * begins listening) so the previous turn's subtitle doesn't linger and read as part of the
      * new one — must run on the UI thread.
@@ -1100,7 +1135,23 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
                                     Log.i(TAG, "debug: 음성 종료 주입")
                                     beginTurn(vadDriven = true)
                                 }
-                                else -> Log.w(TAG, "debug: 알 수 없는 이벤트")
+                                // "input_transcript:<text>" walks the SAME path a real
+                                // transcription walks (onInputTranscript → evidence → luma
+                                // turn → coach indicator). Needed because injected text turns
+                                // never produce a transcription event, so the slow path — and
+                                // everything it feeds, like the model/service indicator — was
+                                // unreachable without a wearer. Same lesson as DEBUG_EVENT
+                                // itself: a hook that bypasses the real path verifies nothing.
+                                else -> {
+                                    val json = intent.getStringExtra("json") ?: return
+                                    if (json.startsWith("input_transcript:")) {
+                                        val text = json.removePrefix("input_transcript:")
+                                        Log.i(TAG, "debug: 입력 전사 주입 = $text")
+                                        handleInputTranscript(text)
+                                    } else {
+                                        Log.w(TAG, "debug: 알 수 없는 이벤트")
+                                    }
+                                }
                             }
                         }
                         DEBUG_SEE_ACTION -> {

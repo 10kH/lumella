@@ -67,4 +67,32 @@ class OpenAiRealtimeTransportSessionPersonaTest {
         val toolCallIndex = instructions.indexOf("call switch_tutor_language")
         assertTrue("handover instruction must precede the tool-call instruction", handoverIndex in 0 until toolCallIndex)
     }
+
+    @Test
+    fun `the persona leads with a recast, like the English tutor it was aligned to`() {
+        // 08/05 requirement 3: same recast behaviour as the English app. The regression this
+        // guards: a persona edit that quietly drops the recast-first rule reverts the Korean
+        // tutor to answering without ever modelling the natural phrasing.
+        val p = OpenAiRealtimeTransport.DEFAULT_SESSION_INSTRUCTIONS
+        assertTrue("recast-first rule lost", p.contains("FIRST move is a recast"))
+        assertTrue("never-as-a-drill lost", p.contains("never as a drill"))
+    }
+
+    @Test
+    fun `the persona forbids repeat-after-me drills`() {
+        // Observed live on this very app (2026-08-12): "자, 이제 따라 해보실까요?" — the exact
+        // drill the requirements ban. The ban must name the Korean phrases, because that is
+        // what the model produces.
+        val p = OpenAiRealtimeTransport.DEFAULT_SESSION_INSTRUCTIONS
+        assertTrue(p.contains("NEVER ask"))
+        assertTrue(p.contains("따라하세요"))
+    }
+
+    @Test
+    fun `the persona caps reply length and difficulty`() {
+        // The live complaint behind 08/05 requirement 3: replies too long and too difficult.
+        val p = OpenAiRealtimeTransport.DEFAULT_SESSION_INSTRUCTIONS
+        assertTrue("length cap lost", p.contains("1-2 short sentences"))
+        assertTrue("difficulty cap lost", p.contains("everyday vocabulary"))
+    }
 }

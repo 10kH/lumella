@@ -491,4 +491,78 @@ class LumaTutorBrainTest {
         assertEquals(listOf("OPEN", "9am-5pm"), context.visibleText)
         brain.stopHeartbeat()
     }
+
+    @Test
+    fun `08-05 requirement 3 - turn response with selectedRoute and selectedProvider populates coachIndicator`() {
+        val transport = FakeLumaHttpTransport().apply {
+            wireHappyPath(coach = true)
+            on("POST", "/v1/orchestrator/turn", json(
+                """
+                {
+                  "session": {"id": "sess-1"},
+                  "selectedRoute": "scenario",
+                  "selectedProvider": "etri",
+                  "coachEvidence": {"corrections": [], "hints": [], "confidence": 0.4}
+                }
+                """.trimIndent(),
+            ))
+        }
+        val brain = newBrain(transport)
+        brain.connect(FakeCredentialsProvider())
+
+        assertNull(brain.coachIndicator())
+        brain.submitTurnEvidence(TurnEvidence(turnId = 1, learnerTranscript = "체크인하고 싶어요"))
+
+        val indicator = brain.coachIndicator()
+        assertNotNull(indicator)
+        assertEquals("scenario", indicator?.route)
+        assertEquals("etri", indicator?.provider)
+        brain.stopHeartbeat()
+    }
+
+    @Test
+    fun `08-05 requirement 3 - a 5xx turn response clears a previously stored coachIndicator on the same brain`() {
+        var turnCalls = 0
+        val transport = FakeLumaHttpTransport().apply {
+            wireHappyPath(coach = true)
+            on("POST", "/v1/orchestrator/turn") { _ ->
+                turnCalls++
+                if (turnCalls == 1) {
+                    json("""{"session": {"id": "sess-1"}, "selectedRoute": "free_chat", "selectedProvider": "etri"}""")
+                } else {
+                    json("""{"error":"boom"}""", code = 500)
+                }
+            }
+        }
+        val brain = newBrain(transport)
+        brain.connect(FakeCredentialsProvider())
+
+        brain.submitTurnEvidence(TurnEvidence(turnId = 1, learnerTranscript = "one"))
+        assertNotNull(brain.coachIndicator())
+
+        brain.submitTurnEvidence(TurnEvidence(turnId = 2, learnerTranscript = "two"))
+
+        assertNull(brain.coachIndicator())
+        assertEquals(SteeringResult.Unavailable(UnavailableReason.SLOW_PATH_UNAVAILABLE), brain.fetchSteering("sess-1"))
+        brain.stopHeartbeat()
+    }
+
+    @Test
+    fun `08-05 requirement 3 - startSession clears a stale coachIndicator from a prior session`() {
+        val transport = FakeLumaHttpTransport().apply {
+            wireHappyPath(coach = true)
+            on("POST", "/v1/orchestrator/turn", json(
+                """{"session": {"id": "sess-1"}, "selectedRoute": "free_chat", "selectedProvider": "etri"}""",
+            ))
+        }
+        val brain = newBrain(transport)
+        brain.connect(FakeCredentialsProvider())
+        brain.submitTurnEvidence(TurnEvidence(turnId = 1, learnerTranscript = "one"))
+        assertNotNull(brain.coachIndicator())
+
+        brain.startSession(SessionPolicy.FRESH)
+
+        assertNull(brain.coachIndicator())
+        brain.stopHeartbeat()
+    }
 }
