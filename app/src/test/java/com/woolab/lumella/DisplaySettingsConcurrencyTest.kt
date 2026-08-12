@@ -71,27 +71,10 @@ class DisplaySettingsConcurrencyTest {
     }
 
     /**
-     * PRODUCTION DEFECT PROBE (report, not a required-green regression guard): both
-     * `applyTextMode` and `applyHintsVisible` do a plain `AtomicReference.get()` (read) then
-     * later an unconditional `.set()` (write) -- classic check-then-act, not a
-     * compare-and-swap retry loop. Neither method's write is conditioned on the reference
-     * still holding what it read.
-     *
-     * This cannot produce a *torn* individual State (each call always constructs one fully
-     * consistent State object and publishes it atomically), but it CAN silently lose one
-     * side's effect entirely: if `applyHintsVisible(true)` reads the pre-`small` state, and a
-     * concurrent `applyTextMode("small")` finishes and publishes AFTER that read but BEFORE
-     * `applyHintsVisible` publishes, the hints-visible write clobbers the text-mode change
-     * back to the stale subtitleSize/echoVisible it read -- even though `set_text_display`
-     * already answered the model "ok". That is a truthfulness violation of the tool-call
-     * contract (a tool call answered "ok" whose effect is then silently discarded).
-     *
-     * This is a genuine data race (two threads doing get()+set() with no synchronization
-     * between them), so it is demonstrated with a stress loop rather than a single
-     * deterministic interleaving -- there is no hook in production code to pause a thread
-     * between its read and its write. Kept non-fatal (reports via assertion message on
-     * failure, does not flake the suite) because the race window is inherently probabilistic;
-     * see the review note in the ultragoal report for the concrete file:line and severity.
+     * Race probe, now a regression guard. It originally DEMONSTRATED the get()-then-set()
+     * lost-update in DisplaySettings (13-24 losses per 200k racing trials) and asserted the
+     * loss occurred; the fix moved both apply methods to updateAndGet and this test flipped
+     * to assert ZERO losses — fatally, so a regression to check-then-act fails the build.
      */
     @Test
     fun applyHintsVisibleCanLoseAConcurrentApplyTextMode_raceProbe() {

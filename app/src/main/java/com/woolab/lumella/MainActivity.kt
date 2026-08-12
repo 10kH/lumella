@@ -812,6 +812,7 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
             // SILENTLY (no exception), so proceeding would exit this app with nothing taking
             // over — the wearer's session just disappears. Stay alive instead.
             Log.w(TAG, "튜터 전환 중단: 앱이 전면이 아님 (백그라운드 실행 제한)")
+            updateStatus("전환 취소됨 · 앱이 화면 밖", "#FF5252")
             return
         }
         try {
