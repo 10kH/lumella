@@ -310,6 +310,7 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
                 }
 
                 override fun onResponseStarted() {
+                    Log.d(TAG, "응답 경계: 억제 해제 + 리셋")
                     runOnUiThread {
                         // New response: its deltas are the truth now. The accumulator resets
                         // HERE rather than at speech start — the response boundary also covers
@@ -321,7 +322,11 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
 
                 override fun onTranscriptDelta(text: String) {
                     runOnUiThread {
-                        if (tutorDeltasSuppressed) return@runOnUiThread
+                        if (tutorDeltasSuppressed) {
+                            // Logged once per suppressed response would be ideal; per-delta
+                            // would flood. Silence is fine — the 응답 경계 log brackets it.
+                            return@runOnUiThread
+                        }
                         subtitleAccumulator.append(text)
                         updateSubtitle(subtitleAccumulator.toString())
                     }
@@ -565,6 +570,7 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
         val retentionToken = subtitleRetention.onSpeechStarted()
         mBindingPair.left.tvSubtitle.postDelayed({
             if (subtitleRetention.mayClear(retentionToken)) {
+                Log.d(TAG, "유지창 만료: 자막 소거 (token=$retentionToken)")
                 clearSubtitle()
             }
         }, subtitleRetention.retentionMs)

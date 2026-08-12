@@ -39,10 +39,14 @@ except OSError:
 rows = []
 for m in re.finditer(r'<node[^>]*>', x):
     tag = m.group(0)
-    text = re.search(r'text="([^"]*)"', tag)
+    # uiautomator quotes attributes with SINGLE quotes when the value contains a double
+    # quote (a tutor reply quoting a sentence does exactly that). Matching only double-quoted
+    # attributes made every such subtitle read as absent — an hour was spent chasing a
+    # "cleared" subtitle that was on screen the whole time.
+    text = re.search(r'text="([^"]*)"', tag) or re.search(r"text='([^']*)'", tag)
     if not text or not text.group(1):
         continue
-    rid = re.search(r'resource-id="([^"]*)"', tag)
+    rid = re.search(r'resource-id="([^"]*)"', tag) or re.search(r"resource-id='([^']*)'", tag)
     bounds = re.search(r'bounds="\[(\d+),(\d+)\]\[(\d+),(\d+)\]"', tag)
     name = rid.group(1).split('/')[-1] if rid and rid.group(1) else '(no id)'
     box = tuple(int(v) for v in bounds.groups()) if bounds else None
