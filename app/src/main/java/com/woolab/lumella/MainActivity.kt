@@ -549,10 +549,10 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
     /**
      * Arms the subtitle retention window. Must run on the UI thread.
      *
-     * Three things belong together and came apart once each:
-     * - The accumulator resets HERE, not when the view blanks. The old clearSubtitle() did
-     *   both at once, so removing the immediate clear silently removed the buffer reset too,
-     *   and every reply arriving inside the window concatenated onto the previous one.
+     * Two things belong together here, and the reset deliberately does NOT:
+     * - The accumulator resets at the RESPONSE boundary (onResponseStarted), not here — the
+     *   boundary also covers turn shapes with no speech start at all (tool continuations),
+     *   and suppression keeps a dying response's late deltas out in between.
      * - The token is taken on the SAME thread that bumps the generation (UI), or an in-flight
      *   delta redraw can bump it between acquisition and posting, and the fresh timer is
      *   refused — the cross-thread check-then-act the retention class exists to eliminate.

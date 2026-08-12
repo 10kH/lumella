@@ -57,6 +57,8 @@ class OpenAiRealtimeTransportTest {
         override fun onSpeechStopped() { speechStopped++ }
         val toolCalls = mutableListOf<Pair<String, String>>()
         override fun onToolCall(name: String, callId: String) { toolCalls.add(name to callId) }
+        var responseStarted = 0
+        override fun onResponseStarted() { responseStarted++ }
     }
 
     private fun successProvider(token: String = "ek_test_token"): TokenServiceCredentialProvider =
@@ -1893,5 +1895,23 @@ class OpenAiRealtimeTransportTest {
         assertFalse("the photo belongs to a session that is gone", transport.sendUserImage("QUJD"))
         assertTrue(factory.socket.sent.none { it.contains("input_image") })
         assertTrue(listener.errors.any { it.contains("closed session") })
+    }
+
+    @Test
+    fun responseCreatedReachesTheListenerOrTheFirstBargeInSuppressesSubtitlesForever() {
+        // The subtitle suppression set at a learner speech start is lifted ONLY by this
+        // callback. If response.created stops reaching the listener — a mapping regression,
+        // or this dispatch line lost in a refactor — every reply after the first interruption
+        // renders no subtitle while the audio plays on, which in the field looks like a
+        // display bug and points nowhere near the transport.
+        val factory = FakeFactory()
+        val listener = RecordingListener()
+        val transport = OpenAiRealtimeTransport(successProvider(), factory, listener = listener)
+        transport.connect()
+        factory.lastListener?.onOpen()
+
+        factory.lastListener?.onMessage("""{"type":"response.created","response":{"id":"resp_1"}}""")
+
+        assertEquals(1, listener.responseStarted)
     }
 }
