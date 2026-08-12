@@ -41,23 +41,25 @@ class DisplaySettings {
      * ends up arguing with a tutor that thinks it already helped.
      */
     fun applyTextMode(mode: String): State? {
-        val next = when (mode) {
-            "large" -> State(subtitleVisible = true, subtitleSize = SubtitleSize.LARGE, echoVisible = true, hintsVisible = current().hintsVisible)
-            "small" -> State(subtitleVisible = true, subtitleSize = SubtitleSize.SMALL, echoVisible = false, hintsVisible = current().hintsVisible)
-            "off" -> State(subtitleVisible = false, subtitleSize = current().subtitleSize, echoVisible = false, hintsVisible = current().hintsVisible)
-            "on" -> State(subtitleVisible = true, subtitleSize = SubtitleSize.LARGE, echoVisible = true, hintsVisible = current().hintsVisible)
-            else -> return null
+        // updateAndGet, not get-then-set: two voice commands can genuinely race (tool calls
+        // answer on the websocket thread while another lands), and deriving the next state
+        // from a separate current() read lost the other call's already-answered effect —
+        // measured at 13-24 losses per 200k racing trials before the fix. The lambda derives
+        // everything from prev, so the read and the publish are one atomic step.
+        if (mode !in setOf("large", "small", "off", "on")) return null
+        return state.updateAndGet { prev ->
+            when (mode) {
+                "large" -> State(subtitleVisible = true, subtitleSize = SubtitleSize.LARGE, echoVisible = true, hintsVisible = prev.hintsVisible)
+                "small" -> State(subtitleVisible = true, subtitleSize = SubtitleSize.SMALL, echoVisible = false, hintsVisible = prev.hintsVisible)
+                "off" -> prev.copy(subtitleVisible = false, echoVisible = false)
+                else -> State(subtitleVisible = true, subtitleSize = SubtitleSize.LARGE, echoVisible = true, hintsVisible = prev.hintsVisible)
+            }
         }
-        state.set(next)
-        return next
     }
 
     /** Applies a `set_hints_visible` tool call. Text settings are untouched. */
-    fun applyHintsVisible(visible: Boolean): State {
-        val next = current().copy(hintsVisible = visible)
-        state.set(next)
-        return next
-    }
+    fun applyHintsVisible(visible: Boolean): State =
+        state.updateAndGet { prev -> prev.copy(hintsVisible = visible) }
 
     companion object {
         /** sp when LARGE — matches the layout default. */

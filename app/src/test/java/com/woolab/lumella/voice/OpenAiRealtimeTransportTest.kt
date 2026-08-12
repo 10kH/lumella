@@ -1966,4 +1966,223 @@ class OpenAiRealtimeTransportTest {
 
         assertEquals(1, listener.responseStarted)
     }
+    // --- Red-team: hostile `arguments` field values through the real parse path ---
+
+    @Test
+    fun hostileArgumentsFieldValuesAreSurfacedRawOrDefaultToEmptyObjectWithoutCrashing() {
+        val factory = FakeFactory()
+        val listener = RecordingListener()
+        val transport = OpenAiRealtimeTransport(successProvider(), factory, listener = listener)
+        transport.connect()
+        factory.lastListener?.onOpen()
+
+        fun send(rawItemJson: String) {
+            factory.lastListener?.onMessage(
+                """{"type":"response.output_item.done","item":$rawItemJson}""",
+            )
+        }
+        var callN = 0
+        fun nextCallId() = "call_${callN++}"
+
+        // "not json" string arguments: still a JSON string field, so it MUST survive intact --
+        // the transport does not look inside it.
+        val notJsonId = nextCallId()
+        send("""{"type":"function_call","name":"set_text_display","call_id":"$notJsonId","arguments":"not json"}""")
+
+        // Empty-string arguments.
+        val emptyId = nextCallId()
+        send("""{"type":"function_call","name":"set_text_display","call_id":"$emptyId","arguments":""}""")
+
+        // arguments is the JSON literal null (not a string) -- MiniJson.string() must reject
+        // the non-string type and the transport must default to "{}", not crash or pass null.
+        val nullLitId = nextCallId()
+        send("""{"type":"function_call","name":"set_text_display","call_id":"$nullLitId","arguments":null}""")
+
+        // arguments is a JSON array literal (not a string) -- same non-string-type rejection.
+        val arrLitId = nextCallId()
+        send("""{"type":"function_call","name":"set_text_display","call_id":"$arrLitId","arguments":[]}""")
+
+        // arguments is a JSON object literal (not a string) -- same rejection.
+        val objLitId = nextCallId()
+        send("""{"type":"function_call","name":"set_text_display","call_id":"$objLitId","arguments":{"mode":123}}""")
+
+        // arguments is a bare number literal (not a string).
+        val numLitId = nextCallId()
+        send("""{"type":"function_call","name":"set_text_display","call_id":"$numLitId","arguments":123}""")
+
+        // arguments string content carries a wrong-typed field, but is still a valid JSON
+        // string value on the wire -- must survive byte-identical, semantics are MainActivity's job.
+        val wrongTypeId = nextCallId()
+        send(
+            """{"type":"function_call","name":"set_text_display","call_id":"$wrongTypeId",""" +
+                """"arguments":"{\"mode\":null}"}""",
+        )
+        val stringVisibleId = nextCallId()
+        send(
+            """{"type":"function_call","name":"set_hints_visible","call_id":"$stringVisibleId",""" +
+                """"arguments":"{\"visible\":\"true\"}"}""",
+        )
+        val klingonId = nextCallId()
+        send(
+            """{"type":"function_call","name":"switch_tutor_language","call_id":"$klingonId",""" +
+                """"arguments":"{\"language\":\"klingon\"}"}""",
+        )
+
+        // Deeply nested garbage.
+        val nestedId = nextCallId()
+        val deeplyNested = "[".repeat(500) + "]".repeat(500)
+        send(
+            """{"type":"function_call","name":"set_text_display","call_id":"$nestedId",""" +
+                """"arguments":${jsonStringForTest(deeplyNested)}}""",
+        )
+
+        // 100KB string payload.
+        val hugeId = nextCallId()
+        val huge = "x".repeat(100_000)
+        send(
+            """{"type":"function_call","name":"set_text_display","call_id":"$hugeId",""" +
+                """"arguments":${jsonStringForTest(huge)}}""",
+        )
+
+        // Unicode/quotes/backslashes.
+        val unicodeId = nextCallId()
+        val unicodeArgs = """{"mode":"small \"quoted\" \\backslash\\ 한국어 이모지 \uD83D\uDE00"}"""
+        send(
+            """{"type":"function_call","name":"set_text_display","call_id":"$unicodeId",""" +
+                """"arguments":${jsonStringForTest(unicodeArgs)}}""",
+        )
+
+        // Nothing here may ever crash the transport (no exception propagated out of onMessage,
+        // which would already have surfaced as a test failure by now), and dispatch must have
+        // happened once per call_id with the transport unable to silently drop a well-formed
+        // string just because its *content* is adversarial.
+        val calls = listener.toolCalls.map { it.second }
+        assertEquals(
+            listOf(notJsonId, emptyId, nullLitId, arrLitId, objLitId, numLitId, wrongTypeId, stringVisibleId, klingonId, nestedId, hugeId, unicodeId),
+            calls,
+        )
+        val args = listener.toolCallArguments
+        assertEquals("not json", args[0])
+        assertEquals("", args[1])
+        assertEquals("{}", args[2]) // null literal -> non-String -> default
+        assertEquals("{}", args[3]) // array literal -> non-String -> default
+        assertEquals("{}", args[4]) // object literal -> non-String -> default
+        assertEquals("{}", args[5]) // number literal -> non-String -> default
+        assertEquals("""{"mode":null}""", args[6])
+        assertEquals("""{"visible":"true"}""", args[7])
+        assertEquals("""{"language":"klingon"}""", args[8])
+        assertEquals(deeplyNested, args[9])
+        assertEquals(huge, args[10])
+        assertEquals(unicodeArgs, args[11])
+    }
+
+    /** Local mirror of the production `jsonString` escaper (internal to the file, not
+     * exported) -- used only to build hostile test fixtures, not exercised as SUT here. */
+    private fun jsonStringForTest(value: String): String {
+        val sb = StringBuilder(value.length + 2)
+        sb.append('"')
+        for (c in value) {
+            when (c) {
+                '"' -> sb.append("\\\"")
+                '\\' -> sb.append("\\\\")
+                '\n' -> sb.append("\\n")
+                '\r' -> sb.append("\\r")
+                '\t' -> sb.append("\\t")
+                else -> if (c.code < 0x20) sb.append("\\u%04x".format(c.code)) else sb.append(c)
+            }
+        }
+        sb.append('"')
+        return sb.toString()
+    }
+
+    // --- Red-team: session JSON integrity (no duplicate keys / stray-brace class) ---
+
+    @Test
+    fun sessionUpdateJsonHasNoDuplicateObjectKeysAtAnyNestingLevel() {
+        val json = OpenAiRealtimeTransport(successProvider(), FakeFactory()).buildSessionUpdateJson()
+        assertNoDuplicateObjectKeys(json)
+    }
+
+    @Test
+    fun functionCallOutputJsonHasNoDuplicateObjectKeys() {
+        val factory = FakeFactory()
+        val transport = OpenAiRealtimeTransport(successProvider(), factory)
+        transport.connect()
+        factory.lastListener?.onOpen()
+        factory.socket.sent.clear()
+
+        transport.sendFunctionCallOutput("call_1", """{"status":"ok","note":"already_active"}""")
+
+        assertNoDuplicateObjectKeys(factory.socket.sent.single())
+    }
+
+    @Test
+    fun duplicateKeyDetectorCatchesAnActuallyDuplicatedKey_sanityCheck() {
+        // Sanity check on the detector itself: it must fail on a deliberately duplicated key,
+        // or a real stray-brace/duplicate-put regression in production JSON would sail through.
+        var threw = false
+        try {
+            assertNoDuplicateObjectKeys("""{"type":"function","type":"duplicate"}""")
+        } catch (_: AssertionError) {
+            threw = true
+        }
+        assertTrue("detector must reject a duplicated top-level key", threw)
+    }
+
+    /**
+     * Scans well-formed JSON text for a duplicated key within the same object (any nesting
+     * level, including inside arrays of objects like the `tools` array). MiniJson.parse()
+     * collapses duplicates into a Map (last write wins) so it cannot see this on its own --
+     * this walks the raw text instead, tracking object/array nesting and string escaping.
+     */
+    private fun assertNoDuplicateObjectKeys(json: String) {
+        val objectKeyStack = ArrayDeque<MutableSet<String>?>()
+        var i = 0
+        val n = json.length
+        fun parseString(): String {
+            val sb = StringBuilder()
+            i++ // opening quote
+            while (i < n && json[i] != '"') {
+                if (json[i] == '\\') {
+                    i++
+                    if (i < n) {
+                        sb.append(json[i])
+                        i++
+                    }
+                } else {
+                    sb.append(json[i])
+                    i++
+                }
+            }
+            i++ // closing quote
+            return sb.toString()
+        }
+        while (i < n) {
+            when (json[i]) {
+                '{' -> {
+                    objectKeyStack.addLast(mutableSetOf())
+                    i++
+                }
+                '[' -> {
+                    objectKeyStack.addLast(null)
+                    i++
+                }
+                '}', ']' -> {
+                    if (objectKeyStack.isNotEmpty()) objectKeyStack.removeLast()
+                    i++
+                }
+                '"' -> {
+                    val s = parseString()
+                    var j = i
+                    while (j < n && json[j].isWhitespace()) j++
+                    if (j < n && json[j] == ':' && objectKeyStack.isNotEmpty() && objectKeyStack.last() != null) {
+                        val keys = objectKeyStack.last()!!
+                        assertTrue("duplicate key \"$s\" found in JSON: $json", keys.add(s))
+                        i = j + 1
+                    }
+                }
+                else -> i++
+            }
+        }
+    }
 }

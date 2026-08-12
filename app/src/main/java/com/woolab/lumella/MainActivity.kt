@@ -784,8 +784,11 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
      */
     private fun handleSwitchTutorLanguage(callId: String, arguments: String) {
         val language = toolArgumentString(arguments, "language")
-        if (language == null) {
-            Log.w(TAG, "음성 명령: switch_tutor_language 인자 손상/누락")
+        if (language == null || language !in setOf("english", "korean")) {
+            // The allow-list matters: without it any unexpected string — a hallucinated
+            // "japanese", a typo — fell through the own-language check and launched the
+            // English sibling as if that were what was asked.
+            Log.w(TAG, "음성 명령: switch_tutor_language 인자 불량 ($language)")
             answerToolCall(callId, """{"status":"error","reason":"bad_arguments"}""")
             return
         }
@@ -795,11 +798,22 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
             return
         }
         Log.i(TAG, "음성 명령: 튜터 전환 -> $language")
-        answerToolCall(callId, """{"status":"ok"}""")
+        // Answer WITHOUT a continuation: the handover sentence was spoken BEFORE the call
+        // (persona rule), and any post-tool reply would be cut mid-word by the exit 1.2s
+        // later — a reply that starts ~0.6s in dies almost by construction. The server just
+        // needs the call answered; nobody needs it to speak again.
+        transport.sendFunctionCallOutput(callId, """{"status":"ok"}""")
         mBindingPair.left.tvSubtitle.postDelayed({ launchSiblingAndExit() }, LANGUAGE_SWITCH_DELAY_MS)
     }
 
     private fun launchSiblingAndExit() {
+        if (!lifecycle.currentState.isAtLeast(androidx.lifecycle.Lifecycle.State.RESUMED)) {
+            // Backgrounded before the post fired: Android drops background activity launches
+            // SILENTLY (no exception), so proceeding would exit this app with nothing taking
+            // over — the wearer's session just disappears. Stay alive instead.
+            Log.w(TAG, "튜터 전환 중단: 앱이 전면이 아님 (백그라운드 실행 제한)")
+            return
+        }
         try {
             val intent = Intent().setClassName(SIBLING_PACKAGE, SIBLING_ACTIVITY)
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
