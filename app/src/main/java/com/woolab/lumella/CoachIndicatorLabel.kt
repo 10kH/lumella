@@ -48,7 +48,10 @@ object CoachIndicatorLabel {
      * later free-text field would otherwise turn the hint bar into a multi-line surprise.
      */
     private fun oneLine(value: String): String =
-        value.map { if (it.isISOControl()) ' ' else it }.joinToString("").trim()
+        value.map {
+            // U+2028/2029 break lines without being ISO control characters.
+            if (it.isISOControl() || it == '\u2028' || it == '\u2029') ' ' else it
+        }.joinToString("").trim()
 
     /** Display label for a wire `provider` value. Unknown providers fall back to the uppercased raw value. */
     fun providerLabel(provider: String): String =

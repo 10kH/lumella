@@ -683,6 +683,29 @@ class LumaTutorBrainTest {
     }
 
     @Test
+    fun `a coach-incapable server never shows a coach indicator, even when its turn response carries route fields`() {
+        // The gate this pins: capabilities.coach=false means fetchSteering permanently refuses
+        // (COACH_UNSUPPORTED) — displaying "코치 …" from that server would label a coach that
+        // never coaches. The hide direction had no test when the gate landed.
+        val transport = FakeLumaHttpTransport().apply {
+            wireHappyPath(coach = false)
+            on("POST", "/v1/orchestrator/turn", json(
+                """{"session": {"id": "sess-1"}, "selectedRoute": "free_chat", "selectedProvider": "etri"}""",
+            ))
+        }
+        val brain = newBrain(transport)
+        brain.connect(FakeCredentialsProvider())
+
+        brain.submitTurnEvidence(TurnEvidence(turnId = 1, learnerTranscript = "one"))
+
+        org.junit.jupiter.api.Assertions.assertNull(
+            brain.coachIndicator(),
+            "coach=false server must never surface a coach label",
+        )
+        brain.stopHeartbeat()
+    }
+
+    @Test
     fun `dedupe - resubmitting the same turnId keeps the FIRST submission's indicator, never doubled or cleared`() {
         var turnCalls = 0
         val transport = FakeLumaHttpTransport().apply {
