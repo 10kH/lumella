@@ -1,5 +1,6 @@
 package com.woolab.lumella
 
+import android.content.ActivityNotFoundException
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -7,7 +8,9 @@ import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
+import android.util.TypedValue
 import android.view.MotionEvent
+import android.view.View
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.ffalcon.mercury.android.sdk.ui.activity.BaseMirrorActivity
@@ -38,6 +41,7 @@ import com.woolab.lumella.voice.RealtimeConnectionStatus
 import com.woolab.lumella.voice.VoiceFastPath
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicReference
+import org.json.JSONObject
 
 /**
  * Device bootstrap (plan G006): wires `local.properties`/`BuildConfig` config through
@@ -77,6 +81,13 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
         /** Shows the model a picture from a file path, bypassing the camera. */
         private const val DEBUG_SEE_ACTION = "com.woolab.lumella.DEBUG_SEE"
         private const val DEBUG_EVENT_ACTION = "com.woolab.lumella.DEBUG_EVENT"
+        /** This app's own tutoring language, per `switch_tutor_language`'s own-language check. */
+        private const val OWN_TUTOR_LANGUAGE = "korean"
+        /** lumella (Korean) hands off to ELLA (English) — explicit component, no implicit intent. */
+        private const val SIBLING_PACKAGE = "com.woolab.ella"
+        private const val SIBLING_ACTIVITY = "com.woolab.ella.MainActivity"
+        /** Gives the model's handover sentence time to finish playing before the app exits. */
+        private const val LANGUAGE_SWITCH_DELAY_MS = 1_200L
         /** Short timeout for the boot-time remote config fetch — must never stall app boot. */
         private const val REMOTE_CONFIG_TIMEOUT_MS = 3_000
     }
@@ -174,6 +185,8 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
 
     /** Answers the model's tool calls and keeps repeated looking bounded. @see CapturePolicy */
     private val capturePolicy = CapturePolicy()
+    /** 08/05 requirement 2: current voice-driven display state, mirrored onto [mBindingPair]. */
+    private val displaySettings = DisplaySettings()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -280,7 +293,24 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
                     runOnUiThread { updateStatus("Ready") }
                 }
 
-                override fun onToolCall(name: String, callId: String) {
+                override fun onToolCall(name: String, callId: String, arguments: String) {
+                    // Display/language tools are routed BEFORE capturePolicy.decide: that
+                    // policy only knows capture_photo and would Refuse anything else, which
+                    // would answer the model with the wrong error instead of running the tool.
+                    when (name) {
+                        "set_text_display" -> {
+                            handleSetTextDisplay(callId, arguments)
+                            return
+                        }
+                        "set_hints_visible" -> {
+                            handleSetHintsVisible(callId, arguments)
+                            return
+                        }
+                        "switch_tutor_language" -> {
+                            handleSwitchTutorLanguage(callId, arguments)
+                            return
+                        }
+                    }
                     when (val decision = capturePolicy.decide(name)) {
                         is CapturePolicy.Decision.Refuse -> {
                             Log.w(TAG, "도구 호출 거절: $name (${decision.reason})")
@@ -673,6 +703,111 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
             // rather than leaving the last status standing.
             Log.w(TAG, "도구 응답 전송 실패 (answered=$answered resumed=$resumed)")
             runOnUiThread { updateStatus("연결이 끊겼어요", "#FF5252") }
+        }
+    }
+    /**
+     * Reads one field out of a tool call's raw `arguments` JSON string. `null` on any parse
+     * failure, wrong type, or missing key — the caller answers `bad_arguments` rather than
+     * guessing, per CapturePolicy's every-call-must-be-answered rule.
+     */
+    private fun toolArgumentString(arguments: String, key: String): String? = runCatching {
+        val obj = JSONObject(arguments)
+        if (!obj.has(key) || obj.isNull(key)) null else obj.getString(key)
+    }.getOrNull()
+
+    private fun toolArgumentBoolean(arguments: String, key: String): Boolean? = runCatching {
+        val obj = JSONObject(arguments)
+        if (!obj.has(key) || obj.isNull(key)) null else obj.getBoolean(key)
+    }.getOrNull()
+
+    /** `set_text_display`: large/small/off/on, per [DisplaySettings.applyTextMode]. */
+    private fun handleSetTextDisplay(callId: String, arguments: String) {
+        val mode = toolArgumentString(arguments, "mode")
+        if (mode == null) {
+            Log.w(TAG, "음성 명령: set_text_display 인자 손상/누락")
+            answerToolCall(callId, """{"status":"error","reason":"bad_arguments"}""")
+            return
+        }
+        val next = displaySettings.applyTextMode(mode)
+        if (next == null) {
+            Log.w(TAG, "음성 명령: 알 수 없는 표시 모드 ($mode)")
+            answerToolCall(callId, """{"status":"error","reason":"unknown_mode"}""")
+            return
+        }
+        Log.i(TAG, "음성 명령: 표시 모드 = $mode")
+        runOnUiThread { applyDisplayState(next) }
+        answerToolCall(callId, """{"status":"ok"}""")
+    }
+
+    /** `set_hints_visible`: shows/hides the hint line ([DisplaySettings.applyHintsVisible]). */
+    private fun handleSetHintsVisible(callId: String, arguments: String) {
+        val visible = toolArgumentBoolean(arguments, "visible")
+        if (visible == null) {
+            Log.w(TAG, "음성 명령: set_hints_visible 인자 손상/누락")
+            answerToolCall(callId, """{"status":"error","reason":"bad_arguments"}""")
+            return
+        }
+        Log.i(TAG, "음성 명령: 힌트 표시 = $visible")
+        val next = displaySettings.applyHintsVisible(visible)
+        runOnUiThread { applyDisplayState(next) }
+        answerToolCall(callId, """{"status":"ok"}""")
+    }
+
+    /**
+     * Applies [DisplaySettings.State] to both eye panes. Visibility and size only — the text
+     * itself is still owned by [updateSubtitle]/[updateUserEcho], so this must not touch it
+     * (G003's future indicator lives on the same hint view, hidden/shown, never text-cleared).
+     */
+    private fun applyDisplayState(state: DisplaySettings.State) {
+        val subtitleSp = if (state.subtitleSize == DisplaySettings.SubtitleSize.LARGE) {
+            DisplaySettings.SUBTITLE_SP_LARGE
+        } else {
+            DisplaySettings.SUBTITLE_SP_SMALL
+        }
+        for (binding in listOf(mBindingPair.left, mBindingPair.right)) {
+            // GONE (not INVISIBLE): "off" also skips draws, and black-on-black is only
+            // transparent by coincidence of color, not by contract.
+            binding.tvSubtitle.visibility = if (state.subtitleVisible) View.VISIBLE else View.GONE
+            binding.tvSubtitle.setTextSize(TypedValue.COMPLEX_UNIT_SP, subtitleSp)
+            binding.tvUserEcho.visibility = if (state.echoVisible) View.VISIBLE else View.GONE
+            binding.tvHint.visibility = if (state.hintsVisible) View.VISIBLE else View.GONE
+        }
+    }
+
+    /**
+     * `switch_tutor_language`: same-language request confirms and does nothing further.
+     * A real switch answers `ok` immediately (so the model's handover sentence, already
+     * spoken, is not left hanging) and launches the sibling app ~1200ms later — long enough
+     * for that sentence to finish. Launch failure cannot re-answer the tool call (the server
+     * rejects a second function_call_output for an answered call), so it tells the WEARER on
+     * screen and stays running; never a silent stuck handover.
+     */
+    private fun handleSwitchTutorLanguage(callId: String, arguments: String) {
+        val language = toolArgumentString(arguments, "language")
+        if (language == null) {
+            Log.w(TAG, "음성 명령: switch_tutor_language 인자 손상/누락")
+            answerToolCall(callId, """{"status":"error","reason":"bad_arguments"}""")
+            return
+        }
+        if (language == OWN_TUTOR_LANGUAGE) {
+            Log.i(TAG, "음성 명령: 이미 $OWN_TUTOR_LANGUAGE 튜터")
+            answerToolCall(callId, """{"status":"ok","note":"already_active"}""")
+            return
+        }
+        Log.i(TAG, "음성 명령: 튜터 전환 -> $language")
+        answerToolCall(callId, """{"status":"ok"}""")
+        mBindingPair.left.tvSubtitle.postDelayed({ launchSiblingAndExit() }, LANGUAGE_SWITCH_DELAY_MS)
+    }
+
+    private fun launchSiblingAndExit() {
+        try {
+            val intent = Intent().setClassName(SIBLING_PACKAGE, SIBLING_ACTIVITY)
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            startActivity(intent)
+            endSessionAndExit()
+        } catch (e: ActivityNotFoundException) {
+            Log.w(TAG, "튜터 전환 실패: 상대 앱 미설치 ($SIBLING_PACKAGE)", e)
+            updateStatus("전환 실패 · 영어 튜터 앱 없음", "#FF5252")
         }
     }
 

@@ -66,8 +66,10 @@ class OpenAiRealtimeTransport(
         fun onTranscriptDelta(text: String) {}
         fun onError(message: String) {}
 
-        /** The model asked the app to run a tool, e.g. capture_photo. */
-        fun onToolCall(name: String, callId: String) {}
+        /** The model asked the app to run a tool, e.g. capture_photo. [arguments] is the raw
+         * (unparsed) `arguments` JSON string the model sent with the function_call item —
+         * `"{}"` when the model sent none. Callers parse only the fields they need. */
+        fun onToolCall(name: String, callId: String, arguments: String = "{}") {}
 
         /**
          * A new response began streaming. This is the boundary that separates a dying
@@ -113,7 +115,21 @@ class OpenAiRealtimeTransport(
                 "like \"이거 뭐야\", \"이거 봐봐\", \"사진 찍어서 알려줘\" — call the " +
                 "capture_photo tool and talk about what you actually see. NEVER describe " +
                 "their surroundings from imagination: if you have not captured a photo this " +
-                "turn, say you will take a look and call the tool."
+                "turn, say you will take a look and call the tool. " +
+                // 08/05 requirement 2: voice control of the display and of which tutor is
+                // active. Call the tool immediately — never just describe what you would do.
+                "You can also control the glasses' display and switch which tutor is active " +
+                "by voice, in Korean or English. Text size/visibility: \"텍스트 크게\" (call " +
+                "set_text_display mode=large), \"텍스트 작게\" (mode=small), \"텍스트 꺼줘\" " +
+                "(mode=off), \"텍스트 켜줘\" (mode=on) — same for English phrasing like " +
+                "\"make the text bigger\" or \"turn the text off\". Explanation/hint " +
+                "visibility: \"설명 꺼줘\" (call set_hints_visible visible=false), \"설명 " +
+                "켜줘\" (visible=true). Tutor language: if the learner asks for the English " +
+                "tutor (\"영어로 해줘\", \"영어 튜터로 바꿔줘\", \"switch to English\"), say " +
+                "one short handover sentence FIRST — e.g. \"영어 튜터로 넘어갈게요\" — THEN " +
+                "call switch_tutor_language with language=\"english\". If they ask for Korean " +
+                "while you are already the Korean tutor, still call switch_tutor_language " +
+                "with language=\"korean\" — it will simply confirm you are already active."
 
         /**
          * How long the server waits for silence before deciding the learner has finished.
@@ -687,7 +703,10 @@ class OpenAiRealtimeTransport(
                         // being answered and turn a needed cancel into a skipped one.
                         toolCallResponseId = MiniJson.string(obj, "response_id")
                         toolCallGeneration = socketGeneration.get()
-                        listener.onToolCall(name, callId)
+                        // Raw JSON string field on the wire (e.g. "{\"mode\":\"small\"}") —
+                        // surfaced as-is; the transport does not parse tool-specific fields.
+                        val arguments = MiniJson.string(item, "arguments") ?: "{}"
+                        listener.onToolCall(name, callId, arguments)
                     }
                 }
             }
@@ -778,7 +797,21 @@ class OpenAiRealtimeTransport(
             """"tools":[{"type":"function","name":"capture_photo",""" +
             """"description":"Capture a photo through the glasses camera when the learner """ +
             """asks you to look at something in front of them.",""" +
-            """"parameters":{"type":"object","properties":{},"required":[]}}],""" +
+            """"parameters":{"type":"object","properties":{},"required":[]}},""" +
+            """{"type":"function","name":"set_text_display",""" +
+            """"description":"Change the tutor text on screen: large, small (also hides the """ +
+            """learner-echo line), off, or back on.",""" +
+            """"parameters":{"type":"object","properties":{"mode":{"type":"string",""" +
+            """"enum":["large","small","off","on"]}},"required":["mode"]}},""" +
+            """{"type":"function","name":"set_hints_visible",""" +
+            """"description":"Show or hide the on-screen explanation/hint line.",""" +
+            """"parameters":{"type":"object","properties":{"visible":{"type":"boolean"}},""" +
+            """"required":["visible"]}},""" +
+            """{"type":"function","name":"switch_tutor_language",""" +
+            """"description":"Hand the learner off to the English or Korean tutor app. """ +
+            """Say a short handover sentence before calling this.",""" +
+            """"parameters":{"type":"object","properties":{"language":{"type":"string",""" +
+            """"enum":["english","korean"]}},"required":["language"]}}],""" +
             """"tool_choice":"auto"}"""
         return """{"type":"session.update","event_id":${jsonString(SESSION_UPDATE_EVENT_ID)},"session":$session}"""
     }

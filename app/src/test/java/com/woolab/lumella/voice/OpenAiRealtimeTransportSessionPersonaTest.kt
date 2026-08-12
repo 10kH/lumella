@@ -34,4 +34,37 @@ class OpenAiRealtimeTransportSessionPersonaTest {
             instructions.contains("NEVER describe") && instructions.contains("imagination"),
         )
     }
+
+    @Test
+    fun `persona mentions all three display and language tools by name`() {
+        // 08/05 requirement 2: without these, the model has no reason to believe display
+        // control or a language switch is even possible — it would try to describe the
+        // change in words instead of calling the tool, same failure class as capture_photo.
+        assertTrue("must mention set_text_display", instructions.contains("set_text_display"))
+        assertTrue("must mention set_hints_visible", instructions.contains("set_hints_visible"))
+        assertTrue("must mention switch_tutor_language", instructions.contains("switch_tutor_language"))
+    }
+
+    @Test
+    fun `persona still teaches the Korean text-display trigger phrases`() {
+        assertTrue(instructions.contains("텍스트 크게"))
+        assertTrue(instructions.contains("텍스트 작게"))
+        assertTrue(instructions.contains("텍스트 꺼줘"))
+        assertTrue(instructions.contains("텍스트 켜줘"))
+        assertTrue(instructions.contains("설명 꺼줘"))
+        assertTrue(instructions.contains("설명"))
+    }
+
+    @Test
+    fun `persona instructs a handover sentence BEFORE the language-switch tool call`() {
+        // A silent language switch is disorienting (the app just vanishes and a different one
+        // appears); the model must speak first, then call the tool — not the other way round.
+        assertTrue(
+            "persona must say to speak a handover sentence FIRST, THEN call the tool",
+            instructions.contains("handover sentence FIRST") && instructions.contains("THEN"),
+        )
+        val handoverIndex = instructions.indexOf("handover sentence FIRST")
+        val toolCallIndex = instructions.indexOf("call switch_tutor_language")
+        assertTrue("handover instruction must precede the tool-call instruction", handoverIndex in 0 until toolCallIndex)
+    }
 }

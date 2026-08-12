@@ -56,7 +56,11 @@ class OpenAiRealtimeTransportTest {
         override fun onSpeechStarted() { speechStarted++ }
         override fun onSpeechStopped() { speechStopped++ }
         val toolCalls = mutableListOf<Pair<String, String>>()
-        override fun onToolCall(name: String, callId: String) { toolCalls.add(name to callId) }
+        val toolCallArguments = mutableListOf<String>()
+        override fun onToolCall(name: String, callId: String, arguments: String) {
+            toolCalls.add(name to callId)
+            toolCallArguments.add(arguments)
+        }
         var responseStarted = 0
         override fun onResponseStarted() { responseStarted++ }
     }
@@ -862,6 +866,54 @@ class OpenAiRealtimeTransportTest {
         assertTrue("tools lost", session["tools"] != null)
         assertEquals("auto", com.woolab.lumella.util.MiniJson.string(session, "tool_choice"))
         assertTrue("audio config lost", com.woolab.lumella.util.MiniJson.asObject(session["audio"]) != null)
+
+        // 08/05 requirement 2: display/language voice control tools must be declared, or the
+        // model has no way to run them — same class of silent gap as a dropped persona.
+        val tools = com.woolab.lumella.util.MiniJson.asArray(session["tools"])
+        assertTrue("tools array missing/empty", tools != null && tools.isNotEmpty())
+        val toolNames = tools!!.mapNotNull { com.woolab.lumella.util.MiniJson.string(com.woolab.lumella.util.MiniJson.asObject(it), "name") }
+        assertEquals(
+            listOf("capture_photo", "set_text_display", "set_hints_visible", "switch_tutor_language"),
+            toolNames,
+        )
+    }
+
+    @Test
+    fun toolCallArgumentsAreSurfacedRawToTheListener() {
+        // The transport must not parse tool-specific fields (that is MainActivity's job with
+        // org.json) but it MUST carry the raw `arguments` JSON string through untouched, or a
+        // dispatched set_text_display/set_hints_visible/switch_tutor_language call has no way
+        // to know what the model asked for.
+        val factory = FakeFactory()
+        val listener = RecordingListener()
+        val transport = OpenAiRealtimeTransport(successProvider(), factory, listener = listener)
+        transport.connect()
+        factory.lastListener?.onOpen()
+
+        factory.lastListener?.onMessage(
+            """{"type":"response.output_item.done","item":{"type":"function_call",""" +
+                """"name":"set_text_display","call_id":"call_disp",""" +
+                """"arguments":"{\"mode\":\"small\"}"}}""",
+        )
+
+        assertEquals(listOf("set_text_display" to "call_disp"), listener.toolCalls)
+        assertEquals(listOf("""{"mode":"small"}"""), listener.toolCallArguments)
+    }
+
+    @Test
+    fun toolCallWithNoArgumentsFieldDefaultsToEmptyObject() {
+        val factory = FakeFactory()
+        val listener = RecordingListener()
+        val transport = OpenAiRealtimeTransport(successProvider(), factory, listener = listener)
+        transport.connect()
+        factory.lastListener?.onOpen()
+
+        factory.lastListener?.onMessage(
+            """{"type":"response.output_item.done","item":{"type":"function_call",""" +
+                """"name":"capture_photo","call_id":"call_abc"}}""",
+        )
+
+        assertEquals(listOf("{}"), listener.toolCallArguments)
     }
     // --- Red-team: hostile tool-call round trip and session payload (ultragoal QA) ---
 
