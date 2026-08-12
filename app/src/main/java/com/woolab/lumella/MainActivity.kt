@@ -126,6 +126,15 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
     private val subtitleRetention = SubtitleRetention()
 
     /**
+     * True between a learner speech start and the next response's first event. A response the
+     * learner just interrupted keeps streaming for a moment, and its late deltas — with no way
+     * to tell them from the next reply's — used to overwrite the subtitle the retention window
+     * was holding. The response boundary is the only honest discriminator, so deltas are
+     * dropped while this is set. UI thread only.
+     */
+    private var tutorDeltasSuppressed = false
+
+    /**
      * Set when a right-tap arrives while the transport is idle-closed (see
      * [OpenAiRealtimeTransport.isClosed]): the tap triggers [OpenAiRealtimeTransport.connect]
      * immediately and recording starts automatically once READY arrives, so a single tap both
@@ -300,8 +309,19 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
                     submitCurrentTurnEvidence()
                 }
 
+                override fun onResponseStarted() {
+                    runOnUiThread {
+                        // New response: its deltas are the truth now. The accumulator resets
+                        // HERE rather than at speech start — the response boundary also covers
+                        // turn shapes with no speech start at all (tool continuations).
+                        tutorDeltasSuppressed = false
+                        subtitleAccumulator.setLength(0)
+                    }
+                }
+
                 override fun onTranscriptDelta(text: String) {
                     runOnUiThread {
+                        if (tutorDeltasSuppressed) return@runOnUiThread
                         subtitleAccumulator.append(text)
                         updateSubtitle(subtitleAccumulator.toString())
                     }
@@ -539,7 +559,9 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
      * - The view is left untouched: retaining the old text is the whole point.
      */
     private fun armSubtitleRetention() {
-        subtitleAccumulator.setLength(0)
+        // A dying response's late deltas must not repopulate the screen the window is holding;
+        // the next onResponseStarted lifts this and resets the accumulator.
+        tutorDeltasSuppressed = true
         val retentionToken = subtitleRetention.onSpeechStarted()
         mBindingPair.left.tvSubtitle.postDelayed({
             if (subtitleRetention.mayClear(retentionToken)) {
@@ -812,7 +834,7 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
         warnIfClipped(mBindingPair.left.tvSubtitle, "tvSubtitle")
         // Non-blank text on screen is new tutor content: any pending retained-clear timer now
         // refers to text that no longer exists, so it must not fire.
-        if (text.isNotEmpty()) {
+        if (text.isNotBlank()) {
             subtitleRetention.onNewTutorText()
         }
     }

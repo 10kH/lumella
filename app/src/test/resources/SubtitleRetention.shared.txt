@@ -47,7 +47,11 @@ class SubtitleRetention(val retentionMs: Long = DEFAULT_RETENTION_MS) {
     }
 
     /** True when the timer holding [token] is still the one whose text is on screen. */
-    fun mayClear(token: Long): Boolean = generation.get() == token
+    fun mayClear(token: Long): Boolean =
+        // The seed itself is refused too: without this, mayClear(Long.MIN_VALUE) was true on a
+        // never-armed instance — unreachable through real callers, but "unclearable by
+        // construction" should be literally true, not true-except-one-value.
+        token != Long.MIN_VALUE && generation.get() == token
 
     companion object {
         /**

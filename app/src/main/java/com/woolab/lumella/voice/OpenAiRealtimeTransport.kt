@@ -69,6 +69,14 @@ class OpenAiRealtimeTransport(
         /** The model asked the app to run a tool, e.g. capture_photo. */
         fun onToolCall(name: String, callId: String) {}
 
+        /**
+         * A new response began streaming. This is the boundary that separates a dying
+         * response's late deltas from the next reply's first ones — without it the app cannot
+         * tell them apart, and a barge-in's in-flight fragment can overwrite the subtitle the
+         * retention window was holding.
+         */
+        fun onResponseStarted() {}
+
         /** Server VAD heard the learner start talking. */
         fun onSpeechStarted() {}
 
@@ -686,6 +694,7 @@ class OpenAiRealtimeTransport(
             RealtimeServerEventKind.SPEECH_STARTED -> listener.onSpeechStarted()
             RealtimeServerEventKind.SPEECH_STOPPED -> listener.onSpeechStopped()
             RealtimeServerEventKind.RESPONSE_CREATED -> {
+                listener.onResponseStarted()
                 responseActive.set(true)
                 activeResponseId = MiniJson.string(MiniJson.asObject(obj["response"]), "id")
             }

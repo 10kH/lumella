@@ -170,6 +170,8 @@ class SubtitleRetentionAdversarialTest {
         assertFalse("a fresh instance must refuse token 0", retention.mayClear(0L))
         assertFalse("and every other easily-forged value", retention.mayClear(1L))
         assertFalse(retention.mayClear(-1L))
+        // And the seed itself — the one value a zero-seed fix would have left clearable.
+        assertFalse(retention.mayClear(Long.MIN_VALUE))
     }
 
     @Test
@@ -219,10 +221,12 @@ class SubtitleRetentionAdversarialTest {
     fun `10k arms interleaved with text bumps - only the most recent event's token is current`() {
         val retention = SubtitleRetention()
         var lastArmToken = -1L
+        var lastIterationBumped = false
         repeat(10_000) { i ->
             val token = retention.onSpeechStarted()
             lastArmToken = token
-            if (i % 7 == 0) {
+            lastIterationBumped = i % 7 == 0
+            if (lastIterationBumped) {
                 retention.onNewTutorText()
                 assertFalse(
                     "the arm just before this bump must not survive it",
@@ -230,9 +234,16 @@ class SubtitleRetentionAdversarialTest {
                 )
             }
         }
-        assertTrue(
-            "the final arm, with no bump after it, must still be current",
-            retention.mayClear(lastArmToken),
-        )
+        // Branching on what the loop actually did: the old unconditional assertion silently
+        // depended on the repeat count modulo 7, and would fail for the wrong reason if
+        // someone changed 10_000 to a count whose last iteration bumps.
+        if (lastIterationBumped) {
+            assertFalse(retention.mayClear(lastArmToken))
+        } else {
+            assertTrue(
+                "the final arm, with no bump after it, must still be current",
+                retention.mayClear(lastArmToken),
+            )
+        }
     }
 }
