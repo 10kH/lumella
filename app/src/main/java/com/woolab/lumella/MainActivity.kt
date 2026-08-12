@@ -1046,11 +1046,14 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
     }
 
     /**
-     * Dual-eye hint-line update: sets [CoachIndicatorLabel.hintLine]'s result (08/05
-     * requirement 3) as `tvHint`'s text on both eye panes. Text only — visibility stays
-     * [DisplaySettings]' territory (see [applyDisplayState]'s kdoc); a hidden hint's text
-     * updates fine off-screen, and a null [indicator] leaves the text at [BASE_HINT].
-     * Must run on the UI thread.
+     * Dual-eye hint-line update. Text only — visibility belongs to [applyDisplayState].
+     *
+     * Timing honesty, so nobody "fixes" this later: the indicator set by turn N's evidence
+     * describes the coach that processed turn N, whose steering shapes reply N+1. The reply
+     * the wearer is hearing at update time was steered by the PREVIOUS turn's coach. The
+     * label reads "코치" (who is coaching) rather than "이 답변은" (who made this reply)
+     * deliberately; per-reply attribution would be off by one and was rejected as such in
+     * the feasibility verdict.
      */
     private fun updateHint(indicator: CoachIndicator?) {
         val text = CoachIndicatorLabel.hintLine(indicator, BASE_HINT)
@@ -1143,7 +1146,10 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
                                 // unreachable without a wearer. Same lesson as DEBUG_EVENT
                                 // itself: a hook that bypasses the real path verifies nothing.
                                 else -> {
-                                    val json = intent.getStringExtra("json") ?: return
+                                    val json = intent.getStringExtra("json") ?: run {
+                                        Log.w(TAG, "debug: 이벤트 인자 없음")
+                                        return
+                                    }
                                     if (json.startsWith("input_transcript:")) {
                                         val text = json.removePrefix("input_transcript:")
                                         Log.i(TAG, "debug: 입력 전사 주입 = $text")

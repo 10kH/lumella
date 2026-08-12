@@ -62,9 +62,14 @@ class LumaTutorBrain(
 
     @Volatile private var capabilities: BrainCapabilities = BrainCapabilities(coach = false, capabilitiesRoute = false)
 
-    private var lastSubmittedTurnId: Int? = null
+    @Volatile private var lastSubmittedTurnId: Int? = null
     @Volatile private var lastEvidence: SteeringEvidence? = null
     @Volatile private var steeringUnavailable: UnavailableReason? = null
+
+    // Plain var would work today (submits ride one executor), but its three siblings are
+    // @Volatile for the same cross-thread reads and the asymmetry reads as an oversight —
+    // the red-team lane flagged the check-then-set as the one unguarded field in the row.
+
     @Volatile private var coachIndicatorField: CoachIndicator? = null
 
     private val pendingSessionCounter = AtomicLong(0)
@@ -175,15 +180,18 @@ class LumaTutorBrain(
             // 08/05 requirement 3: honest per-turn coach indicator. Store only when the wire
             // carries BOTH fields (see luma-api schemas/orchestrator.py OrchestratorTurnResponse
             // — selectedRoute/selectedProvider are camelCase, non-optional on that model, but
-            // this adapter stays tolerant of a response that omits them). Clear when there is
-            // neither coachEvidence nor a route — stale routing must never outlive the turn it
-            // described.
-            val route = json.str("selectedRoute")
-            val provider = json.str("selectedProvider")
-            if (route != null && provider != null) {
-                coachIndicatorField = CoachIndicator(route = route, provider = provider)
-            } else if (coach == null && route == null) {
-                coachIndicatorField = null
+            // this adapter stays tolerant of a response that omits them). Anything short of a
+            // COMPLETE, non-blank pair clears: the first version kept the previous indicator
+            // when exactly one field arrived — neither the set branch nor the clear branch
+            // matched — and the prior turn's label was silently attributed to a turn it did
+            // not describe. Both review lanes found it independently. Nothing honest to show
+            // means show nothing.
+            val route = json.str("selectedRoute")?.takeIf { it.isNotBlank() }
+            val provider = json.str("selectedProvider")?.takeIf { it.isNotBlank() }
+            coachIndicatorField = if (route != null && provider != null) {
+                CoachIndicator(route = route, provider = provider)
+            } else {
+                null
             }
 
             steeringUnavailable = null
@@ -193,7 +201,11 @@ class LumaTutorBrain(
         }
     }
 
-    override fun coachIndicator(): CoachIndicator? = coachIndicatorField
+    override fun coachIndicator(): CoachIndicator? =
+        // Gated on the capability: a server that cannot coach can still serve /turn with
+        // route fields, and displaying "코치 …" for steering that fetchSteering permanently
+        // refuses (COACH_UNSUPPORTED) labels a coach that never coaches.
+        coachIndicatorField.takeIf { capabilities.coach }
 
     override fun fetchSteering(sessionId: String): SteeringResult {
         if (!capabilities.coach) return SteeringResult.Unavailable(UnavailableReason.COACH_UNSUPPORTED)

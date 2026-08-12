@@ -25,6 +25,9 @@ object CoachIndicatorLabel {
     private val PROVIDER_LABELS = mapOf(
         "etri" to "SLM-TANGO",
         "openai" to "LLM-GPT",
+        // luma's provider Literal permits a third value; without this a learner would see
+        // "코치 INTERNAL(…)". No SLM/LLM prefix on purpose — the internal engine is neither.
+        "internal" to "내부",
     )
 
     private val ROUTE_NAMES = mapOf(
@@ -38,13 +41,22 @@ object CoachIndicatorLabel {
         "fallback_tutor" to "기본",
     )
 
-    /** Display label for a wire `provider` value. Unknown providers fall back to the uppercased raw value. Never empty. */
-    fun providerLabel(provider: String): String =
-        PROVIDER_LABELS[provider] ?: provider.uppercase()
+    /**
+     * Collapses anything that would break the one-physical-line hint bar — newlines, tabs,
+     * NUL, escape — into single spaces. Today's wire schema is a closed enum so this is
+     * unreachable, but nothing between the wire and this mapper validates shape, and a
+     * later free-text field would otherwise turn the hint bar into a multi-line surprise.
+     */
+    private fun oneLine(value: String): String =
+        value.map { if (it.isISOControl()) ' ' else it }.joinToString("").trim()
 
-    /** Korean display name for a wire `route` value. Unknown routes fall back to the raw value. Never empty. */
+    /** Display label for a wire `provider` value. Unknown providers fall back to the uppercased raw value. */
+    fun providerLabel(provider: String): String =
+        PROVIDER_LABELS[provider] ?: oneLine(provider).uppercase()
+
+    /** Korean display name for a wire `route` value. Unknown routes fall back to the raw value. */
     fun routeName(route: String): String =
-        ROUTE_NAMES[route] ?: route
+        ROUTE_NAMES[route] ?: oneLine(route)
 
     /**
      * Builds the full bottom-hint line.

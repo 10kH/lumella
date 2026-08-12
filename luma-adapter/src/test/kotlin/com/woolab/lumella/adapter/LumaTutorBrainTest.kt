@@ -3,10 +3,13 @@ package com.woolab.lumella.adapter
 import com.woolab.lumella.contract.BrainConnectionState
 import com.woolab.lumella.contract.BrainCredentials
 import com.woolab.lumella.contract.BrainCredentialsProvider
+import com.woolab.lumella.contract.CoachIndicator
 import com.woolab.lumella.contract.SessionPolicy
 import com.woolab.lumella.contract.SteeringResult
 import com.woolab.lumella.contract.TurnEvidence
 import com.woolab.lumella.contract.UnavailableReason
+import java.util.concurrent.CopyOnWriteArrayList
+import java.util.concurrent.atomic.AtomicBoolean
 import java.time.Instant
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -563,6 +566,218 @@ class LumaTutorBrainTest {
         brain.startSession(SessionPolicy.FRESH)
 
         assertNull(brain.coachIndicator())
+        brain.stopHeartbeat()
+    }
+    // --- Adversarial: brain lifecycle + dedupe interaction (Ultragoal red-team, 08/12) ---
+
+    @Test
+    fun `lifecycle - ok then 5xx then ok again cycles the indicator through set, cleared, set`() {
+        var turnCalls = 0
+        val transport = FakeLumaHttpTransport().apply {
+            wireHappyPath(coach = true)
+            on("POST", "/v1/orchestrator/turn") { _ ->
+                turnCalls++
+                when (turnCalls) {
+                    1 -> json("""{"session": {"id": "sess-1"}, "selectedRoute": "free_chat", "selectedProvider": "etri"}""")
+                    2 -> json("""{"error":"boom"}""", code = 500)
+                    else -> json("""{"session": {"id": "sess-1"}, "selectedRoute": "gpt_qa", "selectedProvider": "openai"}""")
+                }
+            }
+        }
+        val brain = newBrain(transport)
+        brain.connect(FakeCredentialsProvider())
+
+        brain.submitTurnEvidence(TurnEvidence(turnId = 1, learnerTranscript = "one"))
+        assertEquals(CoachIndicator(route = "free_chat", provider = "etri"), brain.coachIndicator())
+
+        brain.submitTurnEvidence(TurnEvidence(turnId = 2, learnerTranscript = "two"))
+        assertNull(brain.coachIndicator())
+
+        brain.submitTurnEvidence(TurnEvidence(turnId = 3, learnerTranscript = "three"))
+        assertEquals(CoachIndicator(route = "gpt_qa", provider = "openai"), brain.coachIndicator())
+        brain.stopHeartbeat()
+    }
+
+    @Test
+    fun `lifecycle - a transport exception on a later turn clears a previously stored coachIndicator`() {
+        var turnCalls = 0
+        val transport = FakeLumaHttpTransport().apply {
+            wireHappyPath(coach = true)
+            on("POST", "/v1/orchestrator/turn") { _ ->
+                turnCalls++
+                if (turnCalls == 1) {
+                    json("""{"session": {"id": "sess-1"}, "selectedRoute": "free_chat", "selectedProvider": "etri"}""")
+                } else {
+                    throw LumaTransportException("connection reset")
+                }
+            }
+        }
+        val brain = newBrain(transport)
+        brain.connect(FakeCredentialsProvider())
+
+        brain.submitTurnEvidence(TurnEvidence(turnId = 1, learnerTranscript = "one"))
+        assertNotNull(brain.coachIndicator())
+
+        brain.submitTurnEvidence(TurnEvidence(turnId = 2, learnerTranscript = "two"))
+        assertNull(brain.coachIndicator())
+        assertEquals(SteeringResult.Unavailable(UnavailableReason.SLOW_PATH_UNAVAILABLE), brain.fetchSteering("sess-1"))
+        brain.stopHeartbeat()
+    }
+
+    /**
+     * This used to PIN a HIGH defect: a response carrying selectedRoute without
+     * selectedProvider matched neither the set nor the clear branch, so the PRIOR turn's
+     * indicator silently survived, mislabeling a turn it did not describe. Both review
+     * lanes found it independently. Fixed: anything short of a complete, non-blank pair
+     * clears — nothing honest to show means show nothing.
+     */
+    @Test
+    fun `a partial route-provider pair clears the indicator instead of leaving the prior turn's`() {
+        var turnCalls = 0
+        val transport = FakeLumaHttpTransport().apply {
+            wireHappyPath(coach = true)
+            on("POST", "/v1/orchestrator/turn") { _ ->
+                turnCalls++
+                if (turnCalls == 1) {
+                    json("""{"session": {"id": "sess-1"}, "selectedRoute": "free_chat", "selectedProvider": "etri"}""")
+                } else {
+                    // No selectedProvider, no coachEvidence: neither branch at
+                    // LumaTutorBrain.kt:183/185 fires.
+                    json("""{"session": {"id": "sess-1"}, "selectedRoute": "gpt_qa"}""")
+                }
+            }
+        }
+        val brain = newBrain(transport)
+        brain.connect(FakeCredentialsProvider())
+
+        brain.submitTurnEvidence(TurnEvidence(turnId = 1, learnerTranscript = "one"))
+        val firstIndicator = brain.coachIndicator()
+        assertEquals(CoachIndicator(route = "free_chat", provider = "etri"), firstIndicator)
+
+        brain.submitTurnEvidence(TurnEvidence(turnId = 2, learnerTranscript = "two"))
+
+        org.junit.jupiter.api.Assertions.assertNull(brain.coachIndicator(), "partial pair must clear, not retain the prior turn's label")
+        brain.stopHeartbeat()
+    }
+
+    /**
+     * This used to PIN a MEDIUM defect: `json.str(key)` returns "" — not null — for a
+     * present-but-empty JSON string, and the null-only guard let an empty pair through,
+     * rendering "코치 ()" on the glasses. Fixed with isNotBlank guards in the adapter.
+     */
+    @Test
+    fun `empty-string route and provider clear the indicator rather than rendering a blank label`() {
+        val transport = FakeLumaHttpTransport().apply {
+            wireHappyPath(coach = true)
+            on("POST", "/v1/orchestrator/turn", json(
+                """{"session": {"id": "sess-1"}, "selectedRoute": "", "selectedProvider": ""}""",
+            ))
+        }
+        val brain = newBrain(transport)
+        brain.connect(FakeCredentialsProvider())
+
+        brain.submitTurnEvidence(TurnEvidence(turnId = 1, learnerTranscript = "one"))
+
+        org.junit.jupiter.api.Assertions.assertNull(brain.coachIndicator())
+        brain.stopHeartbeat()
+    }
+
+    @Test
+    fun `dedupe - resubmitting the same turnId keeps the FIRST submission's indicator, never doubled or cleared`() {
+        var turnCalls = 0
+        val transport = FakeLumaHttpTransport().apply {
+            wireHappyPath(coach = true)
+            on("POST", "/v1/orchestrator/turn") { _ ->
+                turnCalls++
+                json("""{"session": {"id": "sess-1"}, "selectedRoute": "gpt_qa", "selectedProvider": "openai"}""")
+            }
+        }
+        val brain = newBrain(transport)
+        brain.connect(FakeCredentialsProvider())
+
+        val evidence = TurnEvidence(turnId = 9, learnerTranscript = "same turn")
+        brain.submitTurnEvidence(evidence)
+        val first = brain.coachIndicator()
+        assertEquals(CoachIndicator(route = "gpt_qa", provider = "openai"), first)
+
+        brain.submitTurnEvidence(evidence)
+        brain.submitTurnEvidence(evidence)
+
+        // The second/third submits never reach the transport (lastSubmittedTurnId dedupe at
+        // LumaTutorBrain.kt:133), so the indicator is neither doubled nor cleared.
+        assertEquals(1, turnCalls)
+        assertEquals(1, transport.countOf("POST", "/v1/orchestrator/turn"))
+        assertEquals(first, brain.coachIndicator())
+        brain.stopHeartbeat()
+    }
+
+    /**
+     * `coachIndicatorField` is `@Volatile` and always assigned as a whole `CoachIndicator`
+     * reference (LumaTutorBrain.kt:184), so the JMM guarantees no torn read of the
+     * (route, provider) pair even under concurrent submission — this test confirms that
+     * holds. Note (LOW, informational): `lastSubmittedTurnId` (LumaTutorBrain.kt:65) is
+     * NOT `@Volatile` and its check-then-set dedupe (line 133-134) is not synchronized,
+     * unlike the three sibling fields declared `@Volatile` right below it. That is a
+     * latent thread-safety gap in the dedupe mechanism itself (possible visibility lag /
+     * racy double-post under concurrent callers), separate from the pair-integrity property
+     * this test targets.
+     */
+    @Test
+    fun `concurrency - rapid alternating submits from two threads never produce a torn route-provider pair`() {
+        val transport = FakeLumaHttpTransport().apply {
+            wireHappyPath(coach = true)
+            on("POST", "/v1/orchestrator/turn") { req ->
+                val body = req.body.orEmpty()
+                if (body.contains("\"content\":\"A\"")) {
+                    json("""{"session": {"id": "sess-1"}, "selectedRoute": "free_chat", "selectedProvider": "etri"}""")
+                } else {
+                    json("""{"session": {"id": "sess-1"}, "selectedRoute": "gpt_qa", "selectedProvider": "openai"}""")
+                }
+            }
+        }
+        val brain = newBrain(transport)
+        brain.connect(FakeCredentialsProvider())
+
+        val validPairs = setOf(
+            CoachIndicator(route = "free_chat", provider = "etri"),
+            CoachIndicator(route = "gpt_qa", provider = "openai"),
+        )
+        val observedInvalid = CopyOnWriteArrayList<CoachIndicator>()
+        val stop = AtomicBoolean(false)
+
+        val threadA = Thread {
+            var i = 0
+            while (!stop.get()) {
+                brain.submitTurnEvidence(TurnEvidence(turnId = 100_000 + i, learnerTranscript = "A"))
+                i++
+            }
+        }
+        val threadB = Thread {
+            var i = 0
+            while (!stop.get()) {
+                brain.submitTurnEvidence(TurnEvidence(turnId = 200_000 + i, learnerTranscript = "B"))
+                i++
+            }
+        }
+        val reader = Thread {
+            repeat(20_000) {
+                val snapshot = brain.coachIndicator()
+                if (snapshot != null && snapshot !in validPairs) {
+                    observedInvalid.add(snapshot)
+                }
+            }
+        }
+
+        threadA.start()
+        threadB.start()
+        reader.start()
+        Thread.sleep(200)
+        stop.set(true)
+        threadA.join(5_000)
+        threadB.join(5_000)
+        reader.join(5_000)
+
+        assertTrue(observedInvalid.isEmpty(), "torn/invalid indicator pairs observed: $observedInvalid")
         brain.stopHeartbeat()
     }
 }
