@@ -44,7 +44,14 @@ data class TurnEvidence(
  * hears is a separate, always-on model; see `CoachIndicatorLabel` in `:app` for the display
  * mapping and why the voice segment is never derived from this type.
  */
-data class CoachIndicator(val route: String, val provider: String)
+data class CoachIndicator(
+    val route: String,
+    val provider: String,
+    /** The router's own stated reason for choosing [route], model-authored Korean. Shown to the wearer briefly. */
+    val reason: String? = null,
+    /** Router confidence as a percent (0-100), when the server sent one. */
+    val confidencePercent: Int? = null,
+)
 
 /**
  * Slow-path coach brain contract. Pure Kotlin, blocking (no coroutines) —

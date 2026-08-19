@@ -189,7 +189,17 @@ class LumaTutorBrain(
             val route = json.str("selectedRoute")?.takeIf { it.isNotBlank() }
             val provider = json.str("selectedProvider")?.takeIf { it.isNotBlank() }
             coachIndicatorField = if (route != null && provider != null) {
-                CoachIndicator(route = route, provider = provider)
+                CoachIndicator(
+                    route = route,
+                    provider = provider,
+                    // Optional extras (server af1a0c1+): why the router chose this route, in
+                    // the classifier's own words, and how sure it was. Absent on older
+                    // servers; the indicator stays honest without them.
+                    reason = json.str("selectionReason")?.takeIf { it.isNotBlank() },
+                    confidencePercent = json.num("selectionConfidence")
+                        ?.takeIf { it in 0.0..1.0 }
+                        ?.let { (it * 100).toInt() },
+                )
             } else {
                 null
             }

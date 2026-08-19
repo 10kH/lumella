@@ -89,6 +89,9 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
         private const val SIBLING_ACTIVITY = "com.woolab.ella.MainActivity"
         /** Gives the model's handover sentence time to finish playing before the app exits. */
         private const val LANGUAGE_SWITCH_DELAY_MS = 1_200L
+
+        /** How long the router's stated reason holds the hint line before the tap guide returns. */
+        private const val REASON_DISPLAY_MS = 8_000L
         /** Short timeout for the boot-time remote config fetch — must never stall app boot. */
         private const val REMOTE_CONFIG_TIMEOUT_MS = 3_000
         /**
@@ -1056,10 +1059,30 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
      * the feasibility verdict.
      */
     private fun updateHint(indicator: CoachIndicator?) {
-        val text = CoachIndicatorLabel.hintLine(indicator, BASE_HINT)
+        // The router's stated REASON shows for a few seconds, then yields back to the tap
+        // guide — same shape as subtitle retention, same staleness rule: only the timer
+        // still holding the current generation may revert, so a faster next turn's hint is
+        // never clobbered by an older timer. UI thread only.
+        val generation = ++hintGeneration
+        if (indicator?.reason != null) {
+            setHintText(CoachIndicatorLabel.hintLineWithReason(indicator, BASE_HINT))
+            mBindingPair.left.tvHint.postDelayed({
+                if (generation == hintGeneration) {
+                    setHintText(CoachIndicatorLabel.hintLine(indicator, BASE_HINT))
+                }
+            }, REASON_DISPLAY_MS)
+        } else {
+            setHintText(CoachIndicatorLabel.hintLine(indicator, BASE_HINT))
+        }
+    }
+
+    private fun setHintText(text: String) {
         mBindingPair.left.tvHint.text = text
         mBindingPair.right.tvHint.text = text
     }
+
+    /** Monotonic per-hint-update counter; a revert timer from an older update is refused. UI thread only. */
+    private var hintGeneration = 0L
 
     /**
      * Clears the tutor subtitle accumulator and view. Call when a new turn starts (right tap

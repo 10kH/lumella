@@ -683,6 +683,62 @@ class LumaTutorBrainTest {
     }
 
     @Test
+    fun `selectionReason and selectionConfidence ride the indicator when the server sends them`() {
+        val transport = FakeLumaHttpTransport().apply {
+            wireHappyPath(coach = true)
+            on("POST", "/v1/orchestrator/turn", json(
+                """{"session": {"id": "sess-1"}, "selectedRoute": "free_chat", "selectedProvider": "etri",""" +
+                    """ "selectionReason": "학습자가 자유 대화를 원함", "selectionConfidence": 0.74}""",
+            ))
+        }
+        val brain = newBrain(transport)
+        brain.connect(FakeCredentialsProvider())
+        brain.submitTurnEvidence(TurnEvidence(turnId = 1, learnerTranscript = "one"))
+
+        val indicator = brain.coachIndicator()
+        assertEquals("학습자가 자유 대화를 원함", indicator?.reason)
+        assertEquals(74, indicator?.confidencePercent)
+        brain.stopHeartbeat()
+    }
+
+    @Test
+    fun `an older server without the reason fields still yields a plain indicator`() {
+        // The fields are additive (server af1a0c1+); the pair alone must keep working.
+        val transport = FakeLumaHttpTransport().apply {
+            wireHappyPath(coach = true)
+            on("POST", "/v1/orchestrator/turn", json(
+                """{"session": {"id": "sess-1"}, "selectedRoute": "free_chat", "selectedProvider": "etri"}""",
+            ))
+        }
+        val brain = newBrain(transport)
+        brain.connect(FakeCredentialsProvider())
+        brain.submitTurnEvidence(TurnEvidence(turnId = 1, learnerTranscript = "one"))
+
+        val indicator = brain.coachIndicator()
+        assertEquals(CoachIndicator(route = "free_chat", provider = "etri"), indicator)
+        org.junit.jupiter.api.Assertions.assertNull(indicator?.reason)
+        brain.stopHeartbeat()
+    }
+
+    @Test
+    fun `an out-of-range confidence is dropped rather than shown`() {
+        // A confidence of 7.4 (server bug, wrong scale) must not render as 740%.
+        val transport = FakeLumaHttpTransport().apply {
+            wireHappyPath(coach = true)
+            on("POST", "/v1/orchestrator/turn", json(
+                """{"session": {"id": "sess-1"}, "selectedRoute": "free_chat", "selectedProvider": "etri",""" +
+                    """ "selectionConfidence": 7.4}""",
+            ))
+        }
+        val brain = newBrain(transport)
+        brain.connect(FakeCredentialsProvider())
+        brain.submitTurnEvidence(TurnEvidence(turnId = 1, learnerTranscript = "one"))
+
+        org.junit.jupiter.api.Assertions.assertNull(brain.coachIndicator()?.confidencePercent)
+        brain.stopHeartbeat()
+    }
+
+    @Test
     fun `a coach-incapable server never shows a coach indicator, even when its turn response carries route fields`() {
         // The gate this pins: capabilities.coach=false means fetchSteering permanently refuses
         // (COACH_UNSUPPORTED) — displaying "코치 …" from that server would label a coach that

@@ -186,4 +186,61 @@ class CoachIndicatorLabelTest {
         val line = CoachIndicatorLabel.hintLine(CoachIndicator(route = "etri", provider = "free_chat"), "기존 힌트")
         assertEquals("음성 LLM-GPT · 코치 FREE_CHAT(etri) · 기존 힌트", line)
     }
+
+    @Test
+    fun `confidence renders inline in the coach segment when the server sent one`() {
+        val line = CoachIndicatorLabel.hintLine(
+            CoachIndicator(route = "free_chat", provider = "etri", confidencePercent = 98),
+            "기존 힌트",
+        )
+        assertEquals("음성 LLM-GPT · 코치 SLM-TANGO(자유대화 98%) · 기존 힌트", line)
+    }
+
+    @Test
+    fun `no confidence means no percent - never a fabricated number`() {
+        val line = CoachIndicatorLabel.hintLine(CoachIndicator(route = "free_chat", provider = "etri"), "기존 힌트")
+        assertFalse(line.contains("%"))
+    }
+
+    @Test
+    fun `the reason variant replaces the base hint with the router's own words`() {
+        val line = CoachIndicatorLabel.hintLineWithReason(
+            CoachIndicator(route = "free_chat", provider = "etri", reason = "학습자가 자유 대화를 원함", confidencePercent = 74),
+            "기존 힌트",
+        )
+        assertEquals("음성 LLM-GPT · 코치 SLM-TANGO(자유대화 74%) · 사유: 학습자가 자유 대화를 원함", line)
+        assertFalse("the tap guide yields while the reason shows", line.contains("기존 힌트"))
+    }
+
+    @Test
+    fun `a long reason is clipped by display width - Hangul counts double`() {
+        val longReason = "학습자가 특정 질문이 아니라 자유로운 한국어 말하기를 원하며 짧은 대화를 이어가려 한다"
+        val line = CoachIndicatorLabel.hintLineWithReason(
+            CoachIndicator(route = "free_chat", provider = "etri", reason = longReason),
+            "기존 힌트",
+        )
+        assertTrue("clip must end with an ellipsis", line.endsWith("…"))
+        val shown = line.substringAfter("사유: ").removeSuffix("…")
+        val width = shown.sumOf { if (it.code >= 0x1100) 2 else 1 as Int }
+        assertTrue("width $width exceeds the 40-unit budget", width <= 40)
+    }
+
+    @Test
+    fun `a blank reason falls back to the plain hint line - never an empty 사유 segment`() {
+        val line = CoachIndicatorLabel.hintLineWithReason(
+            CoachIndicator(route = "free_chat", provider = "etri", reason = "  "),
+            "기존 힌트",
+        )
+        assertEquals(CoachIndicatorLabel.hintLine(CoachIndicator(route = "free_chat", provider = "etri", reason = "  "), "기존 힌트"), line)
+        assertTrue(line.contains("기존 힌트"))
+    }
+
+    @Test
+    fun `a reason with control characters stays on one line`() {
+        val line = CoachIndicatorLabel.hintLineWithReason(
+            CoachIndicator(route = "free_chat", provider = "etri", reason = "줄1\n줄2"),
+            "기존 힌트",
+        )
+        assertFalse(line.contains("\n"))
+    }
 }
