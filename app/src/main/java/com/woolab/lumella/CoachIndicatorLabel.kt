@@ -39,6 +39,9 @@ object CoachIndicatorLabel {
         "topic_chat" to "주제대화",
         "writing_handoff" to "쓰기",
         "fallback_tutor" to "기본",
+        // Not routable yet — the ETRI ASE endpoint does not exist on our server. The label
+        // is pre-wired so that when luma gains the route, the glasses need no change.
+        "speaking_eval" to "말하기평가",
     )
 
     /**
@@ -88,7 +91,13 @@ object CoachIndicatorLabel {
     }
 
     private fun coachSegment(indicator: CoachIndicator): String {
-        val label = providerLabel(indicator.provider)
+        // Dr. Hwang's memo names this exact label. A speaking-eval turn served by ETRI is
+        // the ASE engine, not TANGO — same provider string, different service.
+        val label = if (indicator.route == "speaking_eval" && indicator.provider == "etri") {
+            "SLM-ASE"
+        } else {
+            providerLabel(indicator.provider)
+        }
         val route = routeName(indicator.route)
         val confidence = indicator.confidencePercent?.let { " ${it}%" } ?: ""
         return "코치 $label($route$confidence)"

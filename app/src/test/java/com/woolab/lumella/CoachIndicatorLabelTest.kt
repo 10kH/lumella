@@ -243,4 +243,17 @@ class CoachIndicatorLabelTest {
         )
         assertFalse(line.contains("\n"))
     }
+
+    @Test
+    fun `a future speaking-eval turn renders SLM-ASE, not SLM-TANGO`() {
+        // Pre-wired for the ETRI ASE integration: same provider string ("etri"), different
+        // service. The 08/05 memo names this exact label. Until luma gains the route this is
+        // unreachable from live traffic — the pin exists so the integration needs no glasses
+        // change and no one "fixes" the special case away in the meantime.
+        val line = CoachIndicatorLabel.hintLine(
+            CoachIndicator(route = "speaking_eval", provider = "etri", confidencePercent = 91),
+            "기존 힌트",
+        )
+        assertEquals("음성 LLM-GPT · 코치 SLM-ASE(말하기평가 91%) · 기존 힌트", line)
+    }
 }
