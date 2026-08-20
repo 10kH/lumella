@@ -78,16 +78,18 @@ object CoachIndicatorLabel {
     }
 
     /**
-     * The transient variant shown right after a turn's routing arrives: the coach segment
-     * plus the router's own stated REASON, replacing the base hint for a few seconds before
-     * [hintLine] takes back over. The reason is width-budgeted (Hangul counts double, the
-     * ellipsis costs one) because requirement 1 of the same memo is about NOT covering the
-     * wearer's view — a two-line hint is the ceiling, never three.
+     * The transient variant shown right after a turn's routing arrives: the router's stated
+     * REASON, alone, with the full hint width. The voice/coach segments deliberately step
+     * aside for these few seconds — they are on the permanent line immediately before and
+     * after, and a ~50-unit fixed prefix was exactly why every real reason clipped (the
+     * router writes full sentences, English ones at that). No manual width clip: the view's
+     * own maxLines+ellipsize is the single backstop, so the label layer cannot clip earlier
+     * than the screen actually requires.
      */
     fun hintLineWithReason(indicator: CoachIndicator, baseHint: String): String {
         val reason = indicator.reason?.takeIf { it.isNotBlank() }
             ?: return hintLine(indicator, baseHint)
-        return "$VOICE_SEGMENT · ${coachSegment(indicator)} · 사유: ${clipToWidth(oneLine(reason), REASON_WIDTH_BUDGET)}"
+        return "사유: ${oneLine(reason)}"
     }
 
     private fun coachSegment(indicator: CoachIndicator): String {
@@ -108,24 +110,4 @@ object CoachIndicatorLabel {
         return "코치 $attempted$label($route$confidence)"
     }
 
-    /** Display-width clip: wide (Hangul-class) chars cost 2 units, the ellipsis costs 1. */
-    private fun clipToWidth(value: String, budget: Int): String {
-        var width = 0
-        val sb = StringBuilder()
-        for (ch in value) {
-            val w = if (ch.code >= 0x1100) 2 else 1
-            if (width + w > budget - 1) return sb.append("…").toString()
-            sb.append(ch)
-            width += w
-        }
-        return sb.toString()
-    }
-
-    /**
-     * ~90 Latin units ≈ 45 Hangul chars. The first budget (40) clipped almost every real
-     * reason — the router writes full sentences. The hint view caps at three lines
-     * (maxLines in the layout is the hard backstop), and the fixed segments plus 90 units
-     * fit inside that.
-     */
-    private const val REASON_WIDTH_BUDGET = 90
 }

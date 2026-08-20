@@ -203,26 +203,29 @@ class CoachIndicatorLabelTest {
     }
 
     @Test
-    fun `the reason variant replaces the base hint with the router's own words`() {
+    fun `the reason variant gives the router's words the full hint width`() {
+        // The fixed voice/coach prefix (~50 units) was exactly why every real reason
+        // clipped; during the transient window the reason stands alone, and the permanent
+        // line before/after carries who is coaching.
         val line = CoachIndicatorLabel.hintLineWithReason(
             CoachIndicator(route = "free_chat", provider = "etri", reason = "학습자가 자유 대화를 원함", confidencePercent = 74),
             "기존 힌트",
         )
-        assertEquals("음성 LLM-GPT · 코치 SLM-TANGO(자유대화 74%) · 사유: 학습자가 자유 대화를 원함", line)
+        assertEquals("사유: 학습자가 자유 대화를 원함", line)
         assertFalse("the tap guide yields while the reason shows", line.contains("기존 힌트"))
     }
 
     @Test
-    fun `a long reason is clipped by display width - Hangul counts double`() {
-        val longReason = "학습자가 특정 질문이 아니라 자유로운 한국어 말하기를 원하며 짧은 대화를 이어가려 한다는 판단이며 이전 턴들의 맥락과 발화의 어조를 종합하면 이 판단의 확신도가 높다"
+    fun `a long reason is passed through whole - the view's maxLines is the only backstop`() {
+        // The label layer must never clip earlier than the screen requires: two layers of
+        // truncation was how "still clipped" survived the first budget increase.
+        val longReason = "The learner is continuing an open-ended Korean conversation about a casual personal preference and expects a friendly conversational reply rather than a factual answer"
         val line = CoachIndicatorLabel.hintLineWithReason(
             CoachIndicator(route = "free_chat", provider = "etri", reason = longReason),
             "기존 힌트",
         )
-        assertTrue("clip must end with an ellipsis", line.endsWith("…"))
-        val shown = line.substringAfter("사유: ").removeSuffix("…")
-        val width = shown.sumOf { if (it.code >= 0x1100) 2 else 1 as Int }
-        assertTrue("width $width exceeds the 90-unit budget", width <= 90)
+        assertEquals("사유: $longReason", line)
+        assertFalse(line.contains("…"))
     }
 
     @Test
