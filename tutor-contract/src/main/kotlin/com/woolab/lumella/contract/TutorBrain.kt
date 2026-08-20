@@ -51,6 +51,13 @@ data class CoachIndicator(
     val reason: String? = null,
     /** Router confidence as a percent (0-100), when the server sent one. */
     val confidencePercent: Int? = null,
+    /**
+     * The provider that was TRIED first when the final one is a quality-gate repair — e.g.
+     * TANGO answered, the evaluator rejected the reply, GPT repaired it. Null when the first
+     * attempt was the one that survived. Display as 시도→최종 so "TANGO participated" is
+     * visible instead of silently absorbed.
+     */
+    val attemptedProvider: String? = null,
 )
 
 /**

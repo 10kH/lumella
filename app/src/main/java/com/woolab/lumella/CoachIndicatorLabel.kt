@@ -100,7 +100,12 @@ object CoachIndicatorLabel {
         }
         val route = routeName(indicator.route)
         val confidence = indicator.confidencePercent?.let { " ${it}%" } ?: ""
-        return "코치 $label($route$confidence)"
+        // 시도→최종: a repaired turn shows the engine that tried first, so TANGO's
+        // participation is visible instead of silently absorbed by the repair.
+        val attempted = indicator.attemptedProvider
+            ?.takeIf { it != indicator.provider }
+            ?.let { "${providerLabel(it)}→" } ?: ""
+        return "코치 $attempted$label($route$confidence)"
     }
 
     /** Display-width clip: wide (Hangul-class) chars cost 2 units, the ellipsis costs 1. */
@@ -116,6 +121,11 @@ object CoachIndicatorLabel {
         return sb.toString()
     }
 
-    /** ~40 Latin units ≈ 20 Hangul chars: fits beside the two fixed segments within two lines. */
-    private const val REASON_WIDTH_BUDGET = 40
+    /**
+     * ~90 Latin units ≈ 45 Hangul chars. The first budget (40) clipped almost every real
+     * reason — the router writes full sentences. The hint view caps at three lines
+     * (maxLines in the layout is the hard backstop), and the fixed segments plus 90 units
+     * fit inside that.
+     */
+    private const val REASON_WIDTH_BUDGET = 90
 }

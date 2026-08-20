@@ -214,7 +214,7 @@ class CoachIndicatorLabelTest {
 
     @Test
     fun `a long reason is clipped by display width - Hangul counts double`() {
-        val longReason = "학습자가 특정 질문이 아니라 자유로운 한국어 말하기를 원하며 짧은 대화를 이어가려 한다"
+        val longReason = "학습자가 특정 질문이 아니라 자유로운 한국어 말하기를 원하며 짧은 대화를 이어가려 한다는 판단이며 이전 턴들의 맥락과 발화의 어조를 종합하면 이 판단의 확신도가 높다"
         val line = CoachIndicatorLabel.hintLineWithReason(
             CoachIndicator(route = "free_chat", provider = "etri", reason = longReason),
             "기존 힌트",
@@ -222,7 +222,7 @@ class CoachIndicatorLabelTest {
         assertTrue("clip must end with an ellipsis", line.endsWith("…"))
         val shown = line.substringAfter("사유: ").removeSuffix("…")
         val width = shown.sumOf { if (it.code >= 0x1100) 2 else 1 as Int }
-        assertTrue("width $width exceeds the 40-unit budget", width <= 40)
+        assertTrue("width $width exceeds the 90-unit budget", width <= 90)
     }
 
     @Test
@@ -255,5 +255,26 @@ class CoachIndicatorLabelTest {
             "기존 힌트",
         )
         assertEquals("음성 LLM-GPT · 코치 SLM-ASE(말하기평가 91%) · 기존 힌트", line)
+    }
+
+    @Test
+    fun `a repaired turn shows the engine that tried first`() {
+        // The wearer's actual confusion this answers: "탱고를 안 쓰는 것 같다" — TANGO WAS
+        // trying, its replies failed the quality gate, GPT repaired them, and the display
+        // silently absorbed the attempt. The arrow makes the participation visible.
+        val line = CoachIndicatorLabel.hintLine(
+            CoachIndicator(route = "free_chat", provider = "openai", attemptedProvider = "etri", confidencePercent = 84),
+            "기존 힌트",
+        )
+        assertEquals("음성 LLM-GPT · 코치 SLM-TANGO→LLM-GPT(자유대화 84%) · 기존 힌트", line)
+    }
+
+    @Test
+    fun `no arrow when the attempt and the survivor are the same engine`() {
+        val line = CoachIndicatorLabel.hintLine(
+            CoachIndicator(route = "free_chat", provider = "etri", attemptedProvider = "etri"),
+            "기존 힌트",
+        )
+        assertFalse(line.contains("→"))
     }
 }

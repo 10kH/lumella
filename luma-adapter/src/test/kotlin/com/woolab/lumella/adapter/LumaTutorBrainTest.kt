@@ -721,6 +721,42 @@ class LumaTutorBrainTest {
     }
 
     @Test
+    fun `a quality-gate repair carries the attempted provider`() {
+        val transport = FakeLumaHttpTransport().apply {
+            wireHappyPath(coach = true)
+            on("POST", "/v1/orchestrator/turn", json(
+                """{"session": {"id": "sess-1"}, "selectedRoute": "free_chat", "selectedProvider": "openai",""" +
+                    """ "fallbackUsed": true,""" +
+                    """ "providerCall": {"provider": "etri", "endpoint": "/tango_generate", "status": "error"}}""",
+            ))
+        }
+        val brain = newBrain(transport)
+        brain.connect(FakeCredentialsProvider())
+        brain.submitTurnEvidence(TurnEvidence(turnId = 1, learnerTranscript = "one"))
+
+        assertEquals("etri", brain.coachIndicator()?.attemptedProvider)
+        brain.stopHeartbeat()
+    }
+
+    @Test
+    fun `no fallback means no attempted provider even when providerCall is present`() {
+        val transport = FakeLumaHttpTransport().apply {
+            wireHappyPath(coach = true)
+            on("POST", "/v1/orchestrator/turn", json(
+                """{"session": {"id": "sess-1"}, "selectedRoute": "free_chat", "selectedProvider": "etri",""" +
+                    """ "fallbackUsed": false,""" +
+                    """ "providerCall": {"provider": "etri", "endpoint": "/tango_generate", "status": "ok"}}""",
+            ))
+        }
+        val brain = newBrain(transport)
+        brain.connect(FakeCredentialsProvider())
+        brain.submitTurnEvidence(TurnEvidence(turnId = 1, learnerTranscript = "one"))
+
+        org.junit.jupiter.api.Assertions.assertNull(brain.coachIndicator()?.attemptedProvider)
+        brain.stopHeartbeat()
+    }
+
+    @Test
     fun `an out-of-range confidence is dropped rather than shown`() {
         // A confidence of 7.4 (server bug, wrong scale) must not render as 740%.
         val transport = FakeLumaHttpTransport().apply {

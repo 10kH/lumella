@@ -199,6 +199,16 @@ class LumaTutorBrain(
                     confidencePercent = json.num("selectionConfidence")
                         ?.takeIf { it in 0.0..1.0 }
                         ?.let { (it * 100).toInt() },
+                    // A quality-gate repair hides the primary engine's participation unless
+                    // surfaced: TANGO tried, the evaluator rejected, GPT repaired — the
+                    // wearer asking "왜 탱고가 안 보여요" was seeing exactly this. Only set
+                    // when the attempt genuinely differs from the survivor.
+                    attemptedProvider = if (json.bool("fallbackUsed") == true) {
+                        json.obj("providerCall")?.str("provider")
+                            ?.takeIf { it.isNotBlank() && it != provider }
+                    } else {
+                        null
+                    },
                 )
             } else {
                 null
