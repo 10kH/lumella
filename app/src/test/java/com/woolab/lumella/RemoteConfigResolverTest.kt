@@ -22,6 +22,25 @@ class RemoteConfigResolverTest {
         }
     }
 
+    /**
+     * Answers per-URL so a test can make the config endpoint healthy while the host it advertises
+     * is dead — the shape of the real 2026-08-31 outage, which a single-response fake cannot
+     * express.
+     */
+    private class RoutingTransport(
+        private val configResponse: Result<TokenHttpResponse>,
+        private val probeResponse: Result<TokenHttpResponse>,
+    ) : ConfigHttpTransport {
+        val urls = mutableListOf<String>()
+        override fun get(url: String, headers: Map<String, String>, callback: (Result<TokenHttpResponse>) -> Unit) {
+            urls += url
+            callback(if (url.endsWith("/v1/config")) configResponse else probeResponse)
+        }
+    }
+
+    private fun okConfig(url: String) =
+        Result.success(TokenHttpResponse(200, """{"lumaBaseUrl":"$url","schemaRev":1}"""))
+
     private fun baseConfig() = AppConfig(
         tokenServiceBaseUrl = "https://lumella-token.vercel.app",
         lumaBaseUrl = "http://10.0.2.2:8010",
@@ -32,16 +51,49 @@ class RemoteConfigResolverTest {
     )
 
     @Test
-    fun remoteUrlIsUsedWhenPresent() {
-        val transport = FakeTransport {
-            Result.success(TokenHttpResponse(200, """{"lumaBaseUrl":"https://random-words.trycloudflare.com","schemaRev":1}"""))
-        }
+    fun remoteUrlIsUsedWhenPresentAndReachable() {
+        val transport = RoutingTransport(
+            configResponse = okConfig("https://random-words.trycloudflare.com"),
+            probeResponse = Result.success(TokenHttpResponse(200, """{"coach":true}""")),
+        )
 
         val resolved = AppConfig.withResolvedLumaBaseUrl(baseConfig(), transport)
 
         assertEquals("https://random-words.trycloudflare.com", resolved.lumaBaseUrl)
-        assertEquals("https://lumella-token.vercel.app/v1/config", transport.lastUrl)
-        assertEquals("local-secret", transport.lastHeaders?.get("X-Lumella-Local-Token"))
+        assertEquals("https://lumella-token.vercel.app/v1/config", transport.urls.first())
+        assertEquals(
+            "https://random-words.trycloudflare.com/v1/capabilities",
+            transport.urls.last(),
+        )
+    }
+
+    /**
+     * The regression this probe exists for: /v1/config answers 200 with a well-formed URL whose
+     * host is gone (a tunnel that died after publishing). Before the probe the app adopted that
+     * host and lost the coach even on the home LAN, where the fallback was answering all along.
+     */
+    @Test
+    fun staleButWellFormedRemoteUrlFallsBackToBuildConfig() {
+        val transport = RoutingTransport(
+            configResponse = okConfig("https://conventions-acres-copper-hayes.trycloudflare.com"),
+            probeResponse = Result.failure(java.io.IOException("unknown host")),
+        )
+
+        val resolved = AppConfig.withResolvedLumaBaseUrl(baseConfig(), transport)
+
+        assertEquals("http://10.0.2.2:8010", resolved.lumaBaseUrl)
+    }
+
+    @Test
+    fun remoteHostAnsweringNonSuccessOnProbeFallsBackToBuildConfig() {
+        val transport = RoutingTransport(
+            configResponse = okConfig("https://tunnel-up-but-luma-down.example"),
+            probeResponse = Result.success(TokenHttpResponse(502, "bad gateway")),
+        )
+
+        val resolved = AppConfig.withResolvedLumaBaseUrl(baseConfig(), transport)
+
+        assertEquals("http://10.0.2.2:8010", resolved.lumaBaseUrl)
     }
 
     @Test

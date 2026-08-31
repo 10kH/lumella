@@ -21,7 +21,10 @@ fun interface ConfigHttpTransport {
  *      URL, republished by `ops/luma-tunnel.sh` on every tunnel restart).
  *   2. Fallback: [buildConfigFallback] (the `local.properties`-sourced `BuildConfig.LUMA_BASE_URL`)
  *      when the remote call fails for ANY reason — network error, non-2xx, malformed JSON, or a
- *      blank/missing `lumaBaseUrl` field.
+ *      blank/missing `lumaBaseUrl` field — AND when the advertised host does not answer a probe
+ *      on [REACHABILITY_PROBE_PATH]. The staleness case is not hypothetical: the published URL
+ *      only changes when `ops/luma-tunnel.sh` republishes it, so a dead tunnel keeps being served
+ *      with HTTP 200 indefinitely and would otherwise mask a working LAN fallback.
  *
  * MUST be invoked off the UI thread: [transport] is expected to perform blocking I/O (see
  * [HttpUrlConnectionTokenHttpTransport]) and invoke its callback synchronously before returning,
@@ -51,7 +54,7 @@ object RemoteConfigResolver {
                 result.onSuccess { response ->
                     if (response.code in 200..299) {
                         val remote = parseLumaBaseUrl(response.body)
-                        if (!remote.isNullOrBlank()) {
+                        if (!remote.isNullOrBlank() && isReachable(transport, remote, localToken)) {
                             resolved = remote
                         }
                     }
@@ -63,6 +66,41 @@ object RemoteConfigResolver {
         }
         return resolved
     }
+
+    /**
+     * Probes [candidate] before adopting it. WHY: the remote config is republished only when
+     * `ops/luma-tunnel.sh` runs, so a tunnel that died (or a publish that never happened) leaves
+     * a syntactically perfect but dead URL served with HTTP 200. Without this check the app
+     * prefers that corpse over a BuildConfig fallback that actually answers — measured on
+     * 2026-08-31, where /v1/config still advertised a 33-day-old quick-tunnel host while
+     * luma-api was reachable the whole time on the LAN address baked into the APK.
+     *
+     * Any non-2xx, transport error, or thrown exception counts as unreachable: the caller then
+     * keeps the fallback. Never throws.
+     */
+    private fun isReachable(
+        transport: ConfigHttpTransport,
+        candidate: String,
+        localToken: String,
+    ): Boolean {
+        var alive = false
+        try {
+            val probeUrl = "${candidate.trimEnd('/')}$REACHABILITY_PROBE_PATH"
+            transport.get(probeUrl, mapOf("X-Lumella-Local-Token" to localToken)) { result ->
+                result.onSuccess { alive = it.code in 200..299 }
+            }
+        } catch (e: Exception) {
+            // Same contract as the config fetch: a throwing transport must not crash boot.
+        }
+        return alive
+    }
+
+    /**
+     * Unauthenticated liveness surface on luma-api. Chosen over a bare `/` because it is the
+     * endpoint the app already depends on for coach availability, so a host that answers here
+     * is a host that can actually serve turns.
+     */
+    internal const val REACHABILITY_PROBE_PATH = "/v1/capabilities"
 
     /** Parses `{"lumaBaseUrl": "...", "schemaRev": 1}` (see api/config.js). Never throws. */
     private fun parseLumaBaseUrl(body: String): String? = try {

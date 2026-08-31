@@ -27,8 +27,23 @@ REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 LOG_DIR="$REPO_ROOT/tmp/luma-tunnel"
 CF_LOG="$LOG_DIR/cloudflared.log"
 
+# Load the Vercel credential before any vercel call. Under launchd there is no TTY and no
+# browser, so `vercel login` cannot complete: the CLI aborts the publish step while the
+# tunnel itself comes up fine, and the URL silently never reaches the glasses. The token
+# lives outside the repo (600 file in a 700 dir) so it is neither committable nor readable
+# by other local accounts the way a world-readable launchd plist would be.
+VERCEL_ENV_FILE="${VERCEL_ENV_FILE:-$HOME/.config/lumella/tunnel.env}"
+if [[ -z "${VERCEL_TOKEN:-}" && -r "$VERCEL_ENV_FILE" ]]; then
+  # shellcheck disable=SC1090
+  set -a; source "$VERCEL_ENV_FILE"; set +a
+fi
+
 command -v cloudflared >/dev/null 2>&1 || { echo "ERROR: cloudflared not found on PATH" >&2; exit 1; }
 command -v vercel >/dev/null 2>&1 || { echo "ERROR: vercel CLI not found on PATH" >&2; exit 1; }
+# Fail before spending a tunnel on a run that cannot publish. Without this the script starts
+# cloudflared, mints a URL, and only then discovers it has no credential — which reads as a
+# working tunnel in the logs while every device is still pointed at a stale address.
+[[ -n "${VERCEL_TOKEN:-}" ]] || { echo "ERROR: VERCEL_TOKEN unset and $VERCEL_ENV_FILE unreadable; refusing to start a tunnel whose URL cannot be published" >&2; exit 1; }
 
 mkdir -p "$LOG_DIR"
 : > "$CF_LOG"
