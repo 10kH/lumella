@@ -151,16 +151,34 @@ INSTALL_FAILED_UPDATE_INCOMPATIBLE: signatures do not match
 
 재서명은 불가능하다. 둘 중 하나다.
 
-- 맥미니의 `~/.android/debug.keystore`를 맥북으로 복사한다 (기존 앱·데이터 유지)
+- 한쪽 `~/.android/debug.keystore`를 다른 쪽으로 복사해 **통일한다** (기존 앱·데이터 유지)
 - `ops/install-glasses.sh --force` — 지우고 새로 깐다. 온디바이스 데이터는 날아가지만
   대화 기록은 맥미니 luma에 있으니 복구된다
 
 adb 인증 키(`~/.android/adbkey`)도 마찬가지다. 처음 꽂는 맥이면 안경에
-**"Allow USB debugging?"**가 뜬다. "Always allow"를 눌러야 한다.
+**"Allow USB debugging?"**가 뜼다. "Always allow"를 눌러야 한다.
 
-> 2026-09-08 확인: 이 맥북의 `~/.android/`는 이전 맥(`Woody-M3A`)에서 통째로 넘어왔다.
-> `adbkey.pub`에 그 호스트명이 남아 있다. 맥미니도 같은 이전을 거쳤다면 두 키가 같아
-> 서명 충돌도 인증 프롬프트도 없다. 안경을 처음 꽂는 순간 어느 쪽인지 바로 드러난다.
+> **2026-09-08 실측.** 두 키가 같을 거라는 추측은 틀렸다. adb 키만 같고
+> (`adbkey.pub`에 `woody@Woody-M3A.local` — 통째 이전된 것, 그래서 인증 프롬프트 없음)
+> **서명 키는 달랐다.** 실제로 `INSTALL_FAILED_UPDATE_INCOMPATIBLE`가 났다.
+>
+> ```
+> 맥북   SHA1 dff5882a7f298b24ef6c1fcb7adccbf9954330b6
+> 맥미니 SHA1 d5ee8c245118b34ae9ebd79b7105d125970363e1
+> ```
+>
+> `--force`로 밀었으니 지금 안경에 깐린 건 **맥북 서명**이다. 따라서 다음에
+> 맥미니가 설치하려 하면 대칭으로 거부당한다. 방향은 **맥북 → 맥미니**다.
+>
+> 양쪽 SSH가 닫혀 있어 `scp`는 안 된다(22/445 모두 closed 확인).
+> **에어드롭으로 옮긴다.** 맥미니에서 기존 키를 먼저 치운다 — 그 키로 서명된
+> 다른 앱이 있으면 같은 충돌이 난다.
+>
+> ```bash
+> # 맥미니에서
+> mv ~/.android/debug.keystore ~/.android/debug.keystore.macmini-old
+> # 그 다음 맥북의 debug.keystore를 에어드롭 → ~/.android/ 에 놓는다
+> ```
 
 ## 4. 안경 무선 연결 — 촬영의 핵심
 
@@ -184,7 +202,13 @@ adb -s <IP>:5555 shell "screenrecord --time-limit 180 /sdcard/take1.mp4"
 adb -s <IP>:5555 pull /sdcard/take1.mp4 ~/shots/
 ```
 
-기기 IP는 DHCP라 망이 바뀌면 달라진다. 안 붙으면 USB로 한 번 꽂아 IP를 다시 본다.
+기기 IP는 DHCP라 망이 바뀌면 달라진다. **케이블 없이 찾을 수 있다** — 5555 포트를 스캔하면 된다.
+
+```bash
+ops/preflight.sh --find     # 새 주소를 찾아 붙이고 전 구간을 점검한다
+```
+
+아이폰 핫스팟은 `172.20.10.0/28`이라 호스트가 14개뿐이라 몇 초면 끝난다.
 
 ### 밖에서 찍을 때 망 구성
 
@@ -198,21 +222,58 @@ adb -s <IP>:5555 pull /sdcard/take1.mp4 ~/shots/
 
 맥북과 안경이 **같은 망**이어야 화면 녹화가 된다. 맥미니는 집에 있어도 무관하다.
 
-## 5. 나가기 전 점검 — 3분
+중요한 구분이다. **대화는 맥북과 무관하다.** 안경이 인터넷에 직접 붙어
+음성(OpenAI)·토큰(Vercel)·코치(터널)를 처리한다. 맥북은 화면 녹화에만 쓴다.
+따라서 맥북이 안경을 못 봐도 **대화는 정상이고 녹화만 불가능하다.**
+
+**안경 와이파이는 이미 저장돼 있다** (2026-09-08 확인). `cmd wifi list-networks`에
+`iPhone`(id 5)과 `Hotspot`(id 3)이 있다. 핫스팟을 켜면 안경이 알아서 붙으니
+렌즈 UI로 새 망을 잡을 일이 없다. 없으면 케이블 꽂고 미리 넣어둔다.
 
 ```bash
-# 안내판이 맥미니를 가리키나
-TOK=$(grep '^lumella.localToken=' ~/workspace/lumella/local.properties | cut -d= -f2-)
-curl -s -H "X-Lumella-Local-Token: $TOK" https://lumella-token.vercel.app/v1/config
-
-# 그 주소가 응답하나 (coach: true 나와야 함)
-curl -s <위에서 받은 주소>/v1/capabilities
-
-# 안경이 무선으로 붙나
-adb devices
+adb shell cmd wifi list-networks        # 저장된 망 확인
 ```
 
-셋 다 되면 나가도 된다.
+**핫스팟이 기기 간 통신을 막을 수 있다.** 아이폰의 "호환성 최대화"(Maximize
+Compatibility)를 켜면 2.4GHz로 내려가면서 클라이언트 격리가 걸리는 경우가 있다.
+증상은 명확하다 — 안경은 멀쩡히 대화하는데 `adb connect`만 안 된다.
+`ops/preflight.sh --find`가 아무것도 못 찾으면 이걸 의심하고 끄면 된다.
+
+### 녹화 실측 (2026-09-08, 무선)
+
+```
+정지 화면 10초   → nb_frames=1     문서가 말한 그대로, 고장 아님
+자막 6회 변경    → nb_frames=13    10.6초, 대화가 오가면 쌓인다
+```
+
+`screencap`은 순흑이지만 **`screenrecord`는 AR 오버레이를 제대로 잡는다.**
+양안(1280x480)이 한 프레임에 들어온다.
+
+## 5. 나가기 전 점검 — 한 줄
+
+```bash
+ops/preflight.sh            # 집에서든 밖에서든
+ops/preflight.sh --find     # 케이블 없이 안경 주소까지 찾아서
+```
+
+다섯 구간을 순서대로 보고 맨 앞 끊긴 곳에서 멈춰 이유를 말한다.
+
+```
+1 맥북 인터넷
+2 토큰 서비스 + 로컬 토큰      401이면 Vercel 환경변수와 불일치
+3 luma (터널 너머 맥미니)      죽은 터널은 200을 계속 내므로 직접 찔러본다
+4 안경 adb                    ← 유일하게 같은 망이 필요한 구간. 녹화전용
+5 앱 설치 · 화면 상태         Ready / Listening... 이어야 정상
+```
+
+수동으로 보려면 이전 방식도 그대로 유효하다.
+
+```bash
+TOK=$(grep '^lumella.localToken=' ~/workspace/lumella/local.properties | cut -d= -f2-)
+curl -s -H "X-Lumella-Local-Token: $TOK" https://lumella-token.vercel.app/v1/config
+curl -s <위에서 받은 주소>/v1/capabilities     # coach: true
+adb devices
+```
 
 ## 6. 자주 걸리는 것
 
