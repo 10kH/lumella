@@ -129,11 +129,38 @@ Toolchain download repositories have not been configured.
 
 ```bash
 cd ~/workspace/lumella
+ops/install-glasses.sh --wireless
+```
+
+**빌드만 하고 설치를 빠뜨리는 실수**가 잦았다. 그래서 한 명령으로 묶었다 —
+빌드·깨우기·설치·버전 확인·무선 전환까지 한다. 손으로 하면 이 둘이다.
+
+```bash
 ./gradlew :app:assembleDebug
 adb install -r app/build/outputs/apk/debug/app-debug.apk
 ```
 
-**빌드만 하고 설치를 빠뜨리는 실수**가 잦았다. 항상 둘을 같이 한다.
+### 다른 맥에서 설치할 때 — 서명이 걸린다
+
+디버그 APK는 `~/.android/debug.keystore`로 서명된다. **이 키는 기계마다 다르다.**
+맥미니가 설치해둔 앱 위에 맥북이 덮어쓰려 하면 이렇게 거부당한다.
+
+```
+INSTALL_FAILED_UPDATE_INCOMPATIBLE: signatures do not match
+```
+
+재서명은 불가능하다. 둘 중 하나다.
+
+- 맥미니의 `~/.android/debug.keystore`를 맥북으로 복사한다 (기존 앱·데이터 유지)
+- `ops/install-glasses.sh --force` — 지우고 새로 깐다. 온디바이스 데이터는 날아가지만
+  대화 기록은 맥미니 luma에 있으니 복구된다
+
+adb 인증 키(`~/.android/adbkey`)도 마찬가지다. 처음 꽂는 맥이면 안경에
+**"Allow USB debugging?"**가 뜬다. "Always allow"를 눌러야 한다.
+
+> 2026-09-08 확인: 이 맥북의 `~/.android/`는 이전 맥(`Woody-M3A`)에서 통째로 넘어왔다.
+> `adbkey.pub`에 그 호스트명이 남아 있다. 맥미니도 같은 이전을 거쳤다면 두 키가 같아
+> 서명 충돌도 인증 프롬프트도 없다. 안경을 처음 꽂는 순간 어느 쪽인지 바로 드러난다.
 
 ## 4. 안경 무선 연결 — 촬영의 핵심
 
