@@ -34,6 +34,8 @@ FIND=""
 [ "${1:-}" = "-h" ] || [ "${1:-}" = "--help" ] && { sed -n '2,26p' "${BASH_SOURCE[0]}"; exit 0; }
 
 FAIL=0
+SCAN_HITS="$(mktemp -t lumella-scan)"
+trap 'rm -f "$SCAN_HITS"' EXIT
 ok()   { printf '  \033[32mOK\033[0m    %s\n' "$1"; }
 bad()  { printf '  \033[31mFAIL\033[0m  %s\n' "$1"; FAIL=1; }
 warn() { printf '  \033[33mWARN\033[0m  %s\n' "$1"; }
@@ -86,15 +88,60 @@ if [ -z "$DEV" ] && [ -n "$FIND" ]; then
   MY="$(ipconfig getifaddr en0 2>/dev/null)"
   if [ -n "$MY" ]; then
     SUB="${MY%.*}"
-    echo "        scanning $SUB.0/24 for an open adb port..."
-    for i in $(seq 1 254); do
-      if nc -z -G 1 "$SUB.$i" 5555 2>/dev/null; then
-        adb connect "$SUB.$i:5555" >/dev/null 2>&1
+    # Ask the network who is actually there before probing anyone. A blind sweep of .1-.254
+    # took 4m17s measured — useless when you are standing outside with a shoot waiting — and
+    # it is mostly time spent timing out on addresses no device holds. One broadcast ping
+    # populates the ARP cache; the live hosts are then a handful, and only those get probed.
+    echo "        looking for the glasses on $SUB.0 ..."
+    ping -c 1 -t 1 "$SUB.255" >/dev/null 2>&1 || true
+    sleep 1
+    # Drop "(incomplete)" rows: a previous sweep leaves an unresolved entry per address it
+    # touched, which would put the whole subnet back in the candidate list. Only entries with a
+    # real MAC mean something answered. BSD awk cannot take index() with a variable here, hence
+    # the substr() prefix test.
+    HOSTS="$(arp -an 2>/dev/null | grep -v incomplete | tr -d '()' | awk -v me="$MY" -v pre="$SUB." '
+      $2 ~ /^[0-9]+\./ && substr($2,1,length(pre))==pre && $2!=me && $2!=pre"255" { print $2 }' | sort -u)"
+    # Probe the live hosts in parallel. Bounded on purpose: spawning one job per address at
+    # once is enough to take the shell down with it.
+    for ip in $HOSTS; do
+      ( nc -z -G 1 "$ip" 5555 2>/dev/null && echo "$ip" >>"$SCAN_HITS" ) &
+      while [ "$(jobs -pr | wc -l)" -ge 16 ]; do wait -n 2>/dev/null || sleep 0.2; done
+    done
+    wait
+    while read -r ip; do
+      [ -z "$ip" ] && continue
+      adb connect "$ip:5555" >/dev/null 2>&1
+      sleep 1
+      DEV="$(adb devices | awk 'NR>1 && $2=="device" {print $1; exit}')"
+      [ -n "$DEV" ] && echo "        found $ip" && break
+    done <"$SCAN_HITS"
+    # ARP only knows hosts this Mac has talked to. On a hotspot joined seconds ago that can be
+    # empty, so fall back to a full sweep of the ACTUAL subnet — /28 on an iPhone is 14 hosts,
+    # not 254, and reading the netmask is what keeps this bounded.
+    if [ -z "$DEV" ]; then
+      MASK="$(ifconfig en0 2>/dev/null | awk '/inet /{print $4; exit}')"
+      LAST=254
+      case "$MASK" in
+        0xfffffff0) LAST=14 ;;
+        0xffffffe0) LAST=30 ;;
+        0xffffffc0) LAST=62 ;;
+        0xffffff80) LAST=126 ;;
+      esac
+      echo "        nothing in ARP; sweeping $SUB.1-$LAST"
+      : >"$SCAN_HITS"
+      for i in $(seq 1 "$LAST"); do
+        ( nc -z -G 1 "$SUB.$i" 5555 2>/dev/null && echo "$SUB.$i" >>"$SCAN_HITS" ) &
+        while [ "$(jobs -pr | wc -l)" -ge 16 ]; do wait -n 2>/dev/null || sleep 0.2; done
+      done
+      wait
+      while read -r ip; do
+        [ -z "$ip" ] && continue
+        adb connect "$ip:5555" >/dev/null 2>&1
         sleep 1
         DEV="$(adb devices | awk 'NR>1 && $2=="device" {print $1; exit}')"
-        [ -n "$DEV" ] && echo "        found $SUB.$i" && break
-      fi
-    done
+        [ -n "$DEV" ] && echo "        found $ip" && break
+      done <"$SCAN_HITS"
+    fi
   fi
 fi
 if [ -z "$DEV" ]; then
