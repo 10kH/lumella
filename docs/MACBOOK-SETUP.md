@@ -74,19 +74,26 @@ gh repo clone 10kH/aaai27
 cat ~/workspace/lumella/local.properties
 ```
 
-키는 일곱이다.
+키는 일곱이지만 **맥미니에서 실제로 가져와야 하는 값은 `localToken` 하나뿐이다.**
+나머지 여섯은 이 레포 안에서 확정된다.
 
 ```properties
 sdk.dir=/Users/<사용자>/Library/Android/sdk    # 맥북 경로로 고칠 것
 lumella.tokenServiceBaseUrl=https://lumella-token.vercel.app
 lumella.lumaBaseUrl=http://192.168.35.170:8010   # 대체 주소, 안내판이 우선
-lumella.localToken=<맥미니에서 복사>
-lumella.brainClassName=...
-lumella.brainEmail=...
-lumella.brainPassword=<맥미니에서 복사>
+lumella.localToken=<맥미니에서 복사 — 유일한 비밀값>
+lumella.brainClassName=com.woolab.lumella.adapter.LumaTutorBrain
+lumella.brainEmail=learner@luma.app
+lumella.brainPassword=luma1234
 ```
 
 `sdk.dir`만 맥북 경로로 바꾼다. 나머지는 그대로.
+
+- `brainClassName`은 `BrainFactory.DEFAULT_BRAIN_CLASS_NAME`과 같은 값이다.
+- `brainEmail`/`brainPassword`는 **비밀값이 아니다.** `luma-api/src/luma_api/seeds/bootstrap.py`가
+  심는 공개 데모 계정이고 `luma/README.md`에도 적혀 있다. 맥미니를 못 열어도 채울 수 있다.
+- `localToken`만 Vercel 환경변수 `LUMELLA_LOCAL_TOKEN`과 짝이 맞아야 한다.
+  틀리면 401, 비면 앱이 `TOKEN-FAIL`로 떨어진다(크래시는 아니다).
 
 ### `luma-api/.env`, `~/.config/lumella/tunnel.env`
 
@@ -95,12 +102,30 @@ lumella.brainPassword=<맥미니에서 복사>
 ## 3. 빌드 환경
 
 ```bash
-brew install --cask android-studio temurin@17
-brew install gh ffmpeg
-export JAVA_HOME=$(/usr/libexec/java_home -v 17)
+brew install --cask android-studio
+brew install openjdk@17 gh ffmpeg
 ```
 
 `JAVA_HOME`을 `~/.zshrc`에 넣어둔다. JDK 17이 아니면 빌드가 깨진다.
+
+**`/usr/libexec/java_home -v 17`을 쓰지 않는다.** Homebrew `openjdk@17`은 keg-only라
+`/Library/Java/JavaVirtualMachines`에 심볼릭 링크가 없고, `java_home`은 그걸 못 본다.
+`java -version`이 "Unable to locate a Java Runtime"으로 나와도 JDK는 깔려 있는 것이다.
+keg 경로를 직접 준다 (sudo 불필요).
+
+```bash
+export JAVA_HOME="/opt/homebrew/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home"
+export PATH="$JAVA_HOME/bin:$PATH"
+```
+
+안드로이드 스튜디오 번들 JBR(21)로는 안 된다. `app/build.gradle.kts:71`의
+`jvmToolchain(17)`이 정확히 17을 요구하는데, `settings.gradle.kts`에 foojay 툴체인
+프로비저닝 플러그인이 없어 자동 내려받기도 없다. 17이 없으면 이렇게 죽는다.
+
+```
+Cannot find a Java installation ... matching: {languageVersion=17}
+Toolchain download repositories have not been configured.
+```
 
 ```bash
 cd ~/workspace/lumella
