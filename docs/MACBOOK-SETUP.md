@@ -108,14 +108,23 @@ brew install openjdk@17 gh ffmpeg
 
 `JAVA_HOME`을 `~/.zshrc`에 넣어둔다. JDK 17이 아니면 빌드가 깨진다.
 
-**`/usr/libexec/java_home -v 17`을 쓰지 않는다.** Homebrew `openjdk@17`은 keg-only라
-`/Library/Java/JavaVirtualMachines`에 심볼릭 링크가 없고, `java_home`은 그걸 못 본다.
-`java -version`이 "Unable to locate a Java Runtime"으로 나와도 JDK는 깔려 있는 것이다.
-keg 경로를 직접 준다 (sudo 불필요).
+이 맥북에서는 **`/usr/libexec/java_home -v 17`이 실패한다.** Homebrew `openjdk@17`은
+keg-only라 `/Library/Java/JavaVirtualMachines`에 심볼릭 링크가 없고, `java_home`은 그걸
+못 본다. `java -version`이 "Unable to locate a Java Runtime"으로 나와도 JDK는 깔려
+있는 것이다.
+
+그렇다고 keg 경로를 박으면 **맥미니에서 죽는다.** 맥미니는 Temurin을 시스템 JDK로
+깔아 `java_home`이 정상으로 찾고, keg 경로는 아예 없다. 둘 다 도는 형태로 쓴다
+(sudo 불필요).
 
 ```bash
-export JAVA_HOME="/opt/homebrew/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home"
+export JAVA_HOME="$(/usr/libexec/java_home -v 17 2>/dev/null || echo /opt/homebrew/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home)"
 export PATH="$JAVA_HOME/bin:$PATH"
+```
+
+```
+맥미니   Temurin 시스템 JDK    java_home이 찾음 → 그걸 쓴다
+맥북     Homebrew openjdk@17   java_home 실패 → keg 경로로 떨어진다
 ```
 
 안드로이드 스튜디오 번들 JBR(21)로는 안 된다. `app/build.gradle.kts:71`의
@@ -170,15 +179,21 @@ adb 인증 키(`~/.android/adbkey`)도 마찬가지다. 처음 꽂는 맥이면 
 > `--force`로 밀었으니 지금 안경에 깐린 건 **맥북 서명**이다. 따라서 다음에
 > 맥미니가 설치하려 하면 대칭으로 거부당한다. 방향은 **맥북 → 맥미니**다.
 >
-> 양쪽 SSH가 닫혀 있어 `scp`는 안 된다(22/445 모두 closed 확인).
-> **에어드롭으로 옮긴다.** 맥미니에서 기존 키를 먼저 치운다 — 그 키로 서명된
-> 다른 앱이 있으면 같은 충돌이 난다.
->
-> ```bash
-> # 맥미니에서
-> mv ~/.android/debug.keystore ~/.android/debug.keystore.macmini-old
-> # 그 다음 맥북의 debug.keystore를 에어드롭 → ~/.android/ 에 놓는다
-> ```
+> 양쪽 SSH가 닫혀 있어 `scp`는 안 된다(22/445 모두 closed 확인). **에어드롭으로 옮긴다.**
+
+**손으로 `mv` 하지 않는다.** 기존 키를 치우기만 하면 다음 빌드에서 Gradle이
+새 키를 자동 생성한다. 지문이 또 달라지는데 경고가 없어서, 다음 설치가 같은 이유로
+실패한 것처럼 보인다. 검증하며 교체하는 스크립트를 쓴다.
+
+```bash
+# 1. 상대 맥의 ~/.android/debug.keystore 를 에어드롭
+# 2. ~/Desktop/keystore-inbox/ 에 넣고
+ops/adopt-keystore.sh
+```
+
+받은 파일을 먼저 읽어 keystore가 아니면 거부하고(에어드롭이 끊긴 경우), 같은 키면
+안 건드리고, 교체할 때만 기존 키를 시각 도장 찍어 백업한 뒤 교체 후 다시 읽어 확인한다.
+방향은 무관하다 — 양쪽 어느 맥에서든 돌린다.
 
 ## 4. 안경 무선 연결 — 촬영의 핵심
 

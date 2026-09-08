@@ -46,16 +46,22 @@ luma가 없어도 앱은 뜹니다(`NoOpBrain` 폴백). 코치 기능만 빠집�
 ## 빌드·테스트
 
 ```bash
-export JAVA_HOME="/opt/homebrew/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home"
+export JAVA_HOME="$(/usr/libexec/java_home -v 17 2>/dev/null || echo /opt/homebrew/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home)"
 ./gradlew :app:testDebugUnitTest :luma-adapter:test :contract-tests:test --rerun-tasks
 ```
 
 `--rerun-tasks` 없으면 `UP-TO-DATE`로 실제 실행되지 않습니다. 344건이 기준선입니다.
 (2026-09-08 맥북 실측 352건 전부 통과.)
 
-`/usr/libexec/java_home -v 17`은 기계에 따라 실패합니다. Homebrew `openjdk@17`은 keg-only라
-심볼릭 링크가 없으면 `java_home`이 못 찾습니다. 위처럼 keg 경로를 직접 주십시오.
-안드로이드 스튜디오 번들 JBR(21)은 `jvmToolchain(17)`을 만족하지 못합니다.
+**두 맥의 JDK 설치 방식이 다릅니다.** 그래서 한 경로를 박지 않고 위처럼 폴백을 둡니다.
+
+```
+맥미니   Temurin 시스템 JDK    java_home -v 17 이 찾음
+맥북     Homebrew openjdk@17   keg-only → java_home 실패, 폴백 경로로
+```
+
+한쪽 경로를 그대로 쓰면 다른 맥에서 죽습니다. 안드로이드 스튜디오 번들 JBR(21)은
+`jvmToolchain(17)`을 만족하지 못합니다.
 
 `LumaTutorBrainTest`의 dedupe 항목이 드물게 실패합니다. 단독 재실행으로 통과하면
 간헐적 실패이니 그대로 두십시오.
