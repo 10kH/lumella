@@ -85,6 +85,23 @@ fi
 echo "4. glasses over adb (needed for RECORDING only)"
 DEV="$(adb devices | awk 'NR>1 && $2=="device" {print $1; exit}')"
 if [ -z "$DEV" ] && [ -n "$FIND" ]; then
+  # IPv6 FIRST. The iPhone hotspot hands this Mac a 192.0.0.2/32 point-to-point v4 address and
+  # the glasses can end up with NO IPv4 at all (DHCPv4 fails, SLAAC succeeds) — measured
+  # 2026-09-09 in the field. Everything still works over IPv6 + the carrier's NAT64: the app
+  # reached READY and a wireless recording pulled fine. A v4-only search finds nothing there and
+  # would blame client isolation, which is the wrong fix for the wrong problem.
+  echo "        checking IPv6 neighbours ..."
+  ping6 -c 1 -i 1 ff02::1%en0 >/dev/null 2>&1 || true
+  sleep 1
+  V6="$(ndp -an 2>/dev/null | awk '$1 ~ /^2[0-9a-f]*:/ && $2 ~ /:/ {print $1}' | sort -u)"
+  for a6 in $V6; do
+    adb connect "[$a6]:5555" >/dev/null 2>&1
+    sleep 1
+    DEV="$(adb devices | awk 'NR>1 && $2=="device" {print $1; exit}')"
+    [ -n "$DEV" ] && echo "        found $a6 (IPv6)" && break
+  done
+fi
+if [ -z "$DEV" ] && [ -n "$FIND" ]; then
   MY="$(ipconfig getifaddr en0 2>/dev/null)"
   if [ -n "$MY" ]; then
     SUB="${MY%.*}"
@@ -146,8 +163,14 @@ if [ -z "$DEV" ] && [ -n "$FIND" ]; then
 fi
 if [ -z "$DEV" ]; then
   bad "no glasses. Conversation still works; you just cannot record."
-  echo "        - re-run with --find to hunt the new DHCP address"
-  echo "        - if --find finds nothing, the hotspot is isolating its clients:"
+  echo "        - re-run with --find (it tries IPv6 neighbours, then IPv4)"
+  echo "        - on the iPhone hotspot the glasses often have NO IPv4 at all; that is normal"
+  echo "          and not a failure. Check the v6 address on the glasses and connect directly:"
+  echo "              adb shell ip addr show wlan0        # over USB"
+  echo "              adb connect [<v6 addr>]:5555"
+  echo "        - adb wireless dies on reboot/network change even though the app keeps working."
+  echo "          service.adb.tcp.port empties out; re-arm it over USB with: adb tcpip 5555"
+  echo "        - only if BOTH families find nothing, suspect client isolation:"
   echo "          turn OFF 'Maximize Compatibility' on iPhone, or use a cable for this take"
 else
   ok "$DEV"
