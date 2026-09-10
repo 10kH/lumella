@@ -82,6 +82,8 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
         /** Shows the model a picture from a file path, bypassing the camera. */
         private const val DEBUG_SEE_ACTION = "com.woolab.lumella.DEBUG_SEE"
         private const val DEBUG_EVENT_ACTION = "com.woolab.lumella.DEBUG_EVENT"
+        private const val DEBUG_REC_START_ACTION = "com.woolab.lumella.DEBUG_REC_START"
+        private const val DEBUG_REC_STOP_ACTION = "com.woolab.lumella.DEBUG_REC_STOP"
         /** This app's own tutoring language, per `switch_tutor_language`'s own-language check. */
         private const val OWN_TUTOR_LANGUAGE = "korean"
         /** lumella (Korean) hands off to ELLA (English) — explicit component, no implicit intent. */
@@ -414,6 +416,8 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
                     addAction(DEBUG_SAY_ACTION)
                     addAction(DEBUG_SEE_ACTION)
                     addAction(DEBUG_EVENT_ACTION)
+                    addAction(DEBUG_REC_START_ACTION)
+                    addAction(DEBUG_REC_STOP_ACTION)
                 },
                 // Only a sender holding DUMP may reach these. The receiver has to stay
                 // exported — `adb shell am broadcast` is the whole point of it, and the glasses
@@ -1231,6 +1235,20 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
                         DEBUG_CAPTURE_ACTION -> {
                             Log.i(TAG, "debug: capturePhoto triggered via broadcast")
                             capturePhoto()
+                        }
+                        DEBUG_REC_START_ACTION -> {
+                            // Shooting aid for the demo film: first-person video from inside
+                            // this app, because the launcher force-stops lumella the moment any
+                            // other app (the camera app included) takes the foreground.
+                            val name = intent.getStringExtra("name")?.takeIf { it.isNotBlank() }
+                                ?: "take-${System.currentTimeMillis()}"
+                            val dest = java.io.File(getExternalFilesDir(null), "$name.mp4")
+                            Log.i(TAG, "debug: start recording -> ${dest.absolutePath}")
+                            camera.startRecording(dest) { msg -> Log.i(TAG, "debug: rec $msg") }
+                        }
+                        DEBUG_REC_STOP_ACTION -> {
+                            Log.i(TAG, "debug: stop recording")
+                            camera.stopRecording { msg -> Log.i(TAG, "debug: rec $msg") }
                         }
                         DEBUG_SPEECH_ACTION -> {
                             Log.i(TAG, "debug: toggleSpeechTurn triggered via broadcast")

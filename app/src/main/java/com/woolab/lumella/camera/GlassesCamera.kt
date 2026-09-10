@@ -4,15 +4,25 @@ import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import android.view.Surface
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
 import androidx.camera.core.CameraState
 import androidx.camera.core.ImageProxy
 import androidx.camera.lifecycle.ProcessCameraProvider
+import androidx.camera.video.FallbackStrategy
+import androidx.camera.video.FileOutputOptions
+import androidx.camera.video.Quality
+import androidx.camera.video.QualitySelector
+import androidx.camera.video.Recorder
+import androidx.camera.video.Recording
+import androidx.camera.video.VideoCapture
+import androidx.camera.video.VideoRecordEvent
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.Observer
+import java.io.File
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicBoolean
@@ -43,6 +53,10 @@ class GlassesCamera(context: Context, private val lifecycleOwner: LifecycleOwner
     }
     private val mainHandler = Handler(Looper.getMainLooper())
     private val capturing = AtomicBoolean(false)
+
+    /** Non-null only while a video recording is in flight. Main-thread only. */
+    private var activeRecording: Recording? = null
+    private var recordingProvider: ProcessCameraProvider? = null
 
     /**
      * Captures a single JPEG frame; [onCaptured] receives raw JPEG bytes.
@@ -171,8 +185,113 @@ class GlassesCamera(context: Context, private val lifecycleOwner: LifecycleOwner
         }
     }
 
+    /**
+     * Records first-person video to [destination] until [stopRecording].
+     *
+     * **Audio is deliberately not recorded.** The device permits one active audio input
+     * (`dumpsys media.audio_policy` reports `maxActiveCount: 1`) and the voice pipeline holds
+     * the mic for the whole session; asking `Recorder` for audio would take it away and end the
+     * conversation this footage exists to show. Sound for the film comes from the external
+     * camera, which is recording the same scene anyway.
+     *
+     * Unlike [captureImage] this keeps the camera bound for the duration — a recording IS the
+     * bind. Photo capture is therefore unavailable while recording (`captureImage` reports
+     * "Capture already in progress"), which is why this is a debug-triggered shooting aid and
+     * not something wired to the touchpad.
+     *
+     * Not exercised by JVM unit tests (real camera stack); verify on device.
+     */
+    fun startRecording(destination: File, onEvent: (String) -> Unit) {
+        if (!capturing.compareAndSet(false, true)) {
+            onEvent("busy: another capture is in progress")
+            return
+        }
+        mainHandler.post {
+            val providerFuture = ProcessCameraProvider.getInstance(appContext)
+            providerFuture.addListener({
+                try {
+                    val provider = providerFuture.get()
+                    val recorder = Recorder.Builder()
+                        .setQualitySelector(
+                            // HIGHEST alone fails on devices whose best profile the encoder
+                            // cannot sustain; the fallback keeps a lower profile usable.
+                            QualitySelector.from(
+                                Quality.FHD,
+                                FallbackStrategy.lowerQualityOrHigherThan(Quality.SD),
+                            ),
+                        )
+                        .build()
+                    val videoCapture = VideoCapture.withOutput(recorder).apply {
+                        // The glasses report a portrait natural orientation, so the recording
+                        // lands with rotation=-90 in its metadata and every player shows it on
+                        // its side. Pin landscape here rather than fixing it per file in the
+                        // edit, which is a step easy to forget on one take out of twelve.
+                        targetRotation = Surface.ROTATION_90
+                    }
+                    provider.unbindAll()
+                    provider.bindToLifecycle(
+                        lifecycleOwner,
+                        CameraSelector.DEFAULT_BACK_CAMERA,
+                        videoCapture,
+                    )
+                    recordingProvider = provider
+                    activeRecording = videoCapture.output
+                        .prepareRecording(appContext, FileOutputOptions.Builder(destination).build())
+                        // No withAudioEnabled() — see kdoc.
+                        .start(ContextCompat.getMainExecutor(appContext)) { event ->
+                            when (event) {
+                                is VideoRecordEvent.Start ->
+                                    Log.i(TAG, "recording started -> ${destination.absolutePath}")
+                                is VideoRecordEvent.Finalize -> {
+                                    val ok = !event.hasError()
+                                    Log.i(
+                                        TAG,
+                                        "recording finalized ok=$ok err=${event.error} " +
+                                            "bytes=${event.outputResults.outputUri}",
+                                    )
+                                    releaseRecording()
+                                    onEvent(
+                                        if (ok) "finalized ${destination.absolutePath}"
+                                        else "failed code=${event.error}",
+                                    )
+                                }
+                                else -> Unit
+                            }
+                        }
+                    onEvent("recording -> ${destination.absolutePath}")
+                } catch (e: Exception) {
+                    releaseRecording()
+                    onEvent("start failed: ${e.message}")
+                }
+            }, ContextCompat.getMainExecutor(appContext))
+        }
+    }
+
+    /** Stops an in-flight recording. The file is only complete once Finalize arrives. */
+    fun stopRecording(onEvent: (String) -> Unit) {
+        mainHandler.post {
+            val rec = activeRecording
+            if (rec == null) {
+                onEvent("not recording")
+                return@post
+            }
+            rec.stop()
+            onEvent("stopping")
+        }
+    }
+
+    /** Main-thread only. Unbinds and clears recording state; safe to call twice. */
+    private fun releaseRecording() {
+        activeRecording = null
+        runCatching { recordingProvider?.unbindAll() }
+            .onFailure { Log.w(TAG, "unbind after recording failed: ${it.message}") }
+        recordingProvider = null
+        capturing.set(false)
+    }
+
     fun shutdown() {
         mainHandler.post {
+            runCatching { activeRecording?.stop() }
             runCatching { ProcessCameraProvider.getInstance(appContext).get().unbindAll() }
         }
         cameraExecutor.shutdown()

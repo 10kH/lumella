@@ -88,6 +88,7 @@ dependencies {
     implementation(libs.androidx.camera.core)
     implementation(libs.androidx.camera.camera2)
     implementation(libs.androidx.camera.lifecycle)
+    implementation(libs.androidx.camera.video)
     // Required by the Mercury SDK: BaseEventActivity.mappingAction() resolves
     // androidx.lifecycle.LifecycleOwnerKt (lifecycleScope) at runtime. Without these the
     // SDK crashes with NoClassDefFoundError on the first touchpad SLIDE gesture — taps
