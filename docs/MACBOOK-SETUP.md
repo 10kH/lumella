@@ -212,10 +212,34 @@ USB를 뽑아도 유지된다. `service.adb.tcp.port=5555`가 기기에 남아 *
 **촬영할 때마다:**
 
 ```bash
+ops/take.sh c7 180 --pov     # 화면 + 1인칭 + 자막문구, 한 번에
+```
+
+한 테이크가 화면만인 경우는 없다. 영상에는 화면(자막·지시자)와 1인칭 시야가 다
+필요하고, **둘이 같은 테이크여야** 맞는다. 손으로 둘을 따로 돌리면 언젠가 한쪽을
+늦게 시작하거나 빠트리고, 그걸 편집 때 알게 된다.
+
+자막 문구도 테이크마다 떨구어 둔다 — 영상에서 한글을 눈으로 받아적으면 오타가 난다.
+
+손으로 하려면:
+
+```bash
 adb devices                                       # <IP>:5555 보여야 함
 adb -s <IP>:5555 shell "screenrecord --time-limit 180 /sdcard/take1.mp4"
 adb -s <IP>:5555 pull /sdcard/take1.mp4 ~/shots/
 ```
+
+1인칭은 카메라 앱이 아니라 **앱 안에서** 찍는다. 카메라 앱을 띄우면 런처가 lumella를
+죽인다 — `rayneo-platform-notes.md` §10·11 참조.
+
+```bash
+adb shell am broadcast -p com.woolab.lumella -a com.woolab.lumella.DEBUG_REC_START --es name pov1
+adb shell am broadcast -p com.woolab.lumella -a com.woolab.lumella.DEBUG_REC_STOP
+adb pull /storage/emulated/0/Android/data/com.woolab.lumella/files/pov1.mp4 ~/shots/
+```
+
+1인칭은 분당 189MB다. `/sdcard` 21G로 114분이니 **테이크마다 회수한다**
+(`take.sh`는 받은 뒤 기기에서 지운다). 화면 녹화는 분당 0.26MB라 사실상 공짜다.
 
 기기 IP는 DHCP라 망이 바뀌면 달라진다. **케이블 없이 찾을 수 있다** — 5555 포트를 스캔하면 된다.
 

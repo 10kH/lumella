@@ -345,6 +345,99 @@ targetSdk 34는 평문 HTTP를 전부 막는다. Mac의 token-service/luma-api�
 
 ---
 
+## 10. 이 기기는 한 번에 앱 하나만 돌린다 (2026-09-10 규명)
+
+**런처가 배경으로 밀린 앱을 의도적으로 죽인다.** 카메라 앱이든 설정 앱이든, 무엇이든
+전면을 가져가면 lumella가 종료된다.
+
+```
+ActivityManager: Killing com.woolab.lumella (adj 700): stop ... due to from pid 1814
+Mercury: BackgroundAppManager$forceStopApp com.woolab.lumella success
+                                           ↑ pid 1814 = mercury.launcher
+```
+
+처음엔 카메라 탓으로 봤고, 그 다음엔 오디오 독점 탓으로 봤다. **둘 다 틀렸다.**
+설정 앱을 띄워도 똑같이 죽는 것으로 갈렸다.
+
+### 무엇이 살아남는가
+
+| 방식 | 전면 점유 | lumella |
+|---|---|---|
+| `screenrecord` (셸 명령) | 안 함 | **생존** |
+| scrcpy 화면 미러링 (셸) | 안 함 | **생존** |
+| 앱 내부 CameraX 녹화 (§11) | 안 함 | **생존** |
+| 카메라 앱 | 함 | 죽음 |
+| 설정 앱 | 함 | 죽음 |
+
+**셸 명령은 앱이 아니라 전면을 안 뺏는다.** 그래서 화면 녹화는 처음부터 문제가 없었다.
+
+### 막힌 우회로 (다시 시도하지 말 것)
+
+| 시도 | 결과 |
+|---|---|
+| `pm revoke` 마이크 권한 | `SYSTEM_FIXED`라 거부 |
+| `appops set ... RECORD_AUDIO deny` | 적용은 되나 **여전히 죽는다** — 오디오가 원인이 아니라는 증거 |
+| `dumpsys deviceidle whitelist +` | 등록되나 무효. 런처가 안드로이드 정책을 무시하고 자체 판단 |
+| `scrcpy --video-source=camera` | `CameraAccessException: Broken pipe (-32)`. lumella를 내려도 동일 — 펌웨어가 camera2 스트림 설정을 거부. 모든 해상도·카메라 id 실패 |
+| 셸에서 카메라 직접 | 도구 없음. `/system/bin`에 `screenrecord`만 있고 카메라 바이너리는 없다 |
+
+### adb로 와이파이를 못 바꾼다
+
+셸 사용자에게 권한이 없다. 매장 공용 AP에 붙어 캡티브 포털에 걸리면 **렌즈 UI나
+RayNeo 앱으로만** 빠져나올 수 있다.
+
+```
+cmd wifi connect-network-id  → SecurityException: Uid 2000 does not have access
+cmd wifi forget-network      → Forget failed
+```
+
+나가기 전에 매장 망을 미리 잊어두면 이 상황이 안 생긴다.
+
+---
+
+## 11. 1인칭 영상은 앱 안에서 찍는다
+
+§10 때문에 카메라 앱을 쓸 수 없다. `GlassesCamera`가 CameraX `VideoCapture`로 직접
+녹화한다. 같은 프로세스라 전면이 안 바뀌고, 런처가 죽일 대상이 없다.
+
+```bash
+adb shell am broadcast -p com.woolab.lumella -a com.woolab.lumella.DEBUG_REC_START --es name pov1
+adb shell am broadcast -p com.woolab.lumella -a com.woolab.lumella.DEBUG_REC_STOP
+adb pull /storage/emulated/0/Android/data/com.woolab.lumella/files/pov1.mp4 ~/shots/
+```
+
+실측: **1920×1080 H.264 30fps, 405프레임/13.5초, 가로.** 녹화 전후 PID 동일.
+
+**오디오는 담지 않는다.** 기기가 오디오 입력을 하나만 허용하고(`dumpsys
+media.audio_policy`의 `maxActiveCount: 1`) 그걸 음성 경로가 쥐고 있다. 녹음에 오디오를
+요구하면 마이크를 빼앗아 대화가 끊긴다 — 찍으려던 장면이 사라진다. 소리는 외부
+카메라에서 가져온다.
+
+제약 둘:
+
+- **녹화 중에는 사진이 안 찍힌다.** 녹화가 곧 바인드라 `capturing` 플래그가 막는다.
+  §의 bind-per-shot 규칙을 의도적으로 깬 자리다
+- 디버그 브로드캐스트 전용. 터치패드에 없다
+
+`targetRotation`을 가로로 박아뒀다. 안경이 세로를 기본 방향으로 보고해서 그냥 찍으면
+`rotation=-90`이 붙어 모든 플레이어에서 눕는다.
+
+### 용량
+
+| 방식 | 규격 | 분당 |
+|---|---|---|
+| 1인칭 (앱 내장) | H.264 1920×1080 | **189MB** |
+| 카메라 앱 | HEVC 2432×1824 | 141MB |
+| 화면 녹화 | H.264 1280×480 | **0.26MB** |
+
+`/sdcard` 여유 21G 기준 1인칭 **114분**. 화면 녹화는 사실상 공짜다.
+테이크당 3분으로 36테이크를 찍으면 20GB라 **빠듯하다 — 테이크마다 회수할 것.**
+
+1인칭이 카메라 앱보다 해상도는 낮은데 용량이 큰 건 H.264라서다. 용량이 걸리면
+HEVC로 바꾸는 수가 있다.
+
+---
+
 ## 참고 파일
 
 - 개발 루프/설정: [`dev-loop.md`](dev-loop.md)
