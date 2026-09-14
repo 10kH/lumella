@@ -36,9 +36,16 @@ class AudioPlayback(private val sampleRateHz: Int = 24_000) {
      * The tutor's PCM is already in hand here, on its way to the track, so it is written out in
      * parallel rather than recovered acoustically. The edit gets two mono files — learner from
      * the video, tutor from this — and mixes them.
+     *
+     * **Silence is written too.** The first version only wrote while the tutor was speaking, so a
+     * 172.3s take produced a 68.7s file: every pause was missing and the mix dragged the tutor's
+     * lines forward, drifting further out of sync as the take went on. Each chunk is now padded
+     * with the silence that elapsed since the previous one, which keeps the file on the same
+     * clock as the video.
      */
     @Volatile private var tapStream: java.io.RandomAccessFile? = null
     @Volatile private var tapBytes: Int = 0
+    @Volatile private var tapStartedAtMs: Long = 0L
 
     /** Allocates the streaming AudioTrack WITHOUT starting playback. Safe to call repeatedly. */
     fun start() {
@@ -88,6 +95,7 @@ class AudioPlayback(private val sampleRateHz: Int = 24_000) {
         tapStream?.let { out ->
             // Best-effort: a failed tap must never interrupt playback the wearer is listening to.
             runCatching {
+                padSilenceTo(out, System.currentTimeMillis() - tapStartedAtMs)
                 out.write(bytes)
                 tapBytes += bytes.size
             }
@@ -102,6 +110,7 @@ class AudioPlayback(private val sampleRateHz: Int = 24_000) {
             raf.setLength(0)
             raf.write(ByteArray(WAV_HEADER_BYTES)) // placeholder; sizes are patched on stop
             tapBytes = 0
+            tapStartedAtMs = System.currentTimeMillis()
             tapStream = raf
         }
     }
@@ -111,11 +120,32 @@ class AudioPlayback(private val sampleRateHz: Int = 24_000) {
         val raf = tapStream ?: return
         tapStream = null
         runCatching {
+            // Pad the tail as well, so the file ends level with the video rather than at the
+            // tutor's last word.
+            padSilenceTo(raf, System.currentTimeMillis() - tapStartedAtMs)
             raf.seek(0)
             raf.write(wavHeader(tapBytes, sampleRateHz))
             raf.close()
         }
         tapBytes = 0
+    }
+
+    /**
+     * Writes zero samples until the file holds [elapsedMs] of audio. Never trims: if playback ran
+     * long the file is already ahead, and cutting it would lose the tutor's voice.
+     */
+    private fun padSilenceTo(out: java.io.RandomAccessFile, elapsedMs: Long) {
+        val wantBytes = (elapsedMs * sampleRateHz / 1000L) * 2L  // mono, 16-bit
+        val gap = wantBytes - tapBytes
+        if (gap <= 0) return
+        var remaining = gap
+        val chunk = ByteArray(SILENCE_CHUNK_BYTES)
+        while (remaining > 0) {
+            val n = minOf(remaining, SILENCE_CHUNK_BYTES.toLong()).toInt()
+            out.write(chunk, 0, n)
+            tapBytes += n
+            remaining -= n
+        }
     }
 
     private fun wavHeader(dataBytes: Int, rate: Int): ByteArray {
@@ -150,5 +180,6 @@ class AudioPlayback(private val sampleRateHz: Int = 24_000) {
 
     private companion object {
         const val WAV_HEADER_BYTES = 44
+        const val SILENCE_CHUNK_BYTES = 16 * 1024
     }
 }
