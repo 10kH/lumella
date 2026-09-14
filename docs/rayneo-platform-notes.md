@@ -389,9 +389,21 @@ RayNeo 앱으로만** 빠져나올 수 있다.
 ```
 cmd wifi connect-network-id  → SecurityException: Uid 2000 does not have access
 cmd wifi forget-network      → Forget failed
+cmd wifi add-network         → 권한 통과. 다만 open|owe|wpa2|wpa3 뿐이다
 ```
 
 나가기 전에 매장 망을 미리 잊어두면 이 상황이 안 생긴다.
+
+**`add-network`만은 예외다** (2026-09-14 확인). 입자 오류를 내지 `SecurityException`을
+안 낸다 — 권한은 통과한다. PSK 망이라면 케이블로 미리 넣어둘 수 있다.
+
+```bash
+adb shell cmd wifi add-network <SSID> wpa2 '<비밀번호>'
+```
+
+다만 **기업망(WPA2-EAP)은 못 넣는다.** 문법이 `open|owe|wpa2|wpa3`뿐이라
+계정·인증서를 받을 자리가 없다. 연구소는 주변이 전부 EAP에 SSID도 숨겨져 있어
+**폰 핫스팟이 유일한 경로였다.**
 
 ---
 
@@ -435,6 +447,23 @@ media.audio_policy`의 `maxActiveCount: 1`) 그걸 음성 경로가 쥐고 있�
 
 1인칭이 카메라 앱보다 해상도는 낮은데 용량이 큰 건 H.264라서다. 용량이 걸리면
 HEVC로 바꾸는 수가 있다.
+
+### 녹화는 인터넷 없이도 된다 (2026-09-14 실측)
+
+연구소에서 망에 못 붙은 채로 `ops/take.sh`를 통째로 돌렸다.
+
+```
+화면 녹화   15프레임 / 10.9초     자막·에코 전부 기록됨
+1인칭      473프레임 / 15.8초    1920×1080 가로, 47.8MB
+자막 덤프   정상
+```
+
+**녹화 기계장치는 adb와 앱만 있으면 도는다.** 다만 화면 왼쪽 위에 빨간
+`Token error`가 박히고, 자막은 `DEBUG_SUBTITLE`로 밀어넣은 가짜다. 음성·토큰·코치가
+전부 인터넷을 요구하므로 **영상이 증명해야 할 내용은 오프라인에 존재할 수 없다.**
+
+그래도 쓸 데가 있다 — 대화가 필요 없는 컷(시야 샷·마무리)과 구도·조명 연습은
+인터넷 없이 찍을 수 있다.
 
 ---
 
