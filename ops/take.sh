@@ -61,13 +61,25 @@ collect() {
   echo "  screen $OUT/$NAME-$stamp-screen.mp4"
 
   if [ -n "$POV" ] || adb -s "$DEV" shell "ls $REMOTE_POV_DIR/$NAME.mp4" >/dev/null 2>&1; then
-    if adb -s "$DEV" pull "$REMOTE_POV_DIR/$NAME.mp4" "$OUT/$NAME-$stamp-pov.mp4" >/dev/null 2>&1; then
-      # Delete on the device: POV runs ~189 MB/min and /sdcard holds about 114 minutes of it.
-      adb -s "$DEV" shell "rm -f $REMOTE_POV_DIR/$NAME.mp4"
-      echo "  pov    $OUT/$NAME-$stamp-pov.mp4"
-    else
-      echo "  pov    MISSING — adb logcat -d | grep 'rec '" >&2
-    fi
+    # A photo turn during a take closes the current segment and opens the next, so one take can
+    # be $NAME.mp4, $NAME-2.mp4, $NAME-3.mp4 ... Pulling only the first name would silently
+    # leave the rest of the take on the device.
+    seg_count=0
+    for remote in $(adb -s "$DEV" shell "ls $REMOTE_POV_DIR/ 2>/dev/null" | tr -d '\r' \
+                    | grep -E "^$NAME(-[0-9]+)?\.mp4$" | sort -t- -k2 -n); do
+      seg_count=$((seg_count + 1))
+      if [ "$seg_count" = "1" ]; then local_name="$OUT/$NAME-$stamp-pov.mp4"
+      else local_name="$OUT/$NAME-$stamp-pov-$seg_count.mp4"; fi
+      if adb -s "$DEV" pull "$REMOTE_POV_DIR/$remote" "$local_name" >/dev/null 2>&1; then
+        # Delete on the device: POV runs ~189 MB/min and /sdcard holds about 114 minutes of it.
+        adb -s "$DEV" shell "rm -f $REMOTE_POV_DIR/$remote"
+        echo "  pov    $local_name"
+      else
+        echo "  pov    MISSING $remote — adb logcat -d | grep 'rec '" >&2
+      fi
+    done
+    [ "$seg_count" = "0" ] && echo "  pov    MISSING — adb logcat -d | grep 'rec '" >&2
+    [ "$seg_count" -gt 1 ] && echo "  note   $seg_count segments (photo turns split the take); join in order"
   fi
 
   ANDROID_SERIAL="$DEV" "$REPO_ROOT/ops/screen-dump.sh" > "$OUT/$NAME-$stamp.txt" 2>/dev/null
@@ -75,7 +87,7 @@ collect() {
 
   # Frame count is the honest check: a static screen yields 1 frame and that is normal, but a take
   # meant to show a conversation with 1 frame means nothing changed and the take is empty.
-  for f in "$OUT/$NAME-$stamp-screen.mp4" "$OUT/$NAME-$stamp-pov.mp4"; do
+  for f in "$OUT/$NAME-$stamp-screen.mp4" "$OUT/$NAME-$stamp-pov"*.mp4; do
     [ -f "$f" ] || continue
     ffprobe -v error -show_entries stream=nb_frames -show_entries format=duration,size \
       -of default=noprint_wrappers=1 "$f" 2>/dev/null |
