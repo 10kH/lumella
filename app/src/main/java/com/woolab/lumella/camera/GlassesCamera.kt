@@ -78,6 +78,14 @@ class GlassesCamera(context: Context, private val lifecycleOwner: LifecycleOwner
     @Volatile private var pendingAfterFinalize: (() -> Unit)? = null
 
     /**
+     * Notified when the video stops and restarts at a segment boundary: `true` when the camera
+     * goes dark, `false` when it is rolling again. The tutor voice tap uses it to keep its
+     * padding on the video's clock rather than the wall's — without it every photo turn pushed
+     * the tutor ~1.5s later than the picture.
+     */
+    @Volatile var onSegmentGap: ((Boolean) -> Unit)? = null
+
+    /**
      * Captures a single JPEG frame; [onCaptured] receives raw JPEG bytes.
      * Safe to call from any thread; binding is marshalled to the main thread as CameraX requires.
      */
@@ -248,11 +256,24 @@ class GlassesCamera(context: Context, private val lifecycleOwner: LifecycleOwner
                 try {
                     val provider = providerFuture.get()
                     val recorder = Recorder.Builder()
+                        // Cap the encoder's bitrate. Recording both layers at full rate left
+                        // cameraserver at 116% CPU with 77% of four cores idle, and the tutor's
+                        // replies dragged — TTFA stayed inside budget at 730ms but the speech
+                        // took seconds to finish. 6 Mbps is ample for 720p footage that gets
+                        // scaled down in the edit, and it buys back the headroom the realtime
+                        // audio path needs.
+                        .setTargetVideoEncodingBitRate(6_000_000)
                         .setQualitySelector(
                             // HIGHEST alone fails on devices whose best profile the encoder
                             // cannot sustain; the fallback keeps a lower profile usable.
+                            // HD, not FHD. At 1920x1080 the POV saturates the single hardware
+                            // encoder and `screenrecord` cannot get a session at all — measured
+                            // 2026-09-14, the screen file froze at 3 frames while the POV kept
+                            // running, and dropping the SCREEN to 640x240 did not help because
+                            // the constraint is the encoder, not the pixel count. A take needs
+                            // both layers, and 1280x720 is past what the film needs anyway.
                             QualitySelector.from(
-                                Quality.FHD,
+                                Quality.HD,
                                 FallbackStrategy.lowerQualityOrHigherThan(Quality.SD),
                             ),
                         )
@@ -287,8 +308,13 @@ class GlassesCamera(context: Context, private val lifecycleOwner: LifecycleOwner
                     activeRecording = pending
                         .start(ContextCompat.getMainExecutor(appContext)) { event ->
                             when (event) {
-                                is VideoRecordEvent.Start ->
+                                is VideoRecordEvent.Start -> {
                                     Log.i(TAG, "recording started -> ${destination.absolutePath}")
+                                    // Close the gap on the REAL start, not on the call that
+                                    // requested it: the encoder takes a moment to come up and
+                                    // counting that as recorded time re-introduces the drift.
+                                    onSegmentGap?.invoke(false)
+                                }
                                 is VideoRecordEvent.Finalize -> {
                                     val ok = !event.hasError()
                                     Log.i(
@@ -359,6 +385,7 @@ class GlassesCamera(context: Context, private val lifecycleOwner: LifecycleOwner
     ) {
         val audio = recordingWithAudio
         val next = nextSegment(current)
+        onSegmentGap?.invoke(true)
         pendingAfterFinalize = {
             cameraExecutor.execute {
                 val bytes = frameFromRecording(current)

@@ -209,7 +209,12 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
         updateStatus("Connecting...", "#9C27B0")
 
         config = AppConfig.fromBuildConfig()
-        camera = GlassesCamera(this, this)
+        camera = GlassesCamera(this, this).apply {
+            // Keep the tutor voice tap on the video's clock across segment boundaries.
+            onSegmentGap = { dark ->
+                if (dark) audioPlayback.pauseVoiceClock() else audioPlayback.resumeVoiceClock()
+            }
+        }
         audioPlayback = AudioPlayback().apply { start() }
 
         brain = BrainFactory.create(config.brainClassName) { reason ->

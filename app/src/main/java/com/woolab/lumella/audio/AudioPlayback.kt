@@ -47,6 +47,19 @@ class AudioPlayback(private val sampleRateHz: Int = 24_000) {
     @Volatile private var tapBytes: Int = 0
     @Volatile private var tapStartedAtMs: Long = 0L
 
+    /**
+     * Milliseconds the video was NOT recording while the tap was open, subtracted from the
+     * padding clock.
+     *
+     * A photo turn closes the current video segment and opens the next, and the camera is dark
+     * for ~1.5s in between. Wall-clock padding filled that gap with silence the video never
+     * had, so every photo turn pushed the tutor a further 1.5s late — measured on a
+     * three-segment take as WAV 149.7s against 146.6s of video. The tap now follows the
+     * video's clock, not the wall's.
+     */
+    @Volatile private var tapGapMs: Long = 0L
+    @Volatile private var gapStartedAtMs: Long = 0L
+
     /** Allocates the streaming AudioTrack WITHOUT starting playback. Safe to call repeatedly. */
     fun start() {
         if (audioTrack != null) return
@@ -95,7 +108,7 @@ class AudioPlayback(private val sampleRateHz: Int = 24_000) {
         tapStream?.let { out ->
             // Best-effort: a failed tap must never interrupt playback the wearer is listening to.
             runCatching {
-                padSilenceTo(out, System.currentTimeMillis() - tapStartedAtMs)
+                padSilenceTo(out, videoElapsedMs())
                 out.write(bytes)
                 tapBytes += bytes.size
             }
@@ -111,6 +124,8 @@ class AudioPlayback(private val sampleRateHz: Int = 24_000) {
             raf.write(ByteArray(WAV_HEADER_BYTES)) // placeholder; sizes are patched on stop
             tapBytes = 0
             tapStartedAtMs = System.currentTimeMillis()
+            tapGapMs = 0L
+            gapStartedAtMs = 0L
             tapStream = raf
         }
     }
@@ -122,7 +137,7 @@ class AudioPlayback(private val sampleRateHz: Int = 24_000) {
         runCatching {
             // Pad the tail as well, so the file ends level with the video rather than at the
             // tutor's last word.
-            padSilenceTo(raf, System.currentTimeMillis() - tapStartedAtMs)
+            padSilenceTo(raf, videoElapsedMs())
             raf.seek(0)
             raf.write(wavHeader(tapBytes, sampleRateHz))
             raf.close()
@@ -134,6 +149,26 @@ class AudioPlayback(private val sampleRateHz: Int = 24_000) {
      * Writes zero samples until the file holds [elapsedMs] of audio. Never trims: if playback ran
      * long the file is already ahead, and cutting it would lose the tutor's voice.
      */
+    /** Marks the start of a stretch where the video is not recording (a segment boundary). */
+    fun pauseVoiceClock() {
+        if (tapStream == null || gapStartedAtMs != 0L) return
+        gapStartedAtMs = System.currentTimeMillis()
+    }
+
+    /** Ends that stretch; its duration is excluded from the padding clock. */
+    fun resumeVoiceClock() {
+        if (gapStartedAtMs == 0L) return
+        tapGapMs += System.currentTimeMillis() - gapStartedAtMs
+        gapStartedAtMs = 0L
+    }
+
+    /** Elapsed time as the VIDEO saw it: wall clock minus the stretches it was not recording. */
+    private fun videoElapsedMs(): Long {
+        val now = System.currentTimeMillis()
+        val openGap = if (gapStartedAtMs != 0L) now - gapStartedAtMs else 0L
+        return now - tapStartedAtMs - tapGapMs - openGap
+    }
+
     private fun padSilenceTo(out: java.io.RandomAccessFile, elapsedMs: Long) {
         val wantBytes = (elapsedMs * sampleRateHz / 1000L) * 2L  // mono, 16-bit
         val gap = wantBytes - tapBytes
