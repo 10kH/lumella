@@ -54,6 +54,37 @@ if [ -z "$DEV" ]; then
   exit 1
 fi
 
+# Photo turns split a take into segments; nobody should have to reassemble them by hand at the
+# edit. The parts all share one encoder config, so the concat demuxer joins them with -c copy:
+# no re-encode, no quality loss, about a second. Segments are KEPT — the join is a convenience,
+# and a take is not worth risking to a muxing surprise.
+join_segments() {
+  local stamp="$1" count="$2"
+  local joined="$OUT/$NAME-$stamp-pov-JOINED.mp4"
+  local list; list="$(mktemp -t lumella-join)"
+  local expected=0 f d
+  for f in "$OUT/$NAME-$stamp-pov.mp4" "$OUT/$NAME-$stamp-pov-"[0-9]*.mp4; do
+    [ -f "$f" ] || continue
+    printf "file '%s'\n" "$f" >>"$list"
+    d="$(ffprobe -v error -show_entries format=duration -of csv=p=0 "$f" 2>/dev/null)"
+    expected="$(awk -v a="$expected" -v b="${d:-0}" 'BEGIN{print a+b}')"
+  done
+  if ffmpeg -v error -f concat -safe 0 -i "$list" -c copy -y "$joined" 2>/dev/null; then
+    local got
+    got="$(ffprobe -v error -show_entries format=duration -of csv=p=0 "$joined" 2>/dev/null)"
+    # A silent short join is the failure that would actually cost footage, so compare lengths
+    # rather than trusting ffmpeg's exit code alone.
+    if awk -v g="${got:-0}" -v e="$expected" 'BEGIN{exit !(g > e-1 && g < e+1)}'; then
+      echo "  joined $joined  ($count segments, $(printf '%.1f' "$got")s)"
+    else
+      echo "  joined $joined  — WARNING: $(printf '%.1f' "${got:-0}")s vs $(printf '%.1f' "$expected")s expected; use the segments" >&2
+    fi
+  else
+    echo "  join   FAILED — segments are intact, join by hand" >&2
+  fi
+  rm -f "$list"
+}
+
 collect() {
   local stamp="$1"
   adb -s "$DEV" pull "$REMOTE_SCREEN_DIR/$NAME.mp4" "$OUT/$NAME-$stamp-screen.mp4" >/dev/null 2>&1
@@ -79,7 +110,7 @@ collect() {
       fi
     done
     [ "$seg_count" = "0" ] && echo "  pov    MISSING — adb logcat -d | grep 'rec '" >&2
-    [ "$seg_count" -gt 1 ] && echo "  note   $seg_count segments (photo turns split the take); join in order"
+    [ "$seg_count" -gt 1 ] && join_segments "$stamp" "$seg_count"
   fi
 
   ANDROID_SERIAL="$DEV" "$REPO_ROOT/ops/screen-dump.sh" > "$OUT/$NAME-$stamp.txt" 2>/dev/null
@@ -89,6 +120,7 @@ collect() {
   # meant to show a conversation with 1 frame means nothing changed and the take is empty.
   for f in "$OUT/$NAME-$stamp-screen.mp4" "$OUT/$NAME-$stamp-pov"*.mp4; do
     [ -f "$f" ] || continue
+    case "$f" in *-JOINED.mp4) continue ;; esac
     ffprobe -v error -show_entries stream=nb_frames -show_entries format=duration,size \
       -of default=noprint_wrappers=1 "$f" 2>/dev/null |
       awk -v n="$(basename "$f")" -F= '
