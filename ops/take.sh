@@ -129,9 +129,27 @@ collect() {
   done
 }
 
+# Fire-and-forget was not enough. On 2026-09-14 the broadcast was accepted, the file appeared,
+# and then stopped growing at 10.9 MB — the screen kept recording and the POV did not, and the
+# take came back 13.3s short at the HEAD, missing the camera-off opening the shot existed to
+# prove. So: confirm the file is actually growing, and restart once if it is not.
 start_pov() {
   [ -z "$POV" ] && return
-  adb -s "$DEV" shell am broadcast -p "$PKG" -a "$PKG.DEBUG_REC_START" --es name "$NAME" >/dev/null 2>&1
+  local remote="$REMOTE_POV_DIR/$NAME.mp4" a b attempt
+  for attempt in 1 2; do
+    adb -s "$DEV" shell am broadcast -p "$PKG" -a "$PKG.DEBUG_REC_START" --es name "$NAME" >/dev/null 2>&1
+    sleep 3
+    a=$(adb -s "$DEV" shell "ls -la $remote" 2>/dev/null | awk '{print $5}')
+    sleep 3
+    b=$(adb -s "$DEV" shell "ls -la $remote" 2>/dev/null | awk '{print $5}')
+    if [ -n "$a" ] && [ -n "$b" ] && [ "$a" != "$b" ]; then
+      return 0
+    fi
+    echo "  POV not advancing (${a:-none} -> ${b:-none}); restarting [$attempt/2]" >&2
+    adb -s "$DEV" shell am broadcast -p "$PKG" -a "$PKG.DEBUG_REC_STOP" >/dev/null 2>&1
+    sleep 3
+  done
+  echo "  WARNING: POV never advanced — shoot will be screen-only" >&2
 }
 
 stop_pov() {
@@ -142,8 +160,12 @@ stop_pov() {
 
 case "$MODE" in
   start)
-    # POV first: a broadcast returns immediately while screenrecord blocks, so starting it second
-    # would leave the wearer's view short at the head of every take.
+    # Screen first, POV second. The POV start now spends ~6s confirming the file is growing, and
+    # whichever is started first runs during that wait — so the order decides which layer carries
+    # the head offset. Screen is the cheap one (0.26 MB/min against 189), and a few seconds of it
+    # before the wearer speaks costs nothing, while the same seconds missing from the POV cost the
+    # opening of the shot. Neither order makes them equal; this one makes the surplus harmless.
+    adb -s "$DEV" shell "screenrecord --time-limit 180 --size 1280x480 $REMOTE_SCREEN_DIR/$NAME.mp4 >/dev/null 2>&1 &" >/dev/null 2>&1
     start_pov
     # Detach ON THE DEVICE with a plain `&`. `setsid` was tried first and the process was gone
     # within seconds every time, while the bare background job keeps running (measured
@@ -152,8 +174,7 @@ case "$MODE" in
     # 180 is screenrecord's own ceiling: --time-limit 900 is REJECTED and the process exits at
     # once, silently, leaving a take with no screen track. That is exactly how the first version
     # of this failed. A longer take needs --stop before the cap, or a second take.
-    adb -s "$DEV" shell "screenrecord --time-limit 180 --size 1280x480 $REMOTE_SCREEN_DIR/$NAME.mp4 >/dev/null 2>&1 &" >/dev/null 2>&1
-    sleep 2
+    sleep 1
     # Check the process list, not the exit status: adb shell does not forward it.
     if [ "$(adb -s "$DEV" shell "pgrep screenrecord" 2>/dev/null | tr -d '\r' | grep -c .)" = "0" ]; then
       echo "WARNING: screen recording did not start; POV may still be running" >&2
