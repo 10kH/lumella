@@ -103,6 +103,38 @@ mix_voices() {
   fi
 }
 
+# Stack the wearer's view over what the glasses were showing, so one file carries both halves of
+# the evidence: the scene and the subtitles/indicator that prove which layer did what.
+#
+# The screen capture is 1280x480 because the display is binocular — two 640x480 eyes side by
+# side showing the same thing. Only the left eye is kept; the right is a duplicate and including
+# it would halve the legible text size for nothing.
+compose() {
+  local stamp="$1"
+  local pov="$OUT/$NAME-$stamp-pov-MIXED.mp4"
+  [ -f "$pov" ] || pov="$OUT/$NAME-$stamp-pov-JOINED.mp4"
+  [ -f "$pov" ] || pov="$OUT/$NAME-$stamp-pov.mp4"
+  local screen="$OUT/$NAME-$stamp-screen.mp4"
+  [ -f "$pov" ] || return 0
+  [ -f "$screen" ] || return 0
+  local out="$OUT/$NAME-$stamp-FINAL.mp4"
+
+  # The screen track is silent (screenrecord has no audio option at all), so the audio comes
+  # from the POV, which already carries learner + tutor.
+  # -noautorotate on the POV, then rotate explicitly. Left to itself ffmpeg applies the file's
+  # rotation metadata before the filter graph, so the POV arrives portrait and vstack refuses it
+  # for not matching the screen's width. Doing it here keeps both inputs 1280 wide.
+  if ffmpeg -v error -noautorotate -i "$pov" -i "$screen" -filter_complex \
+       "[1:v]crop=640:480:0:0,scale=1280:-2,setsar=1[scr];[0:v]scale=1280:-2,setsar=1[pv];[pv][scr]vstack=inputs=2[v]" \
+       -map "[v]" -map 0:a -c:v libx264 -preset veryfast -crf 20 -c:a aac -y "$out" 2>/dev/null; then
+    local wh
+    wh="$(ffprobe -v error -select_streams v -show_entries stream=width,height -of csv=p=0 "$out" 2>/dev/null)"
+    echo "  FINAL  $out  ($wh, view over screen)"
+  else
+    echo "  FINAL  compose failed — the separate files are intact" >&2
+  fi
+}
+
 collect() {
   local stamp="$1"
   adb -s "$DEV" pull "$REMOTE_SCREEN_DIR/$NAME.mp4" "$OUT/$NAME-$stamp-screen.mp4" >/dev/null 2>&1
@@ -141,6 +173,8 @@ collect() {
     mix_voices "$stamp"
   fi
 
+  compose "$stamp"
+
   ANDROID_SERIAL="$DEV" "$REPO_ROOT/ops/screen-dump.sh" > "$OUT/$NAME-$stamp.txt" 2>/dev/null
   echo "  text   $OUT/$NAME-$stamp.txt"
 
@@ -148,7 +182,7 @@ collect() {
   # meant to show a conversation with 1 frame means nothing changed and the take is empty.
   for f in "$OUT/$NAME-$stamp-screen.mp4" "$OUT/$NAME-$stamp-pov"*.mp4; do
     [ -f "$f" ] || continue
-    case "$f" in *-JOINED.mp4|*-MIXED.mp4) continue ;; esac
+    case "$f" in *-JOINED.mp4|*-MIXED.mp4|*-FINAL.mp4) continue ;; esac
     ffprobe -v error -show_entries stream=nb_frames -show_entries format=duration,size \
       -of default=noprint_wrappers=1 "$f" 2>/dev/null |
       awk -v n="$(basename "$f")" -F= '

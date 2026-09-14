@@ -283,7 +283,13 @@ class GlassesCamera(context: Context, private val lifecycleOwner: LifecycleOwner
                         // lands with rotation=-90 in its metadata and every player shows it on
                         // its side. Pin landscape here rather than fixing it per file in the
                         // edit, which is a step easy to forget on one take out of twelve.
-                        targetRotation = Surface.ROTATION_90
+                        //
+                        // Determined by looking at the picture, not the dimensions. ROTATION_90
+                        // removed the metadata and produced a landscape-shaped file, which read
+                        // as correct, but the scene inside was still on its left. ROTATION_270
+                        // then stamped rotation=-180 and stood it on its head. ROTATION_180 is
+                        // what leaves the wearer's view upright.
+                        targetRotation = Surface.ROTATION_180
                     }
                     // VideoCapture binds ALONE. This camera refuses every second use case
                     // beside it — both ImageCapture and ImageAnalysis come back with
