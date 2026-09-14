@@ -1246,10 +1246,17 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
                             val withAudio = intent.getBooleanExtra("audio", true)
                             Log.i(TAG, "debug: start recording -> ${dest.absolutePath} audio=$withAudio")
                             camera.startRecording(dest, withAudio) { msg -> Log.i(TAG, "debug: rec $msg") }
+                            // The video's audio is the mic, and the mic has the tutor echo-cancelled
+                            // out of it. Capture the tutor's own PCM alongside so the take has both
+                            // voices; they are mixed in the edit.
+                            val voiceFile = java.io.File(getExternalFilesDir(null), "$name-tutor.wav")
+                            audioPlayback.startVoiceTap(voiceFile)
+                            Log.i(TAG, "debug: tutor voice -> ${voiceFile.absolutePath}")
                         }
                         DEBUG_REC_STOP_ACTION -> {
                             Log.i(TAG, "debug: stop recording")
                             camera.stopRecording { msg -> Log.i(TAG, "debug: rec $msg") }
+                            audioPlayback.stopVoiceTap()
                         }
                         DEBUG_SPEECH_ACTION -> {
                             Log.i(TAG, "debug: toggleSpeechTurn triggered via broadcast")

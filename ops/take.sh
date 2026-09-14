@@ -85,6 +85,24 @@ join_segments() {
   rm -f "$list"
 }
 
+# Mix the learner (video track) and the tutor (tapped WAV) into one file. Both halves stay on
+# disk: the mix is a convenience, and an edit may well want them on separate tracks.
+mix_voices() {
+  local stamp="$1"
+  local pov="$OUT/$NAME-$stamp-pov-JOINED.mp4"
+  [ -f "$pov" ] || pov="$OUT/$NAME-$stamp-pov.mp4"
+  [ -f "$pov" ] || return 0
+  local wav="$OUT/$NAME-$stamp-tutor.wav"
+  local out="$OUT/$NAME-$stamp-pov-MIXED.mp4"
+  if ffmpeg -v error -i "$pov" -i "$wav" \
+       -filter_complex "[0:a][1:a]amix=inputs=2:duration=longest:dropout_transition=0[a]" \
+       -map 0:v -map "[a]" -c:v copy -c:a aac -y "$out" 2>/dev/null; then
+    echo "  mixed  $out  (learner + tutor)"
+  else
+    echo "  mix    FAILED — both halves are intact, mix by hand" >&2
+  fi
+}
+
 collect() {
   local stamp="$1"
   adb -s "$DEV" pull "$REMOTE_SCREEN_DIR/$NAME.mp4" "$OUT/$NAME-$stamp-screen.mp4" >/dev/null 2>&1
@@ -113,6 +131,16 @@ collect() {
     [ "$seg_count" -gt 1 ] && join_segments "$stamp" "$seg_count"
   fi
 
+  # The tutor's voice, captured separately. The video's audio track is the microphone, and the
+  # mic runs with the platform echo canceller so the tutor is deliberately absent from it — a
+  # take otherwise carries only the learner's half of the conversation.
+  local tutor_remote="$REMOTE_POV_DIR/$NAME-tutor.wav"
+  if adb -s "$DEV" pull "$tutor_remote" "$OUT/$NAME-$stamp-tutor.wav" >/dev/null 2>&1; then
+    adb -s "$DEV" shell "rm -f $tutor_remote"
+    echo "  tutor  $OUT/$NAME-$stamp-tutor.wav"
+    mix_voices "$stamp"
+  fi
+
   ANDROID_SERIAL="$DEV" "$REPO_ROOT/ops/screen-dump.sh" > "$OUT/$NAME-$stamp.txt" 2>/dev/null
   echo "  text   $OUT/$NAME-$stamp.txt"
 
@@ -120,7 +148,7 @@ collect() {
   # meant to show a conversation with 1 frame means nothing changed and the take is empty.
   for f in "$OUT/$NAME-$stamp-screen.mp4" "$OUT/$NAME-$stamp-pov"*.mp4; do
     [ -f "$f" ] || continue
-    case "$f" in *-JOINED.mp4) continue ;; esac
+    case "$f" in *-JOINED.mp4|*-MIXED.mp4) continue ;; esac
     ffprobe -v error -show_entries stream=nb_frames -show_entries format=duration,size \
       -of default=noprint_wrappers=1 "$f" 2>/dev/null |
       awk -v n="$(basename "$f")" -F= '
