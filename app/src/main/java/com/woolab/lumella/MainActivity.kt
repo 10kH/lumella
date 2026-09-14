@@ -1243,8 +1243,9 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
                             val name = intent.getStringExtra("name")?.takeIf { it.isNotBlank() }
                                 ?: "take-${System.currentTimeMillis()}"
                             val dest = java.io.File(getExternalFilesDir(null), "$name.mp4")
-                            Log.i(TAG, "debug: start recording -> ${dest.absolutePath}")
-                            camera.startRecording(dest) { msg -> Log.i(TAG, "debug: rec $msg") }
+                            val withAudio = intent.getBooleanExtra("audio", true)
+                            Log.i(TAG, "debug: start recording -> ${dest.absolutePath} audio=$withAudio")
+                            camera.startRecording(dest, withAudio) { msg -> Log.i(TAG, "debug: rec $msg") }
                         }
                         DEBUG_REC_STOP_ACTION -> {
                             Log.i(TAG, "debug: stop recording")

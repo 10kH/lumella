@@ -188,11 +188,15 @@ class GlassesCamera(context: Context, private val lifecycleOwner: LifecycleOwner
     /**
      * Records first-person video to [destination] until [stopRecording].
      *
-     * **Audio is deliberately not recorded.** The device permits one active audio input
-     * (`dumpsys media.audio_policy` reports `maxActiveCount: 1`) and the voice pipeline holds
-     * the mic for the whole session; asking `Recorder` for audio would take it away and end the
-     * conversation this footage exists to show. Sound for the film comes from the external
-     * camera, which is recording the same scene anyway.
+     * **Audio IS recorded** (`withAudio`, on by default). This was assumed impossible for days:
+     * `dumpsys media.audio_policy` reports `maxActiveCount: 1`, so enabling it looked certain to
+     * take the mic from the voice pipeline and end the conversation the footage exists to show.
+     * Measured 2026-09-14, that is wrong — the cap is not per-process here. With audio on, the
+     * app stayed `Listening...`, a full turn went through (utterance echoed, tutor answered), and
+     * the file came back with an AAC 48 kHz stereo track at mean -32 dB.
+     *
+     * Pass `withAudio = false` if a take must not capture room sound. Note the external camera is
+     * filming the same scene, so its audio remains the better sync reference for the edit.
      *
      * Unlike [captureImage] this keeps the camera bound for the duration — a recording IS the
      * bind. Photo capture is therefore unavailable while recording (`captureImage` reports
@@ -201,7 +205,7 @@ class GlassesCamera(context: Context, private val lifecycleOwner: LifecycleOwner
      *
      * Not exercised by JVM unit tests (real camera stack); verify on device.
      */
-    fun startRecording(destination: File, onEvent: (String) -> Unit) {
+    fun startRecording(destination: File, withAudio: Boolean = true, onEvent: (String) -> Unit) {
         if (!capturing.compareAndSet(false, true)) {
             onEvent("busy: another capture is in progress")
             return
@@ -235,9 +239,13 @@ class GlassesCamera(context: Context, private val lifecycleOwner: LifecycleOwner
                         videoCapture,
                     )
                     recordingProvider = provider
-                    activeRecording = videoCapture.output
+                    val pending = videoCapture.output
                         .prepareRecording(appContext, FileOutputOptions.Builder(destination).build())
-                        // No withAudioEnabled() — see kdoc.
+                    if (withAudio) {
+                        @Suppress("MissingPermission")
+                        pending.withAudioEnabled()
+                    }
+                    activeRecording = pending
                         .start(ContextCompat.getMainExecutor(appContext)) { event ->
                             when (event) {
                                 is VideoRecordEvent.Start ->
