@@ -10,6 +10,9 @@
 # It also dumps the on-screen text per take, because transcribing Korean subtitles by eye from
 # video is how typos get into the final cut (docs/MACBOOK-SETUP.md, layer B-aux).
 #
+# --stop leaves <take>-FINAL.mp4: the wearer's view stacked over the glasses display, audio
+# carrying both voices. That is the file for the edit; the parts are kept beside it.
+#
 #   ops/take.sh c7                   # blocking, 180s, screen only
 #   ops/take.sh c7 60 --pov          # blocking, 60s, + wearer's view
 #   ops/take.sh c7 --start --pov     # start and return; the wearer talks for as long as needed
