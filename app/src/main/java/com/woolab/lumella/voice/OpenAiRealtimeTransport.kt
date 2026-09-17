@@ -798,7 +798,11 @@ class OpenAiRealtimeTransport(
         val format = """{"type":"audio/pcm","rate":$sampleRateHz}"""
         val session = """{"type":"realtime","output_modalities":["audio"],""" +
             """"instructions":${jsonString(sessionInstructions)},""" +
-            """"audio":{"input":{"format":$format,"transcription":{"model":"whisper-1"},""" +
+            // language pinned: without it Whisper guesses per utterance, and the sibling app
+            // (ELLA, English) saw a learner's words come up as Japanese. For a Korean learner
+            // the same guess lands on Chinese or Japanese. The prompt biases vocabulary.
+            """"audio":{"input":{"format":$format,"transcription":{"model":"whisper-1","language":"ko",""" +
+            """"prompt":"한국어 학습자와의 회화 연습."},""" +
             """"turn_detection":{"type":"server_vad","threshold":0.5,"prefix_padding_ms":300,""" +
             """"silence_duration_ms":$VAD_SILENCE_DURATION_MS,"create_response":false}},""" +
             """"output":{"format":$format,"voice":${jsonString(voice)}}},""" +

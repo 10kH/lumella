@@ -140,6 +140,9 @@ class OpenAiRealtimeTransportTest {
         assertTrue(sessionUpdate.contains("\"rate\":24000"))
         assertTrue(sessionUpdate.contains("\"voice\":\"shimmer\""))
         assertTrue(sessionUpdate.contains("\"model\":\"whisper-1\""))
+        // Without a pinned language Whisper guesses per utterance; a Korean learner's words
+        // can come back as Chinese or Japanese. This must not silently disappear.
+        assertTrue(sessionUpdate.contains("\"language\":\"ko\""))
     }
 
     @Test
