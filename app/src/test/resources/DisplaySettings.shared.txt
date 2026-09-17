@@ -16,8 +16,14 @@ import java.util.concurrent.atomic.AtomicReference
  *
  * This file is hand-synchronised between the two glasses apps and pinned by
  * DisplaySettingsDriftTest against a checked-in copy, like SubtitleRetention.
+ *
+ * The one thing the two apps legitimately differ on — whether the bottom gesture hint is
+ * shown before the wearer asks — is a constructor argument, not an edit to this file. Each
+ * MainActivity passes its own; the file stays byte-identical and the drift guard stays
+ * meaningful. (An earlier attempt hardcoded a per-app default here, and both repos' drift
+ * tests went green while the invariant they exist for was broken.)
  */
-class DisplaySettings {
+class DisplaySettings(initialHintsVisible: Boolean = true) {
 
     /** Tutor-subtitle size when visible. LARGE is the pre-existing default look. */
     enum class SubtitleSize { LARGE, SMALL }
@@ -30,7 +36,7 @@ class DisplaySettings {
         val hintsVisible: Boolean = true,
     )
 
-    private val state = AtomicReference(State())
+    private val state = AtomicReference(State(hintsVisible = initialHintsVisible))
 
     fun current(): State = state.get()
 

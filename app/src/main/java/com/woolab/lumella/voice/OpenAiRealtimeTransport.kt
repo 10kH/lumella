@@ -802,7 +802,7 @@ class OpenAiRealtimeTransport(
             // (ELLA, English) saw a learner's words come up as Japanese. For a Korean learner
             // the same guess lands on Chinese or Japanese. The prompt biases vocabulary.
             """"audio":{"input":{"format":$format,"transcription":{"model":"whisper-1","language":"ko",""" +
-            """"prompt":"한국어 학습자와의 회화 연습."},""" +
+            """"prompt":${jsonString("한국어 학습자와의 회화 연습.")}},""" +
             """"turn_detection":{"type":"server_vad","threshold":0.5,"prefix_padding_ms":300,""" +
             """"silence_duration_ms":$VAD_SILENCE_DURATION_MS,"create_response":false}},""" +
             """"output":{"format":$format,"voice":${jsonString(voice)}}},""" +
