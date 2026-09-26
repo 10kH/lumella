@@ -15,6 +15,9 @@ interface PedagogyAgentClient {
     fun analyze(role: String, task: SlowPathTask, callback: (Result<String>) -> Unit)
 }
 
+/** Raised when the brain adapter is asked for a role it has no evidence field for. */
+class UnsupportedRoleException(val role: String) : IllegalArgumentException("brain adapter does not serve role '$role'")
+
 /** Raised when [TutorBrain.fetchSteering] returns [SteeringResult.Unavailable]. */
 class SlowPathUnavailableException(val reason: UnavailableReason) : IllegalStateException(
     "TutorBrain steering unavailable: $reason",
@@ -87,7 +90,7 @@ class TutorBrainPedagogyClient(
             is SteeringResult.Unavailable -> "Unavailable(${steering.reason})"
         })
         when (steering) {
-            is SteeringResult.Available -> callback(Result.success(toChatResponseBody(role, steering.evidence, task)))
+            is SteeringResult.Available -> callback(runCatching { toChatResponseBody(role, steering.evidence, task) })
             is SteeringResult.Unavailable -> callback(Result.failure(SlowPathUnavailableException(steering.reason)))
         }
     }
@@ -102,7 +105,10 @@ class TutorBrainPedagogyClient(
             "grammar" -> buildGrammarContent(evidence, task)
             "pronunciation" -> buildPronunciationContent()
             "visual" -> buildVisualContent(evidence)
-            else -> "{}"
+            // A role the brain does not serve is not an empty analysis; it is a role that must
+            // go elsewhere. Returning "{}" as success here is how consolidate silently produced
+            // no diagnosis for a whole afternoon on the glasses.
+            else -> throw UnsupportedRoleException(role)
         }
         val escaped = content.replace("\\", "\\\\").replace("\"", "\\\"")
         return """{"choices":[{"message":{"content":"$escaped"}}]}"""

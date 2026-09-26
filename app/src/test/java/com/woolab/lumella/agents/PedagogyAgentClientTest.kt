@@ -266,4 +266,15 @@ class PedagogyAgentClientTest {
         assertTrue(failure is SlowPathUnavailableException)
         assertEquals(UnavailableReason.SLOW_PATH_UNAVAILABLE, (failure as SlowPathUnavailableException).reason)
     }
+    @Test
+    fun anUnknownRoleIsAFailureNotAnEmptySuccess() {
+        val brain = FakeBrain { SteeringResult.Available(SteeringEvidence(corrections = emptyList(), hints = emptyList(), confidence = 1.0, sourceTurnId = 4)) }
+        val client = TutorBrainPedagogyClient(brain, sessionId = { "s1" })
+
+        var failure: Throwable? = null
+        client.analyze("consolidate", SlowPathTask(turnId = 1, userTranscript = "x")) { failure = it.exceptionOrNull() }
+
+        assertTrue(failure is UnsupportedRoleException)
+        assertEquals("consolidate", (failure as UnsupportedRoleException).role)
+    }
 }

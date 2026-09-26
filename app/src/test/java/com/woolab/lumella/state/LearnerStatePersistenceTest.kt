@@ -145,4 +145,26 @@ class LearnerStatePersistenceTest {
         val turnsSince = tracker.current() - relaunched.snapshot().lastConsolidatedTurnId
         assertEquals(1, turnsSince)
     }
+    @Test
+    fun a_corrupt_file_is_reported_not_just_ignored() {
+        val f = tmpFile(); f.writeText("{ this is not json")
+        val warnings = mutableListOf<String>()
+        val store = com.woolab.lumella.state.LearnerStateStore(backing = f, warn = { warnings += it })
+
+        assertEquals(0, store.snapshot().revision)                          // started empty, as before
+        assertTrue(warnings.any { it.contains("unreadable") || it.contains("rejected") })  // but said so
+    }
+
+    @Test
+    fun a_failed_persist_is_reported_not_swallowed() {
+        // A directory where the file should be: every write fails.
+        val dir = Files.createTempDirectory("learner-state-dir").toFile()
+        val warnings = mutableListOf<String>()
+        val store = com.woolab.lumella.state.LearnerStateStore(backing = dir, warn = { warnings += it })
+
+        store.apply(StateDelta(sourceTurnId = 1))
+
+        assertEquals(1, store.snapshot().revision)                          // in-memory state advanced
+        assertTrue(warnings.any { it.startsWith("learner-state persist failed at revision 1") })
+    }
 }

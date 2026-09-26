@@ -951,6 +951,12 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
                 slowPathExecutor.execute {
                     try {
                         val imageContext = brain.analyzeImage(bytes, "image/jpeg")
+                        // The adapter answers a failed upload with imageId="" rather than
+                        // throwing (LumaTutorBrain.analyzeImage), so the catch below never
+                        // sees it and the photo quietly attaches to nothing.
+                        if (imageContext.imageId.isBlank()) {
+                            Log.w(TAG, "analyzeImage returned no imageId (brain upload failed); photo will not attach to this turn")
+                        }
                         turnEvidenceAssembler.setPendingImageId(imageContext.imageId)
                         runOnUiThread {
                             // What to do next depends on who asked for the photo. A voice

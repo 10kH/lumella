@@ -60,10 +60,14 @@ class RoutingPedagogyClient(
             return
         }
         perTurn.analyze(role, task) { result ->
-            val unavailable = result.exceptionOrNull() is SlowPathUnavailableException
-            if (unavailable && endpoint != null) {
-                brainUnreachable.set(true)
-                log("slow path: $role turn ${task.turnId} -> brain unavailable, falling through to endpoint")
+            val failure = result.exceptionOrNull()
+            val unavailable = failure is SlowPathUnavailableException
+            // A role the brain does not serve is also a reason to go elsewhere — but it says
+            // nothing about reachability, so it must not latch the brain off.
+            val unserved = failure is UnsupportedRoleException
+            if ((unavailable || unserved) && endpoint != null) {
+                if (unavailable) brainUnreachable.set(true)
+                log("slow path: $role turn ${task.turnId} -> brain ${if (unserved) "does not serve this role" else "unavailable"}, falling through to endpoint")
                 endpoint.analyze(role, task, callback)
             } else {
                 log("slow path: $role turn ${task.turnId} -> brain answered (${if (result.isSuccess) "ok" else result.exceptionOrNull()?.javaClass?.simpleName})")

@@ -33,15 +33,26 @@ import kotlin.concurrent.withLock
 class LearnerStateStore(
     initial: LearnerState = LearnerState(),
     private val backing: File? = null,
+    /**
+     * Injected so plain-JVM tests do not touch android.util.Log. A failed save must never break
+     * the voice loop that just published — but it must never be silent either. On the glasses
+     * that was the second of four faults that stood between the ported code and a diagnosis.
+     */
+    private val warn: (String) -> Unit = { runCatching { android.util.Log.w("lumella", it) } },
 ) {
 
-    private val ref = AtomicReference(load(backing) ?: initial)
+    private val ref = AtomicReference(load(backing, warn) ?: initial)
     private val writeLock = ReentrantLock()
 
     private companion object {
-        fun load(file: File?): LearnerState? {
+        fun load(file: File?, warn: (String) -> Unit): LearnerState? {
             if (file == null || !file.isFile) return null
-            return runCatching { LearnerStateCodec.decode(file.readText()) }.getOrNull()
+            // A corrupt record must not crash boot, but "started empty" and "ignored what was
+            // there" are different events and the second one must be visible.
+            return runCatching { LearnerStateCodec.decode(file.readText()) }
+                .onFailure { warn("learner-state at ${file.name} unreadable, starting empty: ${it.message}") }
+                .getOrNull()
+                ?: run { warn("learner-state at ${file.name} rejected by codec (wrong schema?), starting empty"); null }
         }
     }
 
@@ -52,12 +63,20 @@ class LearnerStateStore(
             file.parentFile?.mkdirs()
             val tmp = File(file.parentFile, file.name + ".tmp")
             tmp.writeText(LearnerStateCodec.encode(state))
-            if (!tmp.renameTo(file)) {
-                // Some filesystems refuse rename-over; fall back to copy + delete.
+            try {
+                java.nio.file.Files.move(
+                    tmp.toPath(), file.toPath(),
+                    java.nio.file.StandardCopyOption.ATOMIC_MOVE, java.nio.file.StandardCopyOption.REPLACE_EXISTING,
+                )
+            } catch (e: java.nio.file.AtomicMoveNotSupportedException) {
+                // The filesystem cannot swap in place. The copy below is not atomic: a crash
+                // mid-write leaves a torn file, which load() will reject and warn about. Say
+                // so once rather than pretend the guarantee held.
+                warn("learner-state: atomic move unsupported on this filesystem, falling back to copy (${e.message})")
                 file.writeText(tmp.readText())
                 tmp.delete()
             }
-        }
+        }.onFailure { warn("learner-state persist failed at revision ${state.revision}: ${it.message}") }
         // Best-effort: a failed save must never break the voice loop that just published.
     }
 

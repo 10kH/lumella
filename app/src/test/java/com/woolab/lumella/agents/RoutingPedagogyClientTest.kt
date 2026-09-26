@@ -127,4 +127,25 @@ class RoutingPedagogyClientTest {
         assertEquals(emptyList<String>(), brain.roles)
         assertEquals(listOf("visual"), endpoint.roles)
     }
+    @Test
+    fun aRoleTheBrainDoesNotServeFallsThroughWithoutBrandingItUnreachable() {
+        // "{}" as success was how consolidate produced nothing all afternoon. Now the brain
+        // adapter throws UnsupportedRoleException; the router must route on it and must NOT
+        // conclude the brain is down — it answered, it just has no such field.
+        val brain = object : PedagogyAgentClient {
+            val roles = mutableListOf<String>()
+            override fun analyze(role: String, task: SlowPathTask, callback: (Result<String>) -> Unit) {
+                roles += role
+                callback(Result.failure(UnsupportedRoleException(role)))
+            }
+        }
+        val endpoint = Recorder("""{"caption":"y","groundedObjects":[]}""")
+        val client = RoutingPedagogyClient(perTurn = brain, endpointClient = endpoint)
+
+        client.analyze("visual", task) {}
+        client.analyze("visual", task) {}
+
+        assertEquals(listOf("visual", "visual"), brain.roles)     // asked every time — not latched off
+        assertEquals(listOf("visual", "visual"), endpoint.roles)  // and answered every time
+    }
 }
