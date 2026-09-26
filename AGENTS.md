@@ -21,6 +21,19 @@ luma 응답을 다루는 코드를 고쳤다면 실서버로 확인하십시오.
 curl -s http://127.0.0.1:8010/v1/capabilities | head -c 200
 ```
 
+## 느린 계층은 여기 없습니다
+
+진단·해제·지시자·학습자 기록 — 슬로우 패스 전부 — 는 `../tutor-slowpath`
+(github.com/10kH/tutor-slowpath)에 있습니다. `settings.gradle.kts`의 `includeBuild`가 형제
+디렉터리를 가리키므로 **두 저장소를 나란히 체크아웃해야 빌드됩니다.** ELLA도 같은 라이브러리를
+씁니다. 슬로우 패스를 고칠 땐 그쪽에서 고치고, 여기서는 `TutorLanguage.KOREAN` 하나만 넘깁니다.
+조립은 `SlowPathAssembly.build()` 한 곳 — MainActivity와 모듈의 통합 테스트가 같은 함수를 부릅니다.
+
+slow path가 부르는 서버는 **ELLA 저장소의 Vercel 함수**(`api/pedagogy-agent.js`, `language=ko`)
+입니다. `local.properties`의 `PEDAGOGY_AGENT_ENDPOINT`·`REALTIME_TOKEN_SECRET`은 ELLA와 같은
+값이어야 합니다. luma 브레인은 슬로우 패스에 관여하지 않습니다 — 빠른 계층 스티어링, 하단
+코치 힌트, 사진 업로드만 합니다.
+
 ## luma와의 결합
 
 ```kotlin

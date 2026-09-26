@@ -1,3 +1,7 @@
+> **2026-09-26부터 이 문서는 역사 기록입니다.** 여기 나열된 15개 main 파일 중 슬로우 패스에
+> 속하는 것들은 더 이상 이식하지 않습니다 — `../tutor-slowpath`에서 가져옵니다. ELLA에서
+> lumella로 손으로 옮기는 일은 끝났습니다. 아래는 그 이식이 어떻게 이뤄졌는지의 기록입니다.
+
 # ELLA-MA → lumella porting map (P3)
 
 Source: `TUTOR/ELLA/app/src/main/java/com/woolab/ella/**` (read-only).
