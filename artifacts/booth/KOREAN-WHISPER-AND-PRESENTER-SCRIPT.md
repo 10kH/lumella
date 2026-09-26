@@ -67,6 +67,21 @@ consolidate → ruleGap 기록          ~4s (luna 추론)
 ```
 [turn-timing.log] 진행자 대본의 "턴 사이 12초"는 여유 있다.
 
+## 2d. 레드팀 (3세대)
+
+```
+같은 유형 오류 2턴 + 정답 1턴   → 3턴째 consolidate, ruleGap 섬     [learner-state-two-errors.json]
+                               서버 프롬프트의 "같은 패턴 ≥2" 가 그대로 작동한다.
+                               관람객이 두 번만 틀려도 진단이 뜰 수 있다 — 대본의 "세 번"은 보험.
+
+Wi-Fi 단절 중 1턴              → 기록은 되나 오류 안 잡힘, 로그에 "grammar call failed" 명시
+                               그 턴은 turnId 가 앞 턴과 같다 (세션 손실이 turnGate 를 닫아
+                               publishLearnerTurn 이 안 불림 — 이식 전부터의 lumella 동작)
+Wi-Fi 복구 후 1턴              → 정상. 앱 재시작 불필요        [learner-state-wifi-outage.json]
+```
+
+**부스에서 Wi-Fi 가 끊기면**: 그 턴은 버려진다. 다음 발화부터 정상. 앱을 다시 띄울 필요 없다.
+
 ## 3. 부스 진행자 대본 — 관람객이 실수를 안 할 때
 
 **같은 유형을 세 번** 말해야 진단이 뜬다. 목적어 조사 오류가 가장 확실하다 — 실측에서 3/3 잡혔고,
