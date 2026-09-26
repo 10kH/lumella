@@ -1,0 +1,14 @@
+09-26 18:25:09.910 I/lumella (17185): debug: 입력 전사 주입 = 어제 친구가 만났어요
+09-26 18:25:09.917 I/lumella (17185): slow path: grammar turn 1 -> endpoint
+09-26 18:25:32.203 I/lumella (17185): debug: 입력 전사 주입 = 오늘 아침에 빵이 먹었어요
+09-26 18:25:32.207 I/lumella (17185): slow path: grammar turn 2 -> endpoint
+09-26 18:25:54.487 I/lumella (17185): debug: 입력 전사 주입 = 내일 영화가 볼 거예요
+09-26 18:25:54.490 I/lumella (17185): slow path: grammar turn 3 -> endpoint
+09-26 18:25:58.837 I/lumella (17185): slow path: consolidate turn 3 -> endpoint
+09-26 18:27:29.065 I/lumella (17596): debug: 입력 전사 주입 = 어제 친구를 만났어요
+09-26 18:27:29.072 I/lumella (17596): slow path: grammar turn 4 -> endpoint
+09-26 18:27:51.311 I/lumella (17596): debug: 입력 전사 주입 = 오늘 아침에 빵을 먹었어요
+09-26 18:27:51.315 I/lumella (17596): slow path: grammar turn 5 -> endpoint
+09-26 18:28:13.556 I/lumella (17596): debug: 입력 전사 주입 = 내일 영화를 볼 거예요
+09-26 18:28:13.560 I/lumella (17596): slow path: grammar turn 6 -> endpoint
+09-26 18:28:16.486 I/lumella (17596): slow path: consolidate turn 6 -> endpoint

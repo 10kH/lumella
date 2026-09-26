@@ -1,0 +1,5 @@
+2026-09-26 18:05 KST — /v1/orchestrator/turn, responseMode=coach, via the remote-config cloudflare tunnel, from the Mac
+content: 어제 친구가 만났어요
+#1 5.124s   #2 4.934s   #3 5.230s
+coachEvidence.corrections = [] on all three (the brain does not see a Korean particle slip)
+This is why BRAIN_UNREACHABLE_AFTER_MS is 15s: a healthy coach turn is ~5s, a dead connect is 20s.

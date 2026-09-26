@@ -1028,9 +1028,11 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
                     brainReachable.set(false)
                     Log.w(TAG, "brain.submitTurnEvidence took ${took}ms at turn $turnId; brain marked unreachable")
                 }
-                // The hint is for the turn it describes; if the wearer has already moved on,
-                // updateHint's generation counter keeps a late reply from overwriting a newer one.
-                runOnUiThread { updateHint(indicator) }
+                // Hints arrive in turn order because this executor is single-threaded and
+                // runOnUiThread posts to one Looper. The one path that can post out of order —
+                // a submit that crossed the unreachable line while its successor was already
+                // queued — is closed by refusing to describe a turn that is no longer current.
+                if (turnId == turnTracker.current()) runOnUiThread { updateHint(indicator) }
             }
         } else {
             runOnUiThread { updateHint(null) }

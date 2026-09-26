@@ -51,6 +51,7 @@ DEBUG_EVENT 주입 경로(전사 → 진단 → 해제)는 실기기에서 전�
                                  모델이 패턴을 지어내지 않는다
 재시작 (--reset 없이)            → ruleGap 유지, 부팅 직후 coach luna
                                  turnId 가 4·5·6 으로 이어지고 6턴째 해제   [learner-state-after-relaunch-clear.json]
+                                 두 pid 에 걸친 로그: consolidate turn 3 (pid1) / turn 6 (pid2)   [relaunch-span-two-pids.log]
 코드스위칭 게이트               → "저는 Jennifer예요" 통과 · "I said 안녕하세요 to her" 차단
                                  "busy한 하루였어요" 통과 · "あああ" 차단   [learner-state-gate-codeswitch.json]
 정답 1턴                        → 진단 유지 (3턴 정답이어야 해제)
