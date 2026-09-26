@@ -98,11 +98,12 @@ class OpenAiRealtimeTransport(
     companion object {
         /**
          * What Whisper is told before it transcribes the learner. Whisper is a language model
-         * and will quietly repair what it hears into well-formed Korean unless told not to;
-         * "회화 연습" primed it to expect correct sentences and it erased exactly the particle
-         * and ending slips the slow layer needs to see (ELLA found the same with verb tense,
-         * c38247b). So the prompt now asks for a verbatim transcript and names the error
-         * classes to leave alone. This reduces the repair; it does not eliminate it.
+         * and can repair what it hears into well-formed text; ELLA measured exactly that for
+         * English verb tense (c38247b), and "회화 연습" primes for correct sentences the same
+         * way. Measured for Korean on 2026-09-26 with a synthetic voice: eight particle,
+         * ending, tense and honorific slips all survived under BOTH the old prompt and this
+         * one. So this prompt is a precaution against the failure ELLA saw, not a fix for one
+         * lumella has observed; the human-voice pass is still owed (artifacts/booth).
          */
         const val TRANSCRIPTION_PROMPT: String =
             "들리는 대로 정확하게 받아쓰세요. 문법 실수도 그대로 적으세요. " +

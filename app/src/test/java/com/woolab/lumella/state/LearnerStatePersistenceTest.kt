@@ -125,4 +125,24 @@ class LearnerStatePersistenceTest {
         assertEquals(1, store.revision())
         assertFalse(File("learner-state.json").exists())
     }
+    @Test
+    fun a_relaunch_continues_turn_numbering_so_the_cadence_stays_alive() {
+        // The bug this guards: every persisted record carries a turn id, and the consolidate
+        // cadence measures turnId - lastConsolidatedTurnId. A tracker restarting at 1 after a
+        // relaunch against a persisted lastConsolidatedTurnId of 6 makes turnsSince negative
+        // for six turns — the slow layer is silent and a standing diagnosis cannot clear.
+        val f = tmpFile()
+        // fullState() already carries lastConsolidatedTurnId = 6 and history up to turn 3
+        val first = com.woolab.lumella.state.LearnerStateStore(fullState(), backing = f)
+        first.apply(StateDelta(sourceTurnId = 6))   // publish to disk
+
+        val relaunched = com.woolab.lumella.state.LearnerStateStore(backing = f)
+        val tracker = com.woolab.lumella.slowpath.TurnTracker(seed = relaunched.snapshot().highestTurnId())
+
+        assertEquals(6, tracker.current())
+        assertEquals(7, tracker.next())
+        // and the dispatcher's cadence sees a fresh window, not a negative one
+        val turnsSince = tracker.current() - relaunched.snapshot().lastConsolidatedTurnId
+        assertEquals(1, turnsSince)
+    }
 }

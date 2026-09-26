@@ -39,11 +39,11 @@ class SlowPathDispatcher(
     /** Injected so plain-JVM tests do not hit android.util.Log and can assert a failure was reported. */
     private val warn: (String) -> Unit = { android.util.Log.w(TAG, it) },
     /**
-     * The language gate exists to keep ambient Korean television out of an English learner's
-     * record. The pre-registered evaluation corpus contains a deliberate Korean code-switch
-     * turn (EvalHarness koreanEfl, AC11) whose whole purpose is to exercise the scaffolding
-     * response — gating it silently changed the ablation numbers. The harness disables the
-     * gate so the study measures what it was registered to measure; the product keeps it.
+     * The language gate exists to keep ambient English, Chinese or Japanese audio out of a
+     * Korean learner's record. The evaluation corpus contains a deliberate English code-switch
+     * turn whose whole purpose is to exercise the scaffolding response — gating it silently
+     * changes the ablation numbers. The harness disables the gate so the study measures what
+     * it was registered to measure; the product keeps it.
      */
     private val gateNonKorean: Boolean = true,
 ) {
@@ -104,7 +104,7 @@ class SlowPathDispatcher(
                 result.onFailure { warn("${agent.role} call failed at turn ${task.turnId}: ${it.message}") }
                 if (remaining.decrementAndGet() == 0) {
                     val after = SlowPathCoalescer.coalesce(deltas.toList())?.let { orchestrator.applySlowPath(it) }
-                    // Only English turns feed the diagnosis; a photo-only dispatch does not.
+                    // Only Korean turns feed the diagnosis; a photo-only dispatch does not.
                     // The cadence runs on fan-in regardless of whether this turn produced a
                     // delta: a quiet turn (no errors, agents returned nothing) is exactly the
                     // turn that should re-examine and clear a standing diagnosis.
@@ -139,7 +139,7 @@ class SlowPathDispatcher(
     }
 
     companion object {
-        private const val TAG = "ELLA"
+        private const val TAG = "lumella"
         const val DEFAULT_CONSOLIDATE_EVERY_TURNS = 3
         const val DEFAULT_CONSOLIDATE_ON_ERROR_COUNT = 4
 
@@ -155,34 +155,48 @@ class SlowPathDispatcher(
         }
 
         /**
-         * Loose on purpose. Accented English with a Korean name in it is still English; what
-         * must be rejected is a whole utterance in another script. Any Hangul, Han or Kana
-         * character disqualifies; otherwise at least half the letters must be Latin. Empty
-         * or letterless text is not English either — there is nothing to correct.
+         * True when the transcript is mostly Korean words. Non-Korean audio — the wearer's
+         * neighbour, a television, an English aside — must not enter a Korean learner's
+         * record as errors. See the body for the word rule and why it is not a letter rule.
          */
         fun isPlausiblyKorean(text: String): Boolean {
-            var hangul = 0
-            var letters = 0
+            // Chinese or Japanese anywhere means the mic caught a screen or a neighbour, not
+            // the learner: the tutor has nothing to teach about it.
             for (ch in text) {
-                val block = Character.UnicodeBlock.of(ch) ?: continue
-                when (block) {
-                    // Chinese or Japanese in the transcript means the mic caught a screen or
-                    // a neighbour, not the learner: the tutor has nothing to teach about it.
+                when (Character.UnicodeBlock.of(ch)) {
                     Character.UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS,
                     Character.UnicodeBlock.HIRAGANA,
                     Character.UnicodeBlock.KATAKANA -> return false
                     else -> Unit
                 }
-                if (Character.isLetter(ch)) {
-                    letters++
-                    if (block == Character.UnicodeBlock.HANGUL_SYLLABLES ||
-                        block == Character.UnicodeBlock.HANGUL_JAMO ||
-                        block == Character.UnicodeBlock.HANGUL_COMPATIBILITY_JAMO) hangul++
+            }
+            // Count words, not letters. A Hangul syllable carries about as much as three Latin
+            // letters, so a letter ratio gated "저는 Jennifer예요" (4 Hangul vs 8 Latin) — a
+            // booth visitor introducing themselves. A word with any Hangul in it is a Korean
+            // word; "Jennifer예요" is Korean, "Jennifer" is not. At least half the words must
+            // be Korean: one borrowed noun in a Korean sentence passes, an English sentence
+            // with one Korean word does not.
+            var words = 0
+            var korean = 0
+            for (token in text.split(Regex("\\s+"))) {
+                var hasLetter = false
+                var hasHangul = false
+                for (ch in token) {
+                    if (!Character.isLetter(ch)) continue
+                    hasLetter = true
+                    when (Character.UnicodeBlock.of(ch)) {
+                        Character.UnicodeBlock.HANGUL_SYLLABLES,
+                        Character.UnicodeBlock.HANGUL_JAMO,
+                        Character.UnicodeBlock.HANGUL_COMPATIBILITY_JAMO -> hasHangul = true
+                        else -> Unit
+                    }
+                }
+                if (hasLetter) {
+                    words++
+                    if (hasHangul) korean++
                 }
             }
-            // At least half the letters must be Hangul. A learner code-switching a word or two
-            // of English into a Korean sentence still passes; an English sentence does not.
-            return letters > 0 && hangul * 2 >= letters
+            return words > 0 && korean * 2 >= words
         }
     }
 }

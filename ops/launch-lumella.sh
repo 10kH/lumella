@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Launch ELLA on the glasses and wait for Ready — without losing to the launcher.
+# Launch lumella on the glasses and wait for Ready — without losing to the launcher.
 #
 # The RayNeo launcher (com.ffalconxr.mercury.launcher, pid ~1809) force-stops an app that is
 # started within a couple of seconds of being force-stopped or reinstalled. Measured 2026-09-18:

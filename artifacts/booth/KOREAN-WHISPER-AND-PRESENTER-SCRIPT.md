@@ -44,6 +44,19 @@ DEBUG_EVENT 주입 경로(전사 → 진단 → 해제)는 실기기에서 전�
            → 우상단 "coach ·"                          [indicator-cleared.png]
 ```
 
+## 2b. 2세대 실기기 검증 (아키텍트 리뷰 후)
+
+```
+혼합 오류 3턴 (조사/시제/높임)   → grammar 3건, ruleGap null    [learner-state-mixed-errors-no-diagnosis.json]
+                                 모델이 패턴을 지어내지 않는다
+재시작 (--reset 없이)            → ruleGap 유지, 부팅 직후 coach luna   [indicator-after-relaunch.png]
+                                 turnId 가 4·5·6 으로 이어지고 6턴째 해제
+코드스위칭 게이트               → "저는 Jennifer예요" 통과 · "I said 안녕하세요 to her" 차단
+                                 "busy한 하루였어요" 통과 · "あああ" 차단   [learner-state-gate-codeswitch.json]
+정답 1턴                        → 진단 유지 (3턴 정답이어야 해제)
+일본어 소음 2턴                 → 기록도, 해제 카운트도 안 됨
+```
+
 ## 3. 부스 진행자 대본 — 관람객이 실수를 안 할 때
 
 **같은 유형을 세 번** 말해야 진단이 뜬다. 목적어 조사 오류가 가장 확실하다 — 실측에서 3/3 잡혔고,
@@ -64,6 +77,9 @@ DEBUG_EVENT 주입 경로(전사 → 진단 → 해제)는 실기기에서 전�
 ```
 
 **한 문장에 오류 하나씩, 천천히, 또렷하게.** 각 턴 사이 12초 이상 — 느린 계층이 돌 시간.
+
+**관람객이 바뀌면 `ops/launch-lumella.sh --reset`.** 안 하면 앞사람의 진단이 다음 사람에게 붙는다
+(진단은 재시작을 견디도록 만들어져 있다 — 그게 의도다).
 
 **부스 전 확인.** 위 여섯 문장을 **사람 목소리로** 안경에 직접 말해 `learner-state.json` 에
 `grammarErrors` 가 3건 쌓이는지 본다. 합성 음성 실측(§1)이 사람 발음에서도 성립하는지는

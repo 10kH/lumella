@@ -85,7 +85,15 @@ data class LearnerState(
     val lastConsolidatedTurnId: Int = 0,
     /** Single-writer monotonic revision counter. */
     val revision: Int = 0,
-)
+) {
+
+    /** The largest turn id anywhere in the record; 0 for an empty one. A relaunched session continues from here. */
+    fun highestTurnId(): Int = maxOf(
+        lastConsolidatedTurnId,
+        turnHistory.maxOfOrNull { it.turnId } ?: 0,
+        grammarErrors.maxOfOrNull { it.turnId } ?: 0,
+    )
+}
 
 /**
  * A proposed mutation emitted by a slow-path agent. Carries source [sourceTurnId]

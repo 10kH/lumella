@@ -67,6 +67,7 @@ import org.json.JSONObject
 class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
 
     companion object {
+        private const val BRAIN_SUBMIT_BOUND_MS = 3_000L
         private const val TAG = "lumella"
         private const val RIGHT_TOUCHPAD_DEVICE = "cyttsp5_mt"
         private const val LEFT_TOUCHPAD_DEVICE = "cyttsp6_mt"
@@ -119,8 +120,19 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
     private lateinit var audioPlayback: AudioPlayback
     private lateinit var camera: GlassesCamera
 
-    private val turnTracker = TurnTracker()
+    private lateinit var turnTracker: TurnTracker
+    /**
+     * Whether the brain connected and opened a session at bootstrap. If not, every call into
+     * it is a connect to an address that does not refuse — the lab server on another subnet
+     * hangs to the transport's 20s timeout — and it runs on the same executor as the slow
+     * path, ahead of it. Nothing is gained by asking a brain that is not there.
+     */
+    private val brainReachable = java.util.concurrent.atomic.AtomicBoolean(false)
     private val sessionIdRef = AtomicReference("")
+    /** Runs the brain submit so [slowPathExecutor] can abandon it at the bound rather than block behind it. */
+    private val brainSubmitExecutor = Executors.newSingleThreadExecutor { r ->
+        Thread(r, "brain-submit").apply { isDaemon = true }
+    }
     private val slowPathExecutor = Executors.newSingleThreadExecutor { r ->
         Thread(r, "lumella-slowpath").apply { isDaemon = true }
     }
@@ -232,19 +244,28 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
         // Backed by a file so a diagnosis survives a restart and so the record can be read
         // from outside — the on-device verification reads exactly this file.
         learnerStore = LearnerStateStore(backing = java.io.File(filesDir, "learner-state.json"))
+        // Continue numbering from what the record already holds — see TurnTracker.
+        turnTracker = TurnTracker(seed = learnerStore.snapshot().highestTurnId())
         val orchestrator = StateGraphOrchestrator(learnerStore, StalenessGuard(3, 20), AblationMode.FULL).apply {
             // A diagnosis lands between turns; redraw the indicator the moment it does.
             onStateChanged = { runOnUiThread { refreshLayerIndicator() } }
         }
-        // Per-turn roles go to the luma brain as before. The consolidate role — the slow layer's
-        // diagnosis of the habit behind the slips — goes to the same Vercel function ELLA uses,
-        // because the brain adapter has no such role and answered it with nothing.
+        // grammar, pronunciation and consolidate go to the same Vercel function ELLA uses; the
+        // brain adapter has no consolidate role, no phoneme field, and answers a Korean particle
+        // slip with corrections=[]. Only visual is brain-first (see RoutingPedagogyClient).
         val consolidateClient = BuildConfig.PEDAGOGY_AGENT_ENDPOINT.takeIf { it.isNotBlank() }?.let { url ->
-            EndpointPedagogyAgentClient(okhttp3.OkHttpClient(), url, BuildConfig.REALTIME_TOKEN_SECRET)
+            // A consolidate call runs a reasoning model; ELLA gives it 30s. OkHttp's 10s default
+            // read timeout turned a slow-but-fine diagnosis into "call failed" on booth Wi-Fi.
+            val http = okhttp3.OkHttpClient.Builder()
+                .connectTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
+                .readTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
+                .build()
+            EndpointPedagogyAgentClient(http, url, BuildConfig.REALTIME_TOKEN_SECRET)
         }
         val pedagogyClient = RoutingPedagogyClient(
             perTurn = TutorBrainPedagogyClient(brain, sessionId = { sessionIdRef.get() }),
-            consolidate = consolidateClient,
+            endpointClient = consolidateClient,
+            brainCameUp = { brainReachable.get() },
         )
         slowPathQueue = SlowPathQueue()
         slowPathDispatcher = SlowPathDispatcher(
@@ -500,6 +521,7 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
                 null
             }
             session?.let { sessionIdRef.set(it.sessionId) }
+            brainReachable.set(session != null)
         } else {
             Log.w(TAG, "Brain unavailable/auth-required at bootstrap; continuing voice-only per W-1 posture")
         }
@@ -980,11 +1002,28 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
         val turnId = turnTracker.current().takeIf { it > 0 } ?: return
         val evidence = turnEvidenceAssembler.assemble(turnId = turnId, transcript = currentTurnUserTranscript)
         slowPathExecutor.execute {
-            voiceFastPath.submitTurnEvidence(evidence)
-            // 08/05 requirement 3: brain.submitTurnEvidence (inside voiceFastPath above) is
-            // what populates coachIndicator() for this turn; read it only after that call
-            // returns, then push the honest per-turn label to both eye panes.
-            val indicator = brain.coachIndicator()
+            // 08/05 requirement 3: brain.submitTurnEvidence is what populates coachIndicator()
+            // for this turn; read it only after that call returns, then push the honest
+            // per-turn label to both eye panes. Bounded, and skipped outright when the brain
+            // never came up: the slow path queued behind this call must not wait 20s per turn
+            // for a server that is not on the booth network.
+            val indicator = if (brainReachable.get()) {
+                val f = brainSubmitExecutor.submit { voiceFastPath.submitTurnEvidence(evidence) }
+                try {
+                    f.get(BRAIN_SUBMIT_BOUND_MS, java.util.concurrent.TimeUnit.MILLISECONDS)
+                    brain.coachIndicator()
+                } catch (_: java.util.concurrent.TimeoutException) {
+                    f.cancel(true)
+                    brainReachable.set(false)
+                    Log.w(TAG, "brain.submitTurnEvidence exceeded ${BRAIN_SUBMIT_BOUND_MS}ms at turn $turnId; brain marked unreachable")
+                    null
+                } catch (e: Exception) {
+                    Log.w(TAG, "brain.submitTurnEvidence failed at turn $turnId: ${e.message}")
+                    null
+                }
+            } else {
+                null
+            }
             runOnUiThread { updateHint(indicator) }
             slowPathQueue.enqueue(SlowPathTask(turnId = turnId, userTranscript = evidence.learnerTranscript))
             slowPathDispatcher.drain(slowPathQueue)

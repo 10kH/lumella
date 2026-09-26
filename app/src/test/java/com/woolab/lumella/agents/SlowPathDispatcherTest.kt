@@ -264,8 +264,11 @@ class SlowPathDispatcherTest {
     fun languageGateIsLooseOnEnglishAndStrictOnOtherScripts() {
         val ok = SlowPathDispatcher::isPlausiblyKorean
         assertTrue(ok("어제 친구를 만나요"))                              // plain Korean
-        assertTrue(ok("친구랑 pizza 먹었어요"))                          // one English word inside Korean: 7 of 12 letters Hangul
-        assertFalse(ok("I said 안녕하세요 to her"))                      // 5 Hangul of 15 letters: an English sentence with one Korean word
+        assertTrue(ok("친구랑 pizza 먹었어요"))                          // one borrowed noun: 2 of 3 words Korean
+        assertTrue(ok("저는 Jennifer예요"))                             // a name with a Korean ending is a Korean word
+        assertTrue(ok("이거 iPhone이에요"))                              // same
+        assertTrue(ok("오늘은 정말 busy한 하루였어요"))                   // realistic learner code-switch
+        assertFalse(ok("I said 안녕하세요 to her"))                      // 1 of 5 words Korean
         assertFalse(ok("My friend and I ate tteokbokki"))              // English sentence
         assertFalse(ok("被性命困佔的"))                                 // Chinese
         assertFalse(ok("怒りを感じる"))                                  // Japanese

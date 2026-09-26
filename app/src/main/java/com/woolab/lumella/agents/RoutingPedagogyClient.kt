@@ -26,13 +26,15 @@ import com.woolab.lumella.slowpath.SlowPathTask
  */
 class RoutingPedagogyClient(
     private val perTurn: PedagogyAgentClient,
-    private val consolidate: PedagogyAgentClient?,
+    private val endpointClient: PedagogyAgentClient?,
+    /** Whether the brain opened a session at bootstrap. False means do not ask it at all. */
+    private val brainCameUp: () -> Boolean = { true },
     /** Injected so plain-JVM tests do not touch android.util.Log. Which client answered is operational fact. */
     private val log: (String) -> Unit = { runCatching { android.util.Log.i("lumella", it) } },
 ) : PedagogyAgentClient {
 
     override fun analyze(role: String, task: SlowPathTask, callback: (Result<String>) -> Unit) {
-        val endpoint = consolidate
+        val endpoint = endpointClient
         if (role in ENDPOINT_ROLES) {
             if (endpoint == null) {
                 callback(Result.failure(SlowPathUnavailableException(UnavailableReason.SLOW_PATH_UNAVAILABLE)))
@@ -51,7 +53,7 @@ class RoutingPedagogyClient(
         // cost ninety seconds before the endpoint was even asked. After the first unavailable
         // answer the brain is skipped for the rest of the session — a booth does not grow a
         // lab server mid-conversation.
-        if (endpoint != null && brainUnreachable.get()) {
+        if (endpoint != null && (brainUnreachable.get() || !brainCameUp())) {
             log("slow path: $role turn ${task.turnId} -> endpoint (brain marked unreachable)")
             endpoint.analyze(role, task, callback)
             return
@@ -73,7 +75,12 @@ class RoutingPedagogyClient(
 
     companion object {
         const val CONSOLIDATE_ROLE = "consolidate"
-        /** Roles the brain cannot serve well enough for a Korean learner; always the endpoint. */
-        val ENDPOINT_ROLES: Set<String> = setOf("grammar", CONSOLIDATE_ROLE)
+        /**
+         * Roles the brain cannot serve for a Korean learner; always the endpoint. Pronunciation
+         * is here because TutorBrainPedagogyClient.buildPronunciationContent returns "{}" for
+         * every turn — the brain has no phoneme field — and a Result.success("{}") is not a
+         * failure the fallthrough could catch. Only visual stays brain-first.
+         */
+        val ENDPOINT_ROLES: Set<String> = setOf("grammar", "pronunciation", CONSOLIDATE_ROLE)
     }
 }

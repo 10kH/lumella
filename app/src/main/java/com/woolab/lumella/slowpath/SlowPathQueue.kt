@@ -9,9 +9,18 @@ import java.util.concurrent.atomic.AtomicInteger
  * tasks off the critical path. Pure JVM logic so it is unit-testable.
  */
 
-/** Monotonic per-session turn id source. Reset on session (re)creation. */
-class TurnTracker {
-    private val counter = AtomicInteger(0)
+/**
+ * Monotonic turn id source.
+ *
+ * Turn ids are persisted with the learner record (every grammar error, every history entry,
+ * and lastConsolidatedTurnId carry one), so a fresh tracker starting at 1 after a relaunch
+ * would hand out ids the record already holds. Worse, the consolidate cadence measures
+ * `turnId - lastConsolidatedTurnId`: with a persisted lastConsolidatedTurnId of 6 and a tracker
+ * restarting at 1, the slow layer is silent for six turns and a standing diagnosis cannot
+ * clear. Seed it from the highest id the record knows.
+ */
+class TurnTracker(seed: Int = 0) {
+    private val counter = AtomicInteger(seed)
 
     /** Returns the next turn id (1-based, strictly increasing within a session). */
     fun next(): Int = counter.incrementAndGet()

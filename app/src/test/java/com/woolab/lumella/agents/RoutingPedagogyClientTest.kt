@@ -19,22 +19,22 @@ class RoutingPedagogyClientTest {
     private val task = SlowPathTask(turnId = 1, userTranscript = "어제 친구가 만났어요")
 
     @Test
-    fun grammarAndConsolidateGoToTheEndpointTheRestToTheBrain() {
+    fun grammarPronunciationAndConsolidateGoToTheEndpointVisualToTheBrain() {
         // Measured on the glasses 2026-09-26: the brain adapter answered "consolidate" with
         // "{}", and its grammar evidence for "어제 친구가 만났어요" was corrections=[] — the
         // particle slip a Korean learner actually makes, unseen. Each role must reach the
         // client that can actually answer it.
         val brain = Recorder("""{"errors":[]}""")
         val endpoint = Recorder("""{"ruleGap":"조사 오류","evidence":[],"practiceTargets":[]}""")
-        val client = RoutingPedagogyClient(perTurn = brain, consolidate = endpoint)
+        val client = RoutingPedagogyClient(perTurn = brain, endpointClient = endpoint)
 
         val replies = mutableMapOf<String, String>()
         for (role in listOf("grammar", "pronunciation", "visual", "consolidate")) {
             client.analyze(role, task) { replies[role] = it.getOrThrow() }
         }
 
-        assertEquals(listOf("pronunciation", "visual"), brain.roles)
-        assertEquals(listOf("grammar", "consolidate"), endpoint.roles)
+        assertEquals(listOf("visual"), brain.roles)
+        assertEquals(listOf("grammar", "pronunciation", "consolidate"), endpoint.roles)
         assertTrue(replies.getValue("consolidate").contains("ruleGap"))
         assertTrue(replies.getValue("grammar").contains("ruleGap"))   // the endpoint stub's reply
     }
@@ -44,7 +44,7 @@ class RoutingPedagogyClientTest {
         // An empty reply is exactly the silent failure this class exists to end. With no
         // endpoint configured the dispatcher must see a failure it can log, not "{}".
         val brain = Recorder("""{"errors":[]}""")
-        val client = RoutingPedagogyClient(perTurn = brain, consolidate = null)
+        val client = RoutingPedagogyClient(perTurn = brain, endpointClient = null)
 
         var failure: Throwable? = null
         client.analyze("consolidate", task) { failure = it.exceptionOrNull() }
@@ -76,13 +76,13 @@ class RoutingPedagogyClientTest {
         // a reason to run. The endpoint serves the same per-turn roles, so use it.
         val brain = Unavailable()
         val endpoint = Recorder("""{"errors":[{"span":"친구가","type":"object particle","recast":"친구를"}]}""")
-        val client = RoutingPedagogyClient(perTurn = brain, consolidate = endpoint)
+        val client = RoutingPedagogyClient(perTurn = brain, endpointClient = endpoint)
 
         var reply: String? = null
-        client.analyze("pronunciation", task) { reply = it.getOrThrow() }
+        client.analyze("visual", task) { reply = it.getOrThrow() }
 
-        assertEquals(listOf("pronunciation"), brain.roles)    // the brain was tried first
-        assertEquals(listOf("pronunciation"), endpoint.roles) // then the endpoint answered
+        assertEquals(listOf("visual"), brain.roles)           // the brain was tried first
+        assertEquals(listOf("visual"), endpoint.roles)        // then the endpoint answered
         assertTrue(reply!!.contains("object particle"))       // the endpoint stub's reply
     }
 
@@ -91,10 +91,10 @@ class RoutingPedagogyClientTest {
         // Only unavailability is a reason to try elsewhere. A malformed reply from a reachable
         // brain is a bug to surface, not a condition to paper over with a second opinion.
         val endpoint = Recorder("""{"errors":[]}""")
-        val client = RoutingPedagogyClient(perTurn = Broken(), consolidate = endpoint)
+        val client = RoutingPedagogyClient(perTurn = Broken(), endpointClient = endpoint)
 
         var failure: Throwable? = null
-        client.analyze("pronunciation", task) { failure = it.exceptionOrNull() }
+        client.analyze("visual", task) { failure = it.exceptionOrNull() }
 
         assertTrue(failure is IllegalStateException)
         assertEquals(emptyList<String>(), endpoint.roles)
@@ -105,13 +105,26 @@ class RoutingPedagogyClientTest {
         // timeout, so three roles cost ninety seconds a turn. One unavailable answer is enough.
         val brain = Unavailable()
         val endpoint = Recorder("""{"errors":[]}""")
-        val client = RoutingPedagogyClient(perTurn = brain, consolidate = endpoint)
+        val client = RoutingPedagogyClient(perTurn = brain, endpointClient = endpoint)
 
-        client.analyze("pronunciation", task) {}
         client.analyze("visual", task) {}
-        client.analyze("pronunciation", task) {}
+        client.analyze("visual", task) {}
+        client.analyze("visual", task) {}
 
-        assertEquals(listOf("pronunciation"), brain.roles)                            // asked exactly once
-        assertEquals(listOf("pronunciation", "visual", "pronunciation"), endpoint.roles) // everything answered
+        assertEquals(listOf("visual"), brain.roles)                    // asked exactly once
+        assertEquals(listOf("visual", "visual", "visual"), endpoint.roles) // everything answered
+    }
+    @Test
+    fun aBrainThatNeverCameUpIsNotAskedEvenOnce() {
+        // Bootstrap already knows whether the brain opened a session. When it did not, the
+        // first visual turn must not pay a connect timeout to find out again.
+        val brain = Recorder("""{"caption":"x","groundedObjects":[]}""")
+        val endpoint = Recorder("""{"caption":"y","groundedObjects":[]}""")
+        val client = RoutingPedagogyClient(perTurn = brain, endpointClient = endpoint, brainCameUp = { false })
+
+        client.analyze("visual", task) {}
+
+        assertEquals(emptyList<String>(), brain.roles)
+        assertEquals(listOf("visual"), endpoint.roles)
     }
 }
