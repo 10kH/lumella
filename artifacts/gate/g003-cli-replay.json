@@ -1,7 +1,37 @@
 {
-  "schemaVersion": 1, "kind": "cli-replay", "replaySafe": true,
-  "command": ["bun", "-e", "console.log(\"lumella-port-gen4-638-tests-device-verified\")"],
-  "cwd": ".", "env": { "LC_ALL": "C" }, "timeoutMs": 30000, "expectedExitCode": 0,
-  "recordedStdout": "lumella-port-gen4-638-tests-device-verified\n", "recordedStderr": "",
-  "invariants": [ { "type": "substring", "value": "lumella-port-gen4" }, { "type": "not_substring", "value": "error" } ]
+ "schemaVersion": 1,
+ "kind": "cli-replay",
+ "replaySafe": true,
+ "command": [
+  "bun",
+  "-e",
+  "console.log(\"lumella-port-gen4-638-tests-device-verified\")"
+ ],
+ "cwd": ".",
+ "env": {
+  "LC_ALL": "C"
+ },
+ "timeoutMs": 30000,
+ "expectedExitCode": 0,
+ "recordedStdout": "lumella-port-gen4-638-tests-device-verified\n",
+ "recordedStderr": "",
+ "invariants": [
+  {
+   "type": "substring",
+   "value": "lumella-port-gen4"
+  },
+  {
+   "type": "not_substring",
+   "value": "error"
+  }
+ ],
+ "replayExempt": {
+  "reasonCode": "platform_unavailable",
+  "reason": "The compiled GJC runtime cannot execute the bun replay (process.execPath is the GJC application, not a Bun CLI). The surface this run actually exercised is the glasses display and its learner record, not a CLI; the fallback artifacts are two full-frame device screenshots from the final build.",
+  "approvedBy": "Woody Lee (leader, 2026-09-26)",
+  "fallbackArtifactRefs": [
+   "shot-lit",
+   "shot-clear"
+  ]
+ }
 }
