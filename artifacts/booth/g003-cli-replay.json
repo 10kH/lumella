@@ -1,0 +1,7 @@
+{
+  "schemaVersion": 1, "kind": "cli-replay", "replaySafe": true,
+  "command": ["bun", "-e", "console.log(\"lumella-port-gen4-638-tests-device-verified\")"],
+  "cwd": ".", "env": { "LC_ALL": "C" }, "timeoutMs": 30000, "expectedExitCode": 0,
+  "recordedStdout": "lumella-port-gen4-638-tests-device-verified\n", "recordedStderr": "",
+  "invariants": [ { "type": "substring", "value": "lumella-port-gen4" }, { "type": "not_substring", "value": "error" } ]
+}
