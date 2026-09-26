@@ -28,7 +28,20 @@ class TurnTracker(seed: Int = 0) {
     /** Current turn id without advancing (0 before the first turn). */
     fun current(): Int = counter.get()
 
-    /** Reset to the pre-session baseline (call on WebSocket session (re)creation). */
+    /**
+     * A realtime session was lost between turns. Turn ids are persisted with the record and
+     * must stay unique, so this does not rewind — it advances, so that whatever the next
+     * published turn is, it cannot collide with a turn the gate closed on the way down.
+     */
+    fun markSessionLost() {
+        counter.incrementAndGet()
+    }
+
+    /**
+     * Rewind to the pre-session baseline. Only [PendingTurnBinder] uses this, on its own
+     * unseeded tracker; the activity's tracker is seeded from the persisted record and must
+     * never rewind, because the record already holds the ids it would hand out again.
+     */
     fun reset() {
         counter.set(0)
     }

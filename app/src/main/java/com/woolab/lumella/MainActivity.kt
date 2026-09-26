@@ -311,6 +311,11 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
                     // guard exists to close.
                     if (status != RealtimeConnectionStatus.READY) {
                         turnGate.onSessionLost()
+                        // The record keeps every turn id it has seen. A turn that arrives
+                        // after a lost session must get a fresh id, not the number the gate
+                        // just refused to publish — the Wi-Fi outage run on 2026-09-26 wrote
+                        // two different transcripts under turn 1 because of this.
+                        turnTracker.markSessionLost()
                         // Same leak, one field over: `speaking` is cleared only by
                         // response.output_audio.done, which a socket dying mid-reply never
                         // delivers — and it gates the "nothing heard yet" message, so a
@@ -492,8 +497,9 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
     /**
      * Runs off the UI thread: resolves the remote luma config (short-timeout, silently
      * falls back to BuildConfig on any failure — see [RemoteConfigResolver]) so the tunnel
-     * URL can change without an APK rebuild, then brain.connect/startSession (best-effort),
-     * then realtime transport connect.
+     * URL can change without an APK rebuild, then connects the realtime transport, then —
+     * on a separate thread, so a slow or absent brain never delays the voice loop —
+     * brain.connect/startSession (best-effort).
      */
     private fun bootstrapBrainAndTransport(credentialsProvider: BrainCredentialsProvider) {
         val buildConfigLumaBaseUrl = config.lumaBaseUrl
@@ -506,29 +512,37 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
         } else {
             Log.i(TAG, "Using BuildConfig lumaBaseUrl (remote config unavailable or unchanged)")
         }
-        val connection = try {
-            brain.connect(credentialsProvider)
-        } catch (e: Exception) {
-            Log.w(TAG, "brain.connect failed: ${e.message}")
-            null
-        }
-
-        if (connection != null && connection.state != BrainConnectionState.AUTH_REQUIRED) {
-            val session = try {
-                brain.startSession(SessionPolicy.RESUME_ACTIVE)
+        // Voice first. The brain is a coach hint and a visual-evidence upload; the realtime
+        // transport is the conversation. Serialising the socket behind brain.connect meant
+        // that with the lab server absent — a 20s connect hang — the wearer stood in silence
+        // for twenty seconds after launch. Measured 2026-09-26. The brain now comes up on its
+        // own thread and the voice loop does not know or care when it does.
+        transport.connect()
+        Thread({
+            val connection = try {
+                brain.connect(credentialsProvider)
             } catch (e: Exception) {
-                Log.w(TAG, "brain.startSession failed: ${e.message}")
+                Log.w(TAG, "brain.connect failed: ${e.message}")
                 null
             }
-            session?.let { sessionIdRef.set(it.sessionId) }
-            brainReachable.set(session != null)
-        } else {
-            Log.w(TAG, "Brain unavailable/auth-required at bootstrap; continuing voice-only per W-1 posture")
-        }
 
-        // Realtime voice transport connects independently of brain readiness — D-4/W-1:
-        // a luma-unreachable brain degrades to voice-only, it never blocks the fast path.
-        transport.connect()
+            if (connection != null && connection.state != BrainConnectionState.AUTH_REQUIRED) {
+                val session = try {
+                    brain.startSession(SessionPolicy.RESUME_ACTIVE)
+                } catch (e: Exception) {
+                    Log.w(TAG, "brain.startSession failed: ${e.message}")
+                    null
+                }
+                session?.let { sessionIdRef.set(it.sessionId) }
+                brainReachable.set(session != null)
+                Log.i(TAG, "brain ready: session=${session?.sessionId ?: "none"} (voice was already up)")
+            } else {
+                Log.w(TAG, "Brain unavailable/auth-required at bootstrap; continuing voice-only per W-1 posture")
+            }
+
+            // Realtime voice transport connects independently of brain readiness — D-4/W-1:
+            // a luma-unreachable brain degrades to voice-only, it never blocks the fast path.
+        }, "brain-bootstrap").apply { isDaemon = true; start() }
     }
 
     // --- Touch mapping (RayNeo touchpad, ported from LEGACY MainActivity.dispatchTouchEvent) ---
@@ -947,8 +961,11 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
                         )
                     }
                 }
-                // 2) And send it to luma for the coach's structured visual evidence.
-                slowPathExecutor.execute {
+                // 2) And send it to luma for the coach's structured visual evidence. On the
+                // brain's own executor: this is a 20s+20s upload when the brain is absent, and
+                // it used to sit on slowPathExecutor ahead of the dispatcher, so one photo tap
+                // stalled the learner record for the next turn.
+                brainSubmitExecutor.execute {
                     try {
                         val imageContext = brain.analyzeImage(bytes, "image/jpeg")
                         // The adapter answers a failed upload with imageId="" rather than
@@ -1392,8 +1409,12 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
         // executor first: shutdown() lets already-queued tasks finish.
         val endingSessionId = sessionIdRef.get().takeIf { it.isNotBlank() }
         if (endingSessionId != null) {
-            runCatching { slowPathExecutor.execute { runCatching { brain.endSession(endingSessionId) } } }
+            // On the brain's executor, behind any submit still in flight — so the session id
+            // it ends is the one the last turn's response bound, not the "pending-N" placeholder
+            // an exit within seconds of a first turn would otherwise see.
+            runCatching { brainSubmitExecutor.execute { runCatching { brain.endSession(endingSessionId) } } }
         }
+        brainSubmitExecutor.shutdown()
         slowPathExecutor.shutdown()
         voicePathExecutor.shutdown()
     }

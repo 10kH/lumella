@@ -167,4 +167,17 @@ class LearnerStatePersistenceTest {
         assertEquals(1, store.snapshot().revision)                          // in-memory state advanced
         assertTrue(warnings.any { it.startsWith("learner-state persist failed at revision 1") })
     }
+    @Test
+    fun a_lost_session_does_not_hand_out_a_turn_id_the_record_already_holds() {
+        // The Wi-Fi outage run wrote two transcripts under turn 1: the gate refused the
+        // turn that arrived during the outage, the tracker did not move, and the next
+        // published turn reused the number. Ids are persisted; they must stay unique.
+        val tracker = com.woolab.lumella.slowpath.TurnTracker(seed = 0)
+        val first = tracker.next()           // 1, published
+        tracker.markSessionLost()            // a turn arrived and was refused
+        val next = tracker.next()
+
+        assertEquals(1, first)
+        assertTrue("next id must be past the refused one", next > first + 1)
+    }
 }
