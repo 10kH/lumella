@@ -4,8 +4,8 @@ import com.woolab.lumella.contract.SteeringEvidence
 import com.woolab.lumella.contract.SteeringResult
 import com.woolab.lumella.contract.TurnEvidence
 import com.woolab.lumella.contract.TutorBrain
-import com.woolab.lumella.orchestration.ResponseInstructions
-import com.woolab.lumella.orchestration.StateGraphOrchestrator
+import com.woolab.tutor.slowpath.ResponseInstructions
+import com.woolab.tutor.slowpath.StateGraphOrchestrator
 import java.util.concurrent.Callable
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors

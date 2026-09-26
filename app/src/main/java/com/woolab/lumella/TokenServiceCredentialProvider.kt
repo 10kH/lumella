@@ -1,6 +1,6 @@
 package com.woolab.lumella
 
-import com.woolab.lumella.util.MiniJson
+import com.woolab.tutor.slowpath.MiniJson
 
 /**
  * Adapts the legacy ELLA `RealtimeCredentialProvider` pattern (bearer credential

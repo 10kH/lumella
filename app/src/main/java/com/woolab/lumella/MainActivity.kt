@@ -14,7 +14,7 @@ import android.view.View
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.ffalcon.mercury.android.sdk.ui.activity.BaseMirrorActivity
-import com.woolab.lumella.agents.EndpointPedagogyAgentClient
+import com.woolab.tutor.slowpath.EndpointPedagogyAgentClient
 import com.woolab.lumella.audio.AudioCapture
 import com.woolab.lumella.audio.AudioPlayback
 import com.woolab.lumella.brain.BrainFactory
@@ -27,12 +27,14 @@ import com.woolab.lumella.contract.CoachIndicator
 import com.woolab.lumella.contract.SessionPolicy
 import com.woolab.lumella.contract.TutorBrain
 import com.woolab.lumella.databinding.ActivityMainBinding
-import com.woolab.lumella.orchestration.StateGraphOrchestrator
-import com.woolab.lumella.slowpath.SlowPathAssembly
-import com.woolab.lumella.slowpath.SlowPathTask
+import com.woolab.tutor.slowpath.StateGraphOrchestrator
+import com.woolab.tutor.slowpath.LayerIndicator
+import com.woolab.tutor.slowpath.SlowPathAssembly
+import com.woolab.tutor.slowpath.TutorLanguage
+import com.woolab.tutor.slowpath.SlowPathTask
 import com.woolab.lumella.slowpath.TurnEvidenceAssembler
-import com.woolab.lumella.slowpath.TurnTracker
-import com.woolab.lumella.state.LearnerStateStore
+import com.woolab.tutor.slowpath.TurnTracker
+import com.woolab.tutor.slowpath.LearnerStateStore
 import com.woolab.lumella.voice.OkHttpRealtimeWebSocketFactory
 import com.woolab.lumella.voice.OpenAiRealtimeTransport
 import com.woolab.lumella.voice.RealtimeConnectionStatus
@@ -245,10 +247,11 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
                 .connectTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
                 .readTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
                 .build()
-            EndpointPedagogyAgentClient(http, url, BuildConfig.REALTIME_TOKEN_SECRET)
+            EndpointPedagogyAgentClient(TutorLanguage.KOREAN, http, url, BuildConfig.REALTIME_TOKEN_SECRET)
         }
         // One place builds the slow path; the end-to-end test calls the same function.
         slowPath = SlowPathAssembly.build(
+            language = TutorLanguage.KOREAN,
             // Backed by a file so a diagnosis survives a restart and so the record can be
             // read from outside — the on-device verification reads exactly this file.
             backing = java.io.File(filesDir, "learner-state.json"),
@@ -1409,7 +1412,7 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
         // onCreate sets the first status line before the store exists; there is nothing to
         // show yet and nothing on record, so the corner stays blank until the store is built.
         if (!::learnerStore.isInitialized) return
-        val text = com.woolab.lumella.pedagogy.LayerIndicator.render(learnerStore.snapshot())
+        val text = LayerIndicator.render(learnerStore.snapshot())
         mBindingPair.left.tvLayers.text = text
         mBindingPair.right.tvLayers.text = text
     }

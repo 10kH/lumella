@@ -20,4 +20,4 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "lumella-glasses"
-include(":app", ":tutor-contract", ":luma-adapter", ":contract-tests")
+include(":app", ":tutor-contract", ":tutor-slowpath", ":luma-adapter", ":contract-tests")

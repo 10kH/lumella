@@ -5,7 +5,7 @@ import com.woolab.lumella.RealtimeServerEventKind
 import com.woolab.lumella.RealtimeServerEventTypes
 import com.woolab.lumella.StandardOpenAiApiKeyRejectedException
 import com.woolab.lumella.TokenServiceCredentialProvider
-import com.woolab.lumella.util.MiniJson
+import com.woolab.tutor.slowpath.MiniJson
 
 /** Coarse connection/session status surfaced to the UI (mirrors LEGACY's status-text states, plan G006). */
 enum class RealtimeConnectionStatus { CONNECTING, READY, DEGRADED, TOKEN_FAIL, CLOSED, IDLE, ACCOUNT_BLOCKED }

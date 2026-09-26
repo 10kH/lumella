@@ -1,6 +1,6 @@
 package com.woolab.lumella.voice
 
-import com.woolab.lumella.config.AblationMode
+import com.woolab.tutor.slowpath.AblationMode
 import com.woolab.lumella.contract.BrainCapabilities
 import com.woolab.lumella.contract.BrainConnection
 import com.woolab.lumella.contract.BrainConnectionState
@@ -13,9 +13,10 @@ import com.woolab.lumella.contract.SteeringResult
 import com.woolab.lumella.contract.TurnEvidence
 import com.woolab.lumella.contract.TutorBrain
 import com.woolab.lumella.contract.UnavailableReason
-import com.woolab.lumella.orchestration.StalenessGuard
-import com.woolab.lumella.orchestration.StateGraphOrchestrator
-import com.woolab.lumella.state.LearnerStateStore
+import com.woolab.tutor.slowpath.StalenessGuard
+import com.woolab.tutor.slowpath.StateGraphOrchestrator
+import com.woolab.tutor.slowpath.TutorLanguage
+import com.woolab.tutor.slowpath.LearnerStateStore
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -42,7 +43,7 @@ class VoiceFastPathTest {
     }
 
     private fun fastPath(brain: TutorBrain, transport: RealtimeTransport = RecordingTransport()) = VoiceFastPath(
-        orchestrator = StateGraphOrchestrator(LearnerStateStore(), StalenessGuard(2, 4), AblationMode.FULL),
+        orchestrator = StateGraphOrchestrator(TutorLanguage.KOREAN, LearnerStateStore(), StalenessGuard(2, 4), AblationMode.FULL),
         brain = brain,
         transport = transport,
         sessionId = { "s1" },
@@ -95,7 +96,7 @@ class VoiceFastPathTest {
         // Voice loop continues: instructions were still built and sent.
         assertEquals(1, transport.sent.size)
         assertEquals(
-            com.woolab.lumella.orchestration.SteeringChannel.RESPONSE_CREATE_INSTRUCTIONS,
+            com.woolab.tutor.slowpath.SteeringChannel.RESPONSE_CREATE_INSTRUCTIONS,
             instr.channel,
         )
         assertTrue(voice.degraded)
@@ -150,7 +151,7 @@ class VoiceFastPathTest {
             SteeringResult.Available(SteeringEvidence(corrections = emptyList(), hints = emptyList(), confidence = 1.0, sourceTurnId = 1))
         })
         val voice = VoiceFastPath(
-            orchestrator = StateGraphOrchestrator(LearnerStateStore(), StalenessGuard(2, 4), AblationMode.FULL),
+            orchestrator = StateGraphOrchestrator(TutorLanguage.KOREAN, LearnerStateStore(), StalenessGuard(2, 4), AblationMode.FULL),
             brain = brain,
             transport = transport,
             sessionId = { "s1" },

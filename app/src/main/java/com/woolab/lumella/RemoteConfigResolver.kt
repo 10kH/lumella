@@ -1,6 +1,6 @@
 package com.woolab.lumella
 
-import com.woolab.lumella.util.MiniJson
+import com.woolab.tutor.slowpath.MiniJson
 
 /** GET transport used to fetch the remote runtime config; mirrors [TokenHttpTransport]'s DI shape
  * (a separate interface because the config endpoint is GET, not POST) so unit tests can fake it

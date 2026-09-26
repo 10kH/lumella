@@ -1,5 +1,8 @@
 package com.woolab.lumella.slowpath
 
+import com.woolab.tutor.slowpath.TurnTracker
+import com.woolab.tutor.slowpath.SlowPathTask
+
 /**
  * Binds the per-turn image to its turn AT SEND/COMMIT TIME (plan P2, AC6 fix).
  *

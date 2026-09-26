@@ -2,7 +2,7 @@ package com.woolab.lumella.voice
 
 import com.woolab.lumella.TokenHttpResponse
 import com.woolab.lumella.TokenServiceCredentialProvider
-import com.woolab.lumella.util.MiniJson
+import com.woolab.tutor.slowpath.MiniJson
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
@@ -859,22 +859,22 @@ class OpenAiRealtimeTransportTest {
         // looks like the model ignoring instructions rather than a syntax error. That is
         // exactly what one stray brace did on 2026-08-05, and nothing here noticed.
         val json = OpenAiRealtimeTransport(successProvider(), FakeFactory()).buildSessionUpdateJson()
-        val root = com.woolab.lumella.util.MiniJson.asObject(com.woolab.lumella.util.MiniJson.parse(json))
+        val root = com.woolab.tutor.slowpath.MiniJson.asObject(com.woolab.tutor.slowpath.MiniJson.parse(json))
         assertTrue("session.update did not parse: $json", root != null)
 
-        val session = com.woolab.lumella.util.MiniJson.asObject(root!!["session"])
+        val session = com.woolab.tutor.slowpath.MiniJson.asObject(root!!["session"])
         assertTrue("session object missing", session != null)
         // Everything the app relies on has to survive the round trip, not just parse.
-        assertTrue("instructions lost", com.woolab.lumella.util.MiniJson.string(session!!, "instructions") != null)
+        assertTrue("instructions lost", com.woolab.tutor.slowpath.MiniJson.string(session!!, "instructions") != null)
         assertTrue("tools lost", session["tools"] != null)
-        assertEquals("auto", com.woolab.lumella.util.MiniJson.string(session, "tool_choice"))
-        assertTrue("audio config lost", com.woolab.lumella.util.MiniJson.asObject(session["audio"]) != null)
+        assertEquals("auto", com.woolab.tutor.slowpath.MiniJson.string(session, "tool_choice"))
+        assertTrue("audio config lost", com.woolab.tutor.slowpath.MiniJson.asObject(session["audio"]) != null)
 
         // 08/05 requirement 2: display/language voice control tools must be declared, or the
         // model has no way to run them — same class of silent gap as a dropped persona.
-        val tools = com.woolab.lumella.util.MiniJson.asArray(session["tools"])
+        val tools = com.woolab.tutor.slowpath.MiniJson.asArray(session["tools"])
         assertTrue("tools array missing/empty", tools != null && tools.isNotEmpty())
-        val toolNames = tools!!.mapNotNull { com.woolab.lumella.util.MiniJson.string(com.woolab.lumella.util.MiniJson.asObject(it), "name") }
+        val toolNames = tools!!.mapNotNull { com.woolab.tutor.slowpath.MiniJson.string(com.woolab.tutor.slowpath.MiniJson.asObject(it), "name") }
         assertEquals(
             listOf("capture_photo", "set_text_display", "set_hints_visible", "switch_tutor_language"),
             toolNames,
@@ -1151,7 +1151,7 @@ class OpenAiRealtimeTransportTest {
         val transport = OpenAiRealtimeTransport(successProvider(), FakeFactory())
         val json = transport.buildImageItemJson("""abc"injected\\and\nnewline""")
 
-        val root = com.woolab.lumella.util.MiniJson.asObject(com.woolab.lumella.util.MiniJson.parse(json))
+        val root = com.woolab.tutor.slowpath.MiniJson.asObject(com.woolab.tutor.slowpath.MiniJson.parse(json))
         assertTrue("image item did not parse: $json", root != null)
     }
 

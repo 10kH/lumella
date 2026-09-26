@@ -1,5 +1,7 @@
 package com.woolab.lumella.config
 
+import com.woolab.tutor.slowpath.AblationMode
+
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertThrows
