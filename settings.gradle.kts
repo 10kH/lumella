@@ -20,4 +20,8 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "lumella-glasses"
-include(":app", ":tutor-contract", ":tutor-slowpath", ":luma-adapter", ":contract-tests")
+include(":app", ":tutor-contract", ":luma-adapter", ":contract-tests")
+
+// The slow layer lives in its own repository, checked out beside this one. Both tutoring apps
+// consume it this way, so a fix lands in both without a port.
+includeBuild("../tutor-slowpath")

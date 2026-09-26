@@ -77,7 +77,7 @@ kotlin {
 
 dependencies {
     implementation(project(":tutor-contract"))
-    implementation(project(":tutor-slowpath"))
+    implementation("com.woolab:tutor-slowpath:0.1.0")
     // :luma-adapter is NOT declared here (implementation/api) — the DependencyRuleGuardTest
     // (:contract-tests) enforces that :app stays free of a compile-time coupling to the
     // engine adapter. The concrete TutorBrain impl is DI-bound at RUNTIME only via
