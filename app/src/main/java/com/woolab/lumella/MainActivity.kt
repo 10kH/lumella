@@ -259,6 +259,8 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
             // A diagnosis lands between turns; redraw the indicator the moment it does.
             onStateChanged = { runOnUiThread { refreshLayerIndicator() } },
             warn = { Log.w(TAG, it) },
+            stalenessMaxAgeTurns = 3,
+            stalenessReAnchorWindowTurns = 20,
         )
         learnerStore = slowPath.store
         turnTracker = slowPath.tracker
