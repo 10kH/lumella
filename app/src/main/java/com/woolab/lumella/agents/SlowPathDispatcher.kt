@@ -57,14 +57,12 @@ class SlowPathDispatcher(
 
     /** Fire the applicable agents for one turn; coalesce + apply when all return. */
     fun dispatch(task: SlowPathTask) {
-        // Language gate. Before the transcription language was pinned, VAD picked up ambient
-        // Korean television and Whisper transcribed it as Korean (and once as Chinese, once as
-        // Italian). The grammar agent then dutifully "corrected" Korean spacing and the coach
-        // steered the ENGLISH tutor with 22 Korean recasts out of 24 recorded errors — all of
-        // it persisted to learner-state.json. The pin fixes most of it upstream; this gate is
-        // the second wall: a Korean tutor has nothing valid to say about a non-Korean
-        // utterance, so the language agents do not fire. The visual agent still runs on a
-        // photo — the image is language-neutral. Also saves two Vercel round-trips per noise
+        // Language gate. ELLA learned this the hard way: before its transcription language was
+        // pinned, VAD picked up ambient television and 22 of 24 recorded "errors" were in the
+        // wrong language, all persisted. The pin fixes most of it upstream; this gate is the
+        // second wall: a Korean tutor has nothing valid to say about an English, Chinese or
+        // Japanese utterance, so the language agents do not fire. The visual agent still runs
+        // on a photo — the image is language-neutral. Also saves Vercel round-trips per noise
         // turn.
         val korean = !gateNonKorean || isPlausiblyKorean(task.userTranscript)
         val applicable = agents.filter { agent ->

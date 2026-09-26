@@ -18,11 +18,12 @@ import com.woolab.lumella.slowpath.SlowPathTask
  *    `corrections: []`, `focusHint: topic_elaboration`. No error recorded, so nothing ever
  *    accumulated, so the diagnosis never had a reason to form.
  *
- * Both jobs are text work on the learner's words and do not depend on the brain, so they go
- * to the same Vercel function ELLA uses, which returned 친구가 → 친구를 for that sentence. The
- * roles the brain does serve — pronunciation, and visual when a photo is attached — stay with
- * it, and fall through to the endpoint only if the brain is unreachable. If the endpoint is not
- * configured, an endpoint role reports unavailable rather than silently returning nothing.
+ * Those jobs are text work on the learner's words and do not depend on the brain, so they go
+ * to the same Vercel function ELLA uses, which returned 친구가 → 친구를 for that sentence.
+ * Pronunciation goes there too: the adapter has no phoneme field and answers "{}" every turn.
+ * Only visual stays brain-first, and falls through to the endpoint if the brain is
+ * unreachable or never came up. If the endpoint is not configured, an endpoint role reports
+ * unavailable rather than silently returning nothing.
  */
 class RoutingPedagogyClient(
     private val perTurn: PedagogyAgentClient,

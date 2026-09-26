@@ -49,11 +49,10 @@ class TutorBrainPedagogyClient(
     private val brain: TutorBrain,
     private val sessionId: () -> String,
     /**
-     * Caller-side bound on [TutorBrain.fetchSteering], the same discipline VoiceFastPath applies.
-     * The transport's own connect timeout is 20s, and a brain address on another subnet does not
-     * refuse — it hangs. Measured 2026-09-26: with the lab server absent, one turn's three roles
-     * took ninety seconds before anything else could run. Past this bound the brain is reported
-     * unavailable, which is what it is.
+     * Caller-side bound on [TutorBrain.fetchSteering]. For the luma adapter that call is a
+     * read of two volatile fields and cannot hang — the 2026-09-26 "ninety seconds" was the
+     * brain's submitTurnEvidence, bounded separately in MainActivity. The bound stays because
+     * the contract does not promise every TutorBrain's fetchSteering is in-memory.
      */
     private val fetchTimeoutMs: Long = 2_000L,
     /**

@@ -67,7 +67,7 @@ import org.json.JSONObject
 class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
 
     companion object {
-        private const val BRAIN_SUBMIT_BOUND_MS = 3_000L
+        private const val BRAIN_UNREACHABLE_AFTER_MS = 15_000L
         private const val TAG = "lumella"
         private const val RIGHT_TOUCHPAD_DEVICE = "cyttsp5_mt"
         private const val LEFT_TOUCHPAD_DEVICE = "cyttsp6_mt"
@@ -122,14 +122,14 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
 
     private lateinit var turnTracker: TurnTracker
     /**
-     * Whether the brain connected and opened a session at bootstrap. If not, every call into
-     * it is a connect to an address that does not refuse — the lab server on another subnet
-     * hangs to the transport's 20s timeout — and it runs on the same executor as the slow
-     * path, ahead of it. Nothing is gained by asking a brain that is not there.
+     * Whether the brain connected and opened a session at bootstrap, and has not since taken
+     * unreachable-long to answer. If not, every call into it is a connect to an address that
+     * does not refuse — the lab server on another subnet hangs to the transport's 20s timeout.
+     * Nothing is gained by asking a brain that is not there.
      */
     private val brainReachable = java.util.concurrent.atomic.AtomicBoolean(false)
     private val sessionIdRef = AtomicReference("")
-    /** Runs the brain submit so [slowPathExecutor] can abandon it at the bound rather than block behind it. */
+    /** Runs the brain submit off the slow path, so the record and the corner never queue behind the coach hint. */
     private val brainSubmitExecutor = Executors.newSingleThreadExecutor { r ->
         Thread(r, "brain-submit").apply { isDaemon = true }
     }
@@ -1001,32 +1001,39 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
     private fun submitCurrentTurnEvidence() {
         val turnId = turnTracker.current().takeIf { it > 0 } ?: return
         val evidence = turnEvidenceAssembler.assemble(turnId = turnId, transcript = currentTurnUserTranscript)
+        // The slow path does not wait for the brain. Measured 2026-09-26: a live coach turn on
+        // /v1/orchestrator/turn takes ~5s, and the first version of this method ran it
+        // synchronously ahead of the dispatcher, so every grammar record and the diagnosis
+        // cadence started 5s late — or, with a bound, a healthy brain got branded dead. The
+        // brain's only product here is the bottom coach hint, which can arrive whenever it
+        // arrives; the corner indicator and the record must not queue behind it.
         slowPathExecutor.execute {
-            // 08/05 requirement 3: brain.submitTurnEvidence is what populates coachIndicator()
-            // for this turn; read it only after that call returns, then push the honest
-            // per-turn label to both eye panes. Bounded, and skipped outright when the brain
-            // never came up: the slow path queued behind this call must not wait 20s per turn
-            // for a server that is not on the booth network.
-            val indicator = if (brainReachable.get()) {
-                val f = brainSubmitExecutor.submit { voiceFastPath.submitTurnEvidence(evidence) }
-                try {
-                    f.get(BRAIN_SUBMIT_BOUND_MS, java.util.concurrent.TimeUnit.MILLISECONDS)
+            slowPathQueue.enqueue(SlowPathTask(turnId = turnId, userTranscript = evidence.learnerTranscript))
+            slowPathDispatcher.drain(slowPathQueue)
+        }
+        if (brainReachable.get()) {
+            brainSubmitExecutor.execute {
+                val started = System.currentTimeMillis()
+                val indicator = try {
+                    voiceFastPath.submitTurnEvidence(evidence)
                     brain.coachIndicator()
-                } catch (_: java.util.concurrent.TimeoutException) {
-                    f.cancel(true)
-                    brainReachable.set(false)
-                    Log.w(TAG, "brain.submitTurnEvidence exceeded ${BRAIN_SUBMIT_BOUND_MS}ms at turn $turnId; brain marked unreachable")
-                    null
                 } catch (e: Exception) {
                     Log.w(TAG, "brain.submitTurnEvidence failed at turn $turnId: ${e.message}")
                     null
                 }
-            } else {
-                null
+                val took = System.currentTimeMillis() - started
+                // A connect to an address that does not refuse hangs to the transport's 20s
+                // timeout. That is what "unreachable" means; a slow coach turn is not it.
+                if (took >= BRAIN_UNREACHABLE_AFTER_MS) {
+                    brainReachable.set(false)
+                    Log.w(TAG, "brain.submitTurnEvidence took ${took}ms at turn $turnId; brain marked unreachable")
+                }
+                // The hint is for the turn it describes; if the wearer has already moved on,
+                // updateHint's generation counter keeps a late reply from overwriting a newer one.
+                runOnUiThread { updateHint(indicator) }
             }
-            runOnUiThread { updateHint(indicator) }
-            slowPathQueue.enqueue(SlowPathTask(turnId = turnId, userTranscript = evidence.learnerTranscript))
-            slowPathDispatcher.drain(slowPathQueue)
+        } else {
+            runOnUiThread { updateHint(null) }
         }
     }
 

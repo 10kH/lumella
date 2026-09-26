@@ -49,13 +49,23 @@ DEBUG_EVENT 주입 경로(전사 → 진단 → 해제)는 실기기에서 전�
 ```
 혼합 오류 3턴 (조사/시제/높임)   → grammar 3건, ruleGap null    [learner-state-mixed-errors-no-diagnosis.json]
                                  모델이 패턴을 지어내지 않는다
-재시작 (--reset 없이)            → ruleGap 유지, 부팅 직후 coach luna   [indicator-after-relaunch.png]
-                                 turnId 가 4·5·6 으로 이어지고 6턴째 해제
+재시작 (--reset 없이)            → ruleGap 유지, 부팅 직후 coach luna
+                                 turnId 가 4·5·6 으로 이어지고 6턴째 해제   [learner-state-after-relaunch-clear.json]
 코드스위칭 게이트               → "저는 Jennifer예요" 통과 · "I said 안녕하세요 to her" 차단
                                  "busy한 하루였어요" 통과 · "あああ" 차단   [learner-state-gate-codeswitch.json]
 정답 1턴                        → 진단 유지 (3턴 정답이어야 해제)
 일본어 소음 2턴                 → 기록도, 해제 카운트도 안 됨
 ```
+
+## 2c. 턴 지연 실측 (3세대)
+
+```
+전사 완료 → grammar 디스패치       0.0s  (브레인 submit 이 슬로우 패스와 병렬)
+3번째 전사 → consolidate 디스패치   3.5s
+consolidate → ruleGap 기록          ~4s (luna 추론)
+브레인 코치 턴 (/v1/orchestrator/turn)  ~5s — 슬로우 패스와 무관, 하단 힌트만 늦게 온다
+```
+[turn-timing.log] 진행자 대본의 "턴 사이 12초"는 여유 있다.
 
 ## 3. 부스 진행자 대본 — 관람객이 실수를 안 할 때
 
