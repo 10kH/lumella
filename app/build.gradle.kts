@@ -107,6 +107,11 @@ dependencies {
     implementation(files("libs/MercuryAndroidSDK-v0.2.2-20250717110238_48b655b3.aar"))
 
     testImplementation(libs.junit)
+    // The Android SDK stubs org.json on the unit-test classpath, so anything that builds a
+    // JSONObject there throws "not mocked". Pull the real library in for tests only, so the
+    // codec tests can serialise learner state and parse it back — production still runs on
+    // the platform's org.json at runtime.
+    testImplementation("org.json:json:20240303")
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 }

@@ -71,6 +71,18 @@ data class LearnerState(
     val visualContext: List<VisualContextItem> = emptyList(),
     val deferredCorrections: List<Correction> = emptyList(),
     val turnHistory: List<TurnRecord> = emptyList(),
+    /**
+     * The slow layer's longitudinal diagnosis: the one grammatical pattern this learner keeps
+     * getting wrong, in a sentence, or null when no pattern has recurred yet. Refreshed every
+     * few turns by the consolidate agent, not every turn. This is what the steering carries
+     * — the fast layer already recasts individual errors on the same turn, so per-turn recasts
+     * from here were redundant.
+     */
+    val ruleGap: String? = null,
+    /** 2-4 correct forms of [ruleGap] the tutor can use naturally in its next replies. */
+    val practiceTargets: List<String> = emptyList(),
+    /** Turn at which [ruleGap] was last refreshed; the dispatch policy reads it. */
+    val lastConsolidatedTurnId: Int = 0,
     /** Single-writer monotonic revision counter. */
     val revision: Int = 0,
 )
@@ -89,14 +101,28 @@ data class StateDelta(
     val addVisualContext: List<VisualContextItem> = emptyList(),
     val addDeferredCorrections: List<Correction> = emptyList(),
     val addTurnHistory: List<TurnRecord> = emptyList(),
+    /**
+     * Consolidation result. [consolidated] true means this delta came from the consolidate
+     * agent and REPLACES ruleGap/practiceTargets (a diagnosis is a snapshot, not an
+     * accumulation) and stamps lastConsolidatedTurnId. A null [ruleGap] with consolidated=true
+     * clears a stale diagnosis — the learner may have stopped making that mistake.
+     */
+    val consolidated: Boolean = false,
+    val ruleGap: String? = null,
+    val practiceTargets: List<String> = emptyList(),
+    val proficiencyEstimate: String? = null,
 ) {
     fun applyTo(state: LearnerState): LearnerState = state.copy(
+        profile = if (proficiencyEstimate != null) state.profile.copy(proficiencyEstimate = proficiencyEstimate) else state.profile,
         grammarErrors = state.grammarErrors + addGrammarErrors,
         pronFluency = pronFluency ?: state.pronFluency,
         vocabTargets = state.vocabTargets + addVocabTargets,
         visualContext = state.visualContext + addVisualContext,
         deferredCorrections = state.deferredCorrections + addDeferredCorrections,
         turnHistory = state.turnHistory + addTurnHistory,
+        ruleGap = if (consolidated) ruleGap else state.ruleGap,
+        practiceTargets = if (consolidated) practiceTargets else state.practiceTargets,
+        lastConsolidatedTurnId = if (consolidated) sourceTurnId else state.lastConsolidatedTurnId,
         revision = state.revision + 1,
     )
 }

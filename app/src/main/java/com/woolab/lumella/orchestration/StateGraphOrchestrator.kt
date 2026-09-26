@@ -70,14 +70,25 @@ class StateGraphOrchestrator(
      * B0: NO_LEARNER_STATE does NOT persist the delta into the shared learner-state; only the
      * deferred corrections survive, in a turn-local ephemeral buffer (replaced, not accumulated).
      */
+    /** Lock-free read of the current learner state (the dispatcher's cadence needs it on a quiet turn). */
+    fun snapshot(): LearnerState = store.snapshot()
+
     fun applySlowPath(delta: StateDelta): LearnerState? {
         if (!ablationMode.usesSlowAgents) return null
         if (!ablationMode.usesLearnerState) {
             if (ablationMode.usesDeferredCorrections) ephemeralBuffer.set(delta.addDeferredCorrections)
             return null
         }
-        return store.apply(delta)
+        return store.apply(delta).also { onStateChanged?.invoke() }
     }
+
+    /**
+     * Notified after a slow-path delta lands. The layer indicator uses it: a diagnosis arrives
+     * between turns, seconds after the reply that triggered it, so waiting for the next status
+     * change would leave the coach line stale for the part of the take that matters most.
+     */
+    @Volatile
+    var onStateChanged: (() -> Unit)? = null
 
     /**
      * Build the per-response steering payload at turn start. Lock-free snapshot read.

@@ -112,6 +112,7 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
     private lateinit var voiceFastPath: VoiceFastPath
     private lateinit var slowPathQueue: SlowPathQueue
     private lateinit var slowPathDispatcher: SlowPathDispatcher
+    private lateinit var learnerStore: LearnerStateStore
     private lateinit var audioCapture: AudioCapture
     private lateinit var audioPlayback: AudioPlayback
     private lateinit var camera: GlassesCamera
@@ -226,7 +227,11 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
                 BrainCredentials(baseUrl = config.lumaBaseUrl, email = config.brainEmail, password = config.brainPassword)
         }
 
-        val orchestrator = StateGraphOrchestrator(LearnerStateStore(), StalenessGuard(3, 20), AblationMode.FULL)
+        learnerStore = LearnerStateStore()
+        val orchestrator = StateGraphOrchestrator(learnerStore, StalenessGuard(3, 20), AblationMode.FULL).apply {
+            // A diagnosis lands between turns; redraw the indicator the moment it does.
+            onStateChanged = { runOnUiThread { refreshLayerIndicator() } }
+        }
         val pedagogyClient = TutorBrainPedagogyClient(brain, sessionId = { sessionIdRef.get() })
         slowPathQueue = SlowPathQueue()
         slowPathDispatcher = SlowPathDispatcher(pedagogyClient, orchestrator)
@@ -1010,6 +1015,10 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
             return
         }
         val color = android.graphics.Color.parseColor(colorHex)
+        // The layer indicator rides every status change: the status line is already the thing
+        // that moves on each turn boundary, so this stays in step with the conversation without
+        // a timer of its own.
+        refreshLayerIndicator()
         mBindingPair.left.tvStatus.text = text
         mBindingPair.left.tvStatus.setTextColor(color)
         mBindingPair.right.tvStatus.text = text
@@ -1313,4 +1322,15 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
         slowPathExecutor.shutdown()
         voicePathExecutor.shutdown()
     }
+
+    /**
+     * Redraws "음성 realtime / 코치 luna" from the current learner state. UI thread only.
+     * The coach line lights only while a diagnosis is on record — see [LayerIndicator].
+     */
+    private fun refreshLayerIndicator() {
+        val text = com.woolab.lumella.pedagogy.LayerIndicator.render(learnerStore.snapshot())
+        mBindingPair.left.tvLayers.text = text
+        mBindingPair.right.tvLayers.text = text
+    }
+
 }

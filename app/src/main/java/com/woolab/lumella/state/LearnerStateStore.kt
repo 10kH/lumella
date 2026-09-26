@@ -1,5 +1,6 @@
 package com.woolab.lumella.state
 
+import java.io.File
 import java.util.concurrent.atomic.AtomicReference
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
@@ -16,11 +17,49 @@ import kotlin.concurrent.withLock
  *
  * The published value is an immutable [LearnerState], so a reader always observes
  * a consistent snapshot; the writer swaps in a new immutable value atomically.
+ *
+ * **Persistence.** With [backing] set, the store loads that file on construction and
+ * rewrites it after every publish, inside the same writer lock, so what is on disk is
+ * always a state that was actually published and never a torn write. Without it the
+ * store behaves exactly as before — memory only — which is what the unit tests use.
+ *
+ * Why: without this, every launch started from `LearnerState()` and the tutor forgot the
+ * learner's errors, recasts and profile between sessions. Personalization that resets
+ * on restart is not personalization. The write is a whole-file replace via a temp file
+ * and rename, so a crash mid-write leaves the previous good file, not a partial one.
+ * A file the codec cannot read (wrong schema, corrupt) is ignored and overwritten on the
+ * next publish rather than crashing the app on boot.
  */
-class LearnerStateStore(initial: LearnerState = LearnerState()) {
+class LearnerStateStore(
+    initial: LearnerState = LearnerState(),
+    private val backing: File? = null,
+) {
 
-    private val ref = AtomicReference(initial)
+    private val ref = AtomicReference(load(backing) ?: initial)
     private val writeLock = ReentrantLock()
+
+    private companion object {
+        fun load(file: File?): LearnerState? {
+            if (file == null || !file.isFile) return null
+            return runCatching { LearnerStateCodec.decode(file.readText()) }.getOrNull()
+        }
+    }
+
+    /** Must be called with [writeLock] held, after [ref] has been set to [state]. */
+    private fun persist(state: LearnerState) {
+        val file = backing ?: return
+        runCatching {
+            file.parentFile?.mkdirs()
+            val tmp = File(file.parentFile, file.name + ".tmp")
+            tmp.writeText(LearnerStateCodec.encode(state))
+            if (!tmp.renameTo(file)) {
+                // Some filesystems refuse rename-over; fall back to copy + delete.
+                file.writeText(tmp.readText())
+                tmp.delete()
+            }
+        }
+        // Best-effort: a failed save must never break the voice loop that just published.
+    }
 
     /** Lock-free, non-blocking read of the current immutable snapshot. */
     fun snapshot(): LearnerState = ref.get()
@@ -50,6 +89,7 @@ class LearnerStateStore(initial: LearnerState = LearnerState()) {
                 transformed
             }
             ref.set(next)
+            persist(next)
             return next
         }
     }
@@ -65,6 +105,7 @@ class LearnerStateStore(initial: LearnerState = LearnerState()) {
             val next = delta.applyTo(current)
             beforePublish?.invoke()
             ref.set(next)
+            persist(next)
             return next
         }
     }

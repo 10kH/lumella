@@ -68,6 +68,28 @@ class SteeringComposerTest {
     }
 
     @Test
+    fun ruleGapBecomesLongitudinalSteeringWithPracticeForms() {
+        val state = LearnerState(
+            ruleGap = "irregular past tense: adds -ed to strong verbs",
+            practiceTargets = listOf("went", "ate", "bought"),
+        )
+        val text = SteeringComposer.compose(persona, state, corrections = emptyList(), lastUserUtterance = "It was fun")
+        assertTrue(text.contains("keeps making the same mistake: irregular past tense"))
+        assertTrue(text.contains("model the correct pattern"))
+        assertTrue(text.contains("went, ate, bought fit this learner"))
+        assertTrue(text.contains("Do not point at the mistake"))
+        // No per-turn recast rides along when the slow layer carries a diagnosis instead.
+        assertTrue(!text.contains("Try:"))
+    }
+
+    @Test
+    fun ruleGapIsSuppressedWhenLearnerStateIsOff() {
+        val state = LearnerState(ruleGap = "articles: drops 'the'", practiceTargets = listOf("the bus"))
+        val text = SteeringComposer.compose(persona, state, emptyList(), lastUserUtterance = "ok", useLearnerState = false)
+        assertTrue(!text.contains("keeps making"))
+    }
+
+    @Test
     fun composesVocabTargetsAndPrioritizedCorrections() {
         val state = LearnerState(
             vocabTargets = listOf(VocabTarget("orchard", "fruit farm"), VocabTarget("harvest", "picking")),
