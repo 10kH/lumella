@@ -95,8 +95,13 @@ class SlowPathDispatcher(
         for (agent in applicable) {
             client.analyze(agent.role, task) { result ->
                 result.onSuccess { body ->
-                    runCatching { agent.toStateDelta(body, task) }.getOrNull()?.let { deltas.add(it) }
+                    runCatching { agent.toStateDelta(body, task) }
+                        .onFailure { warn("${agent.role} parse failed at turn ${task.turnId}: ${it.message}") }
+                        .getOrNull()?.let { deltas.add(it) }
                 }
+                // A per-turn failure used to vanish here. On the glasses that meant three
+                // recorded turns and zero errors with nothing in the log to say why.
+                result.onFailure { warn("${agent.role} call failed at turn ${task.turnId}: ${it.message}") }
                 if (remaining.decrementAndGet() == 0) {
                     val after = SlowPathCoalescer.coalesce(deltas.toList())?.let { orchestrator.applySlowPath(it) }
                     // Only English turns feed the diagnosis; a photo-only dispatch does not.

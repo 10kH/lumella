@@ -246,4 +246,24 @@ class PedagogyAgentClientTest {
         val message = MiniJson.asObject(MiniJson.asObject(choices.first())!!["message"])!!
         assertTrue((message["content"] as String).contains("he goes"))
     }
+    @Test
+    fun aHangingBrainIsReportedUnavailableWithinTheBound() {
+        // Measured 2026-09-26: the lab brain's address on another subnet does not refuse a
+        // connection, it lets it hang to the transport's 20s connect timeout. Three roles in
+        // sequence cost one turn ninety seconds. The client bounds the call itself, the same
+        // way VoiceFastPath does, and reports what a hang is: unavailable.
+        val brain = FakeBrain { Thread.sleep(10_000); SteeringResult.Unavailable(UnavailableReason.NOT_READY) }
+        val client = TutorBrainPedagogyClient(brain, sessionId = { "s1" }, fetchTimeoutMs = 200L)
+
+        val started = System.nanoTime()
+        var failure: Throwable? = null
+        client.analyze("grammar", SlowPathTask(turnId = 1, userTranscript = "어제 친구가 만났어요")) {
+            failure = it.exceptionOrNull()
+        }
+        val elapsedMs = (System.nanoTime() - started) / 1_000_000
+
+        assertTrue("must give up near the bound, took ${elapsedMs}ms", elapsedMs < 2_000)
+        assertTrue(failure is SlowPathUnavailableException)
+        assertEquals(UnavailableReason.SLOW_PATH_UNAVAILABLE, (failure as SlowPathUnavailableException).reason)
+    }
 }

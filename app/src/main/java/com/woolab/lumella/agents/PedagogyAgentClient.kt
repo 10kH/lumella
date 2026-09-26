@@ -48,16 +48,45 @@ class SlowPathUnavailableException(val reason: UnavailableReason) : IllegalState
 class TutorBrainPedagogyClient(
     private val brain: TutorBrain,
     private val sessionId: () -> String,
+    /**
+     * Caller-side bound on [TutorBrain.fetchSteering], the same discipline VoiceFastPath applies.
+     * The transport's own connect timeout is 20s, and a brain address on another subnet does not
+     * refuse — it hangs. Measured 2026-09-26: with the lab server absent, one turn's three roles
+     * took ninety seconds before anything else could run. Past this bound the brain is reported
+     * unavailable, which is what it is.
+     */
+    private val fetchTimeoutMs: Long = 2_000L,
+    /**
+     * Injected so plain-JVM tests do not touch android.util.Log. The default swallows the
+     * "not mocked" stub's exception rather than making ten existing tests pass a lambda.
+     */
+    private val log: (String) -> Unit = { runCatching { android.util.Log.i("lumella", it) } },
 ) : PedagogyAgentClient {
 
+    private val fetchExecutor = java.util.concurrent.Executors.newSingleThreadExecutor { r ->
+        Thread(r, "brain-fetch").apply { isDaemon = true }
+    }
+
     override fun analyze(role: String, task: SlowPathTask, callback: (Result<String>) -> Unit) {
+        val future = fetchExecutor.submit(java.util.concurrent.Callable { brain.fetchSteering(sessionId()) })
         val steering = try {
-            brain.fetchSteering(sessionId())
+            future.get(fetchTimeoutMs, java.util.concurrent.TimeUnit.MILLISECONDS)
+        } catch (_: java.util.concurrent.TimeoutException) {
+            future.cancel(true)
+            callback(Result.failure(SlowPathUnavailableException(UnavailableReason.SLOW_PATH_UNAVAILABLE)))
+            return
+        } catch (e: java.util.concurrent.ExecutionException) {
+            callback(Result.failure(e.cause ?: e))
+            return
         } catch (e: Exception) {
             callback(Result.failure(e))
             return
         }
 
+        log("brain steering for $role turn ${task.turnId}: " + when (steering) {
+            is SteeringResult.Available -> "Available(corrections=${steering.evidence.corrections.size})"
+            is SteeringResult.Unavailable -> "Unavailable(${steering.reason})"
+        })
         when (steering) {
             is SteeringResult.Available -> callback(Result.success(toChatResponseBody(role, steering.evidence, task)))
             is SteeringResult.Unavailable -> callback(Result.failure(SlowPathUnavailableException(steering.reason)))

@@ -15,6 +15,8 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.ffalcon.mercury.android.sdk.ui.activity.BaseMirrorActivity
 import com.woolab.lumella.agents.SlowPathDispatcher
+import com.woolab.lumella.agents.EndpointPedagogyAgentClient
+import com.woolab.lumella.agents.RoutingPedagogyClient
 import com.woolab.lumella.agents.TutorBrainPedagogyClient
 import com.woolab.lumella.audio.AudioCapture
 import com.woolab.lumella.audio.AudioPlayback
@@ -227,14 +229,33 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
                 BrainCredentials(baseUrl = config.lumaBaseUrl, email = config.brainEmail, password = config.brainPassword)
         }
 
-        learnerStore = LearnerStateStore()
+        // Backed by a file so a diagnosis survives a restart and so the record can be read
+        // from outside — the on-device verification reads exactly this file.
+        learnerStore = LearnerStateStore(backing = java.io.File(filesDir, "learner-state.json"))
         val orchestrator = StateGraphOrchestrator(learnerStore, StalenessGuard(3, 20), AblationMode.FULL).apply {
             // A diagnosis lands between turns; redraw the indicator the moment it does.
             onStateChanged = { runOnUiThread { refreshLayerIndicator() } }
         }
-        val pedagogyClient = TutorBrainPedagogyClient(brain, sessionId = { sessionIdRef.get() })
+        // Per-turn roles go to the luma brain as before. The consolidate role — the slow layer's
+        // diagnosis of the habit behind the slips — goes to the same Vercel function ELLA uses,
+        // because the brain adapter has no such role and answered it with nothing.
+        val consolidateClient = BuildConfig.PEDAGOGY_AGENT_ENDPOINT.takeIf { it.isNotBlank() }?.let { url ->
+            EndpointPedagogyAgentClient(okhttp3.OkHttpClient(), url, BuildConfig.REALTIME_TOKEN_SECRET)
+        }
+        val pedagogyClient = RoutingPedagogyClient(
+            perTurn = TutorBrainPedagogyClient(brain, sessionId = { sessionIdRef.get() }),
+            consolidate = consolidateClient,
+        )
         slowPathQueue = SlowPathQueue()
-        slowPathDispatcher = SlowPathDispatcher(pedagogyClient, orchestrator)
+        slowPathDispatcher = SlowPathDispatcher(
+            pedagogyClient,
+            orchestrator,
+            // Product path: the slow layer diagnoses the learner across turns and the steering
+            // carries that diagnosis. Per-turn recasts are the fast layer's job. Left null, the
+            // dispatcher never asks for a diagnosis at all — which is how the first on-device
+            // pass recorded three turns and no errors.
+            consolidateAgent = com.woolab.lumella.agents.ConsolidateAgent(),
+        )
 
         val tokenProvider = createTokenServiceCredentialProviderOrNull(
             transport = HttpUrlConnectionTokenHttpTransport(),
@@ -1328,6 +1349,9 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
      * The coach line lights only while a diagnosis is on record — see [LayerIndicator].
      */
     private fun refreshLayerIndicator() {
+        // onCreate sets the first status line before the store exists; there is nothing to
+        // show yet and nothing on record, so the corner stays blank until the store is built.
+        if (!::learnerStore.isInitialized) return
         val text = com.woolab.lumella.pedagogy.LayerIndicator.render(learnerStore.snapshot())
         mBindingPair.left.tvLayers.text = text
         mBindingPair.right.tvLayers.text = text

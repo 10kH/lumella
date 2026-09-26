@@ -40,6 +40,10 @@ android {
         buildConfigField("String", "BRAIN_CLASS_NAME", "\"${localProp("lumella.brainClassName", "com.woolab.lumella.adapter.LumaTutorBrain")}\"")
         buildConfigField("String", "BRAIN_EMAIL", "\"${localProp("lumella.brainEmail", "")}\"")
         buildConfigField("String", "BRAIN_PASSWORD", "\"${localProp("lumella.brainPassword", "")}\"")
+        // The slow layer's consolidate role is served by ELLA's Vercel function — the luma brain
+        // does not know that role. Same keys as ELLA's local.properties so one file feeds both apps.
+        buildConfigField("String", "PEDAGOGY_AGENT_ENDPOINT", "\"${localProp("PEDAGOGY_AGENT_ENDPOINT", "")}\"")
+        buildConfigField("String", "REALTIME_TOKEN_SECRET", "\"${localProp("REALTIME_TOKEN_SECRET", "")}\"")
     }
 
     buildFeatures {
