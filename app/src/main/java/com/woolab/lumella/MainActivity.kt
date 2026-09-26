@@ -14,7 +14,6 @@ import android.view.View
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.ffalcon.mercury.android.sdk.ui.activity.BaseMirrorActivity
-import com.woolab.lumella.agents.SlowPathDispatcher
 import com.woolab.lumella.agents.EndpointPedagogyAgentClient
 import com.woolab.lumella.agents.RoutingPedagogyClient
 import com.woolab.lumella.agents.TutorBrainPedagogyClient
@@ -23,7 +22,6 @@ import com.woolab.lumella.audio.AudioPlayback
 import com.woolab.lumella.brain.BrainFactory
 import com.woolab.lumella.camera.GlassesCamera
 import com.woolab.lumella.camera.ImageEncoder
-import com.woolab.lumella.config.AblationMode
 import com.woolab.lumella.contract.BrainConnectionState
 import com.woolab.lumella.contract.BrainCredentials
 import com.woolab.lumella.contract.BrainCredentialsProvider
@@ -31,9 +29,8 @@ import com.woolab.lumella.contract.CoachIndicator
 import com.woolab.lumella.contract.SessionPolicy
 import com.woolab.lumella.contract.TutorBrain
 import com.woolab.lumella.databinding.ActivityMainBinding
-import com.woolab.lumella.orchestration.StalenessGuard
 import com.woolab.lumella.orchestration.StateGraphOrchestrator
-import com.woolab.lumella.slowpath.SlowPathQueue
+import com.woolab.lumella.slowpath.SlowPathAssembly
 import com.woolab.lumella.slowpath.SlowPathTask
 import com.woolab.lumella.slowpath.TurnEvidenceAssembler
 import com.woolab.lumella.slowpath.TurnTracker
@@ -113,8 +110,7 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
     private lateinit var socketFactory: OkHttpRealtimeWebSocketFactory
     private lateinit var transport: OpenAiRealtimeTransport
     private lateinit var voiceFastPath: VoiceFastPath
-    private lateinit var slowPathQueue: SlowPathQueue
-    private lateinit var slowPathDispatcher: SlowPathDispatcher
+    private lateinit var slowPath: SlowPathAssembly
     private lateinit var learnerStore: LearnerStateStore
     private lateinit var audioCapture: AudioCapture
     private lateinit var audioPlayback: AudioPlayback
@@ -241,19 +237,10 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
                 BrainCredentials(baseUrl = config.lumaBaseUrl, email = config.brainEmail, password = config.brainPassword)
         }
 
-        // Backed by a file so a diagnosis survives a restart and so the record can be read
-        // from outside — the on-device verification reads exactly this file.
-        learnerStore = LearnerStateStore(backing = java.io.File(filesDir, "learner-state.json"))
-        // Continue numbering from what the record already holds — see TurnTracker.
-        turnTracker = TurnTracker(seed = learnerStore.snapshot().highestTurnId())
-        val orchestrator = StateGraphOrchestrator(learnerStore, StalenessGuard(3, 20), AblationMode.FULL).apply {
-            // A diagnosis lands between turns; redraw the indicator the moment it does.
-            onStateChanged = { runOnUiThread { refreshLayerIndicator() } }
-        }
         // grammar, pronunciation and consolidate go to the same Vercel function ELLA uses; the
         // brain adapter has no consolidate role, no phoneme field, and answers a Korean particle
         // slip with corrections=[]. Only visual is brain-first (see RoutingPedagogyClient).
-        val consolidateClient = BuildConfig.PEDAGOGY_AGENT_ENDPOINT.takeIf { it.isNotBlank() }?.let { url ->
+        val endpointClient = BuildConfig.PEDAGOGY_AGENT_ENDPOINT.takeIf { it.isNotBlank() }?.let { url ->
             // A consolidate call runs a reasoning model; ELLA gives it 30s. OkHttp's 10s default
             // read timeout turned a slow-but-fine diagnosis into "call failed" on booth Wi-Fi.
             val http = okhttp3.OkHttpClient.Builder()
@@ -262,21 +249,21 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
                 .build()
             EndpointPedagogyAgentClient(http, url, BuildConfig.REALTIME_TOKEN_SECRET)
         }
-        val pedagogyClient = RoutingPedagogyClient(
-            perTurn = TutorBrainPedagogyClient(brain, sessionId = { sessionIdRef.get() }),
-            endpointClient = consolidateClient,
+        // One place builds the slow path; the end-to-end test calls the same function.
+        slowPath = SlowPathAssembly.build(
+            // Backed by a file so a diagnosis survives a restart and so the record can be
+            // read from outside — the on-device verification reads exactly this file.
+            backing = java.io.File(filesDir, "learner-state.json"),
+            endpoint = endpointClient,
+            brainClient = TutorBrainPedagogyClient(brain, sessionId = { sessionIdRef.get() }),
             brainCameUp = { brainReachable.get() },
+            // A diagnosis lands between turns; redraw the indicator the moment it does.
+            onStateChanged = { runOnUiThread { refreshLayerIndicator() } },
+            warn = { Log.w(TAG, it) },
         )
-        slowPathQueue = SlowPathQueue()
-        slowPathDispatcher = SlowPathDispatcher(
-            pedagogyClient,
-            orchestrator,
-            // Product path: the slow layer diagnoses the learner across turns and the steering
-            // carries that diagnosis. Per-turn recasts are the fast layer's job. Left null, the
-            // dispatcher never asks for a diagnosis at all — which is how the first on-device
-            // pass recorded three turns and no errors.
-            consolidateAgent = com.woolab.lumella.agents.ConsolidateAgent(),
-        )
+        learnerStore = slowPath.store
+        turnTracker = slowPath.tracker
+        val orchestrator = slowPath.orchestrator
 
         val tokenProvider = createTokenServiceCredentialProviderOrNull(
             transport = HttpUrlConnectionTokenHttpTransport(),
@@ -1031,8 +1018,7 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
         // brain's only product here is the bottom coach hint, which can arrive whenever it
         // arrives; the corner indicator and the record must not queue behind it.
         slowPathExecutor.execute {
-            slowPathQueue.enqueue(SlowPathTask(turnId = turnId, userTranscript = evidence.learnerTranscript))
-            slowPathDispatcher.drain(slowPathQueue)
+            slowPath.dispatch(SlowPathTask(turnId = turnId, userTranscript = evidence.learnerTranscript))
         }
         if (brainReachable.get()) {
             brainSubmitExecutor.execute {

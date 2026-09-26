@@ -8,6 +8,7 @@ import com.woolab.lumella.orchestration.StalenessGuard
 import com.woolab.lumella.orchestration.StateGraphOrchestrator
 import com.woolab.lumella.pedagogy.LayerIndicator
 import com.woolab.lumella.pedagogy.SteeringComposer
+import com.woolab.lumella.slowpath.SlowPathAssembly
 import com.woolab.lumella.slowpath.SlowPathQueue
 import com.woolab.lumella.slowpath.SlowPathTask
 import com.woolab.lumella.slowpath.TurnTracker
@@ -82,29 +83,30 @@ class SlowPathEndToEndTest {
         }
     }
 
-    /** Everything MainActivity builds around the slow path, minus Android. */
+    /** The activity's wiring, by calling the activity's factory — not by re-typing it. */
     private class Rig(backing: File) {
-        val store = LearnerStateStore(backing = backing)
-        val tracker = TurnTracker(seed = store.snapshot().highestTurnId())
         val endpoint = FakeEndpoint()
-        val indicatorRenders = mutableListOf<String>()
-        val orchestrator = StateGraphOrchestrator(store, StalenessGuard(3, 20), AblationMode.FULL).apply {
-            onStateChanged = { indicatorRenders += LayerIndicator.render(store.snapshot()) }
-        }
-        val dispatcher = SlowPathDispatcher(
-            endpoint,
-            orchestrator,
-            consolidateAgent = ConsolidateAgent(),
-            warn = { warnings += it },
-        )
-        val queue = SlowPathQueue()
         val warnings = mutableListOf<String>()
+        val indicatorRenders = mutableListOf<String>()
+        lateinit var assembly: SlowPathAssembly
+        init {
+            assembly = SlowPathAssembly.build(
+                backing = backing,
+                endpoint = endpoint,
+                brainClient = null,                 // the booth build's slow path has no brain in it
+                brainCameUp = { false },
+                onStateChanged = { indicatorRenders += LayerIndicator.render(assembly.store.snapshot()) },
+                warn = { warnings += it },
+            )
+        }
+        val store get() = assembly.store
+        val tracker get() = assembly.tracker
+        val orchestrator get() = assembly.orchestrator
 
         /** One learner turn, the way submitCurrentTurnEvidence does it. */
         fun turn(transcript: String): Int {
             val id = tracker.next()
-            queue.enqueue(SlowPathTask(turnId = id, userTranscript = transcript))
-            dispatcher.drain(queue)
+            assembly.dispatch(SlowPathTask(turnId = id, userTranscript = transcript))
             return id
         }
 
@@ -190,17 +192,33 @@ class SlowPathEndToEndTest {
     @Test
     fun aFailedCallIsLoggedAndTheTurnIsStillRecorded() {
         // Third fault: failures used to vanish. Now the dispatcher warns by role.
-        val rig = Rig(tmp())
         val flaky = object : PedagogyAgentClient {
             override fun analyze(role: String, task: SlowPathTask, callback: (Result<String>) -> Unit) =
                 callback(Result.failure(java.io.IOException("Pedagogy endpoint request failed")))
         }
-        val dispatcher = SlowPathDispatcher(flaky, rig.orchestrator, consolidateAgent = ConsolidateAgent(), warn = { rig.warnings += it })
-        val q = SlowPathQueue(); q.enqueue(SlowPathTask(turnId = 1, userTranscript = "어제 친구가 만났어요")); dispatcher.drain(q)
+        val warnings = mutableListOf<String>()
+        val assembly = SlowPathAssembly.build(
+            backing = tmp(), endpoint = flaky, brainClient = null, brainCameUp = { false },
+            onStateChanged = {}, warn = { warnings += it },
+        )
+        assembly.dispatch(SlowPathTask(turnId = assembly.tracker.next(), userTranscript = "어제 친구가 만났어요"))
 
-        assertEquals(1, rig.store.snapshot().turnHistory.size)
-        assertEquals(0, rig.store.snapshot().grammarErrors.size)
-        assertTrue(rig.warnings.any { it.startsWith("grammar call failed at turn 1") })
-        assertTrue(rig.warnings.any { it.startsWith("pronunciation call failed at turn 1") })
+        assertEquals(1, assembly.store.snapshot().turnHistory.size)
+        assertEquals(0, assembly.store.snapshot().grammarErrors.size)
+        assertTrue(warnings.any { it.startsWith("grammar call failed at turn 1") })
+        assertTrue(warnings.any { it.startsWith("pronunciation call failed at turn 1") })
+    }
+
+    @Test
+    fun nothingConfiguredFailsLoudlyNotSilently() {
+        // The fourth way to ship a slow path that does nothing: no endpoint, no brain. It must
+        // not look like a quiet turn.
+        val warnings = mutableListOf<String>()
+        val assembly = SlowPathAssembly.build(
+            backing = null, endpoint = null, brainClient = null, brainCameUp = { false },
+            onStateChanged = {}, warn = { warnings += it },
+        )
+        assembly.dispatch(SlowPathTask(turnId = 1, userTranscript = "어제 친구가 만났어요"))
+        assertTrue(warnings.any { it.contains("no client configured") })
     }
 }
