@@ -2,7 +2,6 @@ package com.woolab.lumella.slowpath
 
 import com.woolab.lumella.agents.ConsolidateAgent
 import com.woolab.lumella.agents.PedagogyAgentClient
-import com.woolab.lumella.agents.RoutingPedagogyClient
 import com.woolab.lumella.agents.SlowPathDispatcher
 import com.woolab.lumella.config.AblationMode
 import com.woolab.lumella.orchestration.StalenessGuard
@@ -14,8 +13,9 @@ import java.io.File
  * The slow path, assembled in one place.
  *
  * Everything from the learner record on disk to the dispatcher that fills it: store, turn
- * numbering, orchestrator, routing between the pedagogy endpoint and the brain, and the
- * dispatcher with its consolidate agent. MainActivity used to build all of this inline across
+ * numbering, orchestrator, the pedagogy endpoint, and the dispatcher with its consolidate
+ * agent. The luma brain is not here; it never analysed a turn, and the routing that once
+ * decided which of its roles to try was removed the day it was measured. MainActivity used to build all of this inline across
  * thirty lines of onCreate, and on 2026-09-26 the port to this app shipped with one argument
  * missing — no ConsolidateAgent — and formed no diagnosis on the glasses. Nothing caught it
  * because nothing tested the wiring; the end-to-end test that was written afterwards had to
@@ -43,10 +43,8 @@ class SlowPathAssembly private constructor(
     companion object {
         /**
          * @param backing where the learner record lives; null keeps it in memory only.
-         * @param endpoint the pedagogy function (grammar, pronunciation, consolidate). Null means
-         *   not configured, and every endpoint role will report unavailable rather than pretend.
-         * @param brainClient the brain adapter for roles it serves (visual); null means no brain.
-         * @param brainCameUp whether the brain opened a session at bootstrap; consulted per call.
+         * @param endpoint the pedagogy function (grammar, pronunciation, visual, consolidate).
+         *   Null means not configured, and every call fails with a message that says so.
          * @param onStateChanged fires after every orchestrator publish — the activity redraws the
          *   corner indicator here.
          * @param warn where dispatcher and store failures go. They never throw; they always say.
@@ -54,8 +52,6 @@ class SlowPathAssembly private constructor(
         fun build(
             backing: File?,
             endpoint: PedagogyAgentClient?,
-            brainClient: PedagogyAgentClient?,
-            brainCameUp: () -> Boolean,
             onStateChanged: () -> Unit,
             warn: (String) -> Unit,
         ): SlowPathAssembly {
@@ -65,16 +61,7 @@ class SlowPathAssembly private constructor(
             val orchestrator = StateGraphOrchestrator(store, StalenessGuard(3, 20), AblationMode.FULL).apply {
                 this.onStateChanged = onStateChanged
             }
-            val client: PedagogyAgentClient = when {
-                brainClient != null -> RoutingPedagogyClient(
-                    perTurn = brainClient,
-                    endpointClient = endpoint,
-                    brainCameUp = brainCameUp,
-                    log = warn,
-                )
-                endpoint != null -> endpoint
-                else -> NotConfiguredClient
-            }
+            val client: PedagogyAgentClient = endpoint ?: NotConfiguredClient
             val dispatcher = SlowPathDispatcher(
                 client,
                 orchestrator,
@@ -87,7 +74,7 @@ class SlowPathAssembly private constructor(
             return SlowPathAssembly(store, tracker, orchestrator, dispatcher, SlowPathQueue())
         }
 
-        /** Neither endpoint nor brain: every call fails loudly instead of returning nothing. */
+        /** No endpoint: every call fails loudly instead of returning nothing. */
         private object NotConfiguredClient : PedagogyAgentClient {
             override fun analyze(role: String, task: SlowPathTask, callback: (Result<String>) -> Unit) {
                 callback(Result.failure(IllegalStateException("slow path has no client configured for role '$role'")))

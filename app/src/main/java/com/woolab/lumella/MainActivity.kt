@@ -15,8 +15,6 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.ffalcon.mercury.android.sdk.ui.activity.BaseMirrorActivity
 import com.woolab.lumella.agents.EndpointPedagogyAgentClient
-import com.woolab.lumella.agents.RoutingPedagogyClient
-import com.woolab.lumella.agents.TutorBrainPedagogyClient
 import com.woolab.lumella.audio.AudioCapture
 import com.woolab.lumella.audio.AudioPlayback
 import com.woolab.lumella.brain.BrainFactory
@@ -237,9 +235,9 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
                 BrainCredentials(baseUrl = config.lumaBaseUrl, email = config.brainEmail, password = config.brainPassword)
         }
 
-        // grammar, pronunciation and consolidate go to the same Vercel function ELLA uses; the
-        // brain adapter has no consolidate role, no phoneme field, and answers a Korean particle
-        // slip with corrections=[]. Only visual is brain-first (see RoutingPedagogyClient).
+        // The slow path talks to the Vercel pedagogy function and nothing else. The luma brain
+        // serves the fast path's steering, the bottom coach hint, and photo upload — see
+        // PedagogyAgentClient for why it was taken out of here.
         val endpointClient = BuildConfig.PEDAGOGY_AGENT_ENDPOINT.takeIf { it.isNotBlank() }?.let { url ->
             // A consolidate call runs a reasoning model; ELLA gives it 30s. OkHttp's 10s default
             // read timeout turned a slow-but-fine diagnosis into "call failed" on booth Wi-Fi.
@@ -255,8 +253,6 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
             // read from outside — the on-device verification reads exactly this file.
             backing = java.io.File(filesDir, "learner-state.json"),
             endpoint = endpointClient,
-            brainClient = TutorBrainPedagogyClient(brain, sessionId = { sessionIdRef.get() }),
-            brainCameUp = { brainReachable.get() },
             // A diagnosis lands between turns; redraw the indicator the moment it does.
             onStateChanged = { runOnUiThread { refreshLayerIndicator() } },
             warn = { Log.w(TAG, it) },

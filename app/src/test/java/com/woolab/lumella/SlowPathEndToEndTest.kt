@@ -93,8 +93,6 @@ class SlowPathEndToEndTest {
             assembly = SlowPathAssembly.build(
                 backing = backing,
                 endpoint = endpoint,
-                brainClient = null,                 // the booth build's slow path has no brain in it
-                brainCameUp = { false },
                 onStateChanged = { indicatorRenders += LayerIndicator.render(assembly.store.snapshot()) },
                 warn = { warnings += it },
             )
@@ -198,7 +196,7 @@ class SlowPathEndToEndTest {
         }
         val warnings = mutableListOf<String>()
         val assembly = SlowPathAssembly.build(
-            backing = tmp(), endpoint = flaky, brainClient = null, brainCameUp = { false },
+            backing = tmp(), endpoint = flaky,
             onStateChanged = {}, warn = { warnings += it },
         )
         assembly.dispatch(SlowPathTask(turnId = assembly.tracker.next(), userTranscript = "어제 친구가 만났어요"))
@@ -211,11 +209,11 @@ class SlowPathEndToEndTest {
 
     @Test
     fun nothingConfiguredFailsLoudlyNotSilently() {
-        // The fourth way to ship a slow path that does nothing: no endpoint, no brain. It must
-        // not look like a quiet turn.
+        // The fourth way to ship a slow path that does nothing: no endpoint. It must not look
+        // like a quiet turn.
         val warnings = mutableListOf<String>()
         val assembly = SlowPathAssembly.build(
-            backing = null, endpoint = null, brainClient = null, brainCameUp = { false },
+            backing = null, endpoint = null,
             onStateChanged = {}, warn = { warnings += it },
         )
         assembly.dispatch(SlowPathTask(turnId = 1, userTranscript = "어제 친구가 만났어요"))

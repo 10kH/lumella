@@ -13,10 +13,8 @@ import com.woolab.lumella.contract.SteeringResult
 import com.woolab.lumella.contract.TurnEvidence
 import com.woolab.lumella.contract.TutorBrain
 import com.woolab.lumella.contract.UnavailableReason
-import com.woolab.lumella.agents.TutorBrainPedagogyClient
 import com.woolab.lumella.orchestration.StalenessGuard
 import com.woolab.lumella.orchestration.StateGraphOrchestrator
-import com.woolab.lumella.slowpath.SlowPathTask
 import com.woolab.lumella.state.LearnerStateStore
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -141,30 +139,6 @@ class VoiceFastPathTest {
         voice.submitTurnEvidence(TurnEvidence(turnId = 1, learnerTranscript = "hi"))
     }
 
-    // --- (c) submitTurnEvidence idempotency: VoiceFastPath is the SINGLE submitter ---
-
-    @Test
-    fun exactlyOneSubmitPerTurnAcrossAMultiRoleDispatchCycle() {
-        // TutorBrainPedagogyClient.analyze() (per-role: grammar/pronunciation/visual)
-        // must never itself call submitTurnEvidence — only VoiceFastPath does, once
-        // per turn. Simulate a full dispatch cycle (three role analyses plus the
-        // fast path's own single submit) and assert the brain sees exactly one.
-        val submitCount = java.util.concurrent.atomic.AtomicInteger(0)
-        val brain = ScriptedBrain(
-            steeringResult = { SteeringResult.Available(SteeringEvidence(corrections = emptyList(), hints = emptyList(), confidence = 1.0, sourceTurnId = 1)) },
-            onSubmit = { submitCount.incrementAndGet() },
-        )
-        val voice = fastPath(brain)
-        val pedagogyClient = TutorBrainPedagogyClient(brain, sessionId = { "s1" })
-        val task = SlowPathTask(turnId = 1, userTranscript = "hi")
-
-        pedagogyClient.analyze("grammar", task) {}
-        pedagogyClient.analyze("pronunciation", task) {}
-        pedagogyClient.analyze("visual", task) {}
-        voice.submitTurnEvidence(TurnEvidence(turnId = 1, learnerTranscript = "hi"))
-
-        assertEquals(1, submitCount.get())
-    }
 
     // --- (d) fetchSteering caller-side timeout: a hung brain must not stall the loop ---
 
