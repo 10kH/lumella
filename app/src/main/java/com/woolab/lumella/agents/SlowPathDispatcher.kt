@@ -45,7 +45,7 @@ class SlowPathDispatcher(
      * response — gating it silently changed the ablation numbers. The harness disables the
      * gate so the study measures what it was registered to measure; the product keeps it.
      */
-    private val gateNonEnglish: Boolean = true,
+    private val gateNonKorean: Boolean = true,
 ) {
     /** Drain all queued turns and dispatch each. Non-blocking poll. */
     fun drain(queue: SlowPathQueue) {
@@ -62,15 +62,15 @@ class SlowPathDispatcher(
         // Italian). The grammar agent then dutifully "corrected" Korean spacing and the coach
         // steered the ENGLISH tutor with 22 Korean recasts out of 24 recorded errors — all of
         // it persisted to learner-state.json. The pin fixes most of it upstream; this gate is
-        // the second wall: an English tutor has nothing valid to say about a non-English
+        // the second wall: a Korean tutor has nothing valid to say about a non-Korean
         // utterance, so the language agents do not fire. The visual agent still runs on a
         // photo — the image is language-neutral. Also saves two Vercel round-trips per noise
         // turn.
-        val english = !gateNonEnglish || isPlausiblyEnglish(task.userTranscript)
+        val korean = !gateNonKorean || isPlausiblyKorean(task.userTranscript)
         val applicable = agents.filter { agent ->
             when (agent.role) {
                 "visual" -> task.imageBase64 != null
-                else -> english
+                else -> korean
             }
         }
         if (applicable.isEmpty()) return
@@ -103,7 +103,7 @@ class SlowPathDispatcher(
                     // The cadence runs on fan-in regardless of whether this turn produced a
                     // delta: a quiet turn (no errors, agents returned nothing) is exactly the
                     // turn that should re-examine and clear a standing diagnosis.
-                    if (english) maybeConsolidate(after ?: orchestrator.snapshot(), task.turnId)
+                    if (korean) maybeConsolidate(after ?: orchestrator.snapshot(), task.turnId)
                 }
             }
         }
@@ -155,15 +155,14 @@ class SlowPathDispatcher(
          * character disqualifies; otherwise at least half the letters must be Latin. Empty
          * or letterless text is not English either — there is nothing to correct.
          */
-        fun isPlausiblyEnglish(text: String): Boolean {
-            var latin = 0
+        fun isPlausiblyKorean(text: String): Boolean {
+            var hangul = 0
             var letters = 0
             for (ch in text) {
                 val block = Character.UnicodeBlock.of(ch) ?: continue
                 when (block) {
-                    Character.UnicodeBlock.HANGUL_SYLLABLES,
-                    Character.UnicodeBlock.HANGUL_JAMO,
-                    Character.UnicodeBlock.HANGUL_COMPATIBILITY_JAMO,
+                    // Chinese or Japanese in the transcript means the mic caught a screen or
+                    // a neighbour, not the learner: the tutor has nothing to teach about it.
                     Character.UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS,
                     Character.UnicodeBlock.HIRAGANA,
                     Character.UnicodeBlock.KATAKANA -> return false
@@ -171,10 +170,14 @@ class SlowPathDispatcher(
                 }
                 if (Character.isLetter(ch)) {
                     letters++
-                    if (block == Character.UnicodeBlock.BASIC_LATIN || block == Character.UnicodeBlock.LATIN_1_SUPPLEMENT) latin++
+                    if (block == Character.UnicodeBlock.HANGUL_SYLLABLES ||
+                        block == Character.UnicodeBlock.HANGUL_JAMO ||
+                        block == Character.UnicodeBlock.HANGUL_COMPATIBILITY_JAMO) hangul++
                 }
             }
-            return letters > 0 && latin * 2 >= letters
+            // At least half the letters must be Hangul. A learner code-switching a word or two
+            // of English into a Korean sentence still passes; an English sentence does not.
+            return letters > 0 && hangul * 2 >= letters
         }
     }
 }

@@ -74,12 +74,12 @@ class SlowPathDispatcherTest {
         }
         val dispatcher = SlowPathDispatcher(client, orchestrator(store), consolidateAgent = ConsolidateAgent(), consolidateEveryTurns = 3, consolidateOnErrorCount = 4)
 
-        dispatcher.dispatch(SlowPathTask(turnId = 1, userTranscript = "I goed"))
-        dispatcher.dispatch(SlowPathTask(turnId = 2, userTranscript = "I goed"))
+        dispatcher.dispatch(SlowPathTask(turnId = 1, userTranscript = "어제 학교에 가요"))
+        dispatcher.dispatch(SlowPathTask(turnId = 2, userTranscript = "어제 학교에 가요"))
         assertFalse("not before K turns", seen.contains("consolidate"))
         assertEquals(null, store.snapshot().ruleGap)
 
-        dispatcher.dispatch(SlowPathTask(turnId = 3, userTranscript = "I goed"))
+        dispatcher.dispatch(SlowPathTask(turnId = 3, userTranscript = "어제 학교에 가요"))
         assertEquals(1, seen.count { it == "consolidate" })
         val s = store.snapshot()
         assertEquals("irregular past tense: adds -ed to strong verbs", s.ruleGap)
@@ -88,17 +88,17 @@ class SlowPathDispatcherTest {
         assertEquals(3, s.lastConsolidatedTurnId)
 
         // Cadence restarts from the consolidation turn.
-        dispatcher.dispatch(SlowPathTask(turnId = 4, userTranscript = "I goed"))
-        dispatcher.dispatch(SlowPathTask(turnId = 5, userTranscript = "I goed"))
+        dispatcher.dispatch(SlowPathTask(turnId = 4, userTranscript = "어제 학교에 가요"))
+        dispatcher.dispatch(SlowPathTask(turnId = 5, userTranscript = "어제 학교에 가요"))
         assertEquals(1, seen.count { it == "consolidate" })
-        dispatcher.dispatch(SlowPathTask(turnId = 6, userTranscript = "I goed"))
+        dispatcher.dispatch(SlowPathTask(turnId = 6, userTranscript = "어제 학교에 가요"))
         assertEquals(2, seen.count { it == "consolidate" })
     }
 
     @Test
     fun grammarAgentRecordsErrorsWithoutPerTurnCorrectionsWhenConsolidating() {
         val body = """{"choices":[{"message":{"content":"{\"errors\":[{\"span\":\"goed\",\"type\":\"tense\",\"recast\":\"went\"}]}"}}]}"""
-        val task = SlowPathTask(turnId = 1, userTranscript = "I goed")
+        val task = SlowPathTask(turnId = 1, userTranscript = "어제 학교에 가요")
         // FULL with consolidation: record only.
         val recorded = GrammarAgent(emitDeferredCorrections = false).toStateDelta(body, task)
         assertEquals(1, recorded.addGrammarErrors.size)
@@ -115,13 +115,13 @@ class SlowPathDispatcherTest {
         val client = FakeClient(mapOf("grammar" to """{"errors":[{"span":"goed","type":"t","recast":"went"}]}"""))
         // Default (what the pre-registered eval harness constructs): per-turn corrections.
         val legacy = LearnerStateStore()
-        SlowPathDispatcher(client, orchestrator(legacy)).dispatch(SlowPathTask(turnId = 1, userTranscript = "I goed"))
+        SlowPathDispatcher(client, orchestrator(legacy)).dispatch(SlowPathTask(turnId = 1, userTranscript = "어제 학교에 가요"))
         assertEquals(1, legacy.snapshot().grammarErrors.size)
         assertEquals(1, legacy.snapshot().deferredCorrections.size)
         // Product opt-in (MainActivity): errors recorded, no per-turn corrections.
         val product = LearnerStateStore()
         SlowPathDispatcher(client, orchestrator(product), consolidateAgent = ConsolidateAgent())
-            .dispatch(SlowPathTask(turnId = 1, userTranscript = "I goed"))
+            .dispatch(SlowPathTask(turnId = 1, userTranscript = "어제 학교에 가요"))
         assertEquals(1, product.snapshot().grammarErrors.size)
         assertEquals(0, product.snapshot().deferredCorrections.size)
     }
@@ -142,7 +142,7 @@ class SlowPathDispatcherTest {
             }
         }
         val d = SlowPathDispatcher(client, orchestrator(store), consolidateAgent = ConsolidateAgent(), consolidateEveryTurns = 3, consolidateOnErrorCount = 4, warn = { warnings.add(it) })
-        d.dispatch(SlowPathTask(turnId = 3, userTranscript = "ok fine"))
+        d.dispatch(SlowPathTask(turnId = 3, userTranscript = "네 괜찮아요"))
         assertEquals(1, warnings.size)
         assertTrue(warnings[0].contains("consolidate call failed at turn 3"))
         assertTrue(warnings[0].contains("502"))
@@ -165,7 +165,7 @@ class SlowPathDispatcherTest {
             }
         }
         val d = SlowPathDispatcher(client, orchestrator(store), consolidateAgent = ConsolidateAgent(), consolidateEveryTurns = 3, consolidateOnErrorCount = 4, warn = {})
-        d.dispatch(SlowPathTask(turnId = 6, userTranscript = "I had a lovely day"))
+        d.dispatch(SlowPathTask(turnId = 6, userTranscript = "오늘 정말 좋은 하루였어요"))
         assertTrue("consolidate fired on a quiet turn", seen.contains("consolidate"))
         assertEquals(null, store.snapshot().ruleGap)
         assertEquals(6, store.snapshot().lastConsolidatedTurnId)
@@ -230,17 +230,17 @@ class SlowPathDispatcherTest {
 
     @Test
     fun theEvalHarnessCanOptOutOfTheLanguageGate() {
-        // The pre-registered corpus contains a deliberate Korean code-switch turn; gating it
+        // The pre-registered corpus contains a deliberate English code-switch turn; gating it
         // silently moved the ablation numbers. The product keeps the gate, the study does not.
         val client = FakeClient(mapOf("grammar" to """{"errors":[{"span":"x","type":"t","recast":"y"}]}"""))
         val gated = LearnerStateStore()
         SlowPathDispatcher(client, orchestrator(gated))
-            .dispatch(SlowPathTask(turnId = 1, userTranscript = "그거 영어로 어떻게 말해요?"))
+            .dispatch(SlowPathTask(turnId = 1, userTranscript = "How do you say that in Korean?"))
         assertEquals(0, gated.snapshot().grammarErrors.size)
 
         val study = LearnerStateStore()
-        SlowPathDispatcher(client, orchestrator(study), gateNonEnglish = false)
-            .dispatch(SlowPathTask(turnId = 1, userTranscript = "그거 영어로 어떻게 말해요?"))
+        SlowPathDispatcher(client, orchestrator(study), gateNonKorean = false)
+            .dispatch(SlowPathTask(turnId = 1, userTranscript = "How do you say that in Korean?"))
         assertEquals(1, study.snapshot().grammarErrors.size)
     }
 
@@ -249,27 +249,26 @@ class SlowPathDispatcherTest {
         val store = LearnerStateStore()
         val client = FakeClient(mapOf("grammar" to """{"errors":[{"span":"a apple","type":"article","recast":"an apple"}]}"""))
         SlowPathDispatcher(client, orchestrator(store))
-            .dispatch(SlowPathTask(turnId = 4, userTranscript = "I ate a apple", ellaTranscript = "An apple! Nice."))
+            .dispatch(SlowPathTask(turnId = 4, userTranscript = "사과가 먹었어요", ellaTranscript = "사과를 드셨군요!"))
         val h = store.snapshot().turnHistory
         assertEquals(1, h.size)
         assertEquals(4, h[0].turnId)
-        assertEquals("I ate a apple", h[0].userTranscript)
+        assertEquals("사과가 먹었어요", h[0].userTranscript)
         // and serialise carries it to the model, windowed like the errors
         val text = ConsolidateAgent.serialise(store.snapshot(), currentTurnId = 5)
         assertTrue(text.contains("learnerTurnsSinceLastDiagnosis"))
-        assertTrue(text.contains("I ate a apple"))
+        assertTrue(text.contains("사과가 먹었어요"))
     }
 
     @Test
     fun languageGateIsLooseOnEnglishAndStrictOnOtherScripts() {
-        val ok = SlowPathDispatcher::isPlausiblyEnglish
-        assertTrue(ok("I goed to the store yesterday"))
-        assertTrue(ok("My friend Minjun and I ate tteokbokki"))   // romanised Korean is fine
-        assertTrue(ok("café naïve résumé"))                           // Latin-1 accents are letters
-        assertFalse(ok("우지가 사회생활하라"))                           // ambient Korean TV
+        val ok = SlowPathDispatcher::isPlausiblyKorean
+        assertTrue(ok("어제 친구를 만나요"))                              // plain Korean
+        assertTrue(ok("친구랑 pizza 먹었어요"))                          // one English word inside Korean: 7 of 12 letters Hangul
+        assertFalse(ok("I said 안녕하세요 to her"))                      // 5 Hangul of 15 letters: an English sentence with one Korean word
+        assertFalse(ok("My friend and I ate tteokbokki"))              // English sentence
         assertFalse(ok("被性命困佔的"))                                 // Chinese
         assertFalse(ok("怒りを感じる"))                                  // Japanese
-        assertFalse(ok("I said 안녕하세요 to her"))                   // any Hangul disqualifies
         assertFalse(ok(""))
         assertFalse(ok("... !!! 123"))                                   // no letters at all
     }
@@ -285,14 +284,14 @@ class SlowPathDispatcherTest {
         )
         val dispatcher = SlowPathDispatcher(client, orchestrator(store))
 
-        // Korean transcript, no photo: nothing fires, nothing is recorded.
-        dispatcher.dispatch(SlowPathTask(turnId = 1, userTranscript = "사람들 편하게 부산 갈 수 있게"))
+        // English transcript, no photo: nothing fires, nothing is recorded.
+        dispatcher.dispatch(SlowPathTask(turnId = 1, userTranscript = "so people can get to Busan comfortably"))
         assertEquals(emptyList<String>(), client.calledRoles)
         assertEquals(0, store.snapshot().revision)
         assertEquals(0, store.snapshot().grammarErrors.size)
 
-        // Korean transcript WITH a photo: only the visual agent fires.
-        dispatcher.dispatch(SlowPathTask(turnId = 2, userTranscript = "이건 뭐예요", imageBase64 = "img"))
+        // English transcript WITH a photo: only the visual agent fires.
+        dispatcher.dispatch(SlowPathTask(turnId = 2, userTranscript = "what is this", imageBase64 = "img"))
         assertEquals(listOf("visual"), client.calledRoles)
         assertEquals(1, store.snapshot().visualContext.size)
         assertEquals(0, store.snapshot().grammarErrors.size)
@@ -310,7 +309,7 @@ class SlowPathDispatcherTest {
         )
         val dispatcher = SlowPathDispatcher(client, orchestrator(store))
 
-        dispatcher.dispatch(SlowPathTask(turnId = 1, userTranscript = "I goed", imageBase64 = "img"))
+        dispatcher.dispatch(SlowPathTask(turnId = 1, userTranscript = "어제 학교에 가요", imageBase64 = "img"))
 
         val snap = store.snapshot()
         // 3 agents fired; coalesced into exactly one apply (single revision bump).
@@ -329,7 +328,7 @@ class SlowPathDispatcherTest {
         val client = FakeClient(mapOf("grammar" to """{"errors":[]}""", "pronunciation" to """{"problemPhonemes":[]}"""))
         val dispatcher = SlowPathDispatcher(client, orchestrator(store))
 
-        dispatcher.dispatch(SlowPathTask(turnId = 1, userTranscript = "I am fine"))
+        dispatcher.dispatch(SlowPathTask(turnId = 1, userTranscript = "저는 괜찮아요"))
 
         assertTrue("visual agent must not fire without an image", "visual" !in client.calledRoles)
         assertEquals(setOf("grammar", "pronunciation"), client.calledRoles.toSet())
@@ -341,8 +340,8 @@ class SlowPathDispatcherTest {
         val client = FakeClient(mapOf("grammar" to """{"errors":[{"span":"a","type":"t","recast":"b"}]}""", "pronunciation" to """{"problemPhonemes":[]}"""))
         val dispatcher = SlowPathDispatcher(client, orchestrator(store))
         val queue = SlowPathQueue()
-        queue.enqueue(SlowPathTask(1, "first"))
-        queue.enqueue(SlowPathTask(2, "second"))
+        queue.enqueue(SlowPathTask(1, "첫 번째"))
+        queue.enqueue(SlowPathTask(2, "두 번째"))
 
         dispatcher.drain(queue)
 

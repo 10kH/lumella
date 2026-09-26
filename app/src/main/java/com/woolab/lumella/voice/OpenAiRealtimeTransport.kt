@@ -97,6 +97,19 @@ class OpenAiRealtimeTransport(
 
     companion object {
         /**
+         * What Whisper is told before it transcribes the learner. Whisper is a language model
+         * and will quietly repair what it hears into well-formed Korean unless told not to;
+         * "회화 연습" primed it to expect correct sentences and it erased exactly the particle
+         * and ending slips the slow layer needs to see (ELLA found the same with verb tense,
+         * c38247b). So the prompt now asks for a verbatim transcript and names the error
+         * classes to leave alone. This reduces the repair; it does not eliminate it.
+         */
+        const val TRANSCRIPTION_PROMPT: String =
+            "들리는 대로 정확하게 받아쓰세요. 문법 실수도 그대로 적으세요. " +
+                "조사, 어미, 시제를 고치지 마세요. " +
+                "예: \"어제 친구를 만나요\"는 \"어제 친구를 만나요\" 그대로."
+
+        /**
          * v1 product decision (Intent Reconciliation 2026-07-21): KOREAN tutoring.
          * English meta-instructions, Korean speech — realtime models follow this reliably.
          */
@@ -802,7 +815,7 @@ class OpenAiRealtimeTransport(
             // (ELLA, English) saw a learner's words come up as Japanese. For a Korean learner
             // the same guess lands on Chinese or Japanese. The prompt biases vocabulary.
             """"audio":{"input":{"format":$format,"transcription":{"model":"whisper-1","language":"ko",""" +
-            """"prompt":${jsonString("한국어 학습자와의 회화 연습.")}},""" +
+            """"prompt":${jsonString(TRANSCRIPTION_PROMPT)}},""" +
             """"turn_detection":{"type":"server_vad","threshold":0.5,"prefix_padding_ms":300,""" +
             """"silence_duration_ms":$VAD_SILENCE_DURATION_MS,"create_response":false}},""" +
             """"output":{"format":$format,"voice":${jsonString(voice)}}},""" +

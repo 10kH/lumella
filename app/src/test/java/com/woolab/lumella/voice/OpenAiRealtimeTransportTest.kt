@@ -2188,4 +2188,21 @@ class OpenAiRealtimeTransportTest {
             }
         }
     }
+    @Test
+    fun transcriptionPromptAsksForMistakesToSurvive() {
+        // The bug this guards, found in ELLA first (c38247b): Whisper normalises towards fluent
+        // speech. A learner saying "Yesterday I walk to the park" came back "walked", so the
+        // tutor had no error to notice and the slow layer never fired. The old lumella prompt,
+        // "한국어 학습자와의 회화 연습.", advertised conversation practice and so invited the same
+        // repair of particles, endings and tense. The prompt steers output style; it must ask
+        // for verbatim text and name the error classes as things to keep.
+        val prompt = OpenAiRealtimeTransport.TRANSCRIPTION_PROMPT
+        assertTrue("prompt must ask for verbatim output", prompt.contains("들리는 대로"))
+        assertTrue("prompt must name mistakes as things to keep", prompt.contains("실수"))
+        assertTrue("prompt must name particles", prompt.contains("조사"))
+        assertTrue("prompt must name endings", prompt.contains("어미"))
+        assertTrue("prompt must name tense", prompt.contains("시제"))
+        assertTrue("prompt must carry a worked example", prompt.contains("어제 친구를 만나요"))
+        assertFalse("prompt must not advertise conversation practice", prompt.contains("회화 연습"))
+    }
 }
