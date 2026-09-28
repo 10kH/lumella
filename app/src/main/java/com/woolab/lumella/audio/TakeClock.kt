@@ -37,10 +37,17 @@ class TakeClock(
 ) {
     /**
      * Video time at the moment of the call, whether the video was recording then, how many times
-     * the clock has stepped back so far, and the video time the latest step back went to — where
-     * a tap must cut back to, since everything it wrote after that point had no video under it.
+     * the clock has stepped back so far ([epoch]), and the video time each step back went to, in
+     * order. A tap last written in epoch k cuts back to [stepBacks]`[k]`: everything it wrote after
+     * that point had no video under it. Not to the latest — a tap that slept through several step
+     * backs would otherwise keep what it wrote before the first.
      */
-    data class Stamp(val elapsedMs: Long, val dark: Boolean, val epoch: Int = 0, val steppedBackToMs: Long = 0L)
+    data class Stamp(
+        val elapsedMs: Long,
+        val dark: Boolean,
+        val epoch: Int = 0,
+        val stepBacks: List<Long> = emptyList(),
+    )
 
     /** Video time at [anchorWallMs], or the frozen video time while dark. */
     private var baseMs = 0L
@@ -55,8 +62,8 @@ class TakeClock(
      * the next [firstFrame] is a step back to the video.
      */
     private var gaveUp = false
-    private var epoch = 0
-    private var steppedBackToMs = 0L
+    /** Replaced, never mutated, so stamps can share it. */
+    private var stepBacks: List<Long> = emptyList()
 
     init {
         val now = nowMs()
@@ -73,8 +80,8 @@ class TakeClock(
             darkSinceMs = null
             gaveUp = true
         }
-        val anchor = anchorWallMs ?: return Stamp(baseMs, dark = true, epoch = epoch, steppedBackToMs = steppedBackToMs)
-        return Stamp(baseMs + (now - anchor), dark = false, epoch = epoch, steppedBackToMs = steppedBackToMs)
+        val anchor = anchorWallMs ?: return Stamp(baseMs, dark = true, epoch = stepBacks.size, stepBacks = stepBacks)
+        return Stamp(baseMs + (now - anchor), dark = false, epoch = stepBacks.size, stepBacks = stepBacks)
     }
 
     /**
@@ -88,8 +95,7 @@ class TakeClock(
         baseMs = closedMs + segmentRecordedMs
         if (gaveUp) {
             warn("take clock: a video frame came after all; back on the video's clock")
-            epoch++
-            steppedBackToMs = baseMs
+            stepBacks = stepBacks + baseMs
             gaveUp = false
         }
         anchorWallMs = nowMs()

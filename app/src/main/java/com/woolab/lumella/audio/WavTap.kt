@@ -186,9 +186,10 @@ class WavTap(
      */
     private fun stepBackIfNeeded(raf: RandomAccessFile, at: TakeClock.Stamp) {
         if (at.epoch == epoch) return
+        // The first step back this file has not seen: nothing after it had video under it.
+        val target = bytesAt(at.stepBacks[epoch])
         epoch = at.epoch
         resync = true
-        val target = bytesAt(at.steppedBackToMs)
         if (target >= dataBytes) return
         warn("tap $name: clock stepped back ${(dataBytes - target) / 2 * 1000 / sampleRateHz}ms; cutting the file back")
         raf.setLength(HEADER_BYTES + target)

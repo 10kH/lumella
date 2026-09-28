@@ -208,6 +208,23 @@ class WavTapTest {
     }
 
     @Test
+    fun aTapThatSleptThroughTwoStepBacksCutsToTheFirst() {
+        val c = TakeClock(followVideo = true, giveUpAfterMs = 5_000) { now }
+        val tutor = tap(c, live = false)
+        now = 6_000; tutor.write(chunk(100, 9))   // given up: 6000..6099, no video under it
+        now = 7_000; c.firstFrame(0)              // step back 1: video resumes at 0
+        now = 17_000; c.dark()                    // a photo turn after 10s of video, tutor silent
+        now = 17_100; c.segmentEnded(10_000)
+        now = 22_500; c.stamp()                   // the learner's reads keep stamping: given up again
+        now = 23_000; c.firstFrame(0)             // step back 2: video resumes at 10000
+        now = 24_000; tutor.write(chunk(100, 1))  // video time 11000
+        tutor.close()
+
+        assertEquals("cut back to the first step back, not the second", null, span(9))
+        assertEquals(11_000..11_099, span(1))
+    }
+
+    @Test
     fun aGivenUpClockStaysOnTheWallWhenAFramelessSegmentEnds() {
         val c = TakeClock(followVideo = true, giveUpAfterMs = 5_000) { now }
         val tutor = tap(c, live = false)
