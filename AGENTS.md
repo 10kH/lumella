@@ -33,6 +33,8 @@ curl -s http://127.0.0.1:8010/v1/capabilities | head -c 200
 (github.com/10kH/tutor-capture)에 있습니다. **체크아웃은 셋이 나란히** — lumella, tutor-slowpath,
 tutor-capture. 녹음·시계 로직을 고칠 땐 그쪽에서 고치고 테스트도 그쪽에 있습니다(ELLA도 씁니다).
 
+**카메라 코드는 두 앱에 복사본이 있습니다.** `app/src/main/java/com/woolab/lumella/camera/GlassesCamera.kt` 와 ELLA app/src/main/java/com/woolab/ella/capture/GlassesCamera.kt 는 같은 코드입니다 — 사진은 찍을 때만 바인딩, POV 24fps·무음, 사진 턴 보호, 테이크 시계 이벤트. 다른 곳은 설명 주석, 스레드 이름·로그 태그, 그리고 ELLA 쪽 사진 콜백이 회전 각도를 함께 넘기는 것뿐입니다. **한쪽을 고치면 다른 쪽도 고칩니다.** tutor-capture 는 순수 JVM 이라 CameraX 코드를 담지 못해 복사로 두었습니다(안드로이드 라이브러리 모듈로 옮기는 건 남은 일).
+
 slow path가 부르는 서버는 **ELLA 저장소의 Vercel 함수**(`api/pedagogy-agent.js`, `language=ko`)
 입니다. `local.properties`의 `PEDAGOGY_AGENT_ENDPOINT`·`REALTIME_TOKEN_SECRET`은 ELLA와 같은
 값이어야 합니다. luma 브레인은 슬로우 패스에 관여하지 않습니다 — 빠른 계층 스티어링, 하단

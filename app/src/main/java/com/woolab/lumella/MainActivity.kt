@@ -264,17 +264,6 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
     private var tapCloser: Thread? = null
     private var lastTaps: List<WavTap> = emptyList()
 
-    /** The camera's view of a take's clock. The camera carries it from segment to segment. */
-    private fun TakeClock.asRecordingClock(): GlassesCamera.RecordingClock {
-        val clock = this
-        return object : GlassesCamera.RecordingClock {
-            override fun firstFrame(segmentRecordedMs: Long) = clock.firstFrame(segmentRecordedMs)
-            override fun noVideo() = clock.noVideo()
-            override fun dark() = clock.dark()
-            override fun segmentEnded(recordedMs: Long) = clock.segmentEnded(recordedMs)
-        }
-    }
-
     /** Answers the model's tool calls and keeps repeated looking bounded. @see CapturePolicy */
     private val capturePolicy = CapturePolicy()
     /** 08/05 requirement 2: current voice-driven display state, mirrored onto [mBindingPair]. */
@@ -1419,9 +1408,15 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
                             Log.i(TAG, "debug: start recording -> ${dest.absolutePath} camera=$withCamera")
                             // Taps first, on a clock that waits for the camera's first frame, so
                             // not a word falls between the two starts.
+                            val takeDir = getExternalFilesDir(null)
+                            if (java.io.File(takeDir, "$name-learner.wav").exists() || java.io.File(takeDir, "$name.mp4").exists()) {
+                                // take.sh pulls and deletes a take's files on --stop, and its own retry
+                                // reuses a name on purpose; anything else reusing one loses the old take.
+                                Log.w(TAG, "debug: take '$name' already has files on the device; they will be overwritten")
+                            }
                             if (!startTakeVoices(name, followVideo = withCamera)) return
                             if (withCamera) {
-                                camera.startRecording(dest, takeClock?.asRecordingClock()) { msg -> Log.i(TAG, "debug: rec $msg") }
+                                camera.startRecording(dest, takeClock) { msg -> Log.i(TAG, "debug: rec $msg") }
                             }
                         }
                         DEBUG_REC_STOP_ACTION -> {

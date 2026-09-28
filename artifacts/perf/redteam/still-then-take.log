@@ -1,0 +1,10 @@
+09-29 01:51:34.249 I/lumella ( 4078): capture requested; lifecycle=RESUMED
+09-29 01:51:34.495 I/lumella ( 4078): debug: voices -> /storage/emulated/0/Android/data/com.woolab.lumella/files/rtstilll-{learner,tutor}.wav
+09-29 01:51:34.541 D/lumella ( 4078): cameraState=OPEN err=null
+09-29 01:51:35.676 I/lumella ( 4078): photo -> realtime model: chars=51140 sent=true
+09-29 01:51:35.732 I/lumella ( 4078): debug: rec recording -> /storage/emulated/0/Android/data/com.woolab.lumella/files/rtstilll.mp4
+09-29 01:51:35.808 I/lumella ( 4078): recording started -> /storage/emulated/0/Android/data/com.woolab.lumella/files/rtstilll.mp4
+09-29 01:51:42.709 I/lumella ( 4078): recording finalized ok=true err=0 bytes=file:///storage/emulated/0/Android/data/com.woolab.lumella/files/rtstilll.mp4
+  rtstilll.mp4 6.0s
+  rtstilll-learner.wav 5.9s
+  rtstilll-tutor.wav 5.9s

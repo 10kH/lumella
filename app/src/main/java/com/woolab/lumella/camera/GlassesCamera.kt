@@ -25,6 +25,7 @@ import androidx.camera.video.VideoRecordEvent
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.Observer
+import com.woolab.tutor.capture.TakeClock
 import java.io.File
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -62,8 +63,12 @@ class GlassesCamera(context: Context, private val lifecycleOwner: LifecycleOwner
     /** Non-null only while a video recording is in flight. Main-thread only. */
     private var activeRecording: Recording? = null
     private var recordingProvider: ProcessCameraProvider? = null
-    /** The clock of the take [activeRecording] belongs to. Main-thread only. */
-    private var activeClock: RecordingClock? = null
+    /**
+     * The clock of the take [activeRecording] belongs to, passed per take and carried from
+     * segment to segment so a late event from one take can never land on the next take's clock.
+     * Main-thread only.
+     */
+    private var activeClock: TakeClock? = null
     /**
      * [activeRecording] has been told to stop and its Finalize is pending (50ms-1s). A photo
      * request in that window must not start a turn: it would take the post-stop generation and
@@ -106,26 +111,6 @@ class GlassesCamera(context: Context, private val lifecycleOwner: LifecycleOwner
      */
     private var segmentHasFrame = false
 
-    /**
-     * What a take's recording is doing, for anything that must stay on its clock — the voice
-     * taps, via [com.woolab.tutor.capture.TakeClock], which explains why each event is the one it
-     * is. Passed per take and carried from segment to segment, so a late event from one take can
-     * never land on the next take's clock.
-     */
-    interface RecordingClock {
-        /** A segment's first frame is in the file, [segmentRecordedMs] into the segment. */
-        fun firstFrame(segmentRecordedMs: Long)
-        /**
-         * Nothing will record for this take from here (camera busy, start failed, recording
-         * ended by itself): the voices follow the wall rather than wait for a video that is not
-         * coming.
-         */
-        fun noVideo()
-        /** A stop was requested (photo turn or end of take); frames may still land briefly. */
-        fun dark()
-        /** A segment closed having recorded exactly [recordedMs], by the recorder's own count. */
-        fun segmentEnded(recordedMs: Long)
-    }
 
     /**
      * Captures a single JPEG frame; [onCaptured] receives raw JPEG bytes.
@@ -283,23 +268,44 @@ class GlassesCamera(context: Context, private val lifecycleOwner: LifecycleOwner
      *
      * Not exercised by JVM unit tests (real camera stack); verify on device.
      */
-    fun startRecording(destination: File, clock: RecordingClock?, onEvent: (String) -> Unit) {
+    fun startRecording(destination: File, clock: TakeClock?, onEvent: (String) -> Unit) {
         takeActive = true
         mainHandler.post {
             takeGeneration++
-            startSegment(destination, clock, onEvent)
+            startSegment(destination, clock, onEvent = onEvent)
         }
     }
 
     /** The current take will record no more video. Main thread. */
-    private fun takeLostVideo(generation: Int, clock: RecordingClock?) {
+    private fun takeLostVideo(generation: Int, clock: TakeClock?) {
         clock?.noVideo()
         if (generation == takeGeneration) takeActive = false
     }
 
     /** One segment of a take. Main thread. */
-    private fun startSegment(destination: File, clock: RecordingClock?, onEvent: (String) -> Unit) {
+    private fun startSegment(
+        destination: File,
+        clock: TakeClock?,
+        waitedMs: Long = 0L,
+        onEvent: (String) -> Unit,
+    ) {
         val generation = takeGeneration
+        if (capturing.get() && waitedMs < STILL_WAIT_MS) {
+            // A still is mid-flight (bound, opening, or retrying). Binding the recorder now tears
+            // it down, and the still's own release then unbinds the recorder: the take came back
+            // as a 0.25s file while its voices ran on (ELLA QA red-team, 2026-09-29: a photo,
+            // then a take start ~150ms later; the same code runs here). The still's release
+            // clears [capturing] on this thread, so waiting for it is enough.
+            mainHandler.postDelayed({
+                if (generation == takeGeneration) {
+                    startSegment(destination, clock, waitedMs + STILL_POLL_MS, onEvent)
+                } else {
+                    takeLostVideo(generation, clock)
+                    onEvent("superseded")
+                }
+            }, STILL_POLL_MS)
+            return
+        }
         if (activeRecording != null) {
             // This take will not record, so its voices must not wait for a first frame.
             takeLostVideo(generation, clock)
@@ -499,7 +505,7 @@ class GlassesCamera(context: Context, private val lifecycleOwner: LifecycleOwner
             val clock = activeClock
             val next = nextSegment(current)
             pendingAfterFinalize = {
-                cameraExecutor.execute {
+                try { cameraExecutor.execute {
                     val bytes = frameFromRecording(current)
                     mainHandler.post {
                         if (bytes != null) onCaptured(bytes) else onError("Segment produced no frame")
@@ -512,6 +518,10 @@ class GlassesCamera(context: Context, private val lifecycleOwner: LifecycleOwner
                             Log.i(TAG, "take ended during a photo turn; not resuming ${next.name}")
                         }
                     }
+                } } catch (_: java.util.concurrent.RejectedExecutionException) {
+                    // shutdown() ran (the app is closing) while this segment finalised. The take is
+                    // over; there is no frame to lift and no one to hand it to.
+                    Log.w(TAG, "segment finalised after shutdown; photo dropped")
                 }
             }
             clock?.dark()
@@ -583,6 +593,9 @@ class GlassesCamera(context: Context, private val lifecycleOwner: LifecycleOwner
         private const val TAG = "lumella"
 
         private const val POV_FPS = 24
+        /** How long a take start waits for an in-flight still (open wait 5s + retries). */
+        private const val STILL_WAIT_MS = 7_000L
+        private const val STILL_POLL_MS = 100L
         private const val CAMERA_OPEN_TIMEOUT_MS = 5_000L
         private const val ANALYSIS_JPEG_QUALITY = 90
 

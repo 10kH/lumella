@@ -76,6 +76,9 @@ class AudioCapture(
             audioRecord = record
             recording.set(true)
             record.startRecording()
+            // A take can span a reopened mic: its first read is not a stall the buffer bridged, so
+            // the learner tap places it by the clock (tutor-capture WavTap.resync).
+            tap?.resync()
 
             thread = Thread({ streamLoop(record, chunkBytes, bufferBytes) }, "lumella-audio-capture").apply {
                 isDaemon = true
