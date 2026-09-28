@@ -195,6 +195,19 @@ class WavTapTest {
     }
 
     @Test
+    fun theCutReachesBackToTheResumeEvenWhenTheNextWriteIsLater() {
+        val c = TakeClock(followVideo = true, giveUpAfterMs = 5_000) { now }
+        val tutor = tap(c, live = false)
+        now = 6_000; tutor.write(chunk(1_000, 9)) // given up: 6000..6999, no video under it
+        now = 7_000; c.firstFrame(0)              // video resumes at 0
+        now = 14_500; tutor.write(chunk(100, 1))  // video time 7500, past the old end of the file
+        tutor.close()
+
+        assertEquals("the reply with no video under it is gone", null, span(9))
+        assertEquals(7_500..7_599, span(1))
+    }
+
+    @Test
     fun aGivenUpClockStaysOnTheWallWhenAFramelessSegmentEnds() {
         val c = TakeClock(followVideo = true, giveUpAfterMs = 5_000) { now }
         val tutor = tap(c, live = false)

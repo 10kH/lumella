@@ -36,10 +36,11 @@ class TakeClock(
     private val nowMs: () -> Long = System::currentTimeMillis,
 ) {
     /**
-     * Video time at the moment of the call, whether the video was recording then, and how many
-     * times the clock has stepped back so far.
+     * Video time at the moment of the call, whether the video was recording then, how many times
+     * the clock has stepped back so far, and the video time the latest step back went to — where
+     * a tap must cut back to, since everything it wrote after that point had no video under it.
      */
-    data class Stamp(val elapsedMs: Long, val dark: Boolean, val epoch: Int = 0)
+    data class Stamp(val elapsedMs: Long, val dark: Boolean, val epoch: Int = 0, val steppedBackToMs: Long = 0L)
 
     /** Video time at [anchorWallMs], or the frozen video time while dark. */
     private var baseMs = 0L
@@ -55,6 +56,7 @@ class TakeClock(
      */
     private var gaveUp = false
     private var epoch = 0
+    private var steppedBackToMs = 0L
 
     init {
         val now = nowMs()
@@ -71,8 +73,8 @@ class TakeClock(
             darkSinceMs = null
             gaveUp = true
         }
-        val anchor = anchorWallMs ?: return Stamp(baseMs, dark = true, epoch = epoch)
-        return Stamp(baseMs + (now - anchor), dark = false, epoch = epoch)
+        val anchor = anchorWallMs ?: return Stamp(baseMs, dark = true, epoch = epoch, steppedBackToMs = steppedBackToMs)
+        return Stamp(baseMs + (now - anchor), dark = false, epoch = epoch, steppedBackToMs = steppedBackToMs)
     }
 
     /**
@@ -83,12 +85,13 @@ class TakeClock(
     @Synchronized
     fun firstFrame(segmentRecordedMs: Long) {
         if (anchorWallMs != null && !gaveUp) return
+        baseMs = closedMs + segmentRecordedMs
         if (gaveUp) {
             warn("take clock: a video frame came after all; back on the video's clock")
             epoch++
+            steppedBackToMs = baseMs
             gaveUp = false
         }
-        baseMs = closedMs + segmentRecordedMs
         anchorWallMs = nowMs()
         darkSinceMs = null
     }

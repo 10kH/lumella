@@ -125,8 +125,7 @@ class WavTap(
         val raf = out ?: return
         if (broken || finished) return
         try {
-            // A live chunk was heard just before its stamp, so it starts one chunk earlier.
-            stepBackIfNeeded(raf, at, if (live) pcm.size.toLong() else 0L)
+            stepBackIfNeeded(raf, at)
             if (live) {
                 if (at.dark) {
                     resync = true
@@ -168,7 +167,7 @@ class WavTap(
         finished = true
         try {
             if (!broken) {
-                stepBackIfNeeded(raf, at, 0L)
+                stepBackIfNeeded(raf, at)
                 padTo(raf, bytesAt(at.elapsedMs))
             }
             raf.seek(0)
@@ -180,12 +179,16 @@ class WavTap(
         }
     }
 
-    /** The clock stepped back since the last write: cut the file back to where it now stands. */
-    private fun stepBackIfNeeded(raf: RandomAccessFile, at: TakeClock.Stamp, chunkBytes: Long) {
+    /**
+     * The clock stepped back since the last write: cut the file back to where the video resumed.
+     * Not to the current position — by the next write the clock may have run past the old end of
+     * the file, and nothing would be cut. The usual placement then fills up to now.
+     */
+    private fun stepBackIfNeeded(raf: RandomAccessFile, at: TakeClock.Stamp) {
         if (at.epoch == epoch) return
         epoch = at.epoch
         resync = true
-        val target = maxOf(0L, bytesAt(at.elapsedMs) - chunkBytes)
+        val target = bytesAt(at.steppedBackToMs)
         if (target >= dataBytes) return
         warn("tap $name: clock stepped back ${(dataBytes - target) / 2 * 1000 / sampleRateHz}ms; cutting the file back")
         raf.setLength(HEADER_BYTES + target)

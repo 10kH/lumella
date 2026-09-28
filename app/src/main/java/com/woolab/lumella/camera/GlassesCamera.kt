@@ -100,6 +100,13 @@ class GlassesCamera(context: Context, private val lifecycleOwner: LifecycleOwner
     @Volatile private var takeActive = false
 
     /**
+     * The in-flight segment has its first frame. A photo before that stops a segment with nothing
+     * in it: the recorder deletes it (err=8), there is no frame to lift, the photo fails, and the
+     * video stays dark for the whole round trip (~4s measured 2026-09-28). Main-thread only.
+     */
+    private var segmentHasFrame = false
+
+    /**
      * What a take's recording is doing, for anything that must stay on its clock — the voice
      * taps, via [com.woolab.lumella.audio.TakeClock], which explains why each event is the one it
      * is. Passed per take and carried from segment to segment, so a late event from one take can
@@ -125,7 +132,9 @@ class GlassesCamera(context: Context, private val lifecycleOwner: LifecycleOwner
      * Safe to call from any thread; binding is marshalled to the main thread as CameraX requires.
      */
     fun captureImage(onCaptured: (ByteArray) -> Unit, onError: (String) -> Unit) {
-        if (takeActive) {
+        // recordingFile too: between stopRecording and its Finalize takeActive is already false,
+        // and the still path's unbindAll would hit the finalizing recording.
+        if (takeActive || recordingFile != null) {
             // This hardware binds ONE use case at a time, so a still cannot be taken while the
             // recording holds the camera, and an in-progress MP4 has no moov atom to read a
             // frame back from. Close the current segment, lift the frame out of it, and open the
@@ -387,6 +396,7 @@ class GlassesCamera(context: Context, private val lifecycleOwner: LifecycleOwner
                             // is actually in the file.
                             is VideoRecordEvent.Status -> if (!rolled) {
                                 rolled = true
+                                if (activeRecording === self) segmentHasFrame = true
                                 clock?.firstFrame(event.recordingStats.recordedDurationNanos / 1_000_000)
                             }
                             is VideoRecordEvent.Finalize -> {
@@ -422,6 +432,7 @@ class GlassesCamera(context: Context, private val lifecycleOwner: LifecycleOwner
                         }
                     }
                 activeRecording = self
+                segmentHasFrame = false
                 onEvent("recording -> ${destination.absolutePath}")
             } catch (e: Exception) {
                 releaseRecording()
@@ -476,10 +487,10 @@ class GlassesCamera(context: Context, private val lifecycleOwner: LifecycleOwner
         mainHandler.post {
             val rec = activeRecording
             val current = recordingFile
-            if (rec == null || stopping || current == null) {
-                // Between segments, or the take is ending. Also refuses a second photo while the
-                // first is between segments: it would replace the pending resume, and the first
-                // tool call would never be answered.
+            if (rec == null || stopping || current == null || !segmentHasFrame) {
+                // Between segments, not yet a frame in this one, or the take is ending. Also
+                // refuses a second photo while the first is between segments: it would replace
+                // the pending resume, and the first tool call would never be answered.
                 onError("Recording is between segments or ending; try again")
                 return@post
             }
