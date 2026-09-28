@@ -27,11 +27,14 @@ import java.util.concurrent.TimeUnit
  *    it. (The first version wrote only speech, and a 172.3s take gave a 68.7s file.)
  *  - The learner is the microphone: continuous and real time. Its chunks are written back to
  *    back. Re-placing each one by its arrival time would pad or cut a few milliseconds of
- *    scheduling jitter at every chunk, which is a click every 40ms. The clock is consulted only
- *    to drop what was heard while the video was dark, and to pad over a capture stall longer
- *    than [LIVE_SLACK_MS].
+ *    scheduling jitter at every chunk, which is a click every 40ms. The clock is consulted to
+ *    drop what was heard while the video was dark, to place the first chunk after a dark
+ *    stretch (where the video resumes), and to leave a hole where audio was really lost. A
+ *    late read loses nothing until it is later than the capture buffer ([liveSlackMs]) — the
+ *    buffered audio comes out on the next reads — so only a stall past that is padded, and only
+ *    by the part the buffer could not hold.
  *
- * **The header is kept current**, once per second of audio. It used to be written only on
+ * **The header is kept current**, once per second of audio ([HEADER_EVERY_MS]). It used to be written only on
  * close, so an app killed mid-take left `RIFF` and `data` sizes of 0 and ffprobe refused the
  * file outright ("Invalid data found", measured 2026-09-28) — the voices lost along with the
  * video, whose moov atom a kill also never writes. Now at most the last second is unaccounted.
@@ -45,6 +48,8 @@ class WavTap(
     private val clock: TakeClock,
     private val live: Boolean,
     private val warn: (String) -> Unit,
+    /** Live taps: how much audio the source buffers behind a late read. */
+    private val liveSlackMs: Long = 0L,
     private val executor: ExecutorService = Executors.newSingleThreadExecutor { r ->
         Thread(r, "lumella-wav-tap").apply { isDaemon = true }
     },
@@ -53,7 +58,7 @@ class WavTap(
     private val out: RandomAccessFile? = try {
         RandomAccessFile(file, "rw").apply {
             setLength(0)
-            write(ByteArray(HEADER_BYTES)) // sizes are patched on close
+            write(ByteArray(HEADER_BYTES)) // sizes patched every HEADER_EVERY_MS and on close
         }
     } catch (e: IOException) {
         warn("tap $name: cannot open: ${e.message}")
@@ -63,6 +68,8 @@ class WavTap(
     // Writer thread only.
     private var dataBytes = 0L
     private var headerBytes = 0L
+    /** Live taps: the next chunk follows a dark stretch (or is the first), so the clock places it. */
+    private var resync = true
     private var broken = false
     private var finished = false
 
@@ -106,12 +113,20 @@ class WavTap(
         if (broken || finished) return
         try {
             if (live) {
-                if (at.dark) return
-                // Where this chunk would start if it ended now. Behind that by more than the
-                // slack means the capture stalled and the mic lost that stretch: leave the hole
-                // as silence so what follows stays on the video's clock.
+                if (at.dark) {
+                    resync = true
+                    return
+                }
+                // Where this chunk would start if it had just been heard.
                 val chunkStart = bytesAt(at.elapsedMs) - pcm.size
-                if (chunkStart - dataBytes > bytesAt(LIVE_SLACK_MS)) padTo(raf, chunkStart)
+                if (resync) {
+                    padTo(raf, chunkStart)
+                    resync = false
+                } else if (chunkStart - dataBytes > bytesAt(liveSlackMs)) {
+                    // Later than the source's buffer: what it could not hold is gone. The chunk
+                    // in hand is the oldest the buffer kept, heard liveSlackMs before now.
+                    padTo(raf, chunkStart - bytesAt(liveSlackMs))
+                }
             } else {
                 padTo(raf, bytesAt(at.elapsedMs))
             }
@@ -180,8 +195,6 @@ class WavTap(
 
     companion object {
         const val HEADER_BYTES = 44
-        /** A capture gap below this is scheduling jitter, not lost audio. */
-        const val LIVE_SLACK_MS = 100L
         /** How much audio a kill mid-take can leave outside the header's count. */
         const val HEADER_EVERY_MS = 1_000L
         private const val CLOSE_WAIT_MS = 2_000L

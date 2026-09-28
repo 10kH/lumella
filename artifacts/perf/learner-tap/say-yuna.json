@@ -1,0 +1,252 @@
+{
+ "date": "2026-09-28",
+ "source": "macOS say -v Yuna at full volume, Mac speaker ~30cm from the glasses; the three booth error sentences",
+ "learnerWav": "learnertap-203757-learner.wav",
+ "learnerSeconds": 23.4,
+ "povSeconds": 23.5,
+ "halfSecondWindowsAboveMinus55dBFS": 3,
+ "loudestDbfs": -37.5,
+ "quietFloorDbfs": -120.1,
+ "windows": [
+  {
+   "t": 0.0,
+   "rmsDbfs": -104.3,
+   "peak": 1
+  },
+  {
+   "t": 0.5,
+   "rmsDbfs": -111.0,
+   "peak": 1
+  },
+  {
+   "t": 1.0,
+   "rmsDbfs": -104.1,
+   "peak": 1
+  },
+  {
+   "t": 1.5,
+   "rmsDbfs": -109.5,
+   "peak": 1
+  },
+  {
+   "t": 2.0,
+   "rmsDbfs": -103.7,
+   "peak": 1
+  },
+  {
+   "t": 2.5,
+   "rmsDbfs": -113.0,
+   "peak": 1
+  },
+  {
+   "t": 3.0,
+   "rmsDbfs": -120,
+   "peak": 0
+  },
+  {
+   "t": 3.5,
+   "rmsDbfs": -106.6,
+   "peak": 1
+  },
+  {
+   "t": 4.0,
+   "rmsDbfs": -120,
+   "peak": 0
+  },
+  {
+   "t": 4.5,
+   "rmsDbfs": -120,
+   "peak": 0
+  },
+  {
+   "t": 5.0,
+   "rmsDbfs": -120,
+   "peak": 0
+  },
+  {
+   "t": 5.5,
+   "rmsDbfs": -120,
+   "peak": 0
+  },
+  {
+   "t": 6.0,
+   "rmsDbfs": -120,
+   "peak": 0
+  },
+  {
+   "t": 6.5,
+   "rmsDbfs": -120,
+   "peak": 0
+  },
+  {
+   "t": 7.0,
+   "rmsDbfs": -114.1,
+   "peak": 1
+  },
+  {
+   "t": 7.5,
+   "rmsDbfs": -120,
+   "peak": 0
+  },
+  {
+   "t": 8.0,
+   "rmsDbfs": -120,
+   "peak": 0
+  },
+  {
+   "t": 8.5,
+   "rmsDbfs": -120,
+   "peak": 0
+  },
+  {
+   "t": 9.0,
+   "rmsDbfs": -120,
+   "peak": 0
+  },
+  {
+   "t": 9.5,
+   "rmsDbfs": -40.5,
+   "peak": 1390
+  },
+  {
+   "t": 10.0,
+   "rmsDbfs": -37.5,
+   "peak": 1374
+  },
+  {
+   "t": 10.5,
+   "rmsDbfs": -40.6,
+   "peak": 1364
+  },
+  {
+   "t": 11.0,
+   "rmsDbfs": -56.6,
+   "peak": 308
+  },
+  {
+   "t": 11.5,
+   "rmsDbfs": -94.3,
+   "peak": 6
+  },
+  {
+   "t": 12.0,
+   "rmsDbfs": -75.8,
+   "peak": 90
+  },
+  {
+   "t": 12.5,
+   "rmsDbfs": -97.4,
+   "peak": 2
+  },
+  {
+   "t": 13.0,
+   "rmsDbfs": -102.0,
+   "peak": 1
+  },
+  {
+   "t": 13.5,
+   "rmsDbfs": -96.4,
+   "peak": 3
+  },
+  {
+   "t": 14.0,
+   "rmsDbfs": -73.5,
+   "peak": 22
+  },
+  {
+   "t": 14.5,
+   "rmsDbfs": -71.7,
+   "peak": 28
+  },
+  {
+   "t": 15.0,
+   "rmsDbfs": -70.7,
+   "peak": 25
+  },
+  {
+   "t": 15.5,
+   "rmsDbfs": -75.7,
+   "peak": 22
+  },
+  {
+   "t": 16.0,
+   "rmsDbfs": -95.5,
+   "peak": 4
+  },
+  {
+   "t": 16.5,
+   "rmsDbfs": -102.7,
+   "peak": 2
+  },
+  {
+   "t": 17.0,
+   "rmsDbfs": -120,
+   "peak": 0
+  },
+  {
+   "t": 17.5,
+   "rmsDbfs": -120,
+   "peak": 0
+  },
+  {
+   "t": 18.0,
+   "rmsDbfs": -120,
+   "peak": 0
+  },
+  {
+   "t": 18.5,
+   "rmsDbfs": -71.3,
+   "peak": 27
+  },
+  {
+   "t": 19.0,
+   "rmsDbfs": -70.9,
+   "peak": 28
+  },
+  {
+   "t": 19.5,
+   "rmsDbfs": -71.3,
+   "peak": 24
+  },
+  {
+   "t": 20.0,
+   "rmsDbfs": -85.9,
+   "peak": 9
+  },
+  {
+   "t": 20.5,
+   "rmsDbfs": -120,
+   "peak": 0
+  },
+  {
+   "t": 21.0,
+   "rmsDbfs": -120,
+   "peak": 0
+  },
+  {
+   "t": 21.5,
+   "rmsDbfs": -120,
+   "peak": 0
+  },
+  {
+   "t": 22.0,
+   "rmsDbfs": -120,
+   "peak": 0
+  },
+  {
+   "t": 22.5,
+   "rmsDbfs": -120,
+   "peak": 0
+  },
+  {
+   "t": 23.0,
+   "rmsDbfs": -120.1,
+   "peak": 1
+  }
+ ],
+ "tutorLoudWindowsS": [
+  13.0,
+  16.5
+ ],
+ "reading": "Sentence 1 (9.5-11s) is in the learner tap at -37..-40 dBFS; the server VAD heard it and the tutor answered (TTFA 654ms). Sentences 2 and 3 were spoken over and just after the tutor's reply and sit at -70..-75 dBFS: the VOICE_COMMUNICATION echo canceller suppresses the mic during double-talk. The tap records exactly what the realtime API heard, suppression included. A learner who waits for the tutor is recorded at full level; one who talks over it is not, and a Voice Memo is the backup for that."
+}

@@ -47,11 +47,10 @@ NAME="${1:?usage: ops/take.sh <name> [seconds|--start|--stop] [--pov|--audio]}"
 # the recording. A name that already ends in -<digits> is indistinguishable from a segment:
 # "baseline-pov-2" continued as "baseline-pov-3.mp4" and this script, looking for
 # "baseline-pov-2-2.mp4", never pulled it (2026-09-28). Refuse the ambiguous name up front.
-case "$NAME" in
-  *-[0-9]|*-[0-9][0-9]|*-[0-9][0-9][0-9])
-    echo "take name '$NAME' ends in -<number>, which collides with POV segment numbering; use e.g. '${NAME%-*}-${NAME##*-}x' or '${NAME%-*}${NAME##*-}'" >&2
-    exit 2 ;;
-esac
+if [[ "$NAME" =~ -[0-9]+$ ]]; then
+  echo "take name '$NAME' ends in -<number>, which collides with POV segment numbering; use e.g. '${NAME%-*}-${NAME##*-}x' or '${NAME%-*}${NAME##*-}'" >&2
+  exit 2
+fi
 shift
 MODE="block"
 SEC=180
@@ -87,8 +86,10 @@ join_segments() {
   local stamp="$1" count="$2"
   local joined="$OUT/$NAME-$stamp-pov-JOINED.mp4"
   local list; list="$(mktemp -t lumella-join)"
-  local expected=0 f d
-  for f in "$OUT/$NAME-$stamp-pov.mp4" "$OUT/$NAME-$stamp-pov-"[0-9]*.mp4; do
+  local expected=0 f d i
+  # By index, not by glob: a glob sorts -10 before -2.
+  for i in $(seq 1 "$count"); do
+    if [ "$i" = 1 ]; then f="$OUT/$NAME-$stamp-pov.mp4"; else f="$OUT/$NAME-$stamp-pov-$i.mp4"; fi
     [ -f "$f" ] || continue
     printf "file '%s'\n" "$f" >>"$list"
     d="$(ffprobe -v error -show_entries format=duration -of csv=p=0 "$f" 2>/dev/null)"
@@ -110,19 +111,30 @@ join_segments() {
   rm -f "$list"
 }
 
-# Mix the two voice taps into one track, and put it under the wearer's view. Both taps and the
-# silent POV stay on disk: the mix is a convenience, and an edit may well want separate tracks.
+# Mix the voice taps into one track, and put it under the wearer's view. Whichever taps came back
+# are used — one missing tap must not leave the take silent. Taps and the silent POV stay on disk:
+# the mix is a convenience, and an edit may well want separate tracks.
 mix_voices() {
   local stamp="$1"
-  local learner="$OUT/$NAME-$stamp-learner.wav" tutor="$OUT/$NAME-$stamp-tutor.wav"
-  local voices="$OUT/$NAME-$stamp-voices.wav"
-  [ -f "$learner" ] && [ -f "$tutor" ] || return 0
-  if ffmpeg -v error -i "$learner" -i "$tutor" \
-       -filter_complex "[0:a][1:a]amix=inputs=2:duration=longest:dropout_transition=0:normalize=0[a]" \
-       -map "[a]" -y "$voices" 2>/dev/null; then
-    echo "  voices $voices  (learner + tutor)"
+  local voices="$OUT/$NAME-$stamp-voices.wav" who f
+  local inputs=() n=0
+  for who in learner tutor; do
+    f="$OUT/$NAME-$stamp-$who.wav"
+    [ -f "$f" ] && { inputs+=(-i "$f"); n=$((n + 1)); }
+  done
+  [ "$n" = 0 ] && return 0
+  local mixed=1
+  if [ "$n" = 2 ]; then
+    ffmpeg -v error "${inputs[@]}" \
+      -filter_complex "[0:a][1:a]amix=inputs=2:duration=longest:dropout_transition=0:normalize=0[a]" \
+      -map "[a]" -y "$voices" 2>/dev/null || mixed=0
   else
-    echo "  voices mix FAILED — both taps are intact, mix by hand" >&2
+    ffmpeg -v error "${inputs[@]}" -c copy -y "$voices" 2>/dev/null || mixed=0
+  fi
+  if [ "$mixed" = 1 ]; then
+    echo "  voices $voices  ($n of 2 voices)"
+  else
+    echo "  voices mix FAILED — the taps are intact, mix by hand" >&2
     return 0
   fi
   local pov="$OUT/$NAME-$stamp-pov-JOINED.mp4"
@@ -131,40 +143,49 @@ mix_voices() {
   local out="$OUT/$NAME-$stamp-pov-MIXED.mp4"
   if ffmpeg -v error -i "$pov" -i "$voices" -map 0:v -map 1:a -c:v copy -c:a aac -b:a 128k \
        -y "$out" 2>/dev/null; then
-    echo "  mixed  $out  (view + both voices)"
+    echo "  mixed  $out  (view + voices)"
   else
     echo "  mix    FAILED — view and voices are intact, mux by hand" >&2
   fi
 }
 
-# Stack the wearer's view over what the glasses were showing, so one file carries both halves of
+# Put the wearer's view beside what the glasses were showing, so one file carries both halves of
 # the evidence: the scene and the subtitles/indicator that prove which layer did what.
 #
 # The screen capture is 1280x480 because the display is binocular — two 640x480 eyes side by
 # side showing the same thing. Only the left eye is kept; the right is a duplicate and including
 # it would halve the legible text size for nothing.
+#
+# The POV is stored 1280x720 with 90° rotation metadata: upright it is PORTRAIT (720x1280). This
+# used to be composed with -noautorotate and stacked above the screen, which laid the view on its
+# side in every FINAL — the comment promised a rotation the filter never did. ffmpeg now applies
+# the metadata, and the portrait view goes beside the screen at the same height.
+#
+# Without a POV (--audio) the FINAL is the screen with the voices under it.
 compose() {
   local stamp="$1"
+  local screen="$OUT/$NAME-$stamp-screen.mp4" voices="$OUT/$NAME-$stamp-voices.wav"
+  local out="$OUT/$NAME-$stamp-FINAL.mp4"
+  [ -f "$screen" ] || return 0
   local pov="$OUT/$NAME-$stamp-pov-MIXED.mp4"
   [ -f "$pov" ] || pov="$OUT/$NAME-$stamp-pov-JOINED.mp4"
   [ -f "$pov" ] || pov="$OUT/$NAME-$stamp-pov.mp4"
-  local screen="$OUT/$NAME-$stamp-screen.mp4"
-  [ -f "$pov" ] || return 0
-  [ -f "$screen" ] || return 0
-  local out="$OUT/$NAME-$stamp-FINAL.mp4"
-
-  # The screen track is silent (screenrecord has no audio option at all), so the audio comes
-  # from the MIXED POV, which carries learner + tutor. -map 0:a? — a take whose voices failed to
-  # mix still gets its picture.
-  # -noautorotate on the POV, then rotate explicitly. Left to itself ffmpeg applies the file's
-  # rotation metadata before the filter graph, so the POV arrives portrait and vstack refuses it
-  # for not matching the screen's width. Doing it here keeps both inputs 1280 wide.
-  if ffmpeg -v error -noautorotate -i "$pov" -i "$screen" -filter_complex \
-       "[1:v]crop=640:480:0:0,scale=1280:-2,setsar=1[scr];[0:v]scale=1280:-2,setsar=1[pv];[pv][scr]vstack=inputs=2[v]" \
-       -map "[v]" -map "0:a?" -c:v libx264 -preset veryfast -crf 20 -c:a aac -y "$out" 2>/dev/null; then
+  local ok=0
+  if [ -f "$pov" ]; then
+    # -map 0:a? — a take whose voices failed to mix still gets its picture.
+    ffmpeg -v error -i "$pov" -i "$screen" -filter_complex \
+      "[1:v]crop=640:480:0:0,scale=1280:960,setsar=1[scr];[0:v]scale=-2:960,setsar=1[pv];[pv][scr]hstack=inputs=2[v]" \
+      -map "[v]" -map "0:a?" -c:v libx264 -preset veryfast -crf 20 -c:a aac -y "$out" 2>/dev/null && ok=1
+  elif [ -f "$voices" ]; then
+    ffmpeg -v error -i "$screen" -i "$voices" -filter_complex "[0:v]crop=640:480:0:0,scale=1280:960,setsar=1[v]" \
+      -map "[v]" -map 1:a -c:v libx264 -preset veryfast -crf 20 -c:a aac -shortest -y "$out" 2>/dev/null && ok=1
+  else
+    return 0
+  fi
+  if [ "$ok" = 1 ]; then
     local wh
     wh="$(ffprobe -v error -select_streams v -show_entries stream=width,height -of csv=p=0 "$out" 2>/dev/null)"
-    echo "  FINAL  $out  ($wh, view over screen)"
+    echo "  FINAL  $out  ($wh)"
   else
     echo "  FINAL  compose failed — the separate files are intact" >&2
   fi
@@ -205,15 +226,15 @@ collect() {
   fi
 
   # Both voices, tapped by the app on the video's clock. Reached on --audio too: the voices are
-  # the whole point of that mode.
+  # the whole point of that mode. A screen-only take has none, and says nothing about them.
   local who remote
   for who in learner tutor; do
     remote="$REMOTE_POV_DIR/$NAME-$who.wav"
     if adb -s "$DEV" pull "$remote" "$OUT/$NAME-$stamp-$who.wav" >/dev/null 2>&1; then
       adb -s "$DEV" shell "rm -f $remote"
       printf "  %-7s %s\n" "$who" "$OUT/$NAME-$stamp-$who.wav"
-    else
-      echo "  $who MISSING — adb logcat -d | grep 'tap '" >&2
+    elif [ -n "$POV" ] || [ -n "$AUDIO" ]; then
+      echo "  $who MISSING — adb logcat -d | grep -E 'tap |take clock'" >&2
     fi
   done
   mix_voices "$stamp"
@@ -274,7 +295,7 @@ case "$MODE" in
   start)
     # Screen first, POV second. The POV start now spends ~6s confirming the file is growing, and
     # whichever is started first runs during that wait — so the order decides which layer carries
-    # the head offset. Screen is the cheap one (0.26 MB/min against 189), and a few seconds of it
+    # the head offset. Screen is the cheap one (0.26 MB/min against ~43), and a few seconds of it
     # before the wearer speaks costs nothing, while the same seconds missing from the POV cost the
     # opening of the shot. Neither order makes them equal; this one makes the surplus harmless.
     adb -s "$DEV" shell "screenrecord --time-limit 180 --size 1280x480 $REMOTE_SCREEN_DIR/$NAME.mp4 >/dev/null 2>&1 &" >/dev/null 2>&1
@@ -291,15 +312,19 @@ case "$MODE" in
     if [ "$(adb -s "$DEV" shell "pgrep screenrecord" 2>/dev/null | tr -d '\r' | grep -c .)" = "0" ]; then
       echo "WARNING: screen recording did not start; POV may still be running" >&2
     fi
-    date +%H%M%S > "/tmp/lumella-take-$NAME.stamp"
+    # The mode goes with the stamp, so --stop knows what to collect without being told again.
+    echo "$(date +%H%M%S) ${POV:+pov}${AUDIO:+audio}" > "/tmp/lumella-take-$NAME.stamp"
     if [ -n "$POV" ]; then   mode="screen + POV"
-    elif [ -n "$AUDIO" ]; then mode="screen + tutor audio"
+    elif [ -n "$AUDIO" ]; then mode="screen + both voices (no camera)"
     else                     mode="screen"
     fi
     echo "$NAME: recording ($mode). stop with: ops/take.sh $NAME --stop"
     ;;
   stop)
-    STAMP="$(cat "/tmp/lumella-take-$NAME.stamp" 2>/dev/null || date +%H%M%S)"
+    read -r STAMP SAVED_MODE < "/tmp/lumella-take-$NAME.stamp" 2>/dev/null || true
+    STAMP="${STAMP:-$(date +%H%M%S)}"
+    case "${SAVED_MODE:-}" in *pov*) POV=1 ;; esac
+    case "${SAVED_MODE:-}" in *audio*) AUDIO=1 ;; esac
     stop_pov
     # SIGINT so screenrecord finalises the container; SIGKILL leaves an unplayable file.
     adb -s "$DEV" shell "pkill -INT screenrecord" >/dev/null 2>&1

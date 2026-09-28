@@ -1,0 +1,22 @@
+      20:40:02.427apture during recording; closing segment to lift a frame
+      20:40:02.621ebug: stop recording
+      20:40:02.622ebug: rec stopping
+      20:40:02.671ecording finalized ok=true err=0 bytes=file:///storage/emulated/0/Android/data/com.woolab.l
+      20:40:02.850ake ended during a photo turn; not resuming rtphoto01x-2.mp4
+---- gap 0.1s
+      20:40:17.222apture during recording; closing segment to lift a frame
+      20:40:17.452ecording finalized ok=true err=0 bytes=file:///storage/emulated/0/Android/data/com.woolab.l
+      20:40:17.689egment resume: recording -> /storage/emulated/0/Android/data/com.woolab.lumella/files/rtpho
+      20:40:17.800ebug: stop recording
+      20:40:17.801ebug: rec stopping
+      20:40:18.812ecording finalized ok=false err=8 bytes=
+      20:40:18.815egment resume: failed code=8
+---- gap 0.5s
+      20:40:32.500apture during recording; closing segment to lift a frame
+      20:40:32.786ecording finalized ok=true err=0 bytes=file:///storage/emulated/0/Android/data/com.woolab.l
+      20:40:33.209egment resume: recording -> /storage/emulated/0/Android/data/com.woolab.lumella/files/rtpho
+      20:40:33.509ebug: stop recording
+      20:40:33.511ebug: rec stopping
+      20:40:34.451ecording finalized ok=false err=8 bytes=
+      20:40:34.454egment resume: failed code=8
+---- gap 0.9s

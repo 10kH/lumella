@@ -32,8 +32,8 @@ class WavTapTest {
     /** A take without a camera: the wall clock. */
     private fun clock() = TakeClock(followVideo = false) { now }
 
-    private fun tap(clock: TakeClock, live: Boolean) =
-        WavTap(File(dir, "t.wav"), RATE, clock, live, { warnings += it })
+    private fun tap(clock: TakeClock, live: Boolean, slackMs: Long = 400) =
+        WavTap(File(dir, "t.wav"), RATE, clock, live, { warnings += it }, liveSlackMs = slackMs)
 
     /** [ms] of audio, every sample set to [mark] so its position can be found afterwards. */
     private fun chunk(ms: Int, mark: Int): ByteArray {
@@ -135,18 +135,35 @@ class WavTapTest {
         t.close()
 
         assertEquals(null, span(9))
-        assertEquals(80..119, span(3))
+        // The first chunk after the gap is placed where the video resumed (90ms, the recorder's
+        // length), not straight after the last word before it.
+        assertEquals(90..129, span(3))
     }
 
     @Test
-    fun learnerCaptureStallLongerThanTheSlackIsPaddedNotSqueezed() {
+    fun aLateReadTheCaptureBufferCoveredLosesNothingAndShiftsNothing() {
         val c = clock()
-        val t = tap(c, live = true)
+        val t = tap(c, live = true, slackMs = 400)
         now = 40; t.write(chunk(40, 1))
-        now = 440; t.write(chunk(40, 2)) // 360ms the mic never delivered
+        // The loop stalled 360ms. The recorder kept those 360ms; they come out now, together.
+        now = 440
+        repeat(9) { t.write(chunk(40, 2 + it)) }
         t.close()
 
-        assertEquals("the next words land where the video has them", 400..439, span(2))
+        assertEquals("no silence invented for audio the buffer kept", 40..79, span(2))
+        assertEquals(360..399, span(10))
+    }
+
+    @Test
+    fun aStallPastTheCaptureBufferLeavesAHoleOnlyForWhatWasLost() {
+        val c = clock()
+        val t = tap(c, live = true, slackMs = 400)
+        now = 40; t.write(chunk(40, 1))
+        // 1000ms late: the buffer held only the last 400ms; the 560ms before them are gone.
+        now = 1_040; t.write(chunk(40, 2))
+        t.close()
+
+        assertEquals("the oldest kept audio was heard 400ms before now", 600..639, span(2))
     }
 
     @Test
@@ -177,6 +194,32 @@ class WavTapTest {
         t.close()
 
         assertEquals("the next segment starts where the video's does", 1_150..1_249, span(1))
+    }
+
+    @Test
+    fun aVideoThatNeverShowsAFrameIsGivenUpOnAndTheVoicesKeepTheirTime() {
+        val clockWarnings = mutableListOf<String>()
+        val c = TakeClock(followVideo = true, giveUpAfterMs = 5_000, warn = { clockWarnings += it }) { now }
+        val t = tap(c, live = false)
+        now = 2_000; t.write(chunk(100, 9))   // camera still "coming up": dark
+        now = 6_000; t.write(chunk(100, 1))   // 6s without a frame: rolls from the start
+        t.close()
+
+        assertEquals(6_000..6_099, span(1))
+        assertEquals(1, clockWarnings.size)
+    }
+
+    @Test
+    fun aRecordingThatEndsByItselfLetsTheVoicesCarryOn() {
+        val c = TakeClock(followVideo = true) { now }
+        val t = tap(c, live = true)
+        c.rolling(0)
+        now = 1_000; c.segmentEnded(1_000) // no stop was asked for: the camera went away
+        c.rolling(0)                        // what GlassesCamera does when no resume is pending
+        now = 1_040; t.write(chunk(40, 1))
+        t.close()
+
+        assertEquals(1_000..1_039, span(1))
     }
 
     @Test
@@ -226,7 +269,7 @@ class WavTapTest {
     fun aTapKilledMidTakeStillHasAReadableHeader() {
         // Direct executor: the file is inspected while the tap is still open, as a kill leaves it.
         val c = clock()
-        val t = WavTap(File(dir, "t.wav"), RATE, c, false, { warnings += it }, DirectExecutor())
+        val t = WavTap(File(dir, "t.wav"), RATE, c, false, { warnings += it }, executor = DirectExecutor())
         repeat(25) { now = it * 100L; t.write(chunk(100, 1)) } // 2.5s, never closed
 
         val h = ByteBuffer.wrap(File(dir, "t.wav").readBytes(), 0, WavTap.HEADER_BYTES)

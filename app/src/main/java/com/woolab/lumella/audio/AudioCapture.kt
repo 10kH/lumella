@@ -4,6 +4,7 @@ import android.media.AudioFormat
 import android.media.AudioRecord
 import android.media.MediaRecorder
 import android.os.Process
+import android.util.Log
 import java.util.Base64
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -98,8 +99,9 @@ class AudioCapture(
     private fun streamLoop(record: AudioRecord, chunkBytes: Int, bufferBytes: Int) {
         // The audio priority the platform gives its own audio threads. Under POV load the
         // camera HAL alone keeps most of a core busy; a normal-priority reader waits behind it.
+        // Not fatal, so not onError (which the wearer sees as a mic failure).
         runCatching { Process.setThreadPriority(Process.THREAD_PRIORITY_URGENT_AUDIO) }
-            .onFailure { onError("capture thread priority not raised: ${it.message}") }
+            .onFailure { Log.w("lumella", "capture thread priority not raised: ${it.message}") }
         val buffer = ByteArray(chunkBytes)
         var reported = false
         val chunkMs = chunkBytes * 1000L / (sampleRateHz * 2L)
@@ -176,6 +178,7 @@ class AudioCapture(
 
     companion object {
         const val PERF_WINDOW_MS = 5_000L
-        private const val CAPTURE_BUFFER_MS = 400
+        /** Audio the AudioRecord holds behind a late read; a live tap's slack ([WavTap]). */
+        const val CAPTURE_BUFFER_MS = 400
     }
 }

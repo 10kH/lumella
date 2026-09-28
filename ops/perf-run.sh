@@ -10,13 +10,15 @@
 #   playback   per-response AudioTrack underruns, audio time vs wall time, write() blocking
 #   capture    per-5s-window late reads (not scheduled), lost reads (buffer overran), worst cycle
 #   ttfa       per-turn time to first tutor audio
+#   thermal    CPU zone temperatures and frequencies at start and end
+#   files      POV and screen recordings: codec, resolution, effective fps (ffprobe); learner and
+#              tutor WAVs: length and share of loud samples
+#   diagnosis  ruleGap after turn 3 and after turn 6 (the slow path must not regress)
+# and keeps the raw top samples (<label>.top.txt) and the app's log (<label>.logcat.txt) beside it.
 #
 # STRESS=N adds N busy loops on the device for the whole run: the load of a worse day (the
-# heavier POV baseline ran ~80 points above the lighter one on identical settings), applied on
+# heavier POV baseline ran ~67 points above the lighter one on identical settings), applied on
 # purpose, to see whether the audio path holds with less headroom than a quiet run leaves.
-#   thermal    CPU zone temperatures and frequencies at start and end
-#   files      POV and screen recordings: codec, resolution, effective fps (ffprobe)
-#   diagnosis  ruleGap after turn 3 and after turn 6 (the slow path must not regress)
 #
 # Why a script and not a checklist: the POV stutter was described for two weeks as "끊긴다"
 # without a number. Every optimisation after this one is judged by the diff of two of these.
@@ -51,16 +53,18 @@ thermal() {
 }
 
 # The first DNS lookup from a freshly started process sometimes fails on this headset even
-# while the shell resolves the same host (seen 9/28 and 9/29 on CCC2_WLAN). What is measured
-# here is recording load, not the network, so a dead session gets one relaunch before giving up.
+# while the shell resolves the same host (seen 9/28 on CCC2_WLAN). What is measured here is
+# recording load, not the network, so a dead session gets up to two relaunches before giving up.
 adbs logcat -G 8M >/dev/null 2>&1 || true
 for attempt in 1 2 3; do
   echo "[$LABEL] launch --reset (attempt $attempt)"
   adbs logcat -c
   ./ops/launch-lumella.sh --reset >/dev/null 2>&1 || true
   sleep 7
-  PID="$(adbs shell pidof $PKG | tr -d '\r')"
-  STATUS="$( [ -n "$PID" ] && adbs logcat -d -v brief | grep "( *$PID)" | grep -oE 'status=[A-Z-]+' | tail -1 )"
+  # `|| true` inside both: under set -e a dead app (pidof fails) or no status line yet (grep
+  # finds nothing) would end the script here instead of reaching the retry.
+  PID="$(adbs shell pidof $PKG | tr -d '\r' || true)"
+  STATUS="$( [ -n "$PID" ] && adbs logcat -d -v brief | grep "( *$PID)" | grep -oE 'status=[A-Z-]+' | tail -1 || true )"
   [ "$STATUS" = "status=READY" ] && break
   echo "[$LABEL] not READY ($STATUS)" >&2
 done

@@ -216,8 +216,9 @@ ops/take.sh c7 --start --pov   # 걸고 빠진다. 연기를 원하는 만큼 �
 ops/take.sh c7 --stop          # 정지·회수·합성
 ```
 
-끝나면 **`-FINAL.mp4` 하나**가 나온다 — 착용자 시야 위, 화면(자막·지시자) 아래,
-소리는 학습자+튜터. 편집에 그대로 쓴다. 조각·합본·튜터 WAV도 같이 남아 있다.
+끝나면 **`-FINAL.mp4` 하나**가 나온다 — 착용자 시야(세로) 왼쪽, 화면(자막·지시자) 오른쪽,
+소리는 학습자+튜터. 편집에 그대로 쓴다. 조각·합본·`-learner.wav`·`-tutor.wav`·`-voices.wav`도
+같이 남아 있다. 이름은 `-숫자`로 끝나면 안 된다(`c7-2` ✗, `c7b` ✓).
 
 묶어서 돌리는 형태도 된다(`ops/take.sh c7 180 --pov`). 다만 **셀이 끝나면 같이 죽으니**
 대화를 돌리는 동안에는 `--start`/`--stop`을 쓴다.
@@ -252,8 +253,8 @@ adb shell am broadcast -p com.woolab.lumella -a com.woolab.lumella.DEBUG_REC_STO
 adb pull /storage/emulated/0/Android/data/com.woolab.lumella/files/pov1.mp4 ~/shots/
 ```
 
-1인칭은 분당 189MB다. `/sdcard` 21G로 114분이니 **테이크마다 회수한다**
-(`take.sh`는 받은 뒤 기기에서 지운다). 화면 녹화는 분당 0.26MB라 사실상 공짜다.
+1인칭은 분당 약 43MB다(720p 24fps, 9/28 실측). `/sdcard` 21G로 약 8시간이지만 **테이크마다
+회수한다**(`take.sh`는 받은 뒤 기기에서 지운다). 화면 녹화는 분당 0.26MB라 사실상 공짜다.
 
 기기 IP는 DHCP라 망이 바뀌면 달라진다. **케이블 없이 찾을 수 있다** — 5555 포트를 스캔하면 된다.
 

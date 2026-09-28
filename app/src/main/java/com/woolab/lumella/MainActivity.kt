@@ -219,22 +219,42 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
      */
     private fun startTakeVoices(name: String, followVideo: Boolean) {
         val dir = getExternalFilesDir(null)
-        val clock = TakeClock(followVideo)
         val warn: (String) -> Unit = { Log.w(TAG, it) }
+        val clock = TakeClock(followVideo, warn = warn)
         takeClock = clock
         audioPlayback.tap = WavTap(java.io.File(dir, "$name-tutor.wav"), 24_000, clock, live = false, warn = warn)
-        audioCapture.tap = WavTap(java.io.File(dir, "$name-learner.wav"), 24_000, clock, live = true, warn = warn)
+        audioCapture.tap = WavTap(
+            java.io.File(dir, "$name-learner.wav"), 24_000, clock, live = true, warn = warn,
+            liveSlackMs = AudioCapture.CAPTURE_BUFFER_MS.toLong(),
+        )
         Log.i(TAG, "debug: voices -> $dir/$name-{learner,tutor}.wav")
     }
 
+    /** Ends the take's voices at this moment: the clock stops here, then the files are closed. */
     private fun stopTakeVoices() {
+        val clock = takeClock ?: return
+        clock.dark()
         val tutor = audioPlayback.tap
         val learner = audioCapture.tap
         audioPlayback.tap = null
         audioCapture.tap = null
         takeClock = null
-        tutor?.close()
-        learner?.close()
+        // close() waits for each writer to drain: milliseconds normally, up to 2s each on a
+        // failing disk. Not on the main thread, which this is (the debug receiver, onDestroy).
+        Thread({
+            tutor?.close()
+            learner?.close()
+        }, "lumella-tap-close").start()
+    }
+
+    /** The camera's view of a take's clock. The camera carries it from segment to segment. */
+    private fun TakeClock.asRecordingClock(): GlassesCamera.RecordingClock {
+        val clock = this
+        return object : GlassesCamera.RecordingClock {
+            override fun rolling(segmentRecordedMs: Long) = clock.rolling(segmentRecordedMs)
+            override fun dark() = clock.dark()
+            override fun segmentEnded(recordedMs: Long) = clock.segmentEnded(recordedMs)
+        }
     }
 
     /** Answers the model's tool calls and keeps repeated looking bounded. @see CapturePolicy */
@@ -250,14 +270,7 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
         updateStatus("Connecting...", "#9C27B0")
 
         config = AppConfig.fromBuildConfig()
-        camera = GlassesCamera(this, this).apply {
-            // Keep the voice taps on the video's clock, segment by segment.
-            recordingClock = object : GlassesCamera.RecordingClock {
-                override fun rolling(segmentRecordedMs: Long) { takeClock?.rolling(segmentRecordedMs) }
-                override fun dark() { takeClock?.dark() }
-                override fun segmentEnded(recordedMs: Long) { takeClock?.segmentEnded(recordedMs) }
-            }
-        }
+        camera = GlassesCamera(this, this)
         audioPlayback = AudioPlayback().apply { start() }
 
         brain = BrainFactory.create(config.brainClassName) { reason ->
@@ -1390,7 +1403,7 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
                             // not a word falls between the two starts.
                             startTakeVoices(name, followVideo = withCamera)
                             if (withCamera) {
-                                camera.startRecording(dest) { msg -> Log.i(TAG, "debug: rec $msg") }
+                                camera.startRecording(dest, takeClock?.asRecordingClock()) { msg -> Log.i(TAG, "debug: rec $msg") }
                             }
                         }
                         DEBUG_REC_STOP_ACTION -> {

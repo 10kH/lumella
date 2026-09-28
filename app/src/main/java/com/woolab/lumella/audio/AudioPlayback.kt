@@ -167,11 +167,12 @@ class AudioPlayback(private val sampleRateHz: Int = 24_000) {
      * A reply's first delta is small (~100ms of speech) and the next, ~250ms, comes 110-240ms
      * later, so the speaker runs dry inside the first word. Measured 2026-09-28 with NO
      * recording running and the device at 62% of 400% (artifacts/perf/lead-none.json): 4 of 7
-     * replies underran, and in every one of them the reply had fallen behind the speaker by
-     * 91-146ms at its second delta. No buffer size cures that — the data is not here yet — and
-     * it was most of what was left of the stutter once POV load was dealt with. Starting each
-     * reply that much later is the jitter buffer. It costs the wearer [PREROLL_MS] before the
-     * first word, well inside the 0.5-1s pause a reply takes anyway.
+     * replies underran. In three of them the reply had fallen behind the speaker by 91-146ms at
+     * its second delta; the fourth stalled mid-reply (-794ms after a 1.2s gap in delivery, which
+     * no preroll covers). No buffer size cures that — the data is not here yet — and it was most
+     * of what was left of the stutter once POV load was dealt with. Starting each reply that
+     * much later is the jitter buffer. It costs the wearer [PREROLL_MS] before the first word, on
+     * top of the 0.6-1s pause a reply takes anyway.
      *
      * The tap gets the same silence, so the tutor's voice lands in the take when it was heard.
      */
