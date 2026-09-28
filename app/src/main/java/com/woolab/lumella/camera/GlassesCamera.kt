@@ -407,12 +407,8 @@ class GlassesCamera(context: Context, private val lifecycleOwner: LifecycleOwner
     }
 
     /** `take.mp4` -> `take-2.mp4` -> `take-3.mp4`. Keeps segments sortable next to each other. */
-    private fun nextSegment(current: File): File {
-        val name = current.nameWithoutExtension
-        val base = name.substringBeforeLast("-")
-        val n = name.substringAfterLast("-", "").toIntOrNull() ?: 1
-        return File(current.parentFile, "$base-${n + 1}.mp4")
-    }
+    private fun nextSegment(current: File): File = File(current.parentFile, nextSegmentName(current.name))
+
 
     private fun frameFromRecording(file: File): ByteArray? {
         // The file is still being written, so the tail is usually an incomplete fragment:
@@ -453,13 +449,29 @@ class GlassesCamera(context: Context, private val lifecycleOwner: LifecycleOwner
         cameraExecutor.shutdown()
     }
 
-    private companion object {
-        const val TAG = "lumella"
-        const val CAMERA_OPEN_TIMEOUT_MS = 5_000L
-        const val ANALYSIS_JPEG_QUALITY = 90
+    internal companion object {
+        /**
+         * Only a trailing NUMBER is a segment index. The first version cut at the last hyphen
+         * whatever followed it, so a take named "perf-baseline-pov" continued as
+         * "perf-baseline-2.mp4" — the tail of the name was taken for an index, and take.sh,
+         * looking for "perf-baseline-pov-2.mp4", never pulled the second segment. Measured
+         * 2026-09-28: a 138s POV take came back as its first 13.7s. Any hyphenated take name
+         * lost everything after the tutor's first photo.
+         */
+        fun nextSegmentName(currentName: String): String {
+            val name = currentName.removeSuffix(".mp4")
+            val tail = name.substringAfterLast("-", "")
+            val n = tail.toIntOrNull()
+            return if (n != null && name.contains('-')) "${name.substringBeforeLast("-")}-${n + 1}.mp4"
+            else "$name-2.mp4"
+        }
+
+        private const val TAG = "lumella"
+        private const val CAMERA_OPEN_TIMEOUT_MS = 5_000L
+        private const val ANALYSIS_JPEG_QUALITY = 90
 
         /** How far back from the write head to look for a decodable frame, in order. */
-        val FRAME_BACKOFF_MS = longArrayOf(0, 200, 500, 1_000, 2_000)
+        private val FRAME_BACKOFF_MS = longArrayOf(0, 200, 500, 1_000, 2_000)
         const val CAPTURE_MAX_ATTEMPTS = 3
         const val CAPTURE_RETRY_DELAY_MS = 600L
     }

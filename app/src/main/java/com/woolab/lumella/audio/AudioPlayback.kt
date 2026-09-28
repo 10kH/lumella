@@ -95,6 +95,43 @@ class AudioPlayback(private val sampleRateHz: Int = 24_000) {
         }
     }
 
+    /**
+     * What one tutor response cost the playback path. Opened on the first delta of a response,
+     * closed by [endResponseStats]. The harness (ops/perf-run.sh) reads the "perf:" log line.
+     *
+     * - underruns: AudioTrack.getUnderrunCount delta — the track ran dry and the wearer heard a gap.
+     * - audioMs: PCM received for this response, as audio time.
+     * - wallMs: first delta to last delta. wallMs well above audioMs means the reply was
+     *   delivered (and so played) slower than real time: the "stretched speech" symptom.
+     * - maxWriteMs / sumWriteMs: how long track.write blocked this thread. write() blocks when
+     *   the track's buffer is full, so large values mean playback is the bottleneck; near zero
+     *   with underruns means the data arrived too late.
+     * - maxTapMs: the voice tap's disk write on the same thread, per chunk.
+     */
+    private class ResponseStats(val underrunsAtStart: Int) {
+        val startedAtMs = System.currentTimeMillis()
+        var lastDeltaAtMs = startedAtMs
+        var audioBytes = 0L
+        var chunks = 0
+        var maxWriteMs = 0L
+        var sumWriteMs = 0L
+        var maxTapMs = 0L
+    }
+    @Volatile private var stats: ResponseStats? = null
+
+    /** Closes the current response's stats and returns them as one log-ready line, or null if none. */
+    fun endResponseStats(): String? {
+        val st = stats ?: return null
+        stats = null
+        val track = audioTrack
+        val underruns = if (track != null) track.underrunCount - st.underrunsAtStart else -1
+        val audioMs = st.audioBytes * 1000L / (sampleRateHz * 2L)
+        val wallMs = st.lastDeltaAtMs - st.startedAtMs
+        return "perf: playback underruns=$underruns audioMs=$audioMs wallMs=$wallMs chunks=${st.chunks} " +
+            "maxWriteMs=${st.maxWriteMs} sumWriteMs=${st.sumWriteMs} maxTapMs=${st.maxTapMs} " +
+            "bufferFrames=${track?.bufferSizeInFrames ?: -1}"
+    }
+
     /** Decodes and enqueues a base64 PCM16 delta chunk for streaming playback. Tolerant of malformed input. */
     fun playDelta(base64Pcm16: String) {
         val bytes = try {
@@ -104,14 +141,25 @@ class AudioPlayback(private val sampleRateHz: Int = 24_000) {
         }
         val track = audioTrack ?: return
         ensurePlaying(track)
+        val st = stats ?: ResponseStats(track.underrunCount).also { stats = it }
+        val t0 = System.nanoTime()
         track.write(bytes, 0, bytes.size)
+        val writeMs = (System.nanoTime() - t0) / 1_000_000
+        st.chunks++
+        st.audioBytes += bytes.size
+        st.lastDeltaAtMs = System.currentTimeMillis()
+        st.sumWriteMs += writeMs
+        if (writeMs > st.maxWriteMs) st.maxWriteMs = writeMs
         tapStream?.let { out ->
             // Best-effort: a failed tap must never interrupt playback the wearer is listening to.
+            val t1 = System.nanoTime()
             runCatching {
                 padSilenceTo(out, videoElapsedMs())
                 out.write(bytes)
                 tapBytes += bytes.size
             }
+            val tapMs = (System.nanoTime() - t1) / 1_000_000
+            if (tapMs > st.maxTapMs) st.maxTapMs = tapMs
         }
     }
 

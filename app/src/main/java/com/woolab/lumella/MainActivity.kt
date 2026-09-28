@@ -347,6 +347,7 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
                     // and the start of speaking is the microphone hearing the tutor, which
                     // is the failure hands-free lives or dies on.
                     Log.i(TAG, "튜터 발화 끝")
+                    audioPlayback.endResponseStats()?.let { Log.i(TAG, it) }
                     speaking = false
                     runOnUiThread { updateStatus("Ready") }
                 }
@@ -446,7 +447,7 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
                 Log.w(TAG, "Audio capture error: $message")
                 runOnUiThread { updateStatus("Mic error", "#FF0000") }
             },
-        )
+        ).apply { perfLog = { Log.i(TAG, it) } }
 
         ensurePermissions()
 

@@ -1,0 +1,268 @@
+09-28 17:51:33.252 I/.woolab.lumell(30632): Late-enabling -Xcheck:jni
+09-28 17:51:33.322 D/CompatibilityChangeReporter(30632): Compat change id reported: 171979766; UID 10089; state: ENABLED
+09-28 17:51:33.488 I/Perf    (30632): Connecting to perf service.
+09-28 17:51:33.494 V/GraphicsEnvironment(30632): ANGLE Developer option for 'com.woolab.lumella' set to: 'default'
+09-28 17:51:33.495 V/GraphicsEnvironment(30632): ANGLE GameManagerService for com.woolab.lumella: false
+09-28 17:51:33.495 V/GraphicsEnvironment(30632): Neither updatable production driver nor prerelease driver is supported.
+09-28 17:51:33.498 D/NetworkSecurityConfig(30632): Using Network Security Config from resource network_security_config debugBuild: true
+09-28 17:51:33.501 D/NetworkSecurityConfig(30632): Using Network Security Config from resource network_security_config debugBuild: true
+09-28 17:51:33.615 I/SoundPool(30632): tag250929005 SoundPool(maxStreams=4, attr={ content_type=4, usage=6, flags=0x800, tags= })
+09-28 17:51:33.617 W/SoundPool(30632): Use of stream types is deprecated for operations other than volume control
+09-28 17:51:33.617 W/SoundPool(30632): See the documentation of SoundPool() for what to use instead with android.media.AudioAttributes to qualify your playback use case
+09-28 17:51:33.621 D/hzhang2ring(30632): mRingScaleForGD =70.0,mRingScaleForRing=400.0
+09-28 17:51:33.622 D/GestureDetectorWithSound(30632): disable touch sound for type mercury_system_long_press_right
+09-28 17:51:33.691 D/AppCompatDelegate(30632): Checking for metadata for AppLocalesMetadataHolderService : Service not found
+09-28 17:51:33.754 W/.woolab.lumell(30632): Accessing hidden method Landroid/view/View;->computeFitSystemWindows(Landroid/graphics/Rect;Landroid/graphics/Rect;)Z (unsupported, reflection, allowed)
+09-28 17:51:33.756 W/.woolab.lumell(30632): Accessing hidden method Landroid/view/ViewGroup;->makeOptionalFitsSystemWindows()V (unsupported, reflection, allowed)
+09-28 17:51:34.066 W/System  (30632): ClassLoader referenced unknown path: /system/framework/tcmclient.jar
+09-28 17:51:34.094 I/Choreographer(30632): Skipped 34 frames!  The application may be doing too much work on its main thread.
+09-28 17:51:34.189 I/AdrenoGLES-0(30632): QUALCOMM build                   : 02da1206c8, Ifb54304dce
+09-28 17:51:34.189 I/AdrenoGLES-0(30632): Build Date                       : 02/28/25
+09-28 17:51:34.189 I/AdrenoGLES-0(30632): OpenGL ES Shader Compiler Version: E031.50.02.00
+09-28 17:51:34.189 I/AdrenoGLES-0(30632): Local Branch                     : 
+09-28 17:51:34.189 I/AdrenoGLES-0(30632): Remote Branch                    : refs/tags/AU_LINUX_ANDROID_LA.VENDOR.14.3.4.11.00.00.1126.413
+09-28 17:51:34.189 I/AdrenoGLES-0(30632): Remote Branch                    : NONE
+09-28 17:51:34.189 I/AdrenoGLES-0(30632): Reconstruct Branch               : NOTHING
+09-28 17:51:34.189 I/AdrenoGLES-0(30632): Build Config                     : S P 16.1.2 AArch64
+09-28 17:51:34.190 I/AdrenoGLES-0(30632): Driver Path                      : /vendor/lib64/egl/libGLESv2_adreno.so
+09-28 17:51:34.190 I/AdrenoGLES-0(30632): Driver Version                   : 0819.0
+09-28 17:51:34.190 I/AdrenoGLES-0(30632): Process Name                     : com.woolab.lumella
+09-28 17:51:34.199 I/AdrenoGLES-0(30632): PFP: 0x016dd112, ME: 0x00000000
+09-28 17:51:34.205 W/Adreno-AppProfiles(30632): Could not find QSPM HAL service. Skipping adreno profile processing.
+09-28 17:51:34.273 I/OpenGLRenderer(30632): Davey! duration=739ms; Flags=1, FrameTimelineVsyncId=988468, IntendedVsync=50961403627314, Vsync=50961970293958, InputEventId=0, HandleInputStart=50961979617691, AnimationStart=50961979626181, PerformTraversalsStart=50961979882795, DrawStart=50962119569254, FrameDeadline=50961420293980, FrameInterval=50961979211962, FrameStartTime=16666666, SyncQueued=50962124367014, SyncStart=50962124467014, IssueDrawCommandsStart=50962124869983, SwapBuffers=50962135060295, FrameCompleted=50962143270452, DequeueBufferDuration=19792, QueueBufferDuration=981927, GpuCompleted=50962142525347, SwapBuffersCompleted=50962143270452, DisplayPresentTime=35188668498620, 
+09-28 17:51:39.631 D/ProfileInstaller(30632): Installing profile for com.woolab.lumella
+09-28 17:51:40.882 I/lumella (30632): Resolved lumaBaseUrl from remote config (was BuildConfig fallback http://192.168.35.170:8010)
+09-28 17:51:40.886 I/lumella (30632): status=CONNECTING
+09-28 17:51:42.224 I/lumella (30632): brain ready: session=orch_31b8fe120a866b57 (voice was already up)
+09-28 17:51:43.069 I/lumella (30632): status=READY
+09-28 17:51:43.072 I/AudioRecord(30632): set(): sai Format 0x1 is linear
+09-28 17:51:43.109 I/android.media.AudioRecord(30632): tag250902005 setPreferredDeviceToSpeakerMic res:true
+09-28 17:51:43.110 W/AudioRecord(30632): restoreRecord_l(833): dead IAudioRecord, creating a new one from start()
+09-28 17:51:43.124 I/lumella (30632): 연속 청취 시작 (핸즈프리): recording=true
+09-28 17:51:43.414 I/lumella (30632): status=READY
+09-28 17:51:48.153 I/lumella (30632): perf: capture reads=123 lateReads=0 maxCycleMs=44 maxHandleMs=3 bufferMs=40
+09-28 17:51:53.152 I/lumella (30632): perf: capture reads=125 lateReads=0 maxCycleMs=44 maxHandleMs=3 bufferMs=40
+09-28 17:51:58.191 I/lumella (30632): perf: capture reads=126 lateReads=0 maxCycleMs=44 maxHandleMs=3 bufferMs=40
+09-28 17:52:03.195 I/lumella (30632): perf: capture reads=125 lateReads=0 maxCycleMs=45 maxHandleMs=2 bufferMs=40
+09-28 17:52:08.236 I/lumella (30632): perf: capture reads=126 lateReads=0 maxCycleMs=44 maxHandleMs=2 bufferMs=40
+09-28 17:52:13.236 I/lumella (30632): perf: capture reads=125 lateReads=0 maxCycleMs=44 maxHandleMs=2 bufferMs=40
+09-28 17:52:18.273 I/lumella (30632): perf: capture reads=126 lateReads=0 maxCycleMs=44 maxHandleMs=3 bufferMs=40
+09-28 17:52:23.273 I/lumella (30632): perf: capture reads=125 lateReads=0 maxCycleMs=44 maxHandleMs=2 bufferMs=40
+09-28 17:52:28.276 I/lumella (30632): perf: capture reads=125 lateReads=0 maxCycleMs=44 maxHandleMs=3 bufferMs=40
+09-28 17:52:33.276 I/lumella (30632): perf: capture reads=125 lateReads=0 maxCycleMs=44 maxHandleMs=2 bufferMs=40
+09-28 17:52:34.141 I/lumella (30632): debug: start recording -> /storage/emulated/0/Android/data/com.woolab.lumella/files/perf-baseline-audio.mp4 audio=true camera=false
+09-28 17:52:34.143 I/lumella (30632): debug: tutor voice -> /storage/emulated/0/Android/data/com.woolab.lumella/files/perf-baseline-audio-tutor.wav
+09-28 17:52:35.377 I/lumella (30632): debug: 음성 감지 주입
+09-28 17:52:36.462 I/lumella (30632): debug: 음성 종료 주입
+09-28 17:52:36.462 I/lumella (30632): turn end (VAD): audioChunks=1330
+09-28 17:52:36.805 D/lumella (30632): 응답 경계: 억제 해제 + 리셋
+09-28 17:52:37.185 I/lumella (30632): 튜터 발화 시작 (TTFA 723ms)
+09-28 17:52:37.573 I/lumella (30632): debug: 입력 전사 주입 = 어제 친구가 만났어요
+09-28 17:52:38.288 I/lumella (30632): perf: capture reads=125 lateReads=0 maxCycleMs=57 maxHandleMs=2 bufferMs=40
+09-28 17:52:41.572 I/lumella (30632): 튜터 발화 끝
+09-28 17:52:41.573 I/lumella (30632): perf: playback underruns=0 audioMs=4400 wallMs=4374 chunks=17 maxWriteMs=643 sumWriteMs=4162 maxTapMs=1 bufferFrames=1928
+09-28 17:52:41.591 I/lumella (30632): 음성 명령: 사진 촬영 (call_id=call_9lCAix1HDTCOFEF4)
+09-28 17:52:41.712 I/lumella (30632): capture requested; lifecycle=RESUMED
+09-28 17:52:41.755 I/CameraManagerGlobal(30632): Connecting to camera service
+09-28 17:52:41.761 W/libc    (30632): Access denied finding property "vendor.camera.aux.packagelist"
+09-28 17:52:41.761 W/libc    (30632): Access denied finding property "vendor.camera.aux.packagelist"
+09-28 17:52:41.762 W/libc    (30632): Access denied finding property "vendor.camera.aux.packagelist"
+09-28 17:52:41.785 D/CameraRepository(30632): Added camera: 0
+09-28 17:52:41.819 I/Camera2CameraInfo(30632): Device Level: INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED
+09-28 17:52:41.827 D/CameraRepository(30632): Added camera: 1
+09-28 17:52:41.829 I/Camera2CameraInfo(30632): Device Level: INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED
+09-28 17:52:41.830 D/CameraValidator(30632): Verifying camera lens facing on MercuryLiteXR, lensFacingInteger: null
+09-28 17:52:41.869 D/CameraOrientationUtil(30632): getRelativeImageRotation: destRotationDegrees=0, sourceRotationDegrees=90, isOppositeFacing=true, result=90
+09-28 17:52:41.870 D/CameraOrientationUtil(30632): getRelativeImageRotation: destRotationDegrees=0, sourceRotationDegrees=90, isOppositeFacing=true, result=90
+09-28 17:52:41.932 D/ImageCapture(30632): createPipeline(cameraId: 0, streamSpec: StreamSpec{resolution=4032x3024, dynamicRange=DynamicRange@e26cc02{encoding=SDR, bitDepth=8}, expectedFrameRateRange=[0, 0], implementationOptions=androidx.camera.camera2.impl.Camera2ImplConfig@a39a64e})
+09-28 17:52:41.944 D/DeferrableSurface(30632): Surface created[total_surfaces=1, used_surfaces=0](androidx.camera.core.impl.ImmediateSurface@98bc36f}
+09-28 17:52:41.956 D/Camera2CameraImpl(30632): {Camera@cd3c06d[id=0]} Use case androidx.camera.core.ImageCapture-e4c2accd-5ed0-49f4-b747-e9abb03fad19137182838 ACTIVE
+09-28 17:52:41.957 D/UseCaseAttachState(30632): Active and attached use case: [] for camera: 0
+09-28 17:52:41.957 D/lumella (30632): cameraState=CLOSED err=null
+09-28 17:52:41.960 D/Camera2CameraImpl(30632): {Camera@cd3c06d[id=0]} Use case androidx.camera.core.ImageCapture-e4c2accd-5ed0-49f4-b747-e9abb03fad19137182838 ACTIVE
+09-28 17:52:41.960 D/UseCaseAttachState(30632): Active and attached use case: [] for camera: 0
+09-28 17:52:41.962 D/UseCaseAttachState(30632): Active and attached use case: [] for camera: 0
+09-28 17:52:41.964 D/Camera2CameraImpl(30632): {Camera@cd3c06d[id=0]} Use cases [androidx.camera.core.ImageCapture-e4c2accd-5ed0-49f4-b747-e9abb03fad19137182838] now ATTACHED
+09-28 17:52:41.965 D/UseCaseAttachState(30632): All use case: [androidx.camera.core.ImageCapture-e4c2accd-5ed0-49f4-b747-e9abb03fad19137182838] for camera: 0
+09-28 17:52:41.968 D/MeteringRepeating(30632): MeteringSession SurfaceTexture size: 640x480
+09-28 17:52:41.970 D/DeferrableSurface(30632): Surface created[total_surfaces=2, used_surfaces=0](androidx.camera.core.impl.ImmediateSurface@f6e39b2}
+09-28 17:52:41.973 D/UseCaseAttachState(30632): Active and attached use case: [androidx.camera.core.ImageCapture-e4c2accd-5ed0-49f4-b747-e9abb03fad19137182838, MeteringRepeating238791353] for camera: 0
+09-28 17:52:41.978 D/Camera2CameraImpl(30632): {Camera@cd3c06d[id=0]} Resetting Capture Session
+09-28 17:52:41.979 D/Camera2CameraImpl(30632): {Camera@cd3c06d[id=0]} Releasing session in state INITIALIZED
+09-28 17:52:41.980 D/Camera2CameraImpl(30632): {Camera@cd3c06d[id=0]} Attempting to force open the camera.
+09-28 17:52:41.981 D/CameraStateRegistry(30632): tryOpenCamera(Camera@cd3c06d[id=0]) [Available Cameras: 1, Already Open: false (Previous state: null)] --> SUCCESS
+09-28 17:52:41.982 D/CameraStateRegistry(30632): Recalculating open cameras:
+09-28 17:52:41.982 D/CameraStateRegistry(30632): Camera                                       State                 
+09-28 17:52:41.982 D/CameraStateRegistry(30632): -------------------------------------------------------------------
+09-28 17:52:41.982 D/CameraStateRegistry(30632): Camera@bc47c1c[id=1]                         UNKNOWN               
+09-28 17:52:41.982 D/CameraStateRegistry(30632): Camera@cd3c06d[id=0]                         OPENING               
+09-28 17:52:41.982 D/CameraStateRegistry(30632): -------------------------------------------------------------------
+09-28 17:52:41.982 D/CameraStateRegistry(30632): Open count: 1 (Max allowed: 1)
+09-28 17:52:41.983 D/Camera2CameraImpl(30632): {Camera@cd3c06d[id=0]} Opening camera.
+09-28 17:52:41.983 D/Camera2CameraImpl(30632): {Camera@cd3c06d[id=0]} Transitioning camera internal state: INITIALIZED --> OPENING
+09-28 17:52:41.984 D/CameraStateMachine(30632): New public camera state CameraState{type=OPENING, error=null} from OPENING and null
+09-28 17:52:41.984 D/CameraStateMachine(30632): Publishing new public camera state CameraState{type=OPENING, error=null}
+09-28 17:52:41.984 D/lumella (30632): cameraState=OPENING err=null
+09-28 17:52:41.985 D/UseCaseAttachState(30632): All use case: [androidx.camera.core.ImageCapture-e4c2accd-5ed0-49f4-b747-e9abb03fad19137182838, MeteringRepeating238791353] for camera: 0
+09-28 17:52:41.990 W/libc    (30632): Access denied finding property "persist.vendor.camera.privapp.list"
+09-28 17:52:41.994 W/libc    (30632): Access denied finding property "vendor.camera.aux.packagelist"
+09-28 17:52:42.005 D/Camera2CameraImpl(30632): {Camera@cd3c06d[id=0]} Use case androidx.camera.core.ImageCapture-e4c2accd-5ed0-49f4-b747-e9abb03fad19137182838 ACTIVE
+09-28 17:52:42.007 D/UseCaseAttachState(30632): Active and attached use case: [androidx.camera.core.ImageCapture-e4c2accd-5ed0-49f4-b747-e9abb03fad19137182838, MeteringRepeating238791353] for camera: 0
+09-28 17:52:42.013 D/Camera2CameraImpl(30632): {Camera@cd3c06d[id=0]} CameraDevice.onOpened()
+09-28 17:52:42.014 D/Camera2CameraImpl(30632): {Camera@cd3c06d[id=0]} Transitioning camera internal state: OPENING --> OPENED
+09-28 17:52:42.015 D/CameraStateRegistry(30632): Recalculating open cameras:
+09-28 17:52:42.015 D/CameraStateRegistry(30632): Camera                                       State                 
+09-28 17:52:42.015 D/CameraStateRegistry(30632): -------------------------------------------------------------------
+09-28 17:52:42.015 D/CameraStateRegistry(30632): Camera@bc47c1c[id=1]                         UNKNOWN               
+09-28 17:52:42.015 D/CameraStateRegistry(30632): Camera@cd3c06d[id=0]                         OPEN                  
+09-28 17:52:42.015 D/CameraStateRegistry(30632): -------------------------------------------------------------------
+09-28 17:52:42.015 D/CameraStateRegistry(30632): Open count: 1 (Max allowed: 1)
+09-28 17:52:42.016 D/CameraStateMachine(30632): New public camera state CameraState{type=OPEN, error=null} from OPEN and null
+09-28 17:52:42.016 D/CameraStateMachine(30632): Publishing new public camera state CameraState{type=OPEN, error=null}
+09-28 17:52:42.016 D/lumella (30632): cameraState=OPEN err=null
+09-28 17:52:42.017 D/UseCaseAttachState(30632): All use case: [androidx.camera.core.ImageCapture-e4c2accd-5ed0-49f4-b747-e9abb03fad19137182838, MeteringRepeating238791353] for camera: 0
+09-28 17:52:42.017 D/ImageCapture(30632): takePictureInternal
+09-28 17:52:42.019 D/CameraOrientationUtil(30632): getRelativeImageRotation: destRotationDegrees=0, sourceRotationDegrees=90, isOppositeFacing=true, result=90
+09-28 17:52:42.021 D/TakePictureManager(30632): Issue the next TakePictureRequest.
+09-28 17:52:42.025 D/UseCaseAttachState(30632): Active and attached use case: [androidx.camera.core.ImageCapture-e4c2accd-5ed0-49f4-b747-e9abb03fad19137182838, MeteringRepeating238791353] for camera: 0
+09-28 17:52:42.030 D/SyncCaptureSessionBase(30632): [androidx.camera.camera2.internal.SynchronizedCaptureSessionBaseImpl@57669e5] getSurface...done
+09-28 17:52:42.030 D/CaptureSession(30632): Opening capture session.
+09-28 17:52:42.038 D/DeferrableSurface(30632): New surface in use[total_surfaces=2, used_surfaces=1](androidx.camera.core.impl.ImmediateSurface@98bc36f}
+09-28 17:52:42.038 D/DeferrableSurface(30632): use count+1, useCount=1 androidx.camera.core.impl.ImmediateSurface@98bc36f
+09-28 17:52:42.039 D/DeferrableSurface(30632): New surface in use[total_surfaces=2, used_surfaces=2](androidx.camera.core.impl.ImmediateSurface@f6e39b2}
+09-28 17:52:42.039 D/DeferrableSurface(30632): use count+1, useCount=1 androidx.camera.core.impl.ImmediateSurface@f6e39b2
+09-28 17:52:42.173 D/CaptureSession(30632): Attempting to send capture request onConfigured
+09-28 17:52:42.174 D/CaptureSession(30632): Issuing request for session.
+09-28 17:52:42.175 D/Camera2CaptureRequestBuilder(30632): createCaptureRequest
+09-28 17:52:42.182 D/CaptureSession(30632): CameraCaptureSession.onConfigured() mState=OPENED
+09-28 17:52:42.183 D/CaptureSession(30632): CameraCaptureSession.onReady() OPENED
+09-28 17:52:42.298 D/Camera2CameraImpl(30632): {Camera@cd3c06d[id=0]} Issue capture request
+09-28 17:52:42.298 D/CaptureSession(30632): Issuing capture request.
+09-28 17:52:42.301 D/Camera2CaptureRequestBuilder(30632): createCaptureRequest
+09-28 17:52:42.734 D/qdgralloc(30632): GetYUVPlaneInfo: Invalid format passed: 0x21
+09-28 17:52:42.738 D/TakePictureManager(30632): Issue the next TakePictureRequest.
+09-28 17:52:42.738 D/TakePictureManager(30632): No new request.
+09-28 17:52:42.798 D/ImageCapture(30632): clearPipeline
+09-28 17:52:42.798 D/DeferrableSurface(30632): surface closed,  useCount=1 closed=true androidx.camera.core.impl.ImmediateSurface@98bc36f
+09-28 17:52:42.801 D/Camera2CameraImpl(30632): {Camera@cd3c06d[id=0]} Use cases [androidx.camera.core.ImageCapture-e4c2accd-5ed0-49f4-b747-e9abb03fad19137182838] now DETACHED for camera
+09-28 17:52:42.802 D/UseCaseAttachState(30632): All use case: [MeteringRepeating238791353] for camera: 0
+09-28 17:52:42.803 D/MeteringRepeating(30632): MeteringRepeating clear!
+09-28 17:52:42.803 D/DeferrableSurface(30632): surface closed,  useCount=1 closed=true androidx.camera.core.impl.ImmediateSurface@f6e39b2
+09-28 17:52:42.804 D/Camera2CameraImpl(30632): {Camera@cd3c06d[id=0]} Resetting Capture Session
+09-28 17:52:42.806 D/Camera2CameraImpl(30632): {Camera@cd3c06d[id=0]} Releasing session in state OPENED
+09-28 17:52:42.806 D/UseCaseAttachState(30632): Active and attached use case: [] for camera: 0
+09-28 17:52:42.808 D/UseCaseAttachState(30632): Active and attached use case: [] for camera: 0
+09-28 17:52:42.812 D/Camera2CameraImpl(30632): {Camera@cd3c06d[id=0]} Closing camera.
+09-28 17:52:42.813 D/Camera2CameraImpl(30632): {Camera@cd3c06d[id=0]} Transitioning camera internal state: OPENED --> CLOSING
+09-28 17:52:42.814 D/CameraStateRegistry(30632): Recalculating open cameras:
+09-28 17:52:42.814 D/CameraStateRegistry(30632): Camera                                       State                 
+09-28 17:52:42.814 D/CameraStateRegistry(30632): -------------------------------------------------------------------
+09-28 17:52:42.814 D/CameraStateRegistry(30632): Camera@bc47c1c[id=1]                         UNKNOWN               
+09-28 17:52:42.814 D/CameraStateRegistry(30632): Camera@cd3c06d[id=0]                         CLOSING               
+09-28 17:52:42.814 D/CameraStateRegistry(30632): -------------------------------------------------------------------
+09-28 17:52:42.814 D/CameraStateRegistry(30632): Open count: 1 (Max allowed: 1)
+09-28 17:52:42.814 D/CameraStateMachine(30632): New public camera state CameraState{type=CLOSING, error=null} from CLOSING and null
+09-28 17:52:42.815 D/CameraStateMachine(30632): Publishing new public camera state CameraState{type=CLOSING, error=null}
+09-28 17:52:42.817 D/Camera2CameraImpl(30632): {Camera@cd3c06d[id=0]} Resetting Capture Session
+09-28 17:52:42.817 D/Camera2CameraImpl(30632): {Camera@cd3c06d[id=0]} Releasing session in state CLOSING
+09-28 17:52:42.819 D/CaptureSession(30632): onSessionFinished()
+09-28 17:52:42.877 I/.woolab.lumell(30632): Background concurrent copying GC freed 30295(2449KB) AllocSpace objects, 2(32KB) LOS objects, 49% free, 22MB/44MB, paused 65us,2.872ms total 133.901ms
+09-28 17:52:43.161 W/libc    (30632): Access denied finding property "vendor.camera.aux.packagelist"
+09-28 17:52:43.162 D/UseCaseAttachState(30632): Active and attached use case: [] for camera: 0
+09-28 17:52:43.164 D/DeferrableSurface(30632): use count-1,  useCount=0 closed=true androidx.camera.core.impl.ImmediateSurface@98bc36f
+09-28 17:52:43.164 D/DeferrableSurface(30632): Surface no longer in use[total_surfaces=2, used_surfaces=1](androidx.camera.core.impl.ImmediateSurface@98bc36f}
+09-28 17:52:43.164 D/DeferrableSurface(30632): Surface terminated[total_surfaces=1, used_surfaces=1](androidx.camera.core.impl.ImmediateSurface@98bc36f}
+09-28 17:52:43.165 D/DeferrableSurface(30632): use count-1,  useCount=0 closed=true androidx.camera.core.impl.ImmediateSurface@f6e39b2
+09-28 17:52:43.165 D/DeferrableSurface(30632): Surface no longer in use[total_surfaces=1, used_surfaces=0](androidx.camera.core.impl.ImmediateSurface@f6e39b2}
+09-28 17:52:43.165 D/DeferrableSurface(30632): Surface terminated[total_surfaces=0, used_surfaces=0](androidx.camera.core.impl.ImmediateSurface@f6e39b2}
+09-28 17:52:43.166 D/Camera2CameraImpl(30632): {Camera@cd3c06d[id=0]} CameraDevice.onClosed()
+09-28 17:52:43.167 D/Camera2CameraImpl(30632): {Camera@cd3c06d[id=0]} Transitioning camera internal state: CLOSING --> INITIALIZED
+09-28 17:52:43.168 D/CameraStateRegistry(30632): Recalculating open cameras:
+09-28 17:52:43.168 D/CameraStateRegistry(30632): Camera                                       State                 
+09-28 17:52:43.168 D/CameraStateRegistry(30632): -------------------------------------------------------------------
+09-28 17:52:43.168 D/CameraStateRegistry(30632): Camera@bc47c1c[id=1]                         UNKNOWN               
+09-28 17:52:43.168 D/CameraStateRegistry(30632): Camera@cd3c06d[id=0]                         CLOSED                
+09-28 17:52:43.168 D/CameraStateRegistry(30632): -------------------------------------------------------------------
+09-28 17:52:43.168 D/CameraStateRegistry(30632): Open count: 0 (Max allowed: 1)
+09-28 17:52:43.168 D/CameraStateMachine(30632): New public camera state CameraState{type=CLOSED, error=null} from CLOSED and null
+09-28 17:52:43.168 D/CameraStateMachine(30632): Publishing new public camera state CameraState{type=CLOSED, error=null}
+09-28 17:52:43.223 I/lumella (30632): debug: 모델이 본 프레임 저장 /storage/emulated/0/Android/data/com.woolab.lumella/files/model-saw.jpg
+09-28 17:52:43.241 I/lumella (30632): photo -> realtime model: chars=256360 sent=true
+09-28 17:52:43.288 I/lumella (30632): perf: capture reads=125 lateReads=0 maxCycleMs=44 maxHandleMs=10 bufferMs=40
+09-28 17:52:44.183 D/lumella (30632): 응답 경계: 억제 해제 + 리셋
+09-28 17:52:44.942 I/lumella (30632): 튜터 발화 시작 (TTFA 8480ms)
+09-28 17:52:44.942 W/AudioTrack(30632): restartIfDisabled(831): releaseBuffer() track 0xb400007de72caf00 disabled due to previous underrun, restarting
+09-28 17:52:48.288 I/lumella (30632): perf: capture reads=125 lateReads=0 maxCycleMs=56 maxHandleMs=2 bufferMs=40
+09-28 17:52:52.951 I/lumella (30632): 튜터 발화 끝
+09-28 17:52:52.951 I/lumella (30632): perf: playback underruns=0 audioMs=8050 wallMs=8006 chunks=32 maxWriteMs=524 sumWriteMs=7737 maxTapMs=1 bufferFrames=1928
+09-28 17:52:53.289 I/lumella (30632): perf: capture reads=125 lateReads=0 maxCycleMs=42 maxHandleMs=2 bufferMs=40
+09-28 17:52:55.669 I/lumella (30632): debug: 음성 감지 주입
+09-28 17:52:56.754 I/lumella (30632): debug: 음성 종료 주입
+09-28 17:52:56.754 I/lumella (30632): turn end (VAD): audioChunks=507
+09-28 17:52:57.090 D/lumella (30632): 응답 경계: 억제 해제 + 리셋
+09-28 17:52:57.688 I/lumella (30632): 튜터 발화 시작 (TTFA 934ms)
+09-28 17:52:57.688 W/AudioTrack(30632): restartIfDisabled(831): releaseBuffer() track 0xb400007de72caf00 disabled due to previous underrun, restarting
+09-28 17:52:57.846 I/lumella (30632): debug: 입력 전사 주입 = 오늘 아침에 빵이 먹었어요
+09-28 17:52:58.292 I/lumella (30632): perf: capture reads=125 lateReads=0 maxCycleMs=56 maxHandleMs=2 bufferMs=40
+09-28 17:53:01.254 I/lumella (30632): 튜터 발화 끝
+09-28 17:53:01.254 I/lumella (30632): perf: playback underruns=0 audioMs=3600 wallMs=3564 chunks=14 maxWriteMs=594 sumWriteMs=3465 maxTapMs=1 bufferFrames=1928
+09-28 17:53:03.331 I/lumella (30632): perf: capture reads=126 lateReads=0 maxCycleMs=43 maxHandleMs=3 bufferMs=40
+09-28 17:53:08.359 I/lumella (30632): perf: capture reads=126 lateReads=0 maxCycleMs=44 maxHandleMs=2 bufferMs=40
+09-28 17:53:13.359 I/lumella (30632): perf: capture reads=125 lateReads=0 maxCycleMs=45 maxHandleMs=2 bufferMs=40
+09-28 17:53:15.937 I/lumella (30632): debug: 음성 감지 주입
+09-28 17:53:17.003 I/lumella (30632): debug: 음성 종료 주입
+09-28 17:53:17.003 I/lumella (30632): turn end (VAD): audioChunks=507
+09-28 17:53:17.351 D/lumella (30632): 응답 경계: 억제 해제 + 리셋
+09-28 17:53:17.942 I/lumella (30632): 튜터 발화 시작 (TTFA 939ms)
+09-28 17:53:17.943 W/AudioTrack(30632): restartIfDisabled(831): releaseBuffer() track 0xb400007de72caf00 disabled due to previous underrun, restarting
+09-28 17:53:18.067 I/lumella (30632): debug: 입력 전사 주입 = 내일 영화가 볼 거예요
+09-28 17:53:18.370 I/lumella (30632): perf: capture reads=125 lateReads=0 maxCycleMs=57 maxHandleMs=2 bufferMs=40
+09-28 17:53:21.086 I/lumella (30632): 튜터 발화 끝
+09-28 17:53:21.086 I/lumella (30632): perf: playback underruns=0 audioMs=3200 wallMs=3141 chunks=12 maxWriteMs=641 sumWriteMs=3047 maxTapMs=2 bufferFrames=1928
+09-28 17:53:23.370 I/lumella (30632): perf: capture reads=125 lateReads=0 maxCycleMs=41 maxHandleMs=2 bufferMs=40
+09-28 17:53:28.401 I/lumella (30632): perf: capture reads=126 lateReads=0 maxCycleMs=44 maxHandleMs=2 bufferMs=40
+09-28 17:53:33.438 I/lumella (30632): perf: capture reads=126 lateReads=0 maxCycleMs=44 maxHandleMs=2 bufferMs=40
+09-28 17:53:36.246 I/lumella (30632): debug: 음성 감지 주입
+09-28 17:53:37.329 I/lumella (30632): debug: 음성 종료 주입
+09-28 17:53:37.330 I/lumella (30632): turn end (VAD): audioChunks=508
+09-28 17:53:37.659 D/lumella (30632): 응답 경계: 억제 해제 + 리셋
+09-28 17:53:38.075 I/lumella (30632): 튜터 발화 시작 (TTFA 745ms)
+09-28 17:53:38.076 W/AudioTrack(30632): restartIfDisabled(831): releaseBuffer() track 0xb400007de72caf00 disabled due to previous underrun, restarting
+09-28 17:53:38.406 I/lumella (30632): debug: 입력 전사 주입 = 어제 친구를 만났어요
+09-28 17:53:38.471 I/lumella (30632): perf: capture reads=126 lateReads=0 maxCycleMs=45 maxHandleMs=2 bufferMs=40
+09-28 17:53:42.659 I/lumella (30632): 튜터 발화 끝
+09-28 17:53:42.659 I/lumella (30632): perf: playback underruns=1 audioMs=4600 wallMs=4581 chunks=18 maxWriteMs=586 sumWriteMs=4380 maxTapMs=7 bufferFrames=1928
+09-28 17:53:43.472 I/lumella (30632): perf: capture reads=125 lateReads=0 maxCycleMs=41 maxHandleMs=2 bufferMs=40
+09-28 17:53:48.512 I/lumella (30632): perf: capture reads=126 lateReads=0 maxCycleMs=44 maxHandleMs=2 bufferMs=40
+09-28 17:53:53.516 I/lumella (30632): perf: capture reads=125 lateReads=0 maxCycleMs=45 maxHandleMs=2 bufferMs=40
+09-28 17:53:56.507 I/lumella (30632): debug: 음성 감지 주입
+09-28 17:53:57.588 I/lumella (30632): debug: 음성 종료 주입
+09-28 17:53:57.588 I/lumella (30632): turn end (VAD): audioChunks=506
+09-28 17:53:57.948 D/lumella (30632): 응답 경계: 억제 해제 + 리셋
+09-28 17:53:58.366 I/lumella (30632): 튜터 발화 시작 (TTFA 778ms)
+09-28 17:53:58.367 W/AudioTrack(30632): restartIfDisabled(831): releaseBuffer() track 0xb400007de72caf00 disabled due to previous underrun, restarting
+09-28 17:53:58.552 I/lumella (30632): perf: capture reads=126 lateReads=0 maxCycleMs=45 maxHandleMs=2 bufferMs=40
+09-28 17:53:58.691 I/lumella (30632): debug: 입력 전사 주입 = 오늘 아침에 빵을 먹었어요
+09-28 17:54:03.036 I/lumella (30632): 튜터 발화 끝
+09-28 17:54:03.036 I/lumella (30632): perf: playback underruns=0 audioMs=4700 wallMs=4667 chunks=18 maxWriteMs=706 sumWriteMs=4498 maxTapMs=4 bufferFrames=1928
+09-28 17:54:03.552 I/lumella (30632): perf: capture reads=125 lateReads=0 maxCycleMs=42 maxHandleMs=2 bufferMs=40
+09-28 17:54:08.552 I/lumella (30632): perf: capture reads=125 lateReads=0 maxCycleMs=44 maxHandleMs=2 bufferMs=40
+09-28 17:54:13.552 I/lumella (30632): perf: capture reads=125 lateReads=0 maxCycleMs=45 maxHandleMs=2 bufferMs=40
+09-28 17:54:16.787 I/lumella (30632): debug: 음성 감지 주입
+09-28 17:54:17.860 I/lumella (30632): debug: 음성 종료 주입
+09-28 17:54:17.861 I/lumella (30632): turn end (VAD): audioChunks=507
+09-28 17:54:18.212 D/lumella (30632): 응답 경계: 억제 해제 + 리셋
+09-28 17:54:18.553 I/lumella (30632): perf: capture reads=125 lateReads=0 maxCycleMs=44 maxHandleMs=2 bufferMs=40
+09-28 17:54:18.868 I/lumella (30632): 튜터 발화 시작 (TTFA 1008ms)
+09-28 17:54:18.869 W/AudioTrack(30632): restartIfDisabled(831): releaseBuffer() track 0xb400007de72caf00 disabled due to previous underrun, restarting
+09-28 17:54:18.933 I/lumella (30632): debug: 입력 전사 주입 = 내일 영화를 볼 거예요
+09-28 17:54:23.569 I/lumella (30632): perf: capture reads=125 lateReads=0 maxCycleMs=57 maxHandleMs=2 bufferMs=40
+09-28 17:54:24.086 I/lumella (30632): 튜터 발화 끝
+09-28 17:54:24.086 I/lumella (30632): perf: playback underruns=0 audioMs=5200 wallMs=5216 chunks=20 maxWriteMs=703 sumWriteMs=5065 maxTapMs=5 bufferFrames=1928
+09-28 17:54:28.599 I/lumella (30632): perf: capture reads=126 lateReads=0 maxCycleMs=44 maxHandleMs=2 bufferMs=40
+09-28 17:54:33.599 I/lumella (30632): perf: capture reads=125 lateReads=0 maxCycleMs=45 maxHandleMs=2 bufferMs=40
+09-28 17:54:38.637 I/lumella (30632): perf: capture reads=126 lateReads=0 maxCycleMs=44 maxHandleMs=2 bufferMs=40
+09-28 17:54:43.124 I/lumella (30632): debug: stop recording
+09-28 17:54:43.128 I/lumella (30632): debug: rec not recording
+09-28 17:54:43.638 I/lumella (30632): perf: capture reads=125 lateReads=0 maxCycleMs=45 maxHandleMs=2 bufferMs=40
+09-28 17:54:48.681 I/lumella (30632): perf: capture reads=126 lateReads=0 maxCycleMs=44 maxHandleMs=2 bufferMs=40

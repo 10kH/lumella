@@ -36,6 +36,15 @@ REMOTE_POV_DIR="/storage/emulated/0/Android/data/$PKG/files"
 OUT="${SHOTS_DIR:-$HOME/shots}"
 
 NAME="${1:?usage: ops/take.sh <name> [seconds|--start|--stop] [--pov|--audio]}"
+# The app names POV segments <name>.mp4, <name>-2.mp4, <name>-3.mp4 when a photo turn splits
+# the recording. A name that already ends in -<digits> is indistinguishable from a segment:
+# "baseline-pov-2" continued as "baseline-pov-3.mp4" and this script, looking for
+# "baseline-pov-2-2.mp4", never pulled it (2026-09-28). Refuse the ambiguous name up front.
+case "$NAME" in
+  *-[0-9]|*-[0-9][0-9]|*-[0-9][0-9][0-9])
+    echo "take name '$NAME' ends in -<number>, which collides with POV segment numbering; use e.g. '${NAME%-*}-${NAME##*-}x' or '${NAME%-*}${NAME##*-}'" >&2
+    exit 2 ;;
+esac
 shift
 MODE="block"
 SEC=180

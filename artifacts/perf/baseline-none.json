@@ -1,0 +1,550 @@
+{
+ "label": "baseline-none",
+ "mode": "none",
+ "summary": {
+  "cpuTotalMeanPct": 82.6,
+  "cpuTotalPeakPct": 178,
+  "playback": {
+   "responses": 7,
+   "underrunsTotal": 2,
+   "responsesWithUnderrun": 2,
+   "stretchMax": 1.01,
+   "stretchMedian": 1.0,
+   "maxWriteMs": 659,
+   "maxTapMs": 0
+  },
+  "capture": {
+   "windows": 36,
+   "lateReadsTotal": 0,
+   "maxCycleMs": 59,
+   "bufferMs": 40
+  },
+  "ttfaMs": {
+   "n": 7,
+   "median": 798,
+   "max": 6348
+  },
+  "ruleGapAfter3": "목적어에 주격 조사를 씀: 을/를 대신 이/가",
+  "ruleGapAfter6": null
+ },
+ "cpu": {
+  "samples": 44,
+  "processes": [
+   {
+    "name": "com.woolab.lumella",
+    "meanPct": 23.4,
+    "peakPct": 538.0
+   },
+   {
+    "name": "vendor.qti.hardware.AGMIPC@1.0-service",
+    "meanPct": 5.7,
+    "peakPct": 12.0
+   },
+   {
+    "name": "audioserver",
+    "meanPct": 3.9,
+    "peakPct": 11.0
+   },
+   {
+    "name": "android.hardware.audio.service_64",
+    "meanPct": 3.7,
+    "peakPct": 10.0
+   },
+   {
+    "name": "system_server",
+    "meanPct": 2.8,
+    "peakPct": 17.0
+   },
+   {
+    "name": "android.hardware.wifi@1.0-service",
+    "meanPct": 1.6,
+    "peakPct": 3.0
+   },
+   {
+    "name": "android.hardware.sensors@2.1-service.multihal",
+    "meanPct": 1.0,
+    "peakPct": 3.0
+   },
+   {
+    "name": "com.ffalconxr.mercury.launcher",
+    "meanPct": 0.9,
+    "peakPct": 4.0
+   },
+   {
+    "name": "[dp_rx_thread_1]",
+    "meanPct": 0.7,
+    "peakPct": 2.0
+   },
+   {
+    "name": "ueventd",
+    "meanPct": 0.6,
+    "peakPct": 5.0
+   }
+  ],
+  "threads": [
+   {
+    "name": "com.woolab.lumella / AudioPortEventH",
+    "meanPct": 8.8,
+    "peakPct": 389.0
+   },
+   {
+    "name": "com.woolab.lumella / OkHttp TaskRunn",
+    "meanPct": 6.0,
+    "peakPct": 80.0
+   },
+   {
+    "name": "com.woolab.lumella / lumella-audio-c",
+    "meanPct": 2.4,
+    "peakPct": 4.0
+   },
+   {
+    "name": "audioserver / AudioIn_22E",
+    "meanPct": 2.1,
+    "peakPct": 4.0
+   },
+   {
+    "name": "android.hardware.audio.service_64 / reader",
+    "meanPct": 2.0,
+    "peakPct": 3.0
+   },
+   {
+    "name": "vendor.qti.hardware.AGMIPC@1.0-service / AGMIPC@1.0-serv",
+    "meanPct": 1.8,
+    "peakPct": 8.0
+   },
+   {
+    "name": "android.hardware.audio.service_64 / writer",
+    "meanPct": 1.8,
+    "peakPct": 8.0
+   },
+   {
+    "name": "android.hardware.wifi@1.0-service / wifi@1.0-servic",
+    "meanPct": 1.6,
+    "peakPct": 3.0
+   },
+   {
+    "name": "com.woolab.lumella / .woolab.lumella",
+    "meanPct": 1.4,
+    "peakPct": 9.0
+   },
+   {
+    "name": "audioserver / FastMixer",
+    "meanPct": 1.2,
+    "peakPct": 6.0
+   },
+   {
+    "name": "com.woolab.lumella / .openai.com/...",
+    "meanPct": 0.9,
+    "peakPct": 4.0
+   },
+   {
+    "name": "com.woolab.lumella / OkHttp Dispatch",
+    "meanPct": 0.9,
+    "peakPct": 38.0
+   },
+   {
+    "name": "vendor.qti.hardware.AGMIPC@1.0-service / HwBinder:797_D",
+    "meanPct": 0.9,
+    "peakPct": 6.0
+   },
+   {
+    "name": "vendor.qti.hardware.AGMIPC@1.0-service / HwBinder:797_1",
+    "meanPct": 0.9,
+    "peakPct": 4.0
+   },
+   {
+    "name": "com.woolab.lumella / Jit thread pool",
+    "meanPct": 0.8,
+    "peakPct": 6.0
+   }
+  ]
+ },
+ "slowPath": {
+  "after3": {
+   "ruleGap": "목적어에 주격 조사를 씀: 을/를 대신 이/가",
+   "grammarErrors": 3,
+   "turns": 3,
+   "lastConsolidatedTurnId": 3,
+   "errorSpans": [
+    "친구가",
+    "빵이",
+    "영화가"
+   ]
+  },
+  "after6": {
+   "ruleGap": null,
+   "grammarErrors": 3,
+   "turns": 6,
+   "lastConsolidatedTurnId": 6,
+   "errorSpans": [
+    "친구가",
+    "빵이",
+    "영화가"
+   ]
+  },
+  "warnings": []
+ },
+ "playback": [
+  {
+   "underruns": 1,
+   "audioMs": 7300,
+   "wallMs": 7316,
+   "stretch": 1.0,
+   "chunks": 29,
+   "maxWriteMs": 524,
+   "sumWriteMs": 6998,
+   "maxTapMs": 0,
+   "bufferFrames": 1928
+  },
+  {
+   "underruns": 1,
+   "audioMs": 2750,
+   "wallMs": 2739,
+   "stretch": 1.0,
+   "chunks": 11,
+   "maxWriteMs": 468,
+   "sumWriteMs": 2561,
+   "maxTapMs": 0,
+   "bufferFrames": 1928
+  },
+  {
+   "underruns": 0,
+   "audioMs": 6900,
+   "wallMs": 6989,
+   "stretch": 1.01,
+   "chunks": 27,
+   "maxWriteMs": 641,
+   "sumWriteMs": 6773,
+   "maxTapMs": 0,
+   "bufferFrames": 1928
+  },
+  {
+   "underruns": 0,
+   "audioMs": 4300,
+   "wallMs": 4280,
+   "stretch": 1.0,
+   "chunks": 17,
+   "maxWriteMs": 526,
+   "sumWriteMs": 4148,
+   "maxTapMs": 0,
+   "bufferFrames": 1928
+  },
+  {
+   "underruns": 0,
+   "audioMs": 3550,
+   "wallMs": 3505,
+   "stretch": 0.99,
+   "chunks": 14,
+   "maxWriteMs": 535,
+   "sumWriteMs": 3413,
+   "maxTapMs": 0,
+   "bufferFrames": 1928
+  },
+  {
+   "underruns": 0,
+   "audioMs": 4200,
+   "wallMs": 4169,
+   "stretch": 0.99,
+   "chunks": 16,
+   "maxWriteMs": 659,
+   "sumWriteMs": 4050,
+   "maxTapMs": 0,
+   "bufferFrames": 1928
+  },
+  {
+   "underruns": 0,
+   "audioMs": 4750,
+   "wallMs": 4716,
+   "stretch": 0.99,
+   "chunks": 19,
+   "maxWriteMs": 468,
+   "sumWriteMs": 4571,
+   "maxTapMs": 0,
+   "bufferFrames": 1928
+  }
+ ],
+ "capture": [
+  {
+   "reads": 123,
+   "lateReads": 0,
+   "maxCycleMs": 44,
+   "maxHandleMs": 3,
+   "bufferMs": 40
+  },
+  {
+   "reads": 126,
+   "lateReads": 0,
+   "maxCycleMs": 45,
+   "maxHandleMs": 2,
+   "bufferMs": 40
+  },
+  {
+   "reads": 126,
+   "lateReads": 0,
+   "maxCycleMs": 44,
+   "maxHandleMs": 3,
+   "bufferMs": 40
+  },
+  {
+   "reads": 125,
+   "lateReads": 0,
+   "maxCycleMs": 45,
+   "maxHandleMs": 2,
+   "bufferMs": 40
+  },
+  {
+   "reads": 125,
+   "lateReads": 0,
+   "maxCycleMs": 44,
+   "maxHandleMs": 2,
+   "bufferMs": 40
+  },
+  {
+   "reads": 125,
+   "lateReads": 0,
+   "maxCycleMs": 44,
+   "maxHandleMs": 2,
+   "bufferMs": 40
+  },
+  {
+   "reads": 126,
+   "lateReads": 0,
+   "maxCycleMs": 44,
+   "maxHandleMs": 2,
+   "bufferMs": 40
+  },
+  {
+   "reads": 125,
+   "lateReads": 0,
+   "maxCycleMs": 44,
+   "maxHandleMs": 2,
+   "bufferMs": 40
+  },
+  {
+   "reads": 125,
+   "lateReads": 0,
+   "maxCycleMs": 44,
+   "maxHandleMs": 3,
+   "bufferMs": 40
+  },
+  {
+   "reads": 126,
+   "lateReads": 0,
+   "maxCycleMs": 44,
+   "maxHandleMs": 2,
+   "bufferMs": 40
+  },
+  {
+   "reads": 125,
+   "lateReads": 0,
+   "maxCycleMs": 46,
+   "maxHandleMs": 3,
+   "bufferMs": 40
+  },
+  {
+   "reads": 125,
+   "lateReads": 0,
+   "maxCycleMs": 56,
+   "maxHandleMs": 2,
+   "bufferMs": 40
+  },
+  {
+   "reads": 125,
+   "lateReads": 0,
+   "maxCycleMs": 42,
+   "maxHandleMs": 2,
+   "bufferMs": 40
+  },
+  {
+   "reads": 126,
+   "lateReads": 0,
+   "maxCycleMs": 44,
+   "maxHandleMs": 2,
+   "bufferMs": 40
+  },
+  {
+   "reads": 125,
+   "lateReads": 0,
+   "maxCycleMs": 44,
+   "maxHandleMs": 2,
+   "bufferMs": 40
+  },
+  {
+   "reads": 126,
+   "lateReads": 0,
+   "maxCycleMs": 44,
+   "maxHandleMs": 2,
+   "bufferMs": 40
+  },
+  {
+   "reads": 125,
+   "lateReads": 0,
+   "maxCycleMs": 57,
+   "maxHandleMs": 2,
+   "bufferMs": 40
+  },
+  {
+   "reads": 125,
+   "lateReads": 0,
+   "maxCycleMs": 42,
+   "maxHandleMs": 2,
+   "bufferMs": 40
+  },
+  {
+   "reads": 126,
+   "lateReads": 0,
+   "maxCycleMs": 44,
+   "maxHandleMs": 2,
+   "bufferMs": 40
+  },
+  {
+   "reads": 125,
+   "lateReads": 0,
+   "maxCycleMs": 59,
+   "maxHandleMs": 2,
+   "bufferMs": 40
+  },
+  {
+   "reads": 125,
+   "lateReads": 0,
+   "maxCycleMs": 41,
+   "maxHandleMs": 2,
+   "bufferMs": 40
+  },
+  {
+   "reads": 126,
+   "lateReads": 0,
+   "maxCycleMs": 47,
+   "maxHandleMs": 2,
+   "bufferMs": 40
+  },
+  {
+   "reads": 126,
+   "lateReads": 0,
+   "maxCycleMs": 44,
+   "maxHandleMs": 2,
+   "bufferMs": 40
+  },
+  {
+   "reads": 126,
+   "lateReads": 0,
+   "maxCycleMs": 45,
+   "maxHandleMs": 2,
+   "bufferMs": 40
+  },
+  {
+   "reads": 125,
+   "lateReads": 0,
+   "maxCycleMs": 41,
+   "maxHandleMs": 2,
+   "bufferMs": 40
+  },
+  {
+   "reads": 125,
+   "lateReads": 0,
+   "maxCycleMs": 46,
+   "maxHandleMs": 2,
+   "bufferMs": 40
+  },
+  {
+   "reads": 125,
+   "lateReads": 0,
+   "maxCycleMs": 45,
+   "maxHandleMs": 2,
+   "bufferMs": 40
+  },
+  {
+   "reads": 126,
+   "lateReads": 0,
+   "maxCycleMs": 45,
+   "maxHandleMs": 3,
+   "bufferMs": 40
+  },
+  {
+   "reads": 125,
+   "lateReads": 0,
+   "maxCycleMs": 42,
+   "maxHandleMs": 2,
+   "bufferMs": 40
+  },
+  {
+   "reads": 125,
+   "lateReads": 0,
+   "maxCycleMs": 44,
+   "maxHandleMs": 2,
+   "bufferMs": 40
+  },
+  {
+   "reads": 125,
+   "lateReads": 0,
+   "maxCycleMs": 44,
+   "maxHandleMs": 3,
+   "bufferMs": 40
+  },
+  {
+   "reads": 125,
+   "lateReads": 0,
+   "maxCycleMs": 55,
+   "maxHandleMs": 3,
+   "bufferMs": 40
+  },
+  {
+   "reads": 125,
+   "lateReads": 0,
+   "maxCycleMs": 42,
+   "maxHandleMs": 3,
+   "bufferMs": 40
+  },
+  {
+   "reads": 126,
+   "lateReads": 0,
+   "maxCycleMs": 44,
+   "maxHandleMs": 2,
+   "bufferMs": 40
+  },
+  {
+   "reads": 126,
+   "lateReads": 0,
+   "maxCycleMs": 44,
+   "maxHandleMs": 2,
+   "bufferMs": 40
+  },
+  {
+   "reads": 125,
+   "lateReads": 0,
+   "maxCycleMs": 45,
+   "maxHandleMs": 2,
+   "bufferMs": 40
+  }
+ ],
+ "ttfaMs": [
+  651,
+  619,
+  6348,
+  798,
+  803,
+  808,
+  617
+ ],
+ "thermal": {
+  "start": [
+   "cpu-0-0 46500",
+   "cpu-0-1 45300",
+   "cpu-0-2 46100",
+   "cpu-0-3 45700",
+   "freq 1996800 1996800 1996800 1996800"
+  ],
+  "end": [
+   "cpu-0-0 45000",
+   "cpu-0-1 44200",
+   "cpu-0-2 43800",
+   "cpu-0-3 43800",
+   "freq 1497600 1497600 1497600 1497600"
+  ]
+ },
+ "files": {
+  "pov": null,
+  "screen": null,
+  "tutorWav": null
+ }
+}

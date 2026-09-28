@@ -72,15 +72,50 @@ class AudioCapture(
         }
     }
 
+    /**
+     * Capture-side stall accounting for the perf harness. One buffer holds bufferMs of audio;
+     * if the loop comes back to read() much later than that, the platform's ring buffer has been
+     * filling while we were busy (encoding, sending) and past its size it overruns — the
+     * learner's words are lost. Logged every [PERF_WINDOW_MS] as a "perf: capture" line.
+     */
+    @Volatile var perfLog: ((String) -> Unit)? = null
+
     private fun streamLoop(record: AudioRecord, bufferSize: Int) {
         val buffer = ByteArray(bufferSize)
         var reported = false
+        val bufferMs = bufferSize * 1000L / (sampleRateHz * 2L)
+        var windowStart = System.currentTimeMillis()
+        var lastReadEnd = 0L
+        var reads = 0
+        var lateReads = 0
+        var maxGapMs = 0L
+        var maxHandleMs = 0L
         while (recording.get()) {
+            val readStart = System.currentTimeMillis()
+            if (lastReadEnd != 0L) {
+                val gap = readStart - lastReadEnd
+                if (gap > maxHandleMs) maxHandleMs = gap
+            }
             val read = try {
                 record.read(buffer, 0, buffer.size)
             } catch (e: Exception) {
                 onError("AudioRecord.read threw: ${e.message}")
                 return
+            }
+            val readEnd = System.currentTimeMillis()
+            if (lastReadEnd != 0L) {
+                val cycle = readEnd - lastReadEnd
+                if (cycle > maxGapMs) maxGapMs = cycle
+                if (cycle > bufferMs * 2) lateReads++
+            }
+            lastReadEnd = readEnd
+            reads++
+            if (readEnd - windowStart >= PERF_WINDOW_MS) {
+                perfLog?.invoke(
+                    "perf: capture reads=$reads lateReads=$lateReads maxCycleMs=$maxGapMs " +
+                        "maxHandleMs=$maxHandleMs bufferMs=$bufferMs",
+                )
+                windowStart = readEnd; reads = 0; lateReads = 0; maxGapMs = 0; maxHandleMs = 0
             }
             when {
                 read > 0 -> onChunk(Base64.getEncoder().encodeToString(buffer.copyOf(read)))
@@ -111,5 +146,9 @@ class AudioCapture(
         }
         audioRecord?.release()
         audioRecord = null
+    }
+
+    companion object {
+        const val PERF_WINDOW_MS = 5_000L
     }
 }
