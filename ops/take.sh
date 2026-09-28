@@ -19,6 +19,11 @@
 #   ops/take.sh c7 --start --pov     # start and return; the wearer talks for as long as needed
 #   ops/take.sh c7 --stop            # stop, collect, report
 #
+# The booth shoot is `--start --pov`. It used to make the tutor stutter and was shot around with
+# --audio; since 2026-09-28 it runs the six booth sentences with no playback underrun at all
+# (artifacts/perf/README.md). --audio remains for when the tutor still stutters — then it is the
+# network, and a take without the camera is the fallback, not the plan.
+#
 # --start/--stop exist because the blocking form cannot be driven from a shell that ends: the
 # recording died with its parent and the POV kept running unattended to 358 MB before it was
 # noticed (2026-09-14). With --start, screenrecord runs detached ON THE DEVICE, so nothing on
@@ -57,9 +62,10 @@ for a in "$@"; do
     --start) MODE="start" ;;
     --stop)  MODE="stop" ;;
     --pov)   POV=1 ;;
-    # Both voices without the camera. The voice taps and the POV are started by the same
-    # broadcast but are otherwise independent, so a take that only needs sound does not pay for
-    # the camera — still the heaviest thing this device does (artifacts/perf/README.md).
+    # Fallback: both voices and the screen, without the camera. The voice taps and the POV are
+    # started by the same broadcast but are otherwise independent, so a take that only needs
+    # sound does not pay for the camera — still the heaviest thing this device does
+    # (artifacts/perf/README.md).
     --audio) AUDIO=1 ;;
     ''|*[!0-9]*) echo "unknown argument: $a" >&2; exit 2 ;;
     *)       SEC="$a" ;;
