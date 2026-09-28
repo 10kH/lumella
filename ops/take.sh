@@ -35,16 +35,22 @@ REMOTE_SCREEN_DIR="/sdcard"
 REMOTE_POV_DIR="/storage/emulated/0/Android/data/$PKG/files"
 OUT="${SHOTS_DIR:-$HOME/shots}"
 
-NAME="${1:?usage: ops/take.sh <name> [seconds|--start|--stop] [--pov]}"
+NAME="${1:?usage: ops/take.sh <name> [seconds|--start|--stop] [--pov|--audio]}"
 shift
 MODE="block"
 SEC=180
 POV=""
+AUDIO=""
 for a in "$@"; do
   case "$a" in
     --start) MODE="start" ;;
     --stop)  MODE="stop" ;;
     --pov)   POV=1 ;;
+    # The tutor's voice without the camera. tutorVoiceTap and povRecorder are started by the
+    # same broadcast but are otherwise independent (MainActivity.kt:1527-1528), so a take that
+    # only needs sound does not have to pay for the camera — which costs ~50% of one core on
+    # this device and makes the conversation stutter (measured 2026-09-18).
+    --audio) AUDIO=1 ;;
     ''|*[!0-9]*) echo "unknown argument: $a" >&2; exit 2 ;;
     *)       SEC="$a" ;;
   esac
@@ -170,6 +176,7 @@ collect() {
   # mic runs with the platform echo canceller so the tutor is deliberately absent from it — a
   # take otherwise carries only the learner's half of the conversation.
   local tutor_remote="$REMOTE_POV_DIR/$NAME-tutor.wav"
+  # Reached on --audio too: the wav is the whole point of that mode.
   if adb -s "$DEV" pull "$tutor_remote" "$OUT/$NAME-$stamp-tutor.wav" >/dev/null 2>&1; then
     adb -s "$DEV" shell "rm -f $tutor_remote"
     echo "  tutor  $OUT/$NAME-$stamp-tutor.wav"
@@ -199,6 +206,11 @@ collect() {
 # take came back 13.3s short at the HEAD, missing the camera-off opening the shot existed to
 # prove. So: confirm the file is actually growing, and restart once if it is not.
 start_pov() {
+  # --audio: fire the same broadcast, but do not wait on the POV file — there will not be one.
+  if [ -n "$AUDIO" ] && [ -z "$POV" ]; then
+    adb -s "$DEV" shell am broadcast -p "$PKG" -a "$PKG.DEBUG_REC_START" --es name "$NAME" --ez camera false >/dev/null 2>&1
+    return 0
+  fi
   [ -z "$POV" ] && return
   local remote="$REMOTE_POV_DIR/$NAME.mp4" a b attempt
   for attempt in 1 2; do
@@ -245,8 +257,11 @@ case "$MODE" in
       echo "WARNING: screen recording did not start; POV may still be running" >&2
     fi
     date +%H%M%S > "/tmp/lumella-take-$NAME.stamp"
-    [ -n "$POV" ] && echo "$NAME: recording (screen + POV). stop with: ops/take.sh $NAME --stop" \
-                  || echo "$NAME: recording (screen). stop with: ops/take.sh $NAME --stop"
+    if [ -n "$POV" ]; then   mode="screen + POV"
+    elif [ -n "$AUDIO" ]; then mode="screen + tutor audio"
+    else                     mode="screen"
+    fi
+    echo "$NAME: recording ($mode). stop with: ops/take.sh $NAME --stop"
     ;;
   stop)
     STAMP="$(cat "/tmp/lumella-take-$NAME.stamp" 2>/dev/null || date +%H%M%S)"
@@ -259,10 +274,10 @@ case "$MODE" in
     ;;
   block)
     STAMP="$(date +%H%M%S)"
-    echo "[$NAME] ${SEC}s — $(date '+%H:%M:%S')${POV:+ (+POV)}"
+    echo "[$NAME] ${SEC}s — $(date '+%H:%M:%S')${POV:+ (+POV)}${AUDIO:+ (+audio)}"
     start_pov
     adb -s "$DEV" shell "screenrecord --time-limit $SEC --size 1280x480 $REMOTE_SCREEN_DIR/$NAME.mp4"
-    [ -n "$POV" ] && stop_pov
+    { [ -n "$POV" ] || [ -n "$AUDIO" ]; } && stop_pov
     collect "$STAMP"
     ;;
 esac

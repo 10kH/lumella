@@ -1337,8 +1337,15 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
                                 ?: "take-${System.currentTimeMillis()}"
                             val dest = java.io.File(getExternalFilesDir(null), "$name.mp4")
                             val withAudio = intent.getBooleanExtra("audio", true)
-                            Log.i(TAG, "debug: start recording -> ${dest.absolutePath} audio=$withAudio")
-                            camera.startRecording(dest, withAudio) { msg -> Log.i(TAG, "debug: rec $msg") }
+                            // camera=false records only the tutor's voice. The POV encoder costs
+                            // about a core on this device (ELLA measured 119% for the camera
+                            // provider during a POV take), which makes the conversation stutter;
+                            // a take that only needs the voice and the screen should not pay it.
+                            val withCamera = intent.getBooleanExtra("camera", true)
+                            Log.i(TAG, "debug: start recording -> ${dest.absolutePath} audio=$withAudio camera=$withCamera")
+                            if (withCamera) {
+                                camera.startRecording(dest, withAudio) { msg -> Log.i(TAG, "debug: rec $msg") }
+                            }
                             // The video's audio is the mic, and the mic has the tutor echo-cancelled
                             // out of it. Capture the tutor's own PCM alongside so the take has both
                             // voices; they are mixed in the edit.
@@ -1348,6 +1355,8 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
                         }
                         DEBUG_REC_STOP_ACTION -> {
                             Log.i(TAG, "debug: stop recording")
+                            // Safe when no POV take is running: stopRecording on an idle
+                            // recorder reports and returns.
                             camera.stopRecording { msg -> Log.i(TAG, "debug: rec $msg") }
                             audioPlayback.stopVoiceTap()
                         }
