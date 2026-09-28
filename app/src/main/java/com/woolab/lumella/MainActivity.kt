@@ -218,7 +218,6 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
      * see [GlassesCamera.startRecording] for why.
      */
     private fun startTakeVoices(name: String, followVideo: Boolean) {
-        stopTakeVoices()
         val dir = getExternalFilesDir(null)
         val clock = TakeClock(followVideo)
         val warn: (String) -> Unit = { Log.w(TAG, it) }
@@ -431,6 +430,10 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
 
                 override fun onResponseStarted() {
                     Log.d(TAG, "응답 경계: 억제 해제 + 리셋")
+                    // A reply cut off before its output_audio.done (barge-in, cancel) would
+                    // otherwise run on into this one's playback accounting — and this reply
+                    // would start without its preroll. Same thread as the deltas.
+                    audioPlayback.endResponseStats()?.let { Log.i(TAG, "$it closedBy=nextResponse") }
                     runOnUiThread {
                         // New response: its deltas are the truth now. The accumulator resets
                         // HERE rather than at speech start — the response boundary also covers
@@ -1375,6 +1378,13 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
                             // 24fps, artifacts/perf), and a take that only needs the voices and
                             // the screen should not pay it.
                             val withCamera = intent.getBooleanExtra("camera", true)
+                            if (takeClock != null) {
+                                // One take at a time. A second start would open fresh taps on a
+                                // clock waiting for a first frame the running recording already
+                                // delivered — the new learner file would stay silent.
+                                Log.w(TAG, "debug: start ignored — take already running; stop it first")
+                                return
+                            }
                             Log.i(TAG, "debug: start recording -> ${dest.absolutePath} camera=$withCamera")
                             // Taps first, on a clock that waits for the camera's first frame, so
                             // not a word falls between the two starts.
@@ -1407,6 +1417,8 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
                                 pcm[i * 2 + 1] = ((samples[i].toInt() shr 8) and 0xFF).toByte()
                             }
                             audioPlayback.playDelta(android.util.Base64.encodeToString(pcm, android.util.Base64.NO_WRAP))
+                            // Not a reply: close its accounting so the next real one starts clean.
+                            audioPlayback.endResponseStats()?.let { Log.i(TAG, "$it closedBy=tone") }
                         }
                     }
                 }

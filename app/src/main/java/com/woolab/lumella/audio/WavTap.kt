@@ -31,6 +31,11 @@ import java.util.concurrent.TimeUnit
  *    to drop what was heard while the video was dark, and to pad over a capture stall longer
  *    than [LIVE_SLACK_MS].
  *
+ * **The header is kept current**, once per second of audio. It used to be written only on
+ * close, so an app killed mid-take left `RIFF` and `data` sizes of 0 and ffprobe refused the
+ * file outright ("Invalid data found", measured 2026-09-28) — the voices lost along with the
+ * video, whose moov atom a kill also never writes. Now at most the last second is unaccounted.
+ *
  * Failures are reported once through [warn] and never reach the caller: a broken tap must not
  * interrupt the conversation being filmed.
  */
@@ -57,6 +62,7 @@ class WavTap(
 
     // Writer thread only.
     private var dataBytes = 0L
+    private var headerBytes = 0L
     private var broken = false
     private var finished = false
 
@@ -111,6 +117,13 @@ class WavTap(
             }
             raf.write(pcm)
             dataBytes += pcm.size
+            if (dataBytes - headerBytes >= bytesAt(HEADER_EVERY_MS)) {
+                val end = raf.filePointer
+                raf.seek(0)
+                raf.write(header(dataBytes))
+                raf.seek(end)
+                headerBytes = dataBytes
+            }
         } catch (e: IOException) {
             broken = true
             warn("tap $name: write failed, tap stopped: ${e.message}")
@@ -169,6 +182,8 @@ class WavTap(
         const val HEADER_BYTES = 44
         /** A capture gap below this is scheduling jitter, not lost audio. */
         const val LIVE_SLACK_MS = 100L
+        /** How much audio a kill mid-take can leave outside the header's count. */
+        const val HEADER_EVERY_MS = 1_000L
         private const val CLOSE_WAIT_MS = 2_000L
         private val SILENCE = ByteArray(16 * 1024)
     }

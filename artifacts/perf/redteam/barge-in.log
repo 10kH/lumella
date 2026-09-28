@@ -1,0 +1,14 @@
+# 3. 튜터 답 도중 학습자 발화 주입 (2026-09-28 20:03). 디버그 주입이라 서버 취소는 없다.
+    20:03:00.255 debug: 음성 감지 주입
+    20:03:01.355 debug: 음성 종료 주입
+    20:03:01.686 응답 경계: 억제 해제 + 리셋
+    20:03:04.139 응답 경계: 억제 해제 + 리셋
+    20:03:04.857 튜터 발화 시작 (TTFA 3502ms)
+    20:03:06.447 debug: 음성 감지 주입
+    20:03:07.525 debug: 음성 종료 주입
+    20:03:11.430 튜터 발화 끝
+    20:03:11.430 perf: playback underruns=0 audioMs=6650 wallMs=6570 chunks=26 minLeadMs=212 maxGapMs=24 minLeadAtChunk=13
+    20:03:11.447 응답 경계: 억제 해제 + 리셋
+    20:03:11.455 튜터 발화 시작 (TTFA 3930ms)
+    20:03:14.310 튜터 발화 끝
+    20:03:14.311 perf: playback underruns=0 audioMs=2800 wallMs=2852 chunks=11 minLeadMs=52 maxGapMs=18 minLeadAtChunk=10

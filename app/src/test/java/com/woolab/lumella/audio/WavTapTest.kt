@@ -222,6 +222,35 @@ class WavTapTest {
         assertTrue(warnings.isEmpty())
     }
 
+    @Test
+    fun aTapKilledMidTakeStillHasAReadableHeader() {
+        // Direct executor: the file is inspected while the tap is still open, as a kill leaves it.
+        val c = clock()
+        val t = WavTap(File(dir, "t.wav"), RATE, c, false, { warnings += it }, DirectExecutor())
+        repeat(25) { now = it * 100L; t.write(chunk(100, 1)) } // 2.5s, never closed
+
+        val h = ByteBuffer.wrap(File(dir, "t.wav").readBytes(), 0, WavTap.HEADER_BYTES)
+            .order(ByteOrder.LITTLE_ENDIAN)
+        val riff = h.getInt(4)
+        val data = h.getInt(40)
+        assertEquals("patched at the last whole second", 2_000 * 2, data)
+        assertEquals(36 + data, riff)
+    }
+
+    /** Runs each write inline, so the file can be read mid-take. */
+    private class DirectExecutor : java.util.concurrent.AbstractExecutorService() {
+        @Volatile private var shut = false
+        override fun execute(command: Runnable) {
+            if (shut) throw java.util.concurrent.RejectedExecutionException()
+            command.run()
+        }
+        override fun shutdown() { shut = true }
+        override fun shutdownNow(): MutableList<Runnable> { shut = true; return mutableListOf() }
+        override fun isShutdown() = shut
+        override fun isTerminated() = shut
+        override fun awaitTermination(timeout: Long, unit: java.util.concurrent.TimeUnit) = true
+    }
+
     private companion object {
         const val RATE = 1_000
     }
