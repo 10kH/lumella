@@ -17,8 +17,8 @@ import com.ffalcon.mercury.android.sdk.ui.activity.BaseMirrorActivity
 import com.woolab.tutor.slowpath.EndpointPedagogyAgentClient
 import com.woolab.lumella.audio.AudioCapture
 import com.woolab.lumella.audio.AudioPlayback
-import com.woolab.lumella.audio.TakeClock
-import com.woolab.lumella.audio.WavTap
+import com.woolab.tutor.capture.TakeClock
+import com.woolab.tutor.capture.WavTap
 import com.woolab.lumella.brain.BrainFactory
 import com.woolab.lumella.camera.GlassesCamera
 import com.woolab.lumella.camera.ImageEncoder

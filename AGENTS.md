@@ -29,6 +29,10 @@ curl -s http://127.0.0.1:8010/v1/capabilities | head -c 200
 씁니다. 슬로우 패스를 고칠 땐 그쪽에서 고치고, 여기서는 `TutorLanguage.KOREAN` 하나만 넘깁니다.
 조립은 `SlowPathAssembly.build()` 한 곳 — MainActivity와 모듈의 통합 테스트가 같은 함수를 부릅니다.
 
+촬영 도구의 목소리 탭과 테이크 시계(`TakeClock`, `WavTap`)도 같은 방식으로 `../tutor-capture`
+(github.com/10kH/tutor-capture)에 있습니다. **체크아웃은 셋이 나란히** — lumella, tutor-slowpath,
+tutor-capture. 녹음·시계 로직을 고칠 땐 그쪽에서 고치고 테스트도 그쪽에 있습니다(ELLA도 씁니다).
+
 slow path가 부르는 서버는 **ELLA 저장소의 Vercel 함수**(`api/pedagogy-agent.js`, `language=ko`)
 입니다. `local.properties`의 `PEDAGOGY_AGENT_ENDPOINT`·`REALTIME_TOKEN_SECRET`은 ELLA와 같은
 값이어야 합니다. luma 브레인은 슬로우 패스에 관여하지 않습니다 — 빠른 계층 스티어링, 하단

@@ -1,5 +1,6 @@
 package com.woolab.lumella.audio
 
+import com.woolab.tutor.capture.WavTap
 import android.media.AudioAttributes
 import android.media.AudioFormat
 import android.media.AudioTrack

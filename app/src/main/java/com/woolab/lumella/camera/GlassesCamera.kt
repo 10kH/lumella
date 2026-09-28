@@ -108,7 +108,7 @@ class GlassesCamera(context: Context, private val lifecycleOwner: LifecycleOwner
 
     /**
      * What a take's recording is doing, for anything that must stay on its clock — the voice
-     * taps, via [com.woolab.lumella.audio.TakeClock], which explains why each event is the one it
+     * taps, via [com.woolab.tutor.capture.TakeClock], which explains why each event is the one it
      * is. Passed per take and carried from segment to segment, so a late event from one take can
      * never land on the next take's clock.
      */
