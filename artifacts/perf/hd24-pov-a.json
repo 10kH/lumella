@@ -1,0 +1,727 @@
+{
+ "label": "hd24-pov-a",
+ "mode": "pov",
+ "stress": 0,
+ "summary": {
+  "cpuTotalMeanPct": 210.4,
+  "cpuTotalPeakPct": 311.0,
+  "playback": {
+   "responses": 7,
+   "underrunsTotal": 0,
+   "responsesWithUnderrun": 0,
+   "stretchMax": 0.99,
+   "stretchMedian": 0.98,
+   "maxWriteMs": 773,
+   "maxTapMs": 3
+  },
+  "capture": {
+   "windows": 41,
+   "lateReadsTotal": 0,
+   "lostReadsTotal": 0,
+   "maxCycleMs": 67,
+   "chunkMs": 40,
+   "bufferMs": 400
+  },
+  "ttfaMs": {
+   "n": 7,
+   "median": 879,
+   "max": 5472
+  },
+  "ruleGapAfter3": "목적어에 주격 조사를 씀: 을/를 대신 이/가",
+  "ruleGapAfter6": null
+ },
+ "cpu": {
+  "samples": 37,
+  "processes": [
+   {
+    "name": "vendor.qti.camera.provider@2.7-service_64",
+    "meanPct": 86.9,
+    "peakPct": 97.0
+   },
+   {
+    "name": "com.woolab.lumella",
+    "meanPct": 36.5,
+    "peakPct": 228.0
+   },
+   {
+    "name": "cameraserver",
+    "meanPct": 10.0,
+    "peakPct": 15.0
+   },
+   {
+    "name": "media.hwcodec",
+    "meanPct": 7.3,
+    "peakPct": 11.0
+   },
+   {
+    "name": "audioserver",
+    "meanPct": 4.4,
+    "peakPct": 26.0
+   },
+   {
+    "name": "android.hardware.audio.service_64",
+    "meanPct": 4.2,
+    "peakPct": 20.0
+   },
+   {
+    "name": "vendor.qti.hardware.AGMIPC@1.0-service",
+    "meanPct": 4.2,
+    "peakPct": 15.0
+   },
+   {
+    "name": "ueventd",
+    "meanPct": 1.0,
+    "peakPct": 5.0
+   },
+   {
+    "name": "system_server",
+    "meanPct": 0.9,
+    "peakPct": 8.0
+   },
+   {
+    "name": "storaged",
+    "meanPct": 0.6,
+    "peakPct": 24.0
+   }
+  ],
+  "threads": [
+   {
+    "name": "vendor.qti.camera.provider@2.7-service_64 / vendor.qti.came",
+    "meanPct": 78.2,
+    "peakPct": 89.0
+   },
+   {
+    "name": "vendor.qti.camera.provider@2.7-service_64 / HwBinder:795_3",
+    "meanPct": 5.5,
+    "peakPct": 8.0
+   },
+   {
+    "name": "media.hwcodec / EvtQ_c2.qti.avc",
+    "meanPct": 4.9,
+    "peakPct": 8.1
+   },
+   {
+    "name": "com.woolab.lumella / CameraX-camerax",
+    "meanPct": 4.3,
+    "peakPct": 7.0
+   },
+   {
+    "name": "com.woolab.lumella / .woolab.lumella",
+    "meanPct": 4.0,
+    "peakPct": 14.0
+   },
+   {
+    "name": "com.woolab.lumella / OkHttp TaskRunn",
+    "meanPct": 4.0,
+    "peakPct": 9.0
+   },
+   {
+    "name": "cameraserver / CDU-0-FrameProc",
+    "meanPct": 3.0,
+    "peakPct": 4.0
+   },
+   {
+    "name": "com.woolab.lumella / lumella-audio-c",
+    "meanPct": 2.9,
+    "peakPct": 4.0
+   },
+   {
+    "name": "com.woolab.lumella / MP4WtrCtrlHlpLo",
+    "meanPct": 2.4,
+    "peakPct": 90.0
+   },
+   {
+    "name": "cameraserver / HwBinder:887_3",
+    "meanPct": 2.3,
+    "peakPct": 5.0
+   },
+   {
+    "name": "com.woolab.lumella / lumella-camera",
+    "meanPct": 2.1,
+    "peakPct": 78.0
+   },
+   {
+    "name": "android.hardware.audio.service_64 / writer",
+    "meanPct": 2.1,
+    "peakPct": 9.0
+   },
+   {
+    "name": "android.hardware.audio.service_64 / reader",
+    "meanPct": 2.0,
+    "peakPct": 20.0
+   },
+   {
+    "name": "com.woolab.lumella / Binder:19189_3",
+    "meanPct": 1.8,
+    "peakPct": 9.0
+   },
+   {
+    "name": "audioserver / AudioIn_2E6",
+    "meanPct": 1.8,
+    "peakPct": 3.0
+   }
+  ]
+ },
+ "slowPath": {
+  "after3": {
+   "ruleGap": "목적어에 주격 조사를 씀: 을/를 대신 이/가",
+   "grammarErrors": 3,
+   "turns": 3,
+   "lastConsolidatedTurnId": 3,
+   "errorSpans": [
+    "친구가",
+    "빵이",
+    "영화가"
+   ]
+  },
+  "after6": {
+   "ruleGap": null,
+   "grammarErrors": 3,
+   "turns": 6,
+   "lastConsolidatedTurnId": 6,
+   "errorSpans": [
+    "친구가",
+    "빵이",
+    "영화가"
+   ]
+  },
+  "warnings": []
+ },
+ "playback": [
+  {
+   "underruns": 0,
+   "audioMs": 2700,
+   "wallMs": 2650,
+   "stretch": 0.98,
+   "chunks": 10,
+   "maxWriteMs": 772,
+   "sumWriteMs": 2560,
+   "maxTapMs": 0,
+   "bufferFrames": 12000,
+   "minLeadMs": 243,
+   "maxGapMs": 29,
+   "minLeadAtChunk": 1
+  },
+  {
+   "underruns": 0,
+   "audioMs": 8850,
+   "wallMs": 8627,
+   "stretch": 0.97,
+   "chunks": 35,
+   "maxWriteMs": 508,
+   "sumWriteMs": 8249,
+   "maxTapMs": 0,
+   "bufferFrames": 12000,
+   "minLeadMs": 245,
+   "maxGapMs": 40,
+   "minLeadAtChunk": 1
+  },
+  {
+   "underruns": 0,
+   "audioMs": 3800,
+   "wallMs": 3773,
+   "stretch": 0.99,
+   "chunks": 15,
+   "maxWriteMs": 773,
+   "sumWriteMs": 3268,
+   "maxTapMs": 3,
+   "bufferFrames": 12000,
+   "minLeadMs": -51,
+   "maxGapMs": 293,
+   "minLeadAtChunk": 1
+  },
+  {
+   "underruns": 0,
+   "audioMs": 4350,
+   "wallMs": 4249,
+   "stretch": 0.98,
+   "chunks": 17,
+   "maxWriteMs": 772,
+   "sumWriteMs": 4081,
+   "maxTapMs": 0,
+   "bufferFrames": 12000,
+   "minLeadMs": 195,
+   "maxGapMs": 34,
+   "minLeadAtChunk": 13
+  },
+  {
+   "underruns": 0,
+   "audioMs": 4400,
+   "wallMs": 4258,
+   "stretch": 0.97,
+   "chunks": 17,
+   "maxWriteMs": 763,
+   "sumWriteMs": 3779,
+   "maxTapMs": 0,
+   "bufferFrames": 12000,
+   "minLeadMs": 81,
+   "maxGapMs": 123,
+   "minLeadAtChunk": 1
+  },
+  {
+   "underruns": 0,
+   "audioMs": 5800,
+   "wallMs": 5680,
+   "stretch": 0.98,
+   "chunks": 23,
+   "maxWriteMs": 511,
+   "sumWriteMs": 5359,
+   "maxTapMs": 0,
+   "bufferFrames": 12000,
+   "minLeadMs": 212,
+   "maxGapMs": 99,
+   "minLeadAtChunk": 3
+  },
+  {
+   "underruns": 0,
+   "audioMs": 4050,
+   "wallMs": 3792,
+   "stretch": 0.94,
+   "chunks": 16,
+   "maxWriteMs": 508,
+   "sumWriteMs": 3544,
+   "maxTapMs": 0,
+   "bufferFrames": 12000,
+   "minLeadMs": 164,
+   "maxGapMs": 74,
+   "minLeadAtChunk": 11
+  }
+ ],
+ "capture": [
+  {
+   "reads": 123,
+   "lateReads": 0,
+   "lostReads": 0,
+   "maxCycleMs": 44,
+   "maxHandleMs": 4,
+   "chunkMs": 40,
+   "bufferMs": 400
+  },
+  {
+   "reads": 125,
+   "lateReads": 0,
+   "lostReads": 0,
+   "maxCycleMs": 45,
+   "maxHandleMs": 4,
+   "chunkMs": 40,
+   "bufferMs": 400
+  },
+  {
+   "reads": 126,
+   "lateReads": 0,
+   "lostReads": 0,
+   "maxCycleMs": 45,
+   "maxHandleMs": 3,
+   "chunkMs": 40,
+   "bufferMs": 400
+  },
+  {
+   "reads": 125,
+   "lateReads": 0,
+   "lostReads": 0,
+   "maxCycleMs": 45,
+   "maxHandleMs": 2,
+   "chunkMs": 40,
+   "bufferMs": 400
+  },
+  {
+   "reads": 125,
+   "lateReads": 0,
+   "lostReads": 0,
+   "maxCycleMs": 45,
+   "maxHandleMs": 2,
+   "chunkMs": 40,
+   "bufferMs": 400
+  },
+  {
+   "reads": 126,
+   "lateReads": 0,
+   "lostReads": 0,
+   "maxCycleMs": 44,
+   "maxHandleMs": 3,
+   "chunkMs": 40,
+   "bufferMs": 400
+  },
+  {
+   "reads": 125,
+   "lateReads": 0,
+   "lostReads": 0,
+   "maxCycleMs": 45,
+   "maxHandleMs": 3,
+   "chunkMs": 40,
+   "bufferMs": 400
+  },
+  {
+   "reads": 126,
+   "lateReads": 0,
+   "lostReads": 0,
+   "maxCycleMs": 45,
+   "maxHandleMs": 2,
+   "chunkMs": 40,
+   "bufferMs": 400
+  },
+  {
+   "reads": 125,
+   "lateReads": 0,
+   "lostReads": 0,
+   "maxCycleMs": 45,
+   "maxHandleMs": 3,
+   "chunkMs": 40,
+   "bufferMs": 400
+  },
+  {
+   "reads": 126,
+   "lateReads": 0,
+   "lostReads": 0,
+   "maxCycleMs": 44,
+   "maxHandleMs": 2,
+   "chunkMs": 40,
+   "bufferMs": 400
+  },
+  {
+   "reads": 125,
+   "lateReads": 0,
+   "lostReads": 0,
+   "maxCycleMs": 47,
+   "maxHandleMs": 7,
+   "chunkMs": 40,
+   "bufferMs": 400
+  },
+  {
+   "reads": 125,
+   "lateReads": 0,
+   "lostReads": 0,
+   "maxCycleMs": 67,
+   "maxHandleMs": 7,
+   "chunkMs": 40,
+   "bufferMs": 400
+  },
+  {
+   "reads": 125,
+   "lateReads": 0,
+   "lostReads": 0,
+   "maxCycleMs": 47,
+   "maxHandleMs": 5,
+   "chunkMs": 40,
+   "bufferMs": 400
+  },
+  {
+   "reads": 125,
+   "lateReads": 0,
+   "lostReads": 0,
+   "maxCycleMs": 53,
+   "maxHandleMs": 5,
+   "chunkMs": 40,
+   "bufferMs": 400
+  },
+  {
+   "reads": 126,
+   "lateReads": 0,
+   "lostReads": 0,
+   "maxCycleMs": 50,
+   "maxHandleMs": 6,
+   "chunkMs": 40,
+   "bufferMs": 400
+  },
+  {
+   "reads": 125,
+   "lateReads": 0,
+   "lostReads": 0,
+   "maxCycleMs": 64,
+   "maxHandleMs": 11,
+   "chunkMs": 40,
+   "bufferMs": 400
+  },
+  {
+   "reads": 125,
+   "lateReads": 0,
+   "lostReads": 0,
+   "maxCycleMs": 46,
+   "maxHandleMs": 7,
+   "chunkMs": 40,
+   "bufferMs": 400
+  },
+  {
+   "reads": 126,
+   "lateReads": 0,
+   "lostReads": 0,
+   "maxCycleMs": 45,
+   "maxHandleMs": 6,
+   "chunkMs": 40,
+   "bufferMs": 400
+  },
+  {
+   "reads": 126,
+   "lateReads": 0,
+   "lostReads": 0,
+   "maxCycleMs": 50,
+   "maxHandleMs": 6,
+   "chunkMs": 40,
+   "bufferMs": 400
+  },
+  {
+   "reads": 126,
+   "lateReads": 0,
+   "lostReads": 0,
+   "maxCycleMs": 60,
+   "maxHandleMs": 4,
+   "chunkMs": 40,
+   "bufferMs": 400
+  },
+  {
+   "reads": 126,
+   "lateReads": 0,
+   "lostReads": 0,
+   "maxCycleMs": 50,
+   "maxHandleMs": 5,
+   "chunkMs": 40,
+   "bufferMs": 400
+  },
+  {
+   "reads": 126,
+   "lateReads": 0,
+   "lostReads": 0,
+   "maxCycleMs": 45,
+   "maxHandleMs": 4,
+   "chunkMs": 40,
+   "bufferMs": 400
+  },
+  {
+   "reads": 126,
+   "lateReads": 0,
+   "lostReads": 0,
+   "maxCycleMs": 44,
+   "maxHandleMs": 4,
+   "chunkMs": 40,
+   "bufferMs": 400
+  },
+  {
+   "reads": 126,
+   "lateReads": 0,
+   "lostReads": 0,
+   "maxCycleMs": 66,
+   "maxHandleMs": 6,
+   "chunkMs": 40,
+   "bufferMs": 400
+  },
+  {
+   "reads": 125,
+   "lateReads": 0,
+   "lostReads": 0,
+   "maxCycleMs": 56,
+   "maxHandleMs": 9,
+   "chunkMs": 40,
+   "bufferMs": 400
+  },
+  {
+   "reads": 126,
+   "lateReads": 0,
+   "lostReads": 0,
+   "maxCycleMs": 47,
+   "maxHandleMs": 7,
+   "chunkMs": 40,
+   "bufferMs": 400
+  },
+  {
+   "reads": 125,
+   "lateReads": 0,
+   "lostReads": 0,
+   "maxCycleMs": 53,
+   "maxHandleMs": 4,
+   "chunkMs": 40,
+   "bufferMs": 400
+  },
+  {
+   "reads": 125,
+   "lateReads": 0,
+   "lostReads": 0,
+   "maxCycleMs": 53,
+   "maxHandleMs": 13,
+   "chunkMs": 40,
+   "bufferMs": 400
+  },
+  {
+   "reads": 125,
+   "lateReads": 0,
+   "lostReads": 0,
+   "maxCycleMs": 58,
+   "maxHandleMs": 15,
+   "chunkMs": 40,
+   "bufferMs": 400
+  },
+  {
+   "reads": 126,
+   "lateReads": 0,
+   "lostReads": 0,
+   "maxCycleMs": 44,
+   "maxHandleMs": 9,
+   "chunkMs": 40,
+   "bufferMs": 400
+  },
+  {
+   "reads": 125,
+   "lateReads": 0,
+   "lostReads": 0,
+   "maxCycleMs": 47,
+   "maxHandleMs": 8,
+   "chunkMs": 40,
+   "bufferMs": 400
+  },
+  {
+   "reads": 126,
+   "lateReads": 0,
+   "lostReads": 0,
+   "maxCycleMs": 44,
+   "maxHandleMs": 3,
+   "chunkMs": 40,
+   "bufferMs": 400
+  },
+  {
+   "reads": 125,
+   "lateReads": 0,
+   "lostReads": 0,
+   "maxCycleMs": 54,
+   "maxHandleMs": 4,
+   "chunkMs": 40,
+   "bufferMs": 400
+  },
+  {
+   "reads": 126,
+   "lateReads": 0,
+   "lostReads": 0,
+   "maxCycleMs": 50,
+   "maxHandleMs": 5,
+   "chunkMs": 40,
+   "bufferMs": 400
+  },
+  {
+   "reads": 125,
+   "lateReads": 0,
+   "lostReads": 0,
+   "maxCycleMs": 49,
+   "maxHandleMs": 6,
+   "chunkMs": 40,
+   "bufferMs": 400
+  },
+  {
+   "reads": 125,
+   "lateReads": 0,
+   "lostReads": 0,
+   "maxCycleMs": 45,
+   "maxHandleMs": 8,
+   "chunkMs": 40,
+   "bufferMs": 400
+  },
+  {
+   "reads": 125,
+   "lateReads": 0,
+   "lostReads": 0,
+   "maxCycleMs": 44,
+   "maxHandleMs": 4,
+   "chunkMs": 40,
+   "bufferMs": 400
+  },
+  {
+   "reads": 125,
+   "lateReads": 0,
+   "lostReads": 0,
+   "maxCycleMs": 51,
+   "maxHandleMs": 6,
+   "chunkMs": 40,
+   "bufferMs": 400
+  },
+  {
+   "reads": 126,
+   "lateReads": 0,
+   "lostReads": 0,
+   "maxCycleMs": 44,
+   "maxHandleMs": 2,
+   "chunkMs": 40,
+   "bufferMs": 400
+  },
+  {
+   "reads": 125,
+   "lateReads": 0,
+   "lostReads": 0,
+   "maxCycleMs": 44,
+   "maxHandleMs": 2,
+   "chunkMs": 40,
+   "bufferMs": 400
+  },
+  {
+   "reads": 126,
+   "lateReads": 0,
+   "lostReads": 0,
+   "maxCycleMs": 44,
+   "maxHandleMs": 2,
+   "chunkMs": 40,
+   "bufferMs": 400
+  }
+ ],
+ "ttfaMs": [
+  817,
+  5472,
+  760,
+  967,
+  879,
+  847,
+  900
+ ],
+ "thermal": {
+  "start": [
+   "cpu-0-0 39800",
+   "cpu-0-1 39000",
+   "cpu-0-2 40200",
+   "cpu-0-3 39400",
+   "freq 1996800 1996800 1996800 1996800"
+  ],
+  "end": [
+   "cpu-0-0 44600",
+   "cpu-0-1 43400",
+   "cpu-0-2 44600",
+   "cpu-0-3 44200",
+   "freq 1996800 1996800 1996800 1996800"
+  ]
+ },
+ "files": {
+  "pov": [
+   {
+    "path": "/Users/woody/shots/perf-hd24-pov-a-194143-pov.mp4",
+    "codec": "h264",
+    "width": 1280,
+    "height": 720,
+    "durationS": 10.7,
+    "frames": 257,
+    "effectiveFps": 24.0
+   },
+   {
+    "path": "/Users/woody/shots/perf-hd24-pov-a-194143-pov-2.mp4",
+    "codec": "h264",
+    "width": 1280,
+    "height": 720,
+    "durationS": 122.9,
+    "frames": 2949,
+    "effectiveFps": 24.0
+   }
+  ],
+  "screen": {
+   "path": "/Users/woody/shots/perf-hd24-pov-a-194143-screen.mp4",
+   "codec": "h264",
+   "width": 1280,
+   "height": 480,
+   "durationS": 137.0,
+   "frames": 210,
+   "effectiveFps": 1.5
+  },
+  "tutorWav": {
+   "path": "/Users/woody/shots/perf-hd24-pov-a-194143-tutor.wav",
+   "durationS": 133.4,
+   "voicedPct": 11.0
+  },
+  "learnerWav": {
+   "path": "/Users/woody/shots/perf-hd24-pov-a-194143-learner.wav",
+   "durationS": 133.4,
+   "voicedPct": 0.0
+  }
+ }
+}

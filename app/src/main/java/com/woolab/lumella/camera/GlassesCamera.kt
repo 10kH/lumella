@@ -5,6 +5,7 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import android.view.Surface
+import android.util.Range
 import android.graphics.Bitmap
 import android.media.MediaMetadataRetriever
 import androidx.camera.core.CameraSelector
@@ -68,22 +69,28 @@ class GlassesCamera(context: Context, private val lifecycleOwner: LifecycleOwner
      * Photos and video used to share one `capturing` flag, so starting a recording made every
      * photo fail: on 2026-09-14 the wearer asked the tutor to look at what was in front of them
      * and got a red "Capture error" instead, because the recording held the camera. Binding both
-     * use cases together lets a take carry the first-person video, its audio, AND the image turns
+     * use cases together lets a take carry the first-person video AND the image turns
      * the product is built around — no either/or.
      */
     @Volatile private var recordingFile: File? = null
-    @Volatile private var recordingWithAudio: Boolean = true
 
     /** Runs once the in-flight recording finalises — how a segment boundary chains to the next. */
     @Volatile private var pendingAfterFinalize: (() -> Unit)? = null
 
     /**
-     * Notified when the video stops and restarts at a segment boundary: `true` when the camera
-     * goes dark, `false` when it is rolling again. The tutor voice tap uses it to keep its
-     * padding on the video's clock rather than the wall's — without it every photo turn pushed
-     * the tutor ~1.5s later than the picture.
+     * What the recording's clock is doing, for anything that must stay on it — the voice taps,
+     * via [com.woolab.lumella.audio.TakeClock], which explains why each event is the one it is.
      */
-    @Volatile var onSegmentGap: ((Boolean) -> Unit)? = null
+    interface RecordingClock {
+        /** A segment's first frame is in the file. Also sent when a start fails: nothing will record. */
+        fun rolling(segmentRecordedMs: Long)
+        /** A stop was requested (photo turn or end of take); frames may still land briefly. */
+        fun dark()
+        /** A segment closed having recorded exactly [recordedMs], by the recorder's own count. */
+        fun segmentEnded(recordedMs: Long)
+    }
+
+    @Volatile var recordingClock: RecordingClock? = null
 
     /**
      * Captures a single JPEG frame; [onCaptured] receives raw JPEG bytes.
@@ -228,15 +235,14 @@ class GlassesCamera(context: Context, private val lifecycleOwner: LifecycleOwner
     /**
      * Records first-person video to [destination] until [stopRecording].
      *
-     * **Audio IS recorded** (`withAudio`, on by default). This was assumed impossible for days:
-     * `dumpsys media.audio_policy` reports `maxActiveCount: 1`, so enabling it looked certain to
-     * take the mic from the voice pipeline and end the conversation the footage exists to show.
-     * Measured 2026-09-14, that is wrong — the cap is not per-process here. With audio on, the
-     * app stayed `Listening...`, a full turn went through (utterance echoed, tutor answered), and
-     * the file came back with an AAC 48 kHz stereo track at mean -32 dB.
-     *
-     * Pass `withAudio = false` if a take must not capture room sound. Note the external camera is
-     * filming the same scene, so its audio remains the better sync reference for the edit.
+     * **Video only.** The recording used to carry the microphone too (it works — the platform's
+     * one-active-input cap is not per-process here, measured 2026-09-14), but that made CameraX
+     * open the mic a second time and AAC-encode it in software. Measured 2026-09-28 against the
+     * same take without it: the device at 234% against 204% of 400% — lumella +24 points,
+     * media.swcodec +11, the audio HAL +5 — on a device the POV already pushes to its limit.
+     * Both voices now come from taps of PCM the app already has —
+     * the learner from [com.woolab.lumella.audio.AudioCapture], the tutor from
+     * [com.woolab.lumella.audio.AudioPlayback] — on the video's clock ([recordingClock]).
      *
      * Unlike [captureImage] this keeps the camera bound for the duration — a recording IS the
      * bind. Photo capture is therefore unavailable while recording (`captureImage` reports
@@ -245,7 +251,7 @@ class GlassesCamera(context: Context, private val lifecycleOwner: LifecycleOwner
      *
      * Not exercised by JVM unit tests (real camera stack); verify on device.
      */
-    fun startRecording(destination: File, withAudio: Boolean = true, onEvent: (String) -> Unit) {
+    fun startRecording(destination: File, onEvent: (String) -> Unit) {
         if (activeRecording != null) {
             onEvent("busy: already recording")
             return
@@ -278,19 +284,31 @@ class GlassesCamera(context: Context, private val lifecycleOwner: LifecycleOwner
                             ),
                         )
                         .build()
-                    val videoCapture = VideoCapture.withOutput(recorder).apply {
-                        // The glasses report a portrait natural orientation, so the recording
-                        // lands with rotation=-90 in its metadata and every player shows it on
-                        // its side. Pin landscape here rather than fixing it per file in the
-                        // edit, which is a step easy to forget on one take out of twelve.
-                        //
-                        // Determined by looking at the picture, not the dimensions. ROTATION_90
-                        // removed the metadata and produced a landscape-shaped file, which read
-                        // as correct, but the scene inside was still on its left. ROTATION_270
-                        // then stamped rotation=-180 and stood it on its head. ROTATION_180 is
-                        // what leaves the wearer's view upright.
-                        targetRotation = Surface.ROTATION_180
-                    }
+                    // 24fps, locked — the one camera setting that moves the CPU. The camera HAL's
+                    // work is per frame: measured 2026-09-28 at 104.6% of a core at 24fps against
+                    // 122.4% at 30, and the device at 211% against 233% of 400%. [24,24] is one
+                    // of the four AE ranges this camera offers ([15,15] [24,24] [15,30] [30,30])
+                    // and the film standard, so the edit loses nothing. Noise reduction and edge
+                    // enhancement were measured too and left at the camera's defaults: turning
+                    // them off saved nothing (104.2% vs 104.9%) — they run in the ISP, not on a
+                    // core — and only made the picture worse. So did SD: 720x480 cost exactly
+                    // what 1280x720 does (HAL 102.7% both), so the resolution above stands.
+                    val videoCapture = VideoCapture.Builder(recorder)
+                        .setTargetFrameRate(Range(POV_FPS, POV_FPS))
+                        .build()
+                        .apply {
+                            // The glasses report a portrait natural orientation, so the recording
+                            // lands with rotation=-90 in its metadata and every player shows it on
+                            // its side. Pin landscape here rather than fixing it per file in the
+                            // edit, which is a step easy to forget on one take out of twelve.
+                            //
+                            // Determined by looking at the picture, not the dimensions. ROTATION_90
+                            // removed the metadata and produced a landscape-shaped file, which read
+                            // as correct, but the scene inside was still on its left. ROTATION_270
+                            // then stamped rotation=-180 and stood it on its head. ROTATION_180 is
+                            // what leaves the wearer's view upright.
+                            targetRotation = Surface.ROTATION_180
+                        }
                     // VideoCapture binds ALONE. This camera refuses every second use case
                     // beside it — both ImageCapture and ImageAnalysis come back with
                     //   "No supported surface combination is found for camera device - Id : 0"
@@ -303,25 +321,25 @@ class GlassesCamera(context: Context, private val lifecycleOwner: LifecycleOwner
                         videoCapture,
                     )
                     recordingFile = destination
-                    recordingWithAudio = withAudio
                     recordingProvider = provider
-                    val pending = videoCapture.output
+                    // Main executor: the listener runs on one thread, so this needs no guard.
+                    var rolled = false
+                    activeRecording = videoCapture.output
                         .prepareRecording(appContext, FileOutputOptions.Builder(destination).build())
-                    if (withAudio) {
-                        @Suppress("MissingPermission")
-                        pending.withAudioEnabled()
-                    }
-                    activeRecording = pending
                         .start(ContextCompat.getMainExecutor(appContext)) { event ->
                             when (event) {
                                 is VideoRecordEvent.Start -> {
                                     Log.i(TAG, "recording started -> ${destination.absolutePath}")
-                                    // Close the gap on the REAL start, not on the call that
-                                    // requested it: the encoder takes a moment to come up and
-                                    // counting that as recorded time re-introduces the drift.
-                                    onSegmentGap?.invoke(false)
+                                }
+                                // Not Start: Start comes ~1.5s before the first frame, while the
+                                // camera is still opening. The first Status is sent once data is
+                                // actually in the file.
+                                is VideoRecordEvent.Status -> if (!rolled) {
+                                    rolled = true
+                                    recordingClock?.rolling(event.recordingStats.recordedDurationNanos / 1_000_000)
                                 }
                                 is VideoRecordEvent.Finalize -> {
+                                    recordingClock?.segmentEnded(event.recordingStats.recordedDurationNanos / 1_000_000)
                                     val ok = !event.hasError()
                                     Log.i(
                                         TAG,
@@ -346,6 +364,8 @@ class GlassesCamera(context: Context, private val lifecycleOwner: LifecycleOwner
                     onEvent("recording -> ${destination.absolutePath}")
                 } catch (e: Exception) {
                     releaseRecording()
+                    // Nothing will record, so there is no video clock to wait for.
+                    recordingClock?.rolling(0)
                     onEvent("start failed: ${e.message}")
                 }
             }, ContextCompat.getMainExecutor(appContext))
@@ -354,6 +374,7 @@ class GlassesCamera(context: Context, private val lifecycleOwner: LifecycleOwner
 
     /** Stops an in-flight recording. The file is only complete once Finalize arrives. */
     fun stopRecording(onEvent: (String) -> Unit) {
+        recordingClock?.dark()
         mainHandler.post {
             val rec = activeRecording
             if (rec == null) {
@@ -389,9 +410,7 @@ class GlassesCamera(context: Context, private val lifecycleOwner: LifecycleOwner
         onCaptured: (ByteArray) -> Unit,
         onError: (String) -> Unit,
     ) {
-        val audio = recordingWithAudio
         val next = nextSegment(current)
-        onSegmentGap?.invoke(true)
         pendingAfterFinalize = {
             cameraExecutor.execute {
                 val bytes = frameFromRecording(current)
@@ -399,7 +418,7 @@ class GlassesCamera(context: Context, private val lifecycleOwner: LifecycleOwner
                     if (bytes != null) onCaptured(bytes) else onError("Segment produced no frame")
                     // Resume regardless: losing the rest of a take to a failed still is worse
                     // than a still that did not arrive.
-                    startRecording(next, audio) { msg -> Log.i(TAG, "segment resume: $msg") }
+                    startRecording(next) { msg -> Log.i(TAG, "segment resume: $msg") }
                 }
             }
         }
@@ -467,6 +486,8 @@ class GlassesCamera(context: Context, private val lifecycleOwner: LifecycleOwner
         }
 
         private const val TAG = "lumella"
+
+        private const val POV_FPS = 24
         private const val CAMERA_OPEN_TIMEOUT_MS = 5_000L
         private const val ANALYSIS_JPEG_QUALITY = 90
 

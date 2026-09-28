@@ -3,6 +3,7 @@ package com.woolab.lumella.audio
 import android.media.AudioAttributes
 import android.media.AudioFormat
 import android.media.AudioTrack
+import android.os.Build
 import java.util.Base64
 
 /**
@@ -24,50 +25,31 @@ class AudioPlayback(private val sampleRateHz: Int = 24_000) {
     private var audioTrack: AudioTrack? = null
 
     /**
-     * Optional WAV sink for the tutor's voice, used while filming.
-     *
-     * The POV recording captures the microphone, and the microphone is opened with
-     * `VOICE_COMMUNICATION` so the platform echo canceller removes what the speaker is playing
-     * — without it the tutor's own voice feeds back and server VAD reads it as the learner
-     * talking (see `AudioCapture`). Correct for the product, but it means a take carries only
-     * the learner's half: measured 2026-09-14 as -22 dB while the learner spoke against -39 dB
-     * while the tutor did.
-     *
-     * The tutor's PCM is already in hand here, on its way to the track, so it is written out in
-     * parallel rather than recovered acoustically. The edit gets two mono files — learner from
-     * the video, tutor from this — and mixes them.
-     *
-     * **Silence is written too.** The first version only wrote while the tutor was speaking, so a
-     * 172.3s take produced a 68.7s file: every pause was missing and the mix dragged the tutor's
-     * lines forward, drifting further out of sync as the take went on. Each chunk is now padded
-     * with the silence that elapsed since the previous one, which keeps the file on the same
-     * clock as the video.
+     * The tutor's voice for a take, while filming. The POV has no sound track, and the mic that
+     * the learner tap reads is echo-cancelled so the tutor is deliberately absent from it; the
+     * tutor's PCM is in hand here on its way to the speaker, so it is written out in parallel
+     * rather than recovered acoustically. Queued only — see [WavTap] for why the disk write must
+     * not happen on this thread.
      */
-    @Volatile private var tapStream: java.io.RandomAccessFile? = null
-    @Volatile private var tapBytes: Int = 0
-    @Volatile private var tapStartedAtMs: Long = 0L
-
-    /**
-     * Milliseconds the video was NOT recording while the tap was open, subtracted from the
-     * padding clock.
-     *
-     * A photo turn closes the current video segment and opens the next, and the camera is dark
-     * for ~1.5s in between. Wall-clock padding filled that gap with silence the video never
-     * had, so every photo turn pushed the tutor a further 1.5s late — measured on a
-     * three-segment take as WAV 149.7s against 146.6s of video. The tap now follows the
-     * video's clock, not the wall's.
-     */
-    @Volatile private var tapGapMs: Long = 0L
-    @Volatile private var gapStartedAtMs: Long = 0L
+    @Volatile var tap: WavTap? = null
 
     /** Allocates the streaming AudioTrack WITHOUT starting playback. Safe to call repeatedly. */
     fun start() {
         if (audioTrack != null) return
-        val bufferSize = AudioTrack.getMinBufferSize(
+        val minBytes = AudioTrack.getMinBufferSize(
             sampleRateHz,
             AudioFormat.CHANNEL_OUT_MONO,
             AudioFormat.ENCODING_PCM_16BIT,
         )
+        // Well above the minimum. The minimum here is 1928 frames, 80ms, and write() is called
+        // from the websocket reader, which the realtime API keeps blocked in it for ~90% of
+        // every reply (it delivers faster than real time). Each time write() returns, that
+        // thread has what is left in the buffer to decode and bring the next chunk before the
+        // speaker runs dry. With POV recording loading the device to 255-322% of 400%, 80ms was
+        // missed 11 times in one run (2026-09-28, artifacts/perf). More buffer is more slack for
+        // the same thread; it does not delay the first word, because the start threshold below
+        // stays at the minimum.
+        val bufferBytes = maxOf(minBytes, sampleRateHz * 2 * PLAYBACK_BUFFER_MS / 1000)
         val track = AudioTrack.Builder()
             .setAudioAttributes(
                 AudioAttributes.Builder()
@@ -82,9 +64,13 @@ class AudioPlayback(private val sampleRateHz: Int = 24_000) {
                     .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
                     .build(),
             )
-            .setBufferSizeInBytes(bufferSize)
+            .setBufferSizeInBytes(bufferBytes)
             .setTransferMode(AudioTrack.MODE_STREAM)
             .build()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            // A streaming track otherwise waits for its whole buffer before it starts.
+            runCatching { track.setStartThresholdInFrames(minBytes / 2) }
+        }
         audioTrack = track
     }
 
@@ -106,9 +92,14 @@ class AudioPlayback(private val sampleRateHz: Int = 24_000) {
      * - maxWriteMs / sumWriteMs: how long track.write blocked this thread. write() blocks when
      *   the track's buffer is full, so large values mean playback is the bottleneck; near zero
      *   with underruns means the data arrived too late.
-     * - maxTapMs: the voice tap's disk write on the same thread, per chunk.
+     * - maxTapMs: what handing the chunk to the voice tap cost this thread (a queue, so ~0).
+     * - minLeadMs / maxGapMs / minLeadAtChunk: audio queued so far (preroll included) minus time
+     *   since the first delta, at each delta's arrival; the longest wait between deltas; and
+     *   which delta the lowest lead was at. A negative lead means the reply reached this app
+     *   slower than it plays. Underruns with the lead positive throughout would be this
+     *   device's fault: the thread writing to the track did not get to run.
      */
-    private class ResponseStats(val underrunsAtStart: Int) {
+    private class ResponseStats(val underrunsAtStart: Int, val prerollMs: Long) {
         val startedAtMs = System.currentTimeMillis()
         var lastDeltaAtMs = startedAtMs
         var audioBytes = 0L
@@ -116,6 +107,9 @@ class AudioPlayback(private val sampleRateHz: Int = 24_000) {
         var maxWriteMs = 0L
         var sumWriteMs = 0L
         var maxTapMs = 0L
+        var minLeadMs = Long.MAX_VALUE
+        var minLeadAtChunk = 0
+        var maxGapMs = 0L
     }
     @Volatile private var stats: ResponseStats? = null
 
@@ -129,7 +123,9 @@ class AudioPlayback(private val sampleRateHz: Int = 24_000) {
         val wallMs = st.lastDeltaAtMs - st.startedAtMs
         return "perf: playback underruns=$underruns audioMs=$audioMs wallMs=$wallMs chunks=${st.chunks} " +
             "maxWriteMs=${st.maxWriteMs} sumWriteMs=${st.sumWriteMs} maxTapMs=${st.maxTapMs} " +
-            "bufferFrames=${track?.bufferSizeInFrames ?: -1}"
+            "bufferFrames=${track?.bufferSizeInFrames ?: -1} " +
+            "minLeadMs=${if (st.minLeadMs == Long.MAX_VALUE) 0 else st.minLeadMs} maxGapMs=${st.maxGapMs} " +
+            "minLeadAtChunk=${st.minLeadAtChunk}"
     }
 
     /** Decodes and enqueues a base64 PCM16 delta chunk for streaming playback. Tolerant of malformed input. */
@@ -141,7 +137,14 @@ class AudioPlayback(private val sampleRateHz: Int = 24_000) {
         }
         val track = audioTrack ?: return
         ensurePlaying(track)
-        val st = stats ?: ResponseStats(track.underrunCount).also { stats = it }
+        val st = stats ?: startResponse(track)
+        val arrivedAtMs = System.currentTimeMillis()
+        if (st.chunks > 0) {
+            val lead = st.prerollMs + st.audioBytes * 1000L / (sampleRateHz * 2L) - (arrivedAtMs - st.startedAtMs)
+            if (lead < st.minLeadMs) { st.minLeadMs = lead; st.minLeadAtChunk = st.chunks }
+            val gap = arrivedAtMs - st.lastDeltaAtMs
+            if (gap > st.maxGapMs) st.maxGapMs = gap
+        }
         val t0 = System.nanoTime()
         track.write(bytes, 0, bytes.size)
         val writeMs = (System.nanoTime() - t0) / 1_000_000
@@ -150,108 +153,38 @@ class AudioPlayback(private val sampleRateHz: Int = 24_000) {
         st.lastDeltaAtMs = System.currentTimeMillis()
         st.sumWriteMs += writeMs
         if (writeMs > st.maxWriteMs) st.maxWriteMs = writeMs
-        tapStream?.let { out ->
-            // Best-effort: a failed tap must never interrupt playback the wearer is listening to.
+        tap?.let { t ->
             val t1 = System.nanoTime()
-            runCatching {
-                padSilenceTo(out, videoElapsedMs())
-                out.write(bytes)
-                tapBytes += bytes.size
-            }
+            t.write(bytes)
             val tapMs = (System.nanoTime() - t1) / 1_000_000
             if (tapMs > st.maxTapMs) st.maxTapMs = tapMs
         }
     }
 
-    /** Starts writing the tutor's voice to [file] as mono PCM16 WAV. Overwrites any existing file. */
-    fun startVoiceTap(file: java.io.File) {
-        stopVoiceTap()
-        runCatching {
-            val raf = java.io.RandomAccessFile(file, "rw")
-            raf.setLength(0)
-            raf.write(ByteArray(WAV_HEADER_BYTES)) // placeholder; sizes are patched on stop
-            tapBytes = 0
-            tapStartedAtMs = System.currentTimeMillis()
-            tapGapMs = 0L
-            gapStartedAtMs = 0L
-            tapStream = raf
-        }
-    }
-
-    /** Finalises the WAV header and closes the tap. Safe to call when not tapping. */
-    fun stopVoiceTap() {
-        val raf = tapStream ?: return
-        tapStream = null
-        runCatching {
-            // Pad the tail as well, so the file ends level with the video rather than at the
-            // tutor's last word.
-            padSilenceTo(raf, videoElapsedMs())
-            raf.seek(0)
-            raf.write(wavHeader(tapBytes, sampleRateHz))
-            raf.close()
-        }
-        tapBytes = 0
-    }
-
     /**
-     * Writes zero samples until the file holds [elapsedMs] of audio. Never trims: if playback ran
-     * long the file is already ahead, and cutting it would lose the tutor's voice.
+     * Opens a reply with [PREROLL_MS] of silence ahead of its first word.
+     *
+     * A reply's first delta is small (~100ms of speech) and the next, ~250ms, comes 110-240ms
+     * later, so the speaker runs dry inside the first word. Measured 2026-09-28 with NO
+     * recording running and the device at 62% of 400% (artifacts/perf/lead-none.json): 4 of 7
+     * replies underran, and in every one of them the reply had fallen behind the speaker by
+     * 91-146ms at its second delta. No buffer size cures that — the data is not here yet — and
+     * it was most of what was left of the stutter once POV load was dealt with. Starting each
+     * reply that much later is the jitter buffer. It costs the wearer [PREROLL_MS] before the
+     * first word, well inside the 0.5-1s pause a reply takes anyway.
+     *
+     * The tap gets the same silence, so the tutor's voice lands in the take when it was heard.
      */
-    /** Marks the start of a stretch where the video is not recording (a segment boundary). */
-    fun pauseVoiceClock() {
-        if (tapStream == null || gapStartedAtMs != 0L) return
-        gapStartedAtMs = System.currentTimeMillis()
-    }
-
-    /** Ends that stretch; its duration is excluded from the padding clock. */
-    fun resumeVoiceClock() {
-        if (gapStartedAtMs == 0L) return
-        tapGapMs += System.currentTimeMillis() - gapStartedAtMs
-        gapStartedAtMs = 0L
-    }
-
-    /** Elapsed time as the VIDEO saw it: wall clock minus the stretches it was not recording. */
-    private fun videoElapsedMs(): Long {
-        val now = System.currentTimeMillis()
-        val openGap = if (gapStartedAtMs != 0L) now - gapStartedAtMs else 0L
-        return now - tapStartedAtMs - tapGapMs - openGap
-    }
-
-    private fun padSilenceTo(out: java.io.RandomAccessFile, elapsedMs: Long) {
-        val wantBytes = (elapsedMs * sampleRateHz / 1000L) * 2L  // mono, 16-bit
-        val gap = wantBytes - tapBytes
-        if (gap <= 0) return
-        var remaining = gap
-        val chunk = ByteArray(SILENCE_CHUNK_BYTES)
-        while (remaining > 0) {
-            val n = minOf(remaining, SILENCE_CHUNK_BYTES.toLong()).toInt()
-            out.write(chunk, 0, n)
-            tapBytes += n
-            remaining -= n
-        }
-    }
-
-    private fun wavHeader(dataBytes: Int, rate: Int): ByteArray {
-        val bb = java.nio.ByteBuffer.allocate(WAV_HEADER_BYTES).order(java.nio.ByteOrder.LITTLE_ENDIAN)
-        val byteRate = rate * 2 // mono, 16-bit
-        bb.put("RIFF".toByteArray())
-        bb.putInt(36 + dataBytes)
-        bb.put("WAVE".toByteArray())
-        bb.put("fmt ".toByteArray())
-        bb.putInt(16)          // PCM chunk size
-        bb.putShort(1)         // PCM
-        bb.putShort(1)         // mono
-        bb.putInt(rate)
-        bb.putInt(byteRate)
-        bb.putShort(2)         // block align
-        bb.putShort(16)        // bits per sample
-        bb.put("data".toByteArray())
-        bb.putInt(dataBytes)
-        return bb.array()
+    private fun startResponse(track: AudioTrack): ResponseStats {
+        val st = ResponseStats(track.underrunCount, PREROLL_MS.toLong())
+        stats = st
+        val silence = ByteArray(sampleRateHz * 2 * PREROLL_MS / 1000)
+        track.write(silence, 0, silence.size)
+        tap?.write(silence)
+        return st
     }
 
     fun stop() {
-        stopVoiceTap()
         try {
             audioTrack?.stop()
         } catch (_: Exception) {
@@ -262,7 +195,7 @@ class AudioPlayback(private val sampleRateHz: Int = 24_000) {
     }
 
     private companion object {
-        const val WAV_HEADER_BYTES = 44
-        const val SILENCE_CHUNK_BYTES = 16 * 1024
+        const val PLAYBACK_BUFFER_MS = 500
+        const val PREROLL_MS = 150
     }
 }

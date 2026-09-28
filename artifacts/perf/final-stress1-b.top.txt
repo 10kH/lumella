@@ -1,0 +1,2024 @@
+=== 1790589276
+Threads: 1847 total,   2 running, 1845 sleeping,   0 stopped,   0 zombie
+  Mem:  3865588K total,  3272956K used,   592632K free,     6672K buffers
+ Swap:  2097148K total,   380160K used,  1716988K free,  1723720K cached
+400%cpu 154%user   3%nice  93%sys 140%idle   0%iow   7%irq   3%sirq   0%host
+  PID   TID[%CPU]CMD             NAME
+ 8622  8622 94.0 yes             yes
+ 8780  8780 33.0 top             top
+  795  1196 11.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1200 10.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1197 10.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1198  9.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1199  9.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+ 8354  8354  8.0 .woolab.lumella com.woolab.lumella
+ 8354  8363  6.0 Jit thread pool com.woolab.lumella
+  809  8678  3.0 EvtQ_c2.qti.avc media.hwcodec
+ 8354  8376  3.0 Binder:8354_4   com.woolab.lumella
+ 8354  8784  2.0 Binder:8354_7   com.woolab.lumella
+  795  8747  2.0 HwBinder:795_1  vendor.qti.camera.provider@2.7-service_64
+ 8354  8680  2.0 CameraX-camerax com.woolab.lumella
+ 8354  8669  2.0 CameraX-camerax com.woolab.lumella
+  809  8648  2.0 EvtQ_c2.qti.avc media.hwcodec
+ 8354  8635  2.0 lumella-wav-tap com.woolab.lumella
+ 8354  8424  2.0 lumella-audio-c com.woolab.lumella
+  830  8422  2.0 AudioIn_286     audioserver
+ 8354  8398  2.0 OkHttp TaskRunn com.woolab.lumella
+ 8038  8038  2.0 kworker/u9:2-crm_workq-5b0200-c50307 [kworker/u9:2-crm_workq-5b0200-c50307]
+  795  6431  2.0 HwBinder:795_5  vendor.qti.camera.provider@2.7-service_64
+  887  5951  2.0 HwBinder:887_3  cameraserver
+  809  1271  2.0 HwBinder:809_3  media.hwcodec
+  887  1136  2.0 HwBinder:887_2  cameraserver
+  795  1124  2.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  809  8764  1.0 EvtQ_codecPipe  media.hwcodec
+  795  8746  1.0 HwBinder:795_1  vendor.qti.camera.provider@2.7-service_64
+  795  8743  1.0 HwBinder:795_1  vendor.qti.camera.provider@2.7-service_64
+  809  8682  1.0 poll_avcE_105   media.hwcodec
+ 8354  8679  1.0 C2OMXNode       com.woolab.lumella
+  887  8677  1.0 CDU-0-FrameProc cameraserver
+ 8354  8671  1.0 CodecLooper     com.woolab.lumella
+ 8354  8670  1.0 MediaCodec_loop com.woolab.lumella
+ 8354  8666  1.0 HwBinder:8354_1 com.woolab.lumella
+ 8354  8649  1.0 CameraX-core_ca com.woolab.lumella
+ 8354  8637  1.0 CameraX-core_ca com.woolab.lumella
+ 8354  8519  1.0 OkHttp TaskRunn com.woolab.lumella
+  770  8425  1.0 reader          android.hardware.audio.service_64
+ 8354  8394  1.0 .openai.com/... com.woolab.lumella
+=== 1790589279
+Threads: 1859 total,   3 running, 1856 sleeping,   0 stopped,   0 zombie
+  Mem:  3865588K total,  3277888K used,   587700K free,     6672K buffers
+ Swap:  2097148K total,   380160K used,  1716988K free,  1725548K cached
+400%cpu 150%user   4%nice  83%sys 152%idle   0%iow   9%irq   2%sirq   0%host
+  PID   TID[%CPU]CMD             NAME
+ 8622  8622 93.0 yes             yes
+ 8813  8813 33.0 top             top
+  795  1200 11.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1196 10.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1199  9.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1197  9.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1198  9.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  770  2746  5.0 writer          android.hardware.audio.service_64
+ 8354  8784  3.0 Binder:8354_7   com.woolab.lumella
+  809  8678  3.0 EvtQ_c2.qti.avc media.hwcodec
+ 8354  8424  3.0 lumella-audio-c com.woolab.lumella
+  830  1447  3.0 FastMixer       audioserver
+  887  1136  3.0 HwBinder:887_2  cameraserver
+ 8354  8680  2.0 CameraX-camerax com.woolab.lumella
+  887  8677  2.0 CDU-0-FrameProc cameraserver
+ 8354  8669  2.0 CameraX-camerax com.woolab.lumella
+ 8354  8519  2.0 OkHttp TaskRunn com.woolab.lumella
+ 8354  8398  2.0 OkHttp TaskRunn com.woolab.lumella
+ 8354  8369  2.0 Binder:8354_2   com.woolab.lumella
+  797 31788  2.0 HwBinder:797_D  vendor.qti.hardware.AGMIPC@1.0-service
+  797 30290  2.0 HwBinder:797_B  vendor.qti.hardware.AGMIPC@1.0-service
+  795  5937  2.0 HwBinder:795_4  vendor.qti.camera.provider@2.7-service_64
+  797  2749  2.0 HwBinder:797_6  vendor.qti.hardware.AGMIPC@1.0-service
+  795  1124  2.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  8800  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  8799  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+ 8354  8768  1.0 MP4WtrVidTrkThr com.woolab.lumella
+  809  8764  1.0 EvtQ_codecPipe  media.hwcodec
+  795  8751  1.0 HwBinder:795_1  vendor.qti.camera.provider@2.7-service_64
+  795  8743  1.0 HwBinder:795_1  vendor.qti.camera.provider@2.7-service_64
+  809  8682  1.0 poll_avcE_105   media.hwcodec
+ 8354  8679  1.0 C2OMXNode       com.woolab.lumella
+  887  8675  1.0 C3Dev-0-Status  cameraserver
+  887  8676  1.0 C3Dev-0-ReqQueu cameraserver
+ 8354  8670  1.0 MediaCodec_loop com.woolab.lumella
+ 8354  8666  1.0 HwBinder:8354_1 com.woolab.lumella
+ 8354  8637  1.0 CameraX-core_ca com.woolab.lumella
+ 8354  8635  1.0 lumella-wav-tap com.woolab.lumella
+  770  8425  1.0 reader          android.hardware.audio.service_64
+  830  8422  1.0 AudioIn_286     audioserver
+=== 1790589282
+Threads: 1840 total,   3 running, 1837 sleeping,   0 stopped,   0 zombie
+  Mem:  3865588K total,  3246344K used,   619244K free,     6672K buffers
+ Swap:  2097148K total,   380160K used,  1716988K free,  1726172K cached
+400%cpu 110%user   0%nice  75%sys 208%idle   0%iow   5%irq   2%sirq   0%host
+  PID   TID[%CPU]CMD             NAME
+ 8622  8622 94.0 yes             yes
+ 8826  8826 32.0 top             top
+ 8354  8670 11.0 MediaCodec_loop com.woolab.lumella
+ 8354  8795  8.0 lumella-wav-tap com.woolab.lumella
+ 8354  8649  6.0 CameraX-core_ca com.woolab.lumella
+ 8354  8805  4.0 brain-submit    com.woolab.lumella
+ 8354  8804  4.0 lumella-slowpat com.woolab.lumella
+ 8354  8679  4.0 C2OMXNode       com.woolab.lumella
+  795   795  4.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  8726  3.0 HwBinder:795_1  vendor.qti.camera.provider@2.7-service_64
+  198   198  3.0 ueventd         ueventd
+  118   118  3.0 dmabuf-deferred [dmabuf-deferred]
+  830  8422  2.0 AudioIn_286     audioserver
+  795  1218  2.0 HwBinder:795_1  vendor.qti.camera.provider@2.7-service_64
+  368   468  2.0 logd.writer     logd
+ 8627  8647  1.0 HwBinder:8627_1 screenrecord
+  809  8648  1.0 EvtQ_c2.qti.avc media.hwcodec
+ 8354  8635  1.0 lumella-wav-tap com.woolab.lumella
+ 8354  8519  1.0 OkHttp TaskRunn com.woolab.lumella
+ 8354  8424  1.0 lumella-audio-c com.woolab.lumella
+  770  8425  1.0 reader          android.hardware.audio.service_64
+ 8354  8394  1.0 .openai.com/... com.woolab.lumella
+ 8354  8376  1.0 Binder:8354_4   com.woolab.lumella
+ 8354  8363  1.0 Jit thread pool com.woolab.lumella
+ 8354  8354  1.0 .woolab.lumella com.woolab.lumella
+ 7053  7053  1.0 kworker/3:0-pm  [kworker/3:0-pm]
+  368  6321  1.0 logd.reader.per logd
+ 6319  6319  1.0 logcat          logcat
+ 4527  4527  1.0 kworker/u8:1-devfreq_wq [kworker/u8:1-devfreq_wq]
+  797 31788  1.0 HwBinder:797_D  vendor.qti.hardware.AGMIPC@1.0-service
+  778 26746  1.0 11_see          android.hardware.sensors@2.1-service.multihal
+  809 25294  1.0 HwBinder:809_7  media.hwcodec
+ 1723  1867  1.0 Binder:1723_4   com.android.systemui
+  785  1822  1.0 wifi@1.0-servic android.hardware.wifi@1.0-service
+ 1814  1814  1.0 dp_rx_thread_1  [dp_rx_thread_1]
+ 1723  1723  1.0 ndroid.systemui com.android.systemui
+ 1296  1585  1.0 SensorService   system_server
+ 1296  1534  1.0 android.ui      system_server
+  795  1196  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  838  1080  1.0 RenderEngine    surfaceflinger
+=== 1790589284
+Threads: 1859 total,   5 running, 1854 sleeping,   0 stopped,   0 zombie
+  Mem:  3865588K total,  3278424K used,   587164K free,     6672K buffers
+ Swap:  2097148K total,   380160K used,  1716988K free,  1726804K cached
+400%cpu 145%user   0%nice  79%sys 164%idle   0%iow   8%irq   4%sirq   0%host
+  PID   TID[%CPU]CMD             NAME
+ 8622  8622 87.0 yes             yes
+ 8937  8937 33.0 top             top
+  795  1201 12.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1196 10.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1200 10.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1197 10.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1198  9.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  770  2746  4.0 writer          android.hardware.audio.service_64
+  809  8838  3.0 EvtQ_c2.qti.avc media.hwcodec
+ 8354  8369  3.0 Binder:8354_2   com.woolab.lumella
+  830  1447  3.0 FastMixer       audioserver
+  797  1185  3.0 AGMIPC@1.0-serv vendor.qti.hardware.AGMIPC@1.0-service
+ 8354  8784  2.0 Binder:8354_7   com.woolab.lumella
+ 8354  8669  2.0 CameraX-camerax com.woolab.lumella
+ 8354  8635  2.0 lumella-wav-tap com.woolab.lumella
+ 8354  8424  2.0 lumella-audio-c com.woolab.lumella
+ 1296  1558  2.0 PowerManagerSer system_server
+  887  1135  2.0 HwBinder:887_1  cameraserver
+  795  1124  2.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  809  8930  1.0 EvtQ_codecPipe  media.hwcodec
+  795  8917  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  8912  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  8910  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  887  8846  1.0 C3Dev-0-ReqQueu cameraserver
+  887  8847  1.0 CDU-0-FrameProc cameraserver
+ 8354  8834  1.0 CodecLooper     com.woolab.lumella
+ 8354  8833  1.0 MediaCodec_loop com.woolab.lumella
+ 8354  8810  1.0 OkHttp TaskRunn com.woolab.lumella
+ 8354  8680  1.0 CameraX-camerax com.woolab.lumella
+ 8627  8650  1.0 C2OMXNode       screenrecord
+ 8354  8637  1.0 CameraX-core_ca com.woolab.lumella
+  770  8425  1.0 reader          android.hardware.audio.service_64
+  830  8422  1.0 AudioIn_286     audioserver
+ 8354  8398  1.0 .com/... writer com.woolab.lumella
+ 8354  8394  1.0 .openai.com/... com.woolab.lumella
+ 8354  8370  1.0 Binder:8354_3   com.woolab.lumella
+ 8354  8363  1.0 Jit thread pool com.woolab.lumella
+ 8354  8354  1.0 .woolab.lumella com.woolab.lumella
+ 8074  8074  1.0 kworker/u8:3-bwmon_wq [kworker/u8:3-bwmon_wq]
+ 8038  8038  1.0 kworker/u9:2-hal_register_write_wq [kworker/u9:2-hal_register_write_wq]
+=== 1790589287
+Threads: 1863 total,   7 running, 1856 sleeping,   0 stopped,   0 zombie
+  Mem:  3865588K total,  3283980K used,   581608K free,     6672K buffers
+ Swap:  2097148K total,   379904K used,  1717244K free,  1729012K cached
+400%cpu 175%user   4%nice 121%sys  89%idle   0%iow   9%irq   2%sirq   0%host
+  PID   TID[%CPU]CMD             NAME
+ 8622  8622 92.0 yes             yes
+ 8941  8941 32.0 top             top
+  830  8943 17.0 AudioIn_5E      audioserver
+  770  8944 13.0 reader          android.hardware.audio.service_64
+  795  1201 10.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1198 10.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1200 10.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1197  9.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1196  8.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+ 2561  2561  6.0 eech:interactor com.rayneo.aispeech:interactor
+ 8354  8354  5.0 .woolab.lumella com.woolab.lumella
+  770  2746  5.0 writer          android.hardware.audio.service_64
+ 8354  8938  3.0 Binder:8354_8   com.woolab.lumella
+  809  8838  3.0 EvtQ_c2.qti.avc media.hwcodec
+ 8354  8369  3.0 Binder:8354_2   com.woolab.lumella
+  830  1447  3.0 FastMixer       audioserver
+  795  1124  3.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  8910  2.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  887  8847  2.0 CDU-0-FrameProc cameraserver
+ 8354  8669  2.0 CameraX-camerax com.woolab.lumella
+ 8354  8424  2.0 lumella-audio-c com.woolab.lumella
+ 8354  8363  2.0 Jit thread pool com.woolab.lumella
+  797 31788  2.0 HwBinder:797_D  vendor.qti.hardware.AGMIPC@1.0-service
+  797 30290  2.0 HwBinder:797_B  vendor.qti.hardware.AGMIPC@1.0-service
+  887  5951  2.0 HwBinder:887_3  cameraserver
+ 2561  2570  2.0 HeapTaskDaemon  com.rayneo.aispeech:interactor
+ 1723  1723  2.0 ndroid.systemui com.android.systemui
+  795  1218  2.0 HwBinder:795_1  vendor.qti.camera.provider@2.7-service_64
+  797   797  2.0 AGMIPC@1.0-serv vendor.qti.hardware.AGMIPC@1.0-service
+ 8354  8934  1.0 MP4WtrVidTrkThr com.woolab.lumella
+  795  8913  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  8912  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  8909  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  887  8846  1.0 C3Dev-0-ReqQueu cameraserver
+  809  8841  1.0 poll_avcE_109   media.hwcodec
+ 8354  8839  1.0 C2OMXNode       com.woolab.lumella
+ 8354  8834  1.0 CodecLooper     com.woolab.lumella
+ 8354  8810  1.0 OkHttp TaskRunn com.woolab.lumella
+ 8354  8805  1.0 brain-submit    com.woolab.lumella
+ 8354  8769  1.0 Binder:8354_6   com.woolab.lumella
+=== 1790589290
+Threads: 1856 total,   4 running, 1852 sleeping,   0 stopped,   0 zombie
+  Mem:  3865588K total,  3283116K used,   582472K free,     6672K buffers
+ Swap:  2097148K total,   379904K used,  1717244K free,  1730292K cached
+400%cpu 148%user   1%nice  85%sys 157%idle   0%iow   6%irq   3%sirq   0%host
+  PID   TID[%CPU]CMD             NAME
+ 8622  8622 93.0 yes             yes
+ 8951  8951 33.0 top             top
+  795  1196 10.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1198 10.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1197 10.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1200  8.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1201  8.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  809  8838  3.0 EvtQ_c2.qti.avc media.hwcodec
+ 8354  8769  2.0 Binder:8354_6   com.woolab.lumella
+ 8354  8669  2.0 CameraX-camerax com.woolab.lumella
+ 8354  8519  2.0 OkHttp TaskRunn com.woolab.lumella
+ 8354  8424  2.0 lumella-audio-c com.woolab.lumella
+  797 30290  2.0 HwBinder:797_B  vendor.qti.hardware.AGMIPC@1.0-service
+  887  5959  2.0 HwBinder:887_5  cameraserver
+  887  1135  2.0 HwBinder:887_1  cameraserver
+  795  1124  2.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795   795  2.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+ 8354  8938  1.0 Binder:8354_8   com.woolab.lumella
+  795  8910  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  887  8847  1.0 CDU-0-FrameProc cameraserver
+ 8354  8839  1.0 C2OMXNode       com.woolab.lumella
+ 8354  8834  1.0 CodecLooper     com.woolab.lumella
+ 8354  8833  1.0 MediaCodec_loop com.woolab.lumella
+ 8354  8810  1.0 OkHttp TaskRunn com.woolab.lumella
+ 8354  8784  1.0 Binder:8354_7   com.woolab.lumella
+ 8354  8680  1.0 CameraX-camerax com.woolab.lumella
+ 8354  8666  1.0 HwBinder:8354_1 com.woolab.lumella
+ 8627  8650  1.0 C2OMXNode       screenrecord
+ 8354  8635  1.0 lumella-wav-tap com.woolab.lumella
+  770  8425  1.0 reader          android.hardware.audio.service_64
+  830  8422  1.0 AudioIn_286     audioserver
+ 8354  8368  1.0 Binder:8354_1   com.woolab.lumella
+ 8354  8354  1.0 .woolab.lumella com.woolab.lumella
+ 8074  8074  1.0 kworker/u8:3-memlat_wq [kworker/u8:3-memlat_wq]
+  368  6321  1.0 logd.reader.per logd
+ 4997  4997  1.0 kworker/0:2-events [kworker/0:2-events]
+ 4714  4714  1.0 kworker/u9:1-crm_workq-5f0200-40307 [kworker/u9:1-crm_workq-5f0200-40307]
+ 4527  4527  1.0 kworker/u8:1-bwmon_wq [kworker/u8:1-bwmon_wq]
+  778 26746  1.0 11_see          android.hardware.sensors@2.1-service.multihal
+  778 26737  1.0 51_see          android.hardware.sensors@2.1-service.multihal
+=== 1790589293
+Threads: 1857 total,   3 running, 1854 sleeping,   0 stopped,   0 zombie
+  Mem:  3865588K total,  3283212K used,   582376K free,     6672K buffers
+ Swap:  2097148K total,   379904K used,  1717244K free,  1731628K cached
+400%cpu 149%user   4%nice  81%sys 156%idle   0%iow   7%irq   3%sirq   0%host
+  PID   TID[%CPU]CMD             NAME
+ 8622  8622 96.0 yes             yes
+ 8954  8954 32.0 top             top
+  795  1198 11.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1200 10.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1197  9.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1196  9.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1201  9.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  809  8838  4.0 EvtQ_c2.qti.avc media.hwcodec
+ 8354  8368  3.0 Binder:8354_1   com.woolab.lumella
+ 8354  8938  2.0 Binder:8354_8   com.woolab.lumella
+  887  8846  2.0 C3Dev-0-ReqQueu cameraserver
+ 8354  8833  2.0 MediaCodec_loop com.woolab.lumella
+ 8354  8669  2.0 CameraX-camerax com.woolab.lumella
+ 8354  8424  2.0 lumella-audio-c com.woolab.lumella
+ 8354  8364  2.0 HeapTaskDaemon  com.woolab.lumella
+  809  8930  1.0 EvtQ_codecPipe  media.hwcodec
+  795  8917  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  8913  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  8912  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  8910  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  887  8847  1.0 CDU-0-FrameProc cameraserver
+  809  8841  1.0 poll_avcE_109   media.hwcodec
+ 8354  8834  1.0 CodecLooper     com.woolab.lumella
+ 8354  8810  1.0 OkHttp TaskRunn com.woolab.lumella
+ 8354  8680  1.0 CameraX-camerax com.woolab.lumella
+ 8354  8666  1.0 HwBinder:8354_1 com.woolab.lumella
+ 8627  8650  1.0 C2OMXNode       screenrecord
+ 8354  8649  1.0 CameraX-core_ca com.woolab.lumella
+ 8354  8637  1.0 CameraX-core_ca com.woolab.lumella
+  770  8425  1.0 reader          android.hardware.audio.service_64
+  830  8422  1.0 AudioIn_286     audioserver
+ 8354  8399  1.0 Okio Watchdog   com.woolab.lumella
+ 8354  8398  1.0 OkHttp TaskRunn com.woolab.lumella
+ 8354  8363  1.0 Jit thread pool com.woolab.lumella
+ 8354  8354  1.0 .woolab.lumella com.woolab.lumella
+ 8038  8038  1.0 kworker/u9:2-hal_register_write_wq [kworker/u9:2-hal_register_write_wq]
+ 6914  6914  1.0 kworker/u8:4-memlat_wq [kworker/u8:4-memlat_wq]
+ 6319  6319  1.0 logcat          logcat
+ 4714  4714  1.0 kworker/u9:1-crm_workq-5f0200-40307 [kworker/u9:1-crm_workq-5f0200-40307]
+  809 25309  1.0 HwBinder:809_7  media.hwcodec
+=== 1790589296
+Threads: 1857 total,   6 running, 1851 sleeping,   0 stopped,   0 zombie
+  Mem:  3865588K total,  3289920K used,   575668K free,     6672K buffers
+ Swap:  2097148K total,   379904K used,  1717244K free,  1733204K cached
+400%cpu 172%user   6%nice  96%sys 114%idle   0%iow   8%irq   4%sirq   0%host
+  PID   TID[%CPU]CMD             NAME
+ 8622  8622 91.0 yes             yes
+ 8963  8963 33.0 top             top
+ 8354  8354 14.0 .woolab.lumella com.woolab.lumella
+  795  1196 11.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1201  9.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1200  9.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1198  9.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1197  9.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+ 8354  8363  4.0 Jit thread pool com.woolab.lumella
+  809  8838  3.0 EvtQ_c2.qti.avc media.hwcodec
+ 8354  8769  3.0 Binder:8354_6   com.woolab.lumella
+ 8354  8370  3.0 Binder:8354_3   com.woolab.lumella
+  795  8913  2.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  887  8847  2.0 CDU-0-FrameProc cameraserver
+  887  8846  2.0 C3Dev-0-ReqQueu cameraserver
+ 8354  8680  2.0 CameraX-camerax com.woolab.lumella
+ 8354  8424  2.0 lumella-audio-c com.woolab.lumella
+  830  8422  2.0 AudioIn_286     audioserver
+ 8354  8398  2.0 OkHttp TaskRunn com.woolab.lumella
+ 8354  8373  2.0 RenderThread    com.woolab.lumella
+ 4527  4527  2.0 kworker/u8:1-adb [kworker/u8:1-adb]
+  795  5936  2.0 HwBinder:795_3  vendor.qti.camera.provider@2.7-service_64
+  795  1218  2.0 HwBinder:795_1  vendor.qti.camera.provider@2.7-service_64
+  795  1124  2.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+ 8925  8925  1.0 fthread_1       [fthread_1]
+  795  8917  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  8912  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  8909  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  8910  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  809  8841  1.0 poll_avcE_109   media.hwcodec
+ 8354  8839  1.0 C2OMXNode       com.woolab.lumella
+ 8354  8833  1.0 MediaCodec_loop com.woolab.lumella
+ 8354  8810  1.0 OkHttp TaskRunn com.woolab.lumella
+ 8354  8784  1.0 Binder:8354_7   com.woolab.lumella
+ 8354  8669  1.0 CameraX-camerax com.woolab.lumella
+ 8627  8654  1.0 Binder:8627_3   screenrecord
+ 8354  8649  1.0 CameraX-core_ca com.woolab.lumella
+ 8354  8637  1.0 CameraX-core_ca com.woolab.lumella
+  770  8425  1.0 reader          android.hardware.audio.service_64
+ 8354  8400  1.0 luma-heartbeat  com.woolab.lumella
+=== 1790589299
+Threads: 1857 total,   7 running, 1850 sleeping,   0 stopped,   0 zombie
+  Mem:  3865588K total,  3290500K used,   575088K free,     6672K buffers
+ Swap:  2097148K total,   379904K used,  1717244K free,  1734848K cached
+400%cpu 182%user   2%nice  97%sys 107%idle   0%iow   9%irq   3%sirq   0%host
+  PID   TID[%CPU]CMD             NAME
+ 8622  8622 94.0 yes             yes
+ 8977  8977 33.0 top             top
+  795  1197 11.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1200 11.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1198 10.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1201  9.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+ 8354  8354  6.0 .woolab.lumella com.woolab.lumella
+  795  1196  6.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  770  2746  5.0 writer          android.hardware.audio.service_64
+  887  8847  3.0 CDU-0-FrameProc cameraserver
+  809  8838  3.0 EvtQ_c2.qti.avc media.hwcodec
+  830  1447  3.0 FastMixer       audioserver
+  797   797  3.0 AGMIPC@1.0-serv vendor.qti.hardware.AGMIPC@1.0-service
+ 8354  8810  2.0 OkHttp TaskRunn com.woolab.lumella
+ 8354  8769  2.0 Binder:8354_6   com.woolab.lumella
+ 8354  8669  2.0 CameraX-camerax com.woolab.lumella
+ 8354  8635  2.0 lumella-wav-tap com.woolab.lumella
+ 8354  8519  2.0 .com/... writer com.woolab.lumella
+ 8354  8424  2.0 lumella-audio-c com.woolab.lumella
+ 8354  8394  2.0 .openai.com/... com.woolab.lumella
+ 8354  8373  2.0 RenderThread    com.woolab.lumella
+ 8354  8370  2.0 Binder:8354_3   com.woolab.lumella
+ 8354  8363  2.0 Jit thread pool com.woolab.lumella
+ 6914  6914  2.0 kworker/u8:4-crm_workq-icp_message_q [kworker/u8:4-crm_workq-icp_message_q]
+  797 31788  2.0 HwBinder:797_D  vendor.qti.hardware.AGMIPC@1.0-service
+  887  5951  2.0 HwBinder:887_3  cameraserver
+  797  1646  2.0 HwBinder:797_4  vendor.qti.hardware.AGMIPC@1.0-service
+  887  1135  2.0 HwBinder:887_1  cameraserver
+  795  1124  2.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795   795  2.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+ 8354  8934  1.0 MP4WtrVidTrkThr com.woolab.lumella
+  809  8930  1.0 EvtQ_codecPipe  media.hwcodec
+ 8924  8924  1.0 fthread_0       [fthread_0]
+  795  8909  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+ 8354  8834  1.0 CodecLooper     com.woolab.lumella
+ 8354  8833  1.0 MediaCodec_loop com.woolab.lumella
+ 8354  8807  1.0 .vercel.app/... com.woolab.lumella
+ 8354  8784  1.0 Binder:8354_7   com.woolab.lumella
+ 8354  8680  1.0 CameraX-camerax com.woolab.lumella
+  770  8425  1.0 reader          android.hardware.audio.service_64
+=== 1790589302
+Threads: 1857 total,   4 running, 1853 sleeping,   0 stopped,   0 zombie
+  Mem:  3865588K total,  3291176K used,   574412K free,     6672K buffers
+ Swap:  2097148K total,   379904K used,  1717244K free,  1736196K cached
+400%cpu 159%user   4%nice  95%sys 129%idle   0%iow  10%irq   3%sirq   0%host
+  PID   TID[%CPU]CMD             NAME
+ 8622  8622 92.0 yes             yes
+ 8980  8980 32.0 top             top
+  795  1196 10.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1200 10.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1201 10.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1197  9.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+ 8354  8354  8.0 .woolab.lumella com.woolab.lumella
+  795  1198  7.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  770  2746  4.0 writer          android.hardware.audio.service_64
+  887  8847  3.0 CDU-0-FrameProc cameraserver
+  809  8838  3.0 EvtQ_c2.qti.avc media.hwcodec
+  830  1447  3.0 FastMixer       audioserver
+  887  1135  3.0 HwBinder:887_1  cameraserver
+  198   198  3.0 ueventd         ueventd
+  795  8912  2.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+ 8354  8669  2.0 CameraX-camerax com.woolab.lumella
+ 8354  8370  2.0 Binder:8354_3   com.woolab.lumella
+ 8354  8363  2.0 Jit thread pool com.woolab.lumella
+  795  6431  2.0 HwBinder:795_5  vendor.qti.camera.provider@2.7-service_64
+  887  5951  2.0 HwBinder:887_3  cameraserver
+  785  1822  2.0 wifi@1.0-servic android.hardware.wifi@1.0-service
+  797  1185  2.0 AGMIPC@1.0-serv vendor.qti.hardware.AGMIPC@1.0-service
+  795  1124  2.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  797   797  2.0 AGMIPC@1.0-serv vendor.qti.hardware.AGMIPC@1.0-service
+ 8354  8938  1.0 Binder:8354_8   com.woolab.lumella
+ 8354  8934  1.0 MP4WtrVidTrkThr com.woolab.lumella
+ 8926  8926  1.0 fthread_2       [fthread_2]
+  795  8917  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  8913  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  8910  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  887  8845  1.0 C3Dev-0-Status  cameraserver
+  887  8846  1.0 C3Dev-0-ReqQueu cameraserver
+  809  8841  1.0 poll_avcE_109   media.hwcodec
+ 8354  8839  1.0 C2OMXNode       com.woolab.lumella
+ 8354  8810  1.0 .com/... writer com.woolab.lumella
+ 8354  8806  1.0 .vercel.app/... com.woolab.lumella
+ 8354  8680  1.0 CameraX-camerax com.woolab.lumella
+ 8354  8666  1.0 HwBinder:8354_1 com.woolab.lumella
+ 8354  8649  1.0 CameraX-core_ca com.woolab.lumella
+ 8627  8647  1.0 HwBinder:8627_1 screenrecord
+=== 1790589305
+Threads: 1859 total,   2 running, 1857 sleeping,   0 stopped,   0 zombie
+  Mem:  3865588K total,  3292888K used,   572700K free,     6672K buffers
+ Swap:  2097148K total,   379904K used,  1717244K free,  1737556K cached
+400%cpu 146%user   2%nice  89%sys 152%idle   0%iow   8%irq   3%sirq   0%host
+  PID   TID[%CPU]CMD             NAME
+ 8622  8622 95.0 yes             yes
+ 8985  8985 33.0 top             top
+  795  1198 11.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1197 10.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1201  9.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1200  9.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1196  8.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+ 8354  8354  7.0 .woolab.lumella com.woolab.lumella
+  809  8838  3.0 EvtQ_c2.qti.avc media.hwcodec
+ 8354  8938  2.0 Binder:8354_8   com.woolab.lumella
+  795  8912  2.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+ 8354  8680  2.0 CameraX-camerax com.woolab.lumella
+ 8354  8666  2.0 HwBinder:8354_1 com.woolab.lumella
+ 8354  8424  2.0 lumella-audio-c com.woolab.lumella
+ 8354  8369  2.0 Binder:8354_2   com.woolab.lumella
+ 8354  8368  2.0 Binder:8354_1   com.woolab.lumella
+ 8354  8363  2.0 Jit thread pool com.woolab.lumella
+  795  6431  2.0 HwBinder:795_5  vendor.qti.camera.provider@2.7-service_64
+  795  1218  2.0 HwBinder:795_1  vendor.qti.camera.provider@2.7-service_64
+  887  1136  2.0 HwBinder:887_2  cameraserver
+  795  1124  2.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+ 8354  8981  1.0 OkHttp TaskRunn com.woolab.lumella
+  809  8930  1.0 EvtQ_codecPipe  media.hwcodec
+ 8924  8924  1.0 fthread_0       [fthread_0]
+  887  8847  1.0 CDU-0-FrameProc cameraserver
+  887  8846  1.0 C3Dev-0-ReqQueu cameraserver
+  809  8841  1.0 poll_avcE_109   media.hwcodec
+ 8354  8839  1.0 C2OMXNode       com.woolab.lumella
+ 8354  8834  1.0 CodecLooper     com.woolab.lumella
+ 8354  8833  1.0 MediaCodec_loop com.woolab.lumella
+ 8354  8807  1.0 .vercel.app/... com.woolab.lumella
+ 8354  8669  1.0 CameraX-camerax com.woolab.lumella
+ 8354  8635  1.0 lumella-wav-tap com.woolab.lumella
+  770  8425  1.0 reader          android.hardware.audio.service_64
+  830  8422  1.0 AudioIn_286     audioserver
+ 8354  8398  1.0 OkHttp TaskRunn com.woolab.lumella
+ 8074  8074  1.0 kworker/u8:3-kgsl-lockless-work [kworker/u8:3-kgsl-lockless-work]
+ 6914  6914  1.0 kworker/u8:4-memlat_wq [kworker/u8:4-memlat_wq]
+  368  6321  1.0 logd.reader.per logd
+ 6319  6319  1.0 logcat          logcat
+=== 1790589308
+Threads: 1859 total,   5 running, 1854 sleeping,   0 stopped,   0 zombie
+  Mem:  3865588K total,  3270800K used,   594788K free,     6672K buffers
+ Swap:  2097148K total,   379904K used,  1717244K free,  1738776K cached
+400%cpu 149%user   7%nice  94%sys 140%idle   0%iow   7%irq   3%sirq   0%host
+  PID   TID[%CPU]CMD             NAME
+ 8622  8622 96.0 yes             yes
+ 8988  8988 34.0 top             top
+  795  1200 11.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1196 10.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1198 10.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1197 10.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1201  8.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  809  8838  3.0 EvtQ_c2.qti.avc media.hwcodec
+ 8354  8368  3.0 Binder:8354_1   com.woolab.lumella
+ 8354  8364  3.0 HeapTaskDaemon  com.woolab.lumella
+  795  8913  2.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+ 8354  8839  2.0 C2OMXNode       com.woolab.lumella
+ 8354  8680  2.0 CameraX-camerax com.woolab.lumella
+ 8354  8519  2.0 OkHttp TaskRunn com.woolab.lumella
+ 8354  8424  2.0 lumella-audio-c com.woolab.lumella
+  770  8425  2.0 reader          android.hardware.audio.service_64
+ 8354  8370  2.0 Binder:8354_3   com.woolab.lumella
+  795  1124  2.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1092  2.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+ 8354  8981  1.0 OkHttp TaskRunn com.woolab.lumella
+ 8354  8934  1.0 MP4WtrVidTrkThr com.woolab.lumella
+  809  8930  1.0 EvtQ_codecPipe  media.hwcodec
+  795  8909  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  887  8847  1.0 CDU-0-FrameProc cameraserver
+  809  8841  1.0 poll_avcE_109   media.hwcodec
+ 8354  8834  1.0 CodecLooper     com.woolab.lumella
+ 8354  8833  1.0 MediaCodec_loop com.woolab.lumella
+ 8354  8669  1.0 CameraX-camerax com.woolab.lumella
+ 8354  8666  1.0 HwBinder:8354_1 com.woolab.lumella
+ 8354  8649  1.0 CameraX-core_ca com.woolab.lumella
+ 8354  8637  1.0 CameraX-core_ca com.woolab.lumella
+ 8354  8635  1.0 lumella-wav-tap com.woolab.lumella
+  830  8422  1.0 AudioIn_286     audioserver
+ 8354  8398  1.0 OkHttp TaskRunn com.woolab.lumella
+ 8354  8369  1.0 Binder:8354_2   com.woolab.lumella
+ 8354  8363  1.0 Jit thread pool com.woolab.lumella
+ 8074  8074  1.0 kworker/u8:3-memlat_wq [kworker/u8:3-memlat_wq]
+ 6914  6914  1.0 kworker/u8:4-bwmon_wq [kworker/u8:4-bwmon_wq]
+ 5726  5726  1.0 kworker/u9:4-hal_register_write_wq [kworker/u9:4-hal_register_write_wq]
+ 4714  4714  1.0 kworker/u9:1-hal_register_write_wq [kworker/u9:1-hal_register_write_wq]
+=== 1790589311
+Threads: 1861 total,   5 running, 1856 sleeping,   0 stopped,   0 zombie
+  Mem:  3865588K total,  3276648K used,   588940K free,     6672K buffers
+ Swap:  2097148K total,   379904K used,  1717244K free,  1740152K cached
+400%cpu 163%user   2%nice  92%sys 133%idle   0%iow   7%irq   3%sirq   0%host
+  PID   TID[%CPU]CMD             NAME
+ 8622  8622 94.0 yes             yes
+ 8993  8993 33.0 top             top
+  795  1200 11.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1196 10.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1201 10.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1197 10.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1198  7.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+ 8354  8354  6.0 .woolab.lumella com.woolab.lumella
+ 8354  8989  4.0 Binder:8354_9   com.woolab.lumella
+  809  8838  3.0 EvtQ_c2.qti.avc media.hwcodec
+ 8354  8669  2.0 CameraX-camerax com.woolab.lumella
+ 8354  8649  2.0 CameraX-core_ca com.woolab.lumella
+ 8354  8519  2.0 OkHttp TaskRunn com.woolab.lumella
+ 8354  8424  2.0 lumella-audio-c com.woolab.lumella
+  830  8422  2.0 AudioIn_286     audioserver
+ 8354  8398  2.0 OkHttp TaskRunn com.woolab.lumella
+32012 32012  2.0 kworker/u8:6-memlat_wq [kworker/u8:6-memlat_wq]
+31316 31316  2.0 kworker/u9:0-crm_workq-5f0200-40307 [kworker/u9:0-crm_workq-5f0200-40307]
+  795  5936  2.0 HwBinder:795_3  vendor.qti.camera.provider@2.7-service_64
+  887  1136  2.0 HwBinder:887_2  cameraserver
+  795  1124  2.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+ 8354  8934  1.0 MP4WtrVidTrkThr com.woolab.lumella
+  795  8910  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  887  8846  1.0 C3Dev-0-ReqQueu cameraserver
+  887  8847  1.0 CDU-0-FrameProc cameraserver
+ 8354  8839  1.0 C2OMXNode       com.woolab.lumella
+ 8354  8834  1.0 CodecLooper     com.woolab.lumella
+ 8354  8680  1.0 CameraX-camerax com.woolab.lumella
+  809  8648  1.0 EvtQ_c2.qti.avc media.hwcodec
+ 8354  8637  1.0 CameraX-core_ca com.woolab.lumella
+ 8354  8635  1.0 lumella-wav-tap com.woolab.lumella
+  770  8425  1.0 reader          android.hardware.audio.service_64
+ 8354  8399  1.0 Okio Watchdog   com.woolab.lumella
+ 8354  8388  1.0 Binder:8354_5   com.woolab.lumella
+ 8354  8369  1.0 Binder:8354_2   com.woolab.lumella
+ 8354  8363  1.0 Jit thread pool com.woolab.lumella
+ 8299  8299  1.0 kworker/1:1-mm_percpu_wq [kworker/1:1-mm_percpu_wq]
+ 6914  6914  1.0 kworker/u8:4-memlat_wq [kworker/u8:4-memlat_wq]
+ 6319  6319  1.0 logcat          logcat
+ 1830  5032  1.0 DefaultDispatch com.ffalconxr.mercury.launcher
+=== 1790589314
+Threads: 1861 total,   2 running, 1859 sleeping,   0 stopped,   0 zombie
+  Mem:  3865588K total,  3283688K used,   581900K free,     6672K buffers
+ Swap:  2097148K total,   379648K used,  1717500K free,  1747448K cached
+400%cpu 143%user   1%nice  96%sys 152%idle   0%iow   6%irq   2%sirq   0%host
+  PID   TID[%CPU]CMD             NAME
+ 8622  8622 95.0 yes             yes
+ 8996  8996 32.0 top             top
+  795  1200 10.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1198 10.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1201 10.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1196  9.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1197  9.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+ 8354  8784  4.0 Binder:8354_7   com.woolab.lumella
+  887  8847  2.0 CDU-0-FrameProc cameraserver
+  809  8838  2.0 EvtQ_c2.qti.avc media.hwcodec
+ 8354  8680  2.0 CameraX-camerax com.woolab.lumella
+ 8354  8424  2.0 lumella-audio-c com.woolab.lumella
+32012 32012  2.0 kworker/u8:6-bwmon_wq [kworker/u8:6-bwmon_wq]
+  887  5951  2.0 HwBinder:887_3  cameraserver
+  785  1822  2.0 wifi@1.0-servic android.hardware.wifi@1.0-service
+  795  1124  2.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1092  2.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+ 8354  8981  1.0 OkHttp TaskRunn com.woolab.lumella
+ 8354  8934  1.0 MP4WtrVidTrkThr com.woolab.lumella
+  795  8917  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  8912  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  8909  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  8910  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  887  8846  1.0 C3Dev-0-ReqQueu cameraserver
+ 8354  8839  1.0 C2OMXNode       com.woolab.lumella
+ 8354  8834  1.0 CodecLooper     com.woolab.lumella
+ 8354  8833  1.0 MediaCodec_loop com.woolab.lumella
+ 8354  8669  1.0 CameraX-camerax com.woolab.lumella
+ 8354  8666  1.0 HwBinder:8354_1 com.woolab.lumella
+ 8627  8650  1.0 C2OMXNode       screenrecord
+ 8354  8637  1.0 CameraX-core_ca com.woolab.lumella
+ 8627  8627  1.0 screenrecord    screenrecord
+  770  8425  1.0 reader          android.hardware.audio.service_64
+  830  8422  1.0 AudioIn_286     audioserver
+ 8354  8398  1.0 OkHttp TaskRunn com.woolab.lumella
+ 8354  8376  1.0 Binder:8354_4   com.woolab.lumella
+ 8354  8370  1.0 Binder:8354_3   com.woolab.lumella
+ 8354  8354  1.0 .woolab.lumella com.woolab.lumella
+ 6914  6914  1.0 kworker/u8:4-wmi_rx_diag_event_work_ [kworker/u8:4-wmi_rx_diag_event_work_]
+ 4714  4714  1.0 kworker/u9:1-mhi_offload_wq [kworker/u9:1-mhi_offload_wq]
+=== 1790589317
+Threads: 1861 total,   2 running, 1859 sleeping,   0 stopped,   0 zombie
+  Mem:  3865588K total,  3287236K used,   578352K free,     6672K buffers
+ Swap:  2097148K total,   379648K used,  1717500K free,  1749488K cached
+400%cpu 173%user   4%nice 116%sys  94%idle   0%iow  10%irq   3%sirq   0%host
+  PID   TID[%CPU]CMD             NAME
+ 8622  8622 96.0 yes             yes
+ 9004  9004 31.0 top             top
+  795  1200 11.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1196 10.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1198  9.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1197  9.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+ 8354  8354  8.0 .woolab.lumella com.woolab.lumella
+  795  1201  8.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+ 8354  8370  4.0 Binder:8354_3   com.woolab.lumella
+  809  8838  3.0 EvtQ_c2.qti.avc media.hwcodec
+ 8354  8364  3.0 HeapTaskDaemon  com.woolab.lumella
+ 8354  8989  2.0 Binder:8354_9   com.woolab.lumella
+  887  8847  2.0 CDU-0-FrameProc cameraserver
+  830  8422  2.0 AudioIn_286     audioserver
+ 8354  8398  2.0 OkHttp TaskRunn com.woolab.lumella
+ 8354  8363  2.0 Jit thread pool com.woolab.lumella
+ 6914  6914  2.0 kworker/u8:4-crm_workq-icp_command_q [kworker/u8:4-crm_workq-icp_command_q]
+31316 31316  2.0 kworker/u9:0-HIPRIO_SYNC_WORK_QUEUE [kworker/u9:0-HIPRIO_SYNC_WORK_QUEUE]
+  770  2746  2.0 writer          android.hardware.audio.service_64
+  887  1136  2.0 HwBinder:887_2  cameraserver
+  795  1124  2.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  838   838  2.0 surfaceflinger  surfaceflinger
+ 8354  8981  1.0 OkHttp TaskRunn com.woolab.lumella
+ 8955  8955  1.0 kworker/2:0-events [kworker/2:0-events]
+ 8354  8934  1.0 MP4WtrVidTrkThr com.woolab.lumella
+ 8926  8926  1.0 fthread_2       [fthread_2]
+  795  8913  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  8912  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  8910  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  887  8846  1.0 C3Dev-0-ReqQueu cameraserver
+  809  8841  1.0 poll_avcE_109   media.hwcodec
+ 8354  8839  1.0 C2OMXNode       com.woolab.lumella
+ 8354  8833  1.0 MediaCodec_loop com.woolab.lumella
+ 8354  8805  1.0 brain-submit    com.woolab.lumella
+ 8354  8804  1.0 lumella-slowpat com.woolab.lumella
+ 8354  8795  1.0 lumella-wav-tap com.woolab.lumella
+ 8354  8680  1.0 CameraX-camerax com.woolab.lumella
+ 8354  8669  1.0 CameraX-camerax com.woolab.lumella
+ 8354  8666  1.0 HwBinder:8354_1 com.woolab.lumella
+ 8354  8649  1.0 CameraX-core_ca com.woolab.lumella
+=== 1790589320
+Threads: 1861 total,   5 running, 1856 sleeping,   0 stopped,   0 zombie
+  Mem:  3865588K total,  3288212K used,   577376K free,     6672K buffers
+ Swap:  2097148K total,   379648K used,  1717500K free,  1750828K cached
+400%cpu 155%user   4%nice  89%sys 140%idle   0%iow   9%irq   3%sirq   0%host
+  PID   TID[%CPU]CMD             NAME
+ 8622  8622 91.0 yes             yes
+ 9019  9019 34.0 top             top
+  795  1198 11.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1197 10.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1201  9.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1196  9.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1200  7.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+ 8354  8354  5.0 .woolab.lumella com.woolab.lumella
+  770  2746  5.0 writer          android.hardware.audio.service_64
+ 8354  8388  4.0 Binder:8354_5   com.woolab.lumella
+  797 31788  3.0 HwBinder:797_D  vendor.qti.hardware.AGMIPC@1.0-service
+  830  1447  3.0 FastMixer       audioserver
+  797  1185  3.0 AGMIPC@1.0-serv vendor.qti.hardware.AGMIPC@1.0-service
+ 8354  8989  2.0 Binder:8354_9   com.woolab.lumella
+ 8354  8981  2.0 OkHttp TaskRunn com.woolab.lumella
+  887  8847  2.0 CDU-0-FrameProc cameraserver
+  809  8838  2.0 EvtQ_c2.qti.avc media.hwcodec
+ 8354  8669  2.0 CameraX-camerax com.woolab.lumella
+ 8354  8424  2.0 lumella-audio-c com.woolab.lumella
+ 8354  8398  2.0 OkHttp TaskRunn com.woolab.lumella
+ 8354  8394  2.0 .openai.com/... com.woolab.lumella
+ 8354  8364  2.0 HeapTaskDaemon  com.woolab.lumella
+  797 30290  2.0 HwBinder:797_B  vendor.qti.hardware.AGMIPC@1.0-service
+  797  5143  2.0 HwBinder:797_9  vendor.qti.hardware.AGMIPC@1.0-service
+  785  1822  2.0 wifi@1.0-servic android.hardware.wifi@1.0-service
+  795  1124  2.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+ 8354  8934  1.0 MP4WtrVidTrkThr com.woolab.lumella
+  809  8930  1.0 EvtQ_codecPipe  media.hwcodec
+ 8924  8924  1.0 fthread_0       [fthread_0]
+  795  8913  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  8910  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  8909  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  887  8846  1.0 C3Dev-0-ReqQueu cameraserver
+  809  8841  1.0 poll_avcE_109   media.hwcodec
+ 8354  8834  1.0 CodecLooper     com.woolab.lumella
+ 8354  8833  1.0 MediaCodec_loop com.woolab.lumella
+ 8354  8680  1.0 CameraX-camerax com.woolab.lumella
+ 8627  8650  1.0 C2OMXNode       screenrecord
+ 8354  8637  1.0 CameraX-core_ca com.woolab.lumella
+ 8354  8635  1.0 lumella-wav-tap com.woolab.lumella
+=== 1790589323
+Threads: 1860 total,   4 running, 1856 sleeping,   0 stopped,   0 zombie
+  Mem:  3865588K total,  3288480K used,   577108K free,     6672K buffers
+ Swap:  2097148K total,   379648K used,  1717500K free,  1752324K cached
+400%cpu 147%user   0%nice  83%sys 160%idle   0%iow   8%irq   2%sirq   0%host
+  PID   TID[%CPU]CMD             NAME
+ 8622  8622 92.0 yes             yes
+ 9022  9022 33.0 top             top
+  795  1197 10.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1201  9.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1196  8.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1200  8.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1198  8.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+ 8354  8784  4.0 Binder:8354_7   com.woolab.lumella
+  770  2746  4.0 writer          android.hardware.audio.service_64
+  830  1447  3.0 FastMixer       audioserver
+  795  1124  3.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  198   198  3.0 ueventd         ueventd
+  887  8847  2.0 CDU-0-FrameProc cameraserver
+  809  8838  2.0 EvtQ_c2.qti.avc media.hwcodec
+ 8354  8680  2.0 CameraX-camerax com.woolab.lumella
+ 8354  8669  2.0 CameraX-camerax com.woolab.lumella
+ 8354  8519  2.0 OkHttp TaskRunn com.woolab.lumella
+ 8354  8424  2.0 lumella-audio-c com.woolab.lumella
+  797 30290  2.0 HwBinder:797_B  vendor.qti.hardware.AGMIPC@1.0-service
+  887  5951  2.0 HwBinder:887_3  cameraserver
+  797  1646  2.0 HwBinder:797_4  vendor.qti.hardware.AGMIPC@1.0-service
+  887  1135  2.0 HwBinder:887_1  cameraserver
+  795   795  2.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+ 8955  8955  1.0 kworker/2:0-events [kworker/2:0-events]
+ 8354  8938  1.0 Binder:8354_8   com.woolab.lumella
+ 8354  8934  1.0 MP4WtrVidTrkThr com.woolab.lumella
+  809  8930  1.0 EvtQ_codecPipe  media.hwcodec
+  795  8917  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  8913  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  8910  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  887  8846  1.0 C3Dev-0-ReqQueu cameraserver
+  809  8841  1.0 poll_avcE_109   media.hwcodec
+ 8354  8839  1.0 C2OMXNode       com.woolab.lumella
+ 8354  8833  1.0 MediaCodec_loop com.woolab.lumella
+ 8354  8666  1.0 HwBinder:8354_1 com.woolab.lumella
+ 8354  8649  1.0 CameraX-core_ca com.woolab.lumella
+  809  8648  1.0 EvtQ_c2.qti.avc media.hwcodec
+  770  8425  1.0 reader          android.hardware.audio.service_64
+  830  8422  1.0 AudioIn_286     audioserver
+ 8354  8398  1.0 OkHttp TaskRunn com.woolab.lumella
+=== 1790589326
+Threads: 1860 total,   6 running, 1854 sleeping,   0 stopped,   0 zombie
+  Mem:  3865588K total,  3290920K used,   574668K free,     6672K buffers
+ Swap:  2097148K total,   379648K used,  1717500K free,  1753492K cached
+400%cpu 145%user   0%nice  82%sys 162%idle   0%iow   7%irq   4%sirq   0%host
+  PID   TID[%CPU]CMD             NAME
+ 8622  8622 95.0 yes             yes
+ 9025  9025 32.0 top             top
+  795  1200 11.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1198 10.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1201  9.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1196  9.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1197  7.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  809  8838  3.0 EvtQ_c2.qti.avc media.hwcodec
+ 8354  8388  3.0 Binder:8354_5   com.woolab.lumella
+  887  8846  2.0 C3Dev-0-ReqQueu cameraserver
+ 8354  8839  2.0 C2OMXNode       com.woolab.lumella
+ 8354  8784  2.0 Binder:8354_7   com.woolab.lumella
+ 8354  8424  2.0 lumella-audio-c com.woolab.lumella
+ 8354  8398  2.0 OkHttp TaskRunn com.woolab.lumella
+ 5726  5726  2.0 kworker/u9:4-mhi_offload_wq [kworker/u9:4-mhi_offload_wq]
+  797 30290  2.0 HwBinder:797_B  vendor.qti.hardware.AGMIPC@1.0-service
+  795  6431  2.0 HwBinder:795_5  vendor.qti.camera.provider@2.7-service_64
+  797  5143  2.0 HwBinder:797_9  vendor.qti.hardware.AGMIPC@1.0-service
+  887  1135  2.0 HwBinder:887_1  cameraserver
+  795  1124  2.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+ 8354  8934  1.0 MP4WtrVidTrkThr com.woolab.lumella
+ 8926  8926  1.0 fthread_2       [fthread_2]
+ 8924  8924  1.0 fthread_0       [fthread_0]
+  795  8913  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  8912  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  8909  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  887  8847  1.0 CDU-0-FrameProc cameraserver
+  887  8845  1.0 C3Dev-0-Status  cameraserver
+  809  8841  1.0 poll_avcE_109   media.hwcodec
+ 8354  8834  1.0 CodecLooper     com.woolab.lumella
+ 8354  8833  1.0 MediaCodec_loop com.woolab.lumella
+ 8354  8680  1.0 CameraX-camerax com.woolab.lumella
+ 8354  8669  1.0 CameraX-camerax com.woolab.lumella
+ 8354  8666  1.0 HwBinder:8354_1 com.woolab.lumella
+ 8354  8637  1.0 CameraX-core_ca com.woolab.lumella
+ 8354  8635  1.0 lumella-wav-tap com.woolab.lumella
+ 8354  8519  1.0 OkHttp TaskRunn com.woolab.lumella
+  770  8425  1.0 reader          android.hardware.audio.service_64
+  830  8422  1.0 AudioIn_286     audioserver
+ 8354  8354  1.0 .woolab.lumella com.woolab.lumella
+=== 1790589329
+Threads: 1860 total,   2 running, 1858 sleeping,   0 stopped,   0 zombie
+  Mem:  3865588K total,  3291440K used,   574148K free,     6672K buffers
+ Swap:  2097148K total,   379648K used,  1717500K free,  1754840K cached
+400%cpu 149%user   1%nice  86%sys 155%idle   0%iow   7%irq   2%sirq   0%host
+  PID   TID[%CPU]CMD             NAME
+ 8622  8622 95.0 yes             yes
+ 9028  9028 33.0 top             top
+  795  1196 12.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1198 11.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1200  9.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1201  8.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1197  8.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  809  8838  3.0 EvtQ_c2.qti.avc media.hwcodec
+  795  1124  3.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+ 8354  8981  2.0 OkHttp TaskRunn com.woolab.lumella
+ 8354  8424  2.0 lumella-audio-c com.woolab.lumella
+ 8354  8398  2.0 OkHttp TaskRunn com.woolab.lumella
+ 8354  8369  2.0 Binder:8354_2   com.woolab.lumella
+  795  6431  2.0 HwBinder:795_5  vendor.qti.camera.provider@2.7-service_64
+  795  5936  2.0 HwBinder:795_3  vendor.qti.camera.provider@2.7-service_64
+ 1830  1830  2.0 ercury.launcher com.ffalconxr.mercury.launcher
+  797  1646  2.0 HwBinder:797_4  vendor.qti.hardware.AGMIPC@1.0-service
+  795  1218  2.0 HwBinder:795_1  vendor.qti.camera.provider@2.7-service_64
+  887  1136  2.0 HwBinder:887_2  cameraserver
+  368   468  2.0 logd.writer     logd
+ 8354  8934  1.0 MP4WtrVidTrkThr com.woolab.lumella
+  809  8930  1.0 EvtQ_codecPipe  media.hwcodec
+  795  8913  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  8912  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  887  8847  1.0 CDU-0-FrameProc cameraserver
+  887  8846  1.0 C3Dev-0-ReqQueu cameraserver
+ 8354  8839  1.0 C2OMXNode       com.woolab.lumella
+ 8354  8834  1.0 CodecLooper     com.woolab.lumella
+ 8354  8833  1.0 MediaCodec_loop com.woolab.lumella
+ 8354  8680  1.0 CameraX-camerax com.woolab.lumella
+ 8354  8669  1.0 CameraX-camerax com.woolab.lumella
+ 8354  8666  1.0 HwBinder:8354_1 com.woolab.lumella
+ 8354  8649  1.0 CameraX-core_ca com.woolab.lumella
+ 8354  8519  1.0 OkHttp TaskRunn com.woolab.lumella
+  770  8425  1.0 reader          android.hardware.audio.service_64
+  830  8422  1.0 AudioIn_286     audioserver
+ 8354  8388  1.0 Binder:8354_5   com.woolab.lumella
+ 8354  8354  1.0 .woolab.lumella com.woolab.lumella
+ 8299  8299  1.0 kworker/1:1-mm_percpu_wq [kworker/1:1-mm_percpu_wq]
+ 8074  8074  1.0 kworker/u8:3-memlat_wq [kworker/u8:3-memlat_wq]
+=== 1790589332
+Threads: 1860 total,   4 running, 1856 sleeping,   0 stopped,   0 zombie
+  Mem:  3865588K total,  3294936K used,   570652K free,     6672K buffers
+ Swap:  2097148K total,   379648K used,  1717500K free,  1756072K cached
+400%cpu 146%user   0%nice  89%sys 155%idle   0%iow   7%irq   3%sirq   0%host
+  PID   TID[%CPU]CMD             NAME
+ 8622  8622 95.0 yes             yes
+ 9031  9031 32.0 top             top
+  795  1200 10.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1201 10.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1197  9.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1198  9.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1196  8.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+ 8354  8784  4.0 Binder:8354_7   com.woolab.lumella
+  809  8838  3.0 EvtQ_c2.qti.avc media.hwcodec
+  795  8910  2.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  887  8847  2.0 CDU-0-FrameProc cameraserver
+ 8354  8680  2.0 CameraX-camerax com.woolab.lumella
+ 8354  8424  2.0 lumella-audio-c com.woolab.lumella
+  795  5936  2.0 HwBinder:795_3  vendor.qti.camera.provider@2.7-service_64
+  887  1135  2.0 HwBinder:887_1  cameraserver
+  887  1136  2.0 HwBinder:887_2  cameraserver
+  795  1124  2.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+ 8354  8934  1.0 MP4WtrVidTrkThr com.woolab.lumella
+  795  8917  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  8913  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  8912  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  887  8846  1.0 C3Dev-0-ReqQueu cameraserver
+  809  8841  1.0 poll_avcE_109   media.hwcodec
+ 8354  8839  1.0 C2OMXNode       com.woolab.lumella
+ 8354  8834  1.0 CodecLooper     com.woolab.lumella
+ 8354  8833  1.0 MediaCodec_loop com.woolab.lumella
+ 8354  8669  1.0 CameraX-camerax com.woolab.lumella
+ 8354  8637  1.0 CameraX-core_ca com.woolab.lumella
+ 8354  8519  1.0 OkHttp TaskRunn com.woolab.lumella
+  770  8425  1.0 reader          android.hardware.audio.service_64
+  830  8422  1.0 AudioIn_286     audioserver
+ 8354  8398  1.0 OkHttp TaskRunn com.woolab.lumella
+ 8354  8388  1.0 Binder:8354_5   com.woolab.lumella
+ 8354  8354  1.0 .woolab.lumella com.woolab.lumella
+ 8074  8074  1.0 kworker/u8:3-memlat_wq [kworker/u8:3-memlat_wq]
+ 8038  8038  1.0 kworker/u9:2-hal_register_write_wq [kworker/u9:2-hal_register_write_wq]
+ 6914  6914  1.0 kworker/u8:4-memlat_wq [kworker/u8:4-memlat_wq]
+  368  6321  1.0 logd.reader.per logd
+ 6319  6319  1.0 logcat          logcat
+31316 31316  1.0 kworker/u9:0+dp_rx_fst_update_wq [kworker/u9:0+dp_rx_fst_update_wq]
+=== 1790589335
+Threads: 1861 total,   5 running, 1856 sleeping,   0 stopped,   0 zombie
+  Mem:  3865588K total,  3300028K used,   565560K free,     6672K buffers
+ Swap:  2097148K total,   379648K used,  1717500K free,  1757396K cached
+400%cpu 144%user   2%nice  89%sys 156%idle   0%iow   6%irq   3%sirq   0%host
+  PID   TID[%CPU]CMD             NAME
+ 8622  8622 96.0 yes             yes
+ 9035  9035 33.0 top             top
+  795  1196 11.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1201 11.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1200  9.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1198  9.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1197  8.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+ 8354  8938  2.0 Binder:8354_8   com.woolab.lumella
+  887  8847  2.0 CDU-0-FrameProc cameraserver
+  809  8838  2.0 EvtQ_c2.qti.avc media.hwcodec
+ 8354  8834  2.0 CodecLooper     com.woolab.lumella
+ 8354  8784  2.0 Binder:8354_7   com.woolab.lumella
+ 8354  8680  2.0 CameraX-camerax com.woolab.lumella
+ 8354  8666  2.0 HwBinder:8354_1 com.woolab.lumella
+ 8354  8424  2.0 lumella-audio-c com.woolab.lumella
+  770  8425  2.0 reader          android.hardware.audio.service_64
+  887  5951  2.0 HwBinder:887_3  cameraserver
+ 8354  8981  1.0 OkHttp TaskRunn com.woolab.lumella
+  795  8913  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  8909  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+ 8354  8833  1.0 MediaCodec_loop com.woolab.lumella
+ 8354  8669  1.0 CameraX-camerax com.woolab.lumella
+ 8354  8635  1.0 lumella-wav-tap com.woolab.lumella
+ 8354  8519  1.0 OkHttp TaskRunn com.woolab.lumella
+ 8354  8399  1.0 Okio Watchdog   com.woolab.lumella
+ 8354  8369  1.0 Binder:8354_2   com.woolab.lumella
+ 8354  8354  1.0 .woolab.lumella com.woolab.lumella
+ 1830  8097  1.0 DefaultDispatch com.ffalconxr.mercury.launcher
+ 8038  8038  1.0 kworker/u9:2-HIPRIO_SYNC_WORK_QUEUE [kworker/u9:2-HIPRIO_SYNC_WORK_QUEUE]
+ 6914  6914  1.0 kworker/u8:4-memlat_wq [kworker/u8:4-memlat_wq]
+  368  6321  1.0 logd.reader.per logd
+ 5690  5690  1.0 kworker/2:0H-kblockd [kworker/2:0H-kblockd]
+ 4714  4714  1.0 kworker/u9:1-hal_register_write_wq [kworker/u9:1-hal_register_write_wq]
+32012 32012  1.0 kworker/u8:6-crm_workq-icp_message_q [kworker/u8:6-crm_workq-icp_message_q]
+  778 26746  1.0 11_see          android.hardware.sensors@2.1-service.multihal
+ 1489 24572  1.0 UsbFfs-worker   adbd
+  797  5143  1.0 HwBinder:797_9  vendor.qti.hardware.AGMIPC@1.0-service
+ 1814  1814  1.0 dp_rx_thread_1  [dp_rx_thread_1]
+  797  1646  1.0 HwBinder:797_4  vendor.qti.hardware.AGMIPC@1.0-service
+ 1296  1534  1.0 android.ui      system_server
+=== 1790589338
+Threads: 1861 total,   5 running, 1856 sleeping,   0 stopped,   0 zombie
+  Mem:  3865588K total,  3301936K used,   563652K free,     6672K buffers
+ Swap:  2097148K total,   379648K used,  1717500K free,  1759564K cached
+400%cpu 173%user   2%nice 117%sys  93%idle   0%iow  12%irq   3%sirq   0%host
+  PID   TID[%CPU]CMD             NAME
+ 8622  8622 91.0 yes             yes
+ 9047  9047 33.0 top             top
+  795  1196 10.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1197 10.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1200 10.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1198  9.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1201  9.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+ 8354  8354  7.0 .woolab.lumella com.woolab.lumella
+ 8354  8394  4.0 .openai.com/... com.woolab.lumella
+  770  2746  4.0 writer          android.hardware.audio.service_64
+ 8354  8938  3.0 Binder:8354_8   com.woolab.lumella
+  809  8838  3.0 EvtQ_c2.qti.avc media.hwcodec
+  809  8648  3.0 EvtQ_c2.qti.avc media.hwcodec
+ 8354  8368  3.0 Binder:8354_1   com.woolab.lumella
+ 8354  8363  3.0 Jit thread pool com.woolab.lumella
+  797  1646  3.0 HwBinder:797_4  vendor.qti.hardware.AGMIPC@1.0-service
+  830  1447  3.0 FastMixer       audioserver
+  887  8847  2.0 CDU-0-FrameProc cameraserver
+ 8354  8839  2.0 C2OMXNode       com.woolab.lumella
+ 8354  8424  2.0 lumella-audio-c com.woolab.lumella
+ 6914  6914  2.0 kworker/u8:4-bwmon_wq [kworker/u8:4-bwmon_wq]
+ 5002  5002  2.0 kworker/u8:0-memlat_wq [kworker/u8:0-memlat_wq]
+  887  5951  2.0 HwBinder:887_3  cameraserver
+  797  5143  2.0 HwBinder:797_9  vendor.qti.hardware.AGMIPC@1.0-service
+ 1814  1814  2.0 dp_rx_thread_1  [dp_rx_thread_1]
+  795  1124  2.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  838  1080  2.0 RenderEngine    surfaceflinger
+  838   838  2.0 surfaceflinger  surfaceflinger
+  773   773  2.0 health@2.1-serv android.hardware.health@2.1-service
+ 9032  9032  1.0 kworker/u9:3-hal_register_write_wq [kworker/u9:3-hal_register_write_wq]
+ 8354  8981  1.0 OkHttp TaskRunn com.woolab.lumella
+ 8955  8955  1.0 kworker/2:0-events [kworker/2:0-events]
+ 8354  8934  1.0 MP4WtrVidTrkThr com.woolab.lumella
+  809  8930  1.0 EvtQ_codecPipe  media.hwcodec
+ 8926  8926  1.0 fthread_2       [fthread_2]
+  795  8913  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  8912  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  8910  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  8909  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  887  8846  1.0 C3Dev-0-ReqQueu cameraserver
+=== 1790589341
+Threads: 1861 total,   6 running, 1855 sleeping,   0 stopped,   0 zombie
+  Mem:  3865588K total,  3302632K used,   562956K free,     6672K buffers
+ Swap:  2097148K total,   379648K used,  1717500K free,  1761044K cached
+400%cpu 161%user   1%nice  89%sys 137%idle   0%iow   9%irq   3%sirq   0%host
+  PID   TID[%CPU]CMD             NAME
+ 8622  8622 92.0 yes             yes
+ 9059  9059 32.0 top             top
+  795  1200 10.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1201 10.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1196 10.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1197  9.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1198  9.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+ 8354  8354  8.0 .woolab.lumella com.woolab.lumella
+  770  2746  5.0 writer          android.hardware.audio.service_64
+  830  1447  4.0 FastMixer       audioserver
+  809  8838  3.0 EvtQ_c2.qti.avc media.hwcodec
+ 8354  8424  3.0 lumella-audio-c com.woolab.lumella
+  797  5143  3.0 HwBinder:797_9  vendor.qti.hardware.AGMIPC@1.0-service
+  887  1136  3.0 HwBinder:887_2  cameraserver
+  887  8847  2.0 CDU-0-FrameProc cameraserver
+  809  8648  2.0 EvtQ_c2.qti.avc media.hwcodec
+ 8354  8368  2.0 Binder:8354_1   com.woolab.lumella
+  797  2749  2.0 HwBinder:797_6  vendor.qti.hardware.AGMIPC@1.0-service
+  830  1448  2.0 AudioOut_D      audioserver
+  795  1124  2.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+ 8354  8981  1.0 OkHttp TaskRunn com.woolab.lumella
+ 8354  8934  1.0 MP4WtrVidTrkThr com.woolab.lumella
+  809  8930  1.0 EvtQ_codecPipe  media.hwcodec
+  795  8917  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  8913  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  8910  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  887  8846  1.0 C3Dev-0-ReqQueu cameraserver
+  809  8841  1.0 poll_avcE_109   media.hwcodec
+ 8354  8839  1.0 C2OMXNode       com.woolab.lumella
+ 8354  8833  1.0 MediaCodec_loop com.woolab.lumella
+ 8354  8784  1.0 Binder:8354_7   com.woolab.lumella
+ 8354  8680  1.0 CameraX-camerax com.woolab.lumella
+ 8354  8669  1.0 CameraX-camerax com.woolab.lumella
+ 8354  8666  1.0 HwBinder:8354_1 com.woolab.lumella
+ 8627  8647  1.0 HwBinder:8627_1 screenrecord
+ 8354  8637  1.0 CameraX-core_ca com.woolab.lumella
+  830  8422  1.0 AudioIn_286     audioserver
+ 8354  8398  1.0 OkHttp TaskRunn com.woolab.lumella
+ 8354  8394  1.0 .openai.com/... com.woolab.lumella
+ 8354  8369  1.0 Binder:8354_2   com.woolab.lumella
+=== 1790589344
+Threads: 1860 total,   5 running, 1855 sleeping,   0 stopped,   0 zombie
+  Mem:  3865588K total,  3303720K used,   561868K free,     6672K buffers
+ Swap:  2097148K total,   379648K used,  1717500K free,  1762160K cached
+400%cpu 154%user   1%nice  93%sys 143%idle   0%iow   7%irq   2%sirq   0%host
+  PID   TID[%CPU]CMD             NAME
+ 8622  8622 96.0 yes             yes
+ 9062  9062 32.0 top             top
+  795  1198 10.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1201  9.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1196  9.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1200  9.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1197  8.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+ 8354  8368  4.0 Binder:8354_1   com.woolab.lumella
+ 8354  8354  4.0 .woolab.lumella com.woolab.lumella
+ 8354  8398  3.0 OkHttp TaskRunn com.woolab.lumella
+  198   198  3.0 ueventd         ueventd
+  887  8847  2.0 CDU-0-FrameProc cameraserver
+  809  8838  2.0 EvtQ_c2.qti.avc media.hwcodec
+ 8354  8833  2.0 MediaCodec_loop com.woolab.lumella
+ 8354  8519  2.0 OkHttp TaskRunn com.woolab.lumella
+ 8354  8424  2.0 lumella-audio-c com.woolab.lumella
+ 8354  8388  2.0 Binder:8354_5   com.woolab.lumella
+ 8354  8369  2.0 Binder:8354_2   com.woolab.lumella
+ 6914  6914  2.0 kworker/u8:4-memlat_wq [kworker/u8:4-memlat_wq]
+  797  5143  2.0 HwBinder:797_9  vendor.qti.hardware.AGMIPC@1.0-service
+  797  1646  2.0 HwBinder:797_4  vendor.qti.hardware.AGMIPC@1.0-service
+  887  1136  2.0 HwBinder:887_2  cameraserver
+  795  1124  2.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1092  2.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+ 8354  8934  1.0 MP4WtrVidTrkThr com.woolab.lumella
+  809  8930  1.0 EvtQ_codecPipe  media.hwcodec
+ 8925  8925  1.0 fthread_1       [fthread_1]
+  795  8912  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  8910  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  887  8846  1.0 C3Dev-0-ReqQueu cameraserver
+  809  8841  1.0 poll_avcE_109   media.hwcodec
+ 8354  8834  1.0 CodecLooper     com.woolab.lumella
+ 8354  8805  1.0 brain-submit    com.woolab.lumella
+ 8354  8680  1.0 CameraX-camerax com.woolab.lumella
+ 8354  8669  1.0 CameraX-camerax com.woolab.lumella
+ 8627  8654  1.0 Binder:8627_3   screenrecord
+ 8627  8650  1.0 C2OMXNode       screenrecord
+  809  8648  1.0 EvtQ_c2.qti.avc media.hwcodec
+  770  8425  1.0 reader          android.hardware.audio.service_64
+  830  8422  1.0 AudioIn_286     audioserver
+=== 1790589346
+Threads: 1860 total,   3 running, 1857 sleeping,   0 stopped,   0 zombie
+  Mem:  3865588K total,  3305796K used,   559792K free,     6672K buffers
+ Swap:  2097148K total,   379648K used,  1717500K free,  1763520K cached
+400%cpu 144%user   3%nice 101%sys 144%idle   0%iow   6%irq   2%sirq   0%host
+  PID   TID[%CPU]CMD             NAME
+ 8622  8622 96.0 yes             yes
+ 9065  9065 32.0 top             top
+  795  1197 10.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1196 10.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1198 10.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1201  9.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1200  9.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  809  8838  3.0 EvtQ_c2.qti.avc media.hwcodec
+ 8354  8364  3.0 HeapTaskDaemon  com.woolab.lumella
+ 8354  8938  2.0 Binder:8354_8   com.woolab.lumella
+  887  8847  2.0 CDU-0-FrameProc cameraserver
+ 8354  8424  2.0 lumella-audio-c com.woolab.lumella
+ 8354  8368  2.0 Binder:8354_1   com.woolab.lumella
+  797 31788  2.0 HwBinder:797_D  vendor.qti.hardware.AGMIPC@1.0-service
+  795  6431  2.0 HwBinder:795_5  vendor.qti.camera.provider@2.7-service_64
+  887  5951  2.0 HwBinder:887_3  cameraserver
+  887  1136  2.0 HwBinder:887_2  cameraserver
+  795  1124  2.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+ 9032  9032  1.0 kworker/u9:3-crm_workq-5f0200-40307 [kworker/u9:3-crm_workq-5f0200-40307]
+ 8354  8981  1.0 OkHttp TaskRunn com.woolab.lumella
+  795  8917  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  8913  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  8910  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  887  8846  1.0 C3Dev-0-ReqQueu cameraserver
+  887  8845  1.0 C3Dev-0-Status  cameraserver
+  809  8841  1.0 poll_avcE_109   media.hwcodec
+ 8354  8839  1.0 C2OMXNode       com.woolab.lumella
+ 8354  8834  1.0 CodecLooper     com.woolab.lumella
+ 8354  8833  1.0 MediaCodec_loop com.woolab.lumella
+ 8354  8680  1.0 CameraX-camerax com.woolab.lumella
+ 8354  8669  1.0 CameraX-camerax com.woolab.lumella
+ 8354  8649  1.0 CameraX-core_ca com.woolab.lumella
+ 8354  8635  1.0 lumella-wav-tap com.woolab.lumella
+  770  8425  1.0 reader          android.hardware.audio.service_64
+  830  8422  1.0 AudioIn_286     audioserver
+ 8354  8398  1.0 OkHttp TaskRunn com.woolab.lumella
+ 8354  8388  1.0 Binder:8354_5   com.woolab.lumella
+ 8038  8038  1.0 kworker/u9:2-HIPRIO_SYNC_WORK_QUEUE [kworker/u9:2-HIPRIO_SYNC_WORK_QUEUE]
+  368  6321  1.0 logd.reader.per logd
+ 6319  6319  1.0 logcat          logcat
+=== 1790589349
+Threads: 1860 total,   5 running, 1855 sleeping,   0 stopped,   0 zombie
+  Mem:  3865588K total,  3308336K used,   557252K free,     6672K buffers
+ Swap:  2097148K total,   379648K used,  1717500K free,  1764768K cached
+400%cpu 151%user   0%nice  90%sys 150%idle   0%iow   7%irq   2%sirq   0%host
+  PID   TID[%CPU]CMD             NAME
+ 8622  8622 97.0 yes             yes
+ 9068  9068 33.0 top             top
+  795  1197 11.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1196 10.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1201  9.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1200  9.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1198  8.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+ 8354  8938  4.0 Binder:8354_8   com.woolab.lumella
+  809  8838  3.0 EvtQ_c2.qti.avc media.hwcodec
+ 8354  8388  3.0 Binder:8354_5   com.woolab.lumella
+  887  1136  3.0 HwBinder:887_2  cameraserver
+  795  1124  3.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+ 8354  8981  2.0 OkHttp TaskRunn com.woolab.lumella
+  887  8847  2.0 CDU-0-FrameProc cameraserver
+ 8354  8424  2.0 lumella-audio-c com.woolab.lumella
+  830  8422  2.0 AudioIn_286     audioserver
+ 6319  6319  2.0 logcat          logcat
+ 9032  9032  1.0 kworker/u9:3-HIPRIO_SYNC_WORK_QUEUE [kworker/u9:3-HIPRIO_SYNC_WORK_QUEUE]
+  809  8930  1.0 EvtQ_codecPipe  media.hwcodec
+ 8925  8925  1.0 fthread_1       [fthread_1]
+  795  8917  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  8913  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  8912  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  8909  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  8910  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  887  8846  1.0 C3Dev-0-ReqQueu cameraserver
+  809  8841  1.0 poll_avcE_109   media.hwcodec
+ 8354  8833  1.0 MediaCodec_loop com.woolab.lumella
+ 8354  8680  1.0 CameraX-camerax com.woolab.lumella
+ 8354  8666  1.0 HwBinder:8354_1 com.woolab.lumella
+ 8354  8635  1.0 lumella-wav-tap com.woolab.lumella
+ 8354  8519  1.0 OkHttp TaskRunn com.woolab.lumella
+  770  8425  1.0 reader          android.hardware.audio.service_64
+ 8354  8368  1.0 Binder:8354_1   com.woolab.lumella
+ 8354  8354  1.0 .woolab.lumella com.woolab.lumella
+ 8038  8038  1.0 kworker/u9:2-crm_workq-5f0200-40307 [kworker/u9:2-crm_workq-5f0200-40307]
+  368  6321  1.0 logd.reader.per logd
+ 4527  4527  1.0 kworker/u8:1-memlat_wq [kworker/u8:1-memlat_wq]
+32012 32012  1.0 kworker/u8:6-memlat_wq [kworker/u8:6-memlat_wq]
+  797 31788  1.0 HwBinder:797_D  vendor.qti.hardware.AGMIPC@1.0-service
+=== 1790589352
+Threads: 1860 total,   3 running, 1857 sleeping,   0 stopped,   0 zombie
+  Mem:  3865588K total,  3310996K used,   554592K free,     6672K buffers
+ Swap:  2097148K total,   379648K used,  1717500K free,  1766020K cached
+400%cpu 160%user   1%nice  87%sys 143%idle   0%iow   6%irq   3%sirq   0%host
+  PID   TID[%CPU]CMD             NAME
+ 8622  8622 95.0 yes             yes
+ 9071  9071 33.0 top             top
+  795  1196 12.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1198 10.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1201  9.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1197  9.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1200  9.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+ 8354  8368  4.0 Binder:8354_1   com.woolab.lumella
+  809  8838  3.0 EvtQ_c2.qti.avc media.hwcodec
+ 8354  8938  2.0 Binder:8354_8   com.woolab.lumella
+  887  8847  2.0 CDU-0-FrameProc cameraserver
+ 8354  8680  2.0 CameraX-camerax com.woolab.lumella
+ 8354  8669  2.0 CameraX-camerax com.woolab.lumella
+ 8354  8519  2.0 OkHttp TaskRunn com.woolab.lumella
+ 8354  8424  2.0 lumella-audio-c com.woolab.lumella
+ 6914  6914  2.0 kworker/u8:4-memlat_wq [kworker/u8:4-memlat_wq]
+  797 31788  2.0 HwBinder:797_D  vendor.qti.hardware.AGMIPC@1.0-service
+  887  1136  2.0 HwBinder:887_2  cameraserver
+  887  1135  2.0 HwBinder:887_1  cameraserver
+  795  1124  2.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+ 9032  9032  1.0 kworker/u9:3-hal_register_write_wq [kworker/u9:3-hal_register_write_wq]
+ 8354  8934  1.0 MP4WtrVidTrkThr com.woolab.lumella
+ 8926  8926  1.0 fthread_2       [fthread_2]
+  795  8917  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  8913  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  8912  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  887  8846  1.0 C3Dev-0-ReqQueu cameraserver
+ 8354  8833  1.0 MediaCodec_loop com.woolab.lumella
+ 8354  8666  1.0 HwBinder:8354_1 com.woolab.lumella
+ 8354  8637  1.0 CameraX-core_ca com.woolab.lumella
+  770  8425  1.0 reader          android.hardware.audio.service_64
+  830  8422  1.0 AudioIn_286     audioserver
+ 8354  8398  1.0 OkHttp TaskRunn com.woolab.lumella
+ 8354  8388  1.0 Binder:8354_5   com.woolab.lumella
+ 8354  8354  1.0 .woolab.lumella com.woolab.lumella
+  795  6431  1.0 HwBinder:795_5  vendor.qti.camera.provider@2.7-service_64
+  887  5951  1.0 HwBinder:887_3  cameraserver
+  795  5936  1.0 HwBinder:795_3  vendor.qti.camera.provider@2.7-service_64
+ 2595  2767  1.0 RMonitor_Monito com.sogou.inputmethod.iot
+ 1830  1830  1.0 ercury.launcher com.ffalconxr.mercury.launcher
+=== 1790589355
+Threads: 1859 total,   2 running, 1857 sleeping,   0 stopped,   0 zombie
+  Mem:  3865588K total,  3312108K used,   553480K free,     6672K buffers
+ Swap:  2097148K total,   379648K used,  1717500K free,  1767316K cached
+400%cpu 154%user   4%nice 104%sys 128%idle   0%iow   7%irq   3%sirq   0%host
+  PID   TID[%CPU]CMD             NAME
+ 8622  8622 95.0 yes             yes
+ 9074  9074 33.0 top             top
+  795  1201 11.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1200 10.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1197  9.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1196  8.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1198  8.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+ 8354  8354  4.0 .woolab.lumella com.woolab.lumella
+  809  8838  3.0 EvtQ_c2.qti.avc media.hwcodec
+  887  1135  3.0 HwBinder:887_1  cameraserver
+  795  8917  2.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  8913  2.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  887  8847  2.0 CDU-0-FrameProc cameraserver
+ 8354  8680  2.0 CameraX-camerax com.woolab.lumella
+ 8354  8424  2.0 lumella-audio-c com.woolab.lumella
+  770  8425  2.0 reader          android.hardware.audio.service_64
+  830  8422  2.0 AudioIn_286     audioserver
+ 8354  8388  2.0 Binder:8354_5   com.woolab.lumella
+ 8354  8370  2.0 Binder:8354_3   com.woolab.lumella
+ 8354  8364  2.0 HeapTaskDaemon  com.woolab.lumella
+  797 31788  2.0 HwBinder:797_D  vendor.qti.hardware.AGMIPC@1.0-service
+  795  1124  2.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1092  2.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  368   468  2.0 logd.writer     logd
+ 9032  9032  1.0 kworker/u9:3-hal_register_write_wq [kworker/u9:3-hal_register_write_wq]
+ 8354  8981  1.0 OkHttp TaskRunn com.woolab.lumella
+ 8354  8938  1.0 Binder:8354_8   com.woolab.lumella
+ 8354  8934  1.0 MP4WtrVidTrkThr com.woolab.lumella
+  809  8930  1.0 EvtQ_codecPipe  media.hwcodec
+ 8925  8925  1.0 fthread_1       [fthread_1]
+  795  8912  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  8910  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  809  8841  1.0 poll_avcE_109   media.hwcodec
+ 8354  8834  1.0 CodecLooper     com.woolab.lumella
+ 8354  8833  1.0 MediaCodec_loop com.woolab.lumella
+ 8354  8669  1.0 CameraX-camerax com.woolab.lumella
+ 8354  8666  1.0 HwBinder:8354_1 com.woolab.lumella
+ 8354  8649  1.0 CameraX-core_ca com.woolab.lumella
+ 8627  8641  1.0 screenrecord_lo screenrecord
+ 8354  8635  1.0 lumella-wav-tap com.woolab.lumella
+=== 1790589358
+Threads: 1859 total,   4 running, 1855 sleeping,   0 stopped,   0 zombie
+  Mem:  3865588K total,  3318360K used,   547228K free,     6672K buffers
+ Swap:  2097148K total,   379648K used,  1717500K free,  1769456K cached
+400%cpu 173%user   2%nice 102%sys 109%idle   0%iow  11%irq   3%sirq   0%host
+  PID   TID[%CPU]CMD             NAME
+ 8622  8622 91.0 yes             yes
+ 9087  9087 32.0 top             top
+  795  1201 12.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1200 10.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1196 10.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1198  9.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1197  7.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+ 8354  8354  6.0 .woolab.lumella com.woolab.lumella
+ 8354  8388  4.0 Binder:8354_5   com.woolab.lumella
+  809  8838  3.0 EvtQ_c2.qti.avc media.hwcodec
+  809  8648  3.0 EvtQ_c2.qti.avc media.hwcodec
+ 8354  8394  3.0 .openai.com/... com.woolab.lumella
+  770  2746  3.0 writer          android.hardware.audio.service_64
+  830  1447  3.0 FastMixer       audioserver
+  198   198  3.0 ueventd         ueventd
+  795  8913  2.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  887  8847  2.0 CDU-0-FrameProc cameraserver
+ 8354  8680  2.0 CameraX-camerax com.woolab.lumella
+ 8354  8669  2.0 CameraX-camerax com.woolab.lumella
+ 8354  8424  2.0 lumella-audio-c com.woolab.lumella
+ 8354  8376  2.0 Binder:8354_4   com.woolab.lumella
+ 8354  8368  2.0 Binder:8354_1   com.woolab.lumella
+ 8354  8363  2.0 Jit thread pool com.woolab.lumella
+ 8038  8038  2.0 kworker/u9:2-crm_workq-5f0200-40307 [kworker/u9:2-crm_workq-5f0200-40307]
+ 1830  1830  2.0 ercury.launcher com.ffalconxr.mercury.launcher
+  797  1222  2.0 HwBinder:797_3  vendor.qti.hardware.AGMIPC@1.0-service
+  797  1185  2.0 AGMIPC@1.0-serv vendor.qti.hardware.AGMIPC@1.0-service
+  887  1135  2.0 HwBinder:887_1  cameraserver
+  887  1136  2.0 HwBinder:887_2  cameraserver
+  795  1124  2.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1092  2.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  838   838  2.0 surfaceflinger  surfaceflinger
+  797   797  2.0 AGMIPC@1.0-serv vendor.qti.hardware.AGMIPC@1.0-service
+  773   773  2.0 health@2.1-serv android.hardware.health@2.1-service
+ 8354  8981  1.0 OkHttp TaskRunn com.woolab.lumella
+ 8955  8955  1.0 kworker/2:0-events [kworker/2:0-events]
+ 8354  8934  1.0 MP4WtrVidTrkThr com.woolab.lumella
+ 8926  8926  1.0 fthread_2       [fthread_2]
+  795  8917  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  8912  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+=== 1790589361
+Threads: 1860 total,   4 running, 1856 sleeping,   0 stopped,   0 zombie
+  Mem:  3865588K total,  3318552K used,   547036K free,     6672K buffers
+ Swap:  2097148K total,   379648K used,  1717500K free,  1770844K cached
+400%cpu 151%user   1%nice  91%sys 147%idle   0%iow   8%irq   2%sirq   0%host
+  PID   TID[%CPU]CMD             NAME
+ 8622  8622 94.0 yes             yes
+ 9097  9097 32.0 top             top
+  795  1197 12.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1198 11.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1200 10.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1196  9.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1201  8.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  809  8838  4.0 EvtQ_c2.qti.avc media.hwcodec
+ 8354  8388  3.0 Binder:8354_5   com.woolab.lumella
+ 8354  8376  3.0 Binder:8354_4   com.woolab.lumella
+  887  5951  3.0 HwBinder:887_3  cameraserver
+  795  1124  3.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  887  8847  2.0 CDU-0-FrameProc cameraserver
+  809  8841  2.0 poll_avcE_109   media.hwcodec
+ 8354  8680  2.0 CameraX-camerax com.woolab.lumella
+ 8354  8666  2.0 HwBinder:8354_1 com.woolab.lumella
+ 4527  4527  2.0 kworker/u8:1-memlat_wq [kworker/u8:1-memlat_wq]
+  795  6431  2.0 HwBinder:795_5  vendor.qti.camera.provider@2.7-service_64
+  770  2746  2.0 writer          android.hardware.audio.service_64
+  830  1447  2.0 FastMixer       audioserver
+  797  1222  2.0 HwBinder:797_3  vendor.qti.hardware.AGMIPC@1.0-service
+  887  1136  2.0 HwBinder:887_2  cameraserver
+ 8354  8981  1.0 OkHttp TaskRunn com.woolab.lumella
+ 8354  8934  1.0 MP4WtrVidTrkThr com.woolab.lumella
+  809  8930  1.0 EvtQ_codecPipe  media.hwcodec
+  795  8913  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  8912  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  8910  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  887  8846  1.0 C3Dev-0-ReqQueu cameraserver
+ 8354  8839  1.0 C2OMXNode       com.woolab.lumella
+ 8354  8834  1.0 CodecLooper     com.woolab.lumella
+ 8354  8833  1.0 MediaCodec_loop com.woolab.lumella
+ 8354  8669  1.0 CameraX-camerax com.woolab.lumella
+ 8354  8637  1.0 CameraX-core_ca com.woolab.lumella
+ 8354  8424  1.0 lumella-audio-c com.woolab.lumella
+  770  8425  1.0 reader          android.hardware.audio.service_64
+  830  8422  1.0 AudioIn_286     audioserver
+ 8354  8398  1.0 OkHttp TaskRunn com.woolab.lumella
+ 8354  8354  1.0 .woolab.lumella com.woolab.lumella
+ 8074  8074  1.0 kworker/u8:3-memlat_wq [kworker/u8:3-memlat_wq]
+=== 1790589364
+Threads: 1859 total,   3 running, 1856 sleeping,   0 stopped,   0 zombie
+  Mem:  3865588K total,  3319916K used,   545672K free,     6672K buffers
+ Swap:  2097148K total,   379648K used,  1717500K free,  1772124K cached
+400%cpu 154%user   1%nice  84%sys 152%idle   0%iow   6%irq   3%sirq   0%host
+  PID   TID[%CPU]CMD             NAME
+ 8622  8622 96.0 yes             yes
+ 9100  9100 32.0 top             top
+  795  1197 11.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1201 10.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1200 10.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1198  9.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1196  9.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+ 8354  8376  4.0 Binder:8354_4   com.woolab.lumella
+  809  8838  3.0 EvtQ_c2.qti.avc media.hwcodec
+  887  1135  3.0 HwBinder:887_1  cameraserver
+  198   198  3.0 ueventd         ueventd
+  795  8913  2.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  8910  2.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  887  8847  2.0 CDU-0-FrameProc cameraserver
+ 8354  8424  2.0 lumella-audio-c com.woolab.lumella
+ 8354  8370  2.0 Binder:8354_3   com.woolab.lumella
+  785  1822  2.0 wifi@1.0-servic android.hardware.wifi@1.0-service
+  795  1124  2.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+ 9032  9032  1.0 kworker/u9:3-hal_register_write_wq [kworker/u9:3-hal_register_write_wq]
+ 8354  8934  1.0 MP4WtrVidTrkThr com.woolab.lumella
+  809  8930  1.0 EvtQ_codecPipe  media.hwcodec
+ 8926  8926  1.0 fthread_2       [fthread_2]
+  795  8917  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  8909  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  887  8846  1.0 C3Dev-0-ReqQueu cameraserver
+  809  8841  1.0 poll_avcE_109   media.hwcodec
+ 8354  8834  1.0 CodecLooper     com.woolab.lumella
+ 8354  8833  1.0 MediaCodec_loop com.woolab.lumella
+ 8354  8680  1.0 CameraX-camerax com.woolab.lumella
+ 8354  8669  1.0 CameraX-camerax com.woolab.lumella
+ 8354  8666  1.0 HwBinder:8354_1 com.woolab.lumella
+ 8354  8649  1.0 CameraX-core_ca com.woolab.lumella
+ 8354  8519  1.0 OkHttp TaskRunn com.woolab.lumella
+  770  8425  1.0 reader          android.hardware.audio.service_64
+  830  8422  1.0 AudioIn_286     audioserver
+ 8354  8398  1.0 OkHttp TaskRunn com.woolab.lumella
+ 8354  8363  1.0 Jit thread pool com.woolab.lumella
+ 8354  8354  1.0 .woolab.lumella com.woolab.lumella
+ 8074  8074  1.0 kworker/u8:3-wmi_rx_diag_event_work_ [kworker/u8:3-wmi_rx_diag_event_work_]
+ 8038  8038  1.0 kworker/u9:2-mhi_offload_wq [kworker/u9:2-mhi_offload_wq]
+=== 1790589367
+Threads: 1859 total,   2 running, 1857 sleeping,   0 stopped,   0 zombie
+  Mem:  3865588K total,  3320228K used,   545360K free,     6672K buffers
+ Swap:  2097148K total,   379648K used,  1717500K free,  1773392K cached
+400%cpu 148%user   3%nice  81%sys 159%idle   0%iow   6%irq   3%sirq   0%host
+  PID   TID[%CPU]CMD             NAME
+ 8622  8622 95.0 yes             yes
+ 9103  9103 32.0 top             top
+  795  1200 11.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1198 10.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1196  9.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1197  9.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1201  9.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  809  8838  3.0 EvtQ_c2.qti.avc media.hwcodec
+ 8354  8370  3.0 Binder:8354_3   com.woolab.lumella
+ 8354  8364  3.0 HeapTaskDaemon  com.woolab.lumella
+ 8354  8981  2.0 OkHttp TaskRunn com.woolab.lumella
+  795  8913  2.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  887  8847  2.0 CDU-0-FrameProc cameraserver
+ 8354  8424  2.0 lumella-audio-c com.woolab.lumella
+  830  8422  2.0 AudioIn_286     audioserver
+ 8354  8376  2.0 Binder:8354_4   com.woolab.lumella
+ 8074  8074  2.0 kworker/u8:3-crm_workq-icp_message_q [kworker/u8:3-crm_workq-icp_message_q]
+  795  1124  2.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  797   797  2.0 AGMIPC@1.0-serv vendor.qti.hardware.AGMIPC@1.0-service
+  795   795  2.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+ 9032  9032  1.0 kworker/u9:3-hal_register_write_wq [kworker/u9:3-hal_register_write_wq]
+ 8354  8938  1.0 Binder:8354_8   com.woolab.lumella
+ 8924  8924  1.0 fthread_0       [fthread_0]
+  887  8846  1.0 C3Dev-0-ReqQueu cameraserver
+ 8354  8839  1.0 C2OMXNode       com.woolab.lumella
+ 8354  8834  1.0 CodecLooper     com.woolab.lumella
+ 8354  8833  1.0 MediaCodec_loop com.woolab.lumella
+ 8354  8680  1.0 CameraX-camerax com.woolab.lumella
+ 8354  8669  1.0 CameraX-camerax com.woolab.lumella
+ 8354  8666  1.0 HwBinder:8354_1 com.woolab.lumella
+ 8354  8649  1.0 CameraX-core_ca com.woolab.lumella
+ 8354  8637  1.0 CameraX-core_ca com.woolab.lumella
+ 8354  8519  1.0 OkHttp TaskRunn com.woolab.lumella
+  770  8425  1.0 reader          android.hardware.audio.service_64
+ 8354  8354  1.0 .woolab.lumella com.woolab.lumella
+ 8038  8038  1.0 kworker/u9:2-crm_workq-5f0200-40307 [kworker/u9:2-crm_workq-5f0200-40307]
+  368  6321  1.0 logd.reader.per logd
+ 1489 24572  1.0 UsbFfs-worker   adbd
+  795  6431  1.0 HwBinder:795_5  vendor.qti.camera.provider@2.7-service_64
+  887  5951  1.0 HwBinder:887_3  cameraserver
+=== 1790589370
+Threads: 1860 total,   5 running, 1855 sleeping,   0 stopped,   0 zombie
+  Mem:  3865588K total,  3324700K used,   540888K free,     6672K buffers
+ Swap:  2097148K total,   379648K used,  1717500K free,  1774604K cached
+400%cpu 152%user   0%nice  82%sys 156%idle   0%iow   6%irq   4%sirq   0%host
+  PID   TID[%CPU]CMD             NAME
+ 8622  8622 96.0 yes             yes
+ 9107  9107 32.0 top             top
+  795  1196 11.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1201 10.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1198  9.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1197  9.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1200  8.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  809  8838  3.0 EvtQ_c2.qti.avc media.hwcodec
+ 8354  8354  3.0 .woolab.lumella com.woolab.lumella
+ 8354  8938  2.0 Binder:8354_8   com.woolab.lumella
+ 8354  8839  2.0 C2OMXNode       com.woolab.lumella
+ 8354  8388  2.0 Binder:8354_5   com.woolab.lumella
+  887  1135  2.0 HwBinder:887_1  cameraserver
+ 8354  8981  1.0 OkHttp TaskRunn com.woolab.lumella
+ 8955  8955  1.0 kworker/2:0-events [kworker/2:0-events]
+ 8925  8925  1.0 fthread_1       [fthread_1]
+  795  8917  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  8913  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  8909  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  8910  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  887  8846  1.0 C3Dev-0-ReqQueu cameraserver
+  887  8847  1.0 CDU-0-FrameProc cameraserver
+  809  8841  1.0 poll_avcE_109   media.hwcodec
+ 8354  8834  1.0 CodecLooper     com.woolab.lumella
+ 8354  8833  1.0 MediaCodec_loop com.woolab.lumella
+ 8354  8680  1.0 CameraX-camerax com.woolab.lumella
+ 8354  8669  1.0 CameraX-camerax com.woolab.lumella
+ 8354  8666  1.0 HwBinder:8354_1 com.woolab.lumella
+  809  8648  1.0 EvtQ_c2.qti.avc media.hwcodec
+ 8354  8635  1.0 lumella-wav-tap com.woolab.lumella
+ 8354  8519  1.0 OkHttp TaskRunn com.woolab.lumella
+ 8354  8424  1.0 lumella-audio-c com.woolab.lumella
+  830  8422  1.0 AudioIn_286     audioserver
+ 8354  8376  1.0 Binder:8354_4   com.woolab.lumella
+ 8074  8074  1.0 kworker/u8:3-memlat_wq [kworker/u8:3-memlat_wq]
+ 6030  6030  1.0 kworker/3:1H-kblockd [kworker/3:1H-kblockd]
+ 4714  4714  1.0 kworker/u9:1-crm_workq-5f0200-40307 [kworker/u9:1-crm_workq-5f0200-40307]
+ 4527  4527  1.0 kworker/u8:1-memlat_wq [kworker/u8:1-memlat_wq]
+  778 26746  1.0 11_see          android.hardware.sensors@2.1-service.multihal
+ 1489 24572  1.0 UsbFfs-worker   adbd
+=== 1790589373
+Threads: 1860 total,   4 running, 1856 sleeping,   0 stopped,   0 zombie
+  Mem:  3865588K total,  3323232K used,   542356K free,     6672K buffers
+ Swap:  2097148K total,   379648K used,  1717500K free,  1775808K cached
+400%cpu 153%user   1%nice  82%sys 155%idle   0%iow   6%irq   3%sirq   0%host
+  PID   TID[%CPU]CMD             NAME
+ 8622  8622 96.0 yes             yes
+ 9110  9110 33.0 top             top
+  795  1198 12.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1197 11.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1196 10.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1200  9.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1201  7.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+ 8354  8376  4.0 Binder:8354_4   com.woolab.lumella
+  809  8838  3.0 EvtQ_c2.qti.avc media.hwcodec
+ 8354  8368  3.0 Binder:8354_1   com.woolab.lumella
+  887  8847  2.0 CDU-0-FrameProc cameraserver
+ 8354  8680  2.0 CameraX-camerax com.woolab.lumella
+ 8354  8519  2.0 OkHttp TaskRunn com.woolab.lumella
+ 8354  8424  2.0 lumella-audio-c com.woolab.lumella
+  770  8425  2.0 reader          android.hardware.audio.service_64
+  830  8422  2.0 AudioIn_286     audioserver
+ 8354  8398  2.0 OkHttp TaskRunn com.woolab.lumella
+  795  6431  2.0 HwBinder:795_5  vendor.qti.camera.provider@2.7-service_64
+  795  5936  2.0 HwBinder:795_3  vendor.qti.camera.provider@2.7-service_64
+  887  1135  2.0 HwBinder:887_1  cameraserver
+  795  1124  2.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  8913  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  8910  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  8909  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  887  8846  1.0 C3Dev-0-ReqQueu cameraserver
+  809  8841  1.0 poll_avcE_109   media.hwcodec
+ 8354  8839  1.0 C2OMXNode       com.woolab.lumella
+ 8354  8834  1.0 CodecLooper     com.woolab.lumella
+ 8354  8833  1.0 MediaCodec_loop com.woolab.lumella
+ 8354  8669  1.0 CameraX-camerax com.woolab.lumella
+ 8354  8666  1.0 HwBinder:8354_1 com.woolab.lumella
+ 8354  8649  1.0 CameraX-core_ca com.woolab.lumella
+ 8354  8637  1.0 CameraX-core_ca com.woolab.lumella
+ 8354  8635  1.0 lumella-wav-tap com.woolab.lumella
+ 8354  8363  1.0 Jit thread pool com.woolab.lumella
+ 8354  8354  1.0 .woolab.lumella com.woolab.lumella
+ 8038  8038  1.0 kworker/u9:2-hal_register_write_wq [kworker/u9:2-hal_register_write_wq]
+ 6914  6914  1.0 kworker/u8:4-memlat_wq [kworker/u8:4-memlat_wq]
+ 5960  5960  1.0 kworker/1:2-mm_percpu_wq [kworker/1:2-mm_percpu_wq]
+ 4714  4714  1.0 kworker/u9:1-HIPRIO_SYNC_WORK_QUEUE [kworker/u9:1-HIPRIO_SYNC_WORK_QUEUE]
+=== 1790589376
+Threads: 1861 total,   3 running, 1858 sleeping,   0 stopped,   0 zombie
+  Mem:  3865588K total,  3326736K used,   538852K free,     6672K buffers
+ Swap:  2097148K total,   379648K used,  1717500K free,  1776964K cached
+400%cpu 142%user   3%nice  93%sys 152%idle   0%iow   6%irq   4%sirq   0%host
+  PID   TID[%CPU]CMD             NAME
+ 8622  8622 95.0 yes             yes
+ 9114  9114 31.0 top             top
+  795  1200 11.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1197 11.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1201 10.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1198  9.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1196  9.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+ 8354  8354  4.0 .woolab.lumella com.woolab.lumella
+ 8354  8388  3.0 Binder:8354_5   com.woolab.lumella
+  887  1136  3.0 HwBinder:887_2  cameraserver
+  795  1124  3.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+ 8354  8938  2.0 Binder:8354_8   com.woolab.lumella
+  887  8847  2.0 CDU-0-FrameProc cameraserver
+  809  8838  2.0 EvtQ_c2.qti.avc media.hwcodec
+ 8354  8680  2.0 CameraX-camerax com.woolab.lumella
+  809  8648  2.0 EvtQ_c2.qti.avc media.hwcodec
+ 8354  8635  2.0 lumella-wav-tap com.woolab.lumella
+ 8354  8519  2.0 OkHttp TaskRunn com.woolab.lumella
+ 8354  8424  2.0 lumella-audio-c com.woolab.lumella
+  830  8422  2.0 AudioIn_286     audioserver
+ 8354  8364  2.0 HeapTaskDaemon  com.woolab.lumella
+  887  5951  2.0 HwBinder:887_3  cameraserver
+ 8354  8981  1.0 OkHttp TaskRunn com.woolab.lumella
+ 8354  8934  1.0 MP4WtrVidTrkThr com.woolab.lumella
+  809  8930  1.0 EvtQ_codecPipe  media.hwcodec
+  795  8913  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  8912  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  887  8846  1.0 C3Dev-0-ReqQueu cameraserver
+  809  8841  1.0 poll_avcE_109   media.hwcodec
+ 8354  8833  1.0 MediaCodec_loop com.woolab.lumella
+  809  8652  1.0 poll_avcE_102   media.hwcodec
+ 8354  8649  1.0 CameraX-core_ca com.woolab.lumella
+  770  8425  1.0 reader          android.hardware.audio.service_64
+ 8354  8398  1.0 OkHttp TaskRunn com.woolab.lumella
+ 8354  8373  1.0 RenderThread    com.woolab.lumella
+ 8354  8370  1.0 Binder:8354_3   com.woolab.lumella
+ 8354  8363  1.0 Jit thread pool com.woolab.lumella
+ 8074  8074  1.0 kworker/u8:3-memlat_wq [kworker/u8:3-memlat_wq]
+ 8038  8038  1.0 kworker/u9:2-HIPRIO_SYNC_WORK_QUEUE [kworker/u9:2-HIPRIO_SYNC_WORK_QUEUE]
+ 6914  6914  1.0 kworker/u8:4-crm_workq-icp_message_q [kworker/u8:4-crm_workq-icp_message_q]
+=== 1790589379
+Threads: 1862 total,   2 running, 1860 sleeping,   0 stopped,   0 zombie
+  Mem:  3865588K total,  3331080K used,   534508K free,     6672K buffers
+ Swap:  2097148K total,   379648K used,  1717500K free,  1779168K cached
+400%cpu 161%user   1%nice  90%sys 134%idle   0%iow  10%irq   4%sirq   0%host
+  PID   TID[%CPU]CMD             NAME
+ 8622  8622 93.0 yes             yes
+ 9128  9128 33.0 top             top
+  795  1197 12.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1198 11.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1201 10.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1200  8.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1196  8.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  770  2746  5.0 writer          android.hardware.audio.service_64
+  830  1447  4.0 FastMixer       audioserver
+  809  8838  3.0 EvtQ_c2.qti.avc media.hwcodec
+  797 31788  3.0 HwBinder:797_D  vendor.qti.hardware.AGMIPC@1.0-service
+  797  1646  3.0 HwBinder:797_4  vendor.qti.hardware.AGMIPC@1.0-service
+ 8354  8981  2.0 OkHttp TaskRunn com.woolab.lumella
+ 8354  8938  2.0 Binder:8354_8   com.woolab.lumella
+  887  8847  2.0 CDU-0-FrameProc cameraserver
+ 8354  8834  2.0 CodecLooper     com.woolab.lumella
+ 8354  8519  2.0 OkHttp TaskRunn com.woolab.lumella
+ 8354  8424  2.0 lumella-audio-c com.woolab.lumella
+ 8354  8394  2.0 .openai.com/... com.woolab.lumella
+ 8354  8368  2.0 Binder:8354_1   com.woolab.lumella
+ 6914  6914  2.0 kworker/u8:4-msm_cvp_workerq_iris [kworker/u8:4-msm_cvp_workerq_iris]
+  797 30290  2.0 HwBinder:797_B  vendor.qti.hardware.AGMIPC@1.0-service
+  830  1448  2.0 AudioOut_D      audioserver
+  797  1185  2.0 AGMIPC@1.0-serv vendor.qti.hardware.AGMIPC@1.0-service
+  887  1136  2.0 HwBinder:887_2  cameraserver
+  795  1124  2.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  198   198  2.0 ueventd         ueventd
+ 9032  9032  1.0 kworker/u9:3-hal_register_write_wq [kworker/u9:3-hal_register_write_wq]
+ 8354  8934  1.0 MP4WtrVidTrkThr com.woolab.lumella
+  809  8930  1.0 EvtQ_codecPipe  media.hwcodec
+ 8925  8925  1.0 fthread_1       [fthread_1]
+  795  8917  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  8913  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  8912  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  8910  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  8909  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+ 8354  8839  1.0 C2OMXNode       com.woolab.lumella
+ 8354  8807  1.0 .vercel.app/... com.woolab.lumella
+ 8354  8795  1.0 lumella-wav-tap com.woolab.lumella
+ 8354  8680  1.0 CameraX-camerax com.woolab.lumella
+=== 1790589382
+Threads: 1862 total,   6 running, 1856 sleeping,   0 stopped,   0 zombie
+  Mem:  3865588K total,  3331240K used,   534348K free,     6672K buffers
+ Swap:  2097148K total,   379648K used,  1717500K free,  1780596K cached
+400%cpu 146%user   1%nice  88%sys 155%idle   0%iow   7%irq   3%sirq   0%host
+  PID   TID[%CPU]CMD             NAME
+ 8622  8622 93.0 yes             yes
+ 9137  9137 33.0 top             top
+  795  1196 12.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1197 10.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1201 10.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1198  9.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1200  9.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+ 8354  8938  3.0 Binder:8354_8   com.woolab.lumella
+  809  8838  3.0 EvtQ_c2.qti.avc media.hwcodec
+  795  1124  3.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  887  8847  2.0 CDU-0-FrameProc cameraserver
+ 8354  8834  2.0 CodecLooper     com.woolab.lumella
+  770  8425  2.0 reader          android.hardware.audio.service_64
+ 8354  8370  2.0 Binder:8354_3   com.woolab.lumella
+  797 30290  2.0 HwBinder:797_B  vendor.qti.hardware.AGMIPC@1.0-service
+  887  1136  2.0 HwBinder:887_2  cameraserver
+ 9032  9032  1.0 kworker/u9:3-hal_register_write_wq [kworker/u9:3-hal_register_write_wq]
+ 8354  8981  1.0 OkHttp TaskRunn com.woolab.lumella
+ 8955  8955  1.0 kworker/2:0-events [kworker/2:0-events]
+ 8354  8934  1.0 MP4WtrVidTrkThr com.woolab.lumella
+  795  8917  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  8913  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  8909  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  887  8846  1.0 C3Dev-0-ReqQueu cameraserver
+  809  8841  1.0 poll_avcE_109   media.hwcodec
+ 8354  8839  1.0 C2OMXNode       com.woolab.lumella
+ 8354  8680  1.0 CameraX-camerax com.woolab.lumella
+ 8354  8669  1.0 CameraX-camerax com.woolab.lumella
+ 8354  8666  1.0 HwBinder:8354_1 com.woolab.lumella
+ 8354  8424  1.0 lumella-audio-c com.woolab.lumella
+  830  8422  1.0 AudioIn_286     audioserver
+ 8354  8398  1.0 OkHttp TaskRunn com.woolab.lumella
+ 8354  8368  1.0 Binder:8354_1   com.woolab.lumella
+ 8354  8354  1.0 .woolab.lumella com.woolab.lumella
+ 8074  8074  1.0 kworker/u8:3-devfreq_wq [kworker/u8:3-devfreq_wq]
+ 8038  8038  1.0 kworker/u9:2-crm_workq-5f0200-40307 [kworker/u9:2-crm_workq-5f0200-40307]
+ 6914  6914  1.0 kworker/u8:4-rt-cdm1_0 [kworker/u8:4-rt-cdm1_0]
+ 5960  5960  1.0 kworker/1:2-mm_percpu_wq [kworker/1:2-mm_percpu_wq]
+  778 26746  1.0 11_see          android.hardware.sensors@2.1-service.multihal
+ 1489 24572  1.0 UsbFfs-worker   adbd
+=== 1790589385
+Threads: 1862 total,   6 running, 1856 sleeping,   0 stopped,   0 zombie
+  Mem:  3865588K total,  3332000K used,   533588K free,     6672K buffers
+ Swap:  2097148K total,   379648K used,  1717500K free,  1781912K cached
+400%cpu 142%user   0%nice  90%sys 158%idle   0%iow   6%irq   4%sirq   0%host
+  PID   TID[%CPU]CMD             NAME
+ 8622  8622 95.0 yes             yes
+ 9140  9140 33.0 top             top
+  795  1196 11.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1197 10.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1201  9.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1200  9.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1198  8.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  198   198  4.0 ueventd         ueventd
+ 8354  8938  3.0 Binder:8354_8   com.woolab.lumella
+  809  8838  3.0 EvtQ_c2.qti.avc media.hwcodec
+ 8354  8370  3.0 Binder:8354_3   com.woolab.lumella
+ 8354  8981  2.0 OkHttp TaskRunn com.woolab.lumella
+  795  8910  2.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  887  8847  2.0 CDU-0-FrameProc cameraserver
+ 8354  8669  2.0 CameraX-camerax com.woolab.lumella
+ 1296  1585  2.0 SensorService   system_server
+  809  1272  2.0 HwBinder:809_4  media.hwcodec
+  887  1136  2.0 HwBinder:887_2  cameraserver
+  887  1135  2.0 HwBinder:887_1  cameraserver
+  795  1092  2.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+ 9032  9032  1.0 kworker/u9:3-hal_register_write_wq [kworker/u9:3-hal_register_write_wq]
+ 8354  8934  1.0 MP4WtrVidTrkThr com.woolab.lumella
+  809  8930  1.0 EvtQ_codecPipe  media.hwcodec
+ 8924  8924  1.0 fthread_0       [fthread_0]
+  795  8913  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  8912  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  8909  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  809  8841  1.0 poll_avcE_109   media.hwcodec
+ 8354  8839  1.0 C2OMXNode       com.woolab.lumella
+ 8354  8680  1.0 CameraX-camerax com.woolab.lumella
+ 8354  8666  1.0 HwBinder:8354_1 com.woolab.lumella
+ 8354  8649  1.0 CameraX-core_ca com.woolab.lumella
+  809  8648  1.0 EvtQ_c2.qti.avc media.hwcodec
+ 8354  8637  1.0 CameraX-core_ca com.woolab.lumella
+ 8354  8519  1.0 OkHttp TaskRunn com.woolab.lumella
+ 8354  8424  1.0 lumella-audio-c com.woolab.lumella
+  770  8425  1.0 reader          android.hardware.audio.service_64
+ 6914  6914  1.0 kworker/u8:4-crm_workq-icp_command_q [kworker/u8:4-crm_workq-icp_command_q]
+ 6319  6319  1.0 logcat          logcat
+ 4714  4714  1.0 kworker/u9:1-hal_register_write_wq [kworker/u9:1-hal_register_write_wq]
+=== 1790589388
+Threads: 1862 total,   4 running, 1858 sleeping,   0 stopped,   0 zombie
+  Mem:  3865588K total,  3334740K used,   530848K free,     6672K buffers
+ Swap:  2097148K total,   379648K used,  1717500K free,  1783224K cached
+400%cpu 141%user   3%nice  86%sys 161%idle   0%iow   6%irq   3%sirq   0%host
+  PID   TID[%CPU]CMD             NAME
+ 8622  8622 95.0 yes             yes
+ 9143  9143 33.0 top             top
+  795  1198 12.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1196 11.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1197 10.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1201  9.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1200  8.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+ 8354  8370  3.0 Binder:8354_3   com.woolab.lumella
+ 8354  8938  2.0 Binder:8354_8   com.woolab.lumella
+  887  8846  2.0 C3Dev-0-ReqQueu cameraserver
+  887  8847  2.0 CDU-0-FrameProc cameraserver
+  809  8838  2.0 EvtQ_c2.qti.avc media.hwcodec
+ 8354  8834  2.0 CodecLooper     com.woolab.lumella
+ 8354  8519  2.0 OkHttp TaskRunn com.woolab.lumella
+  770  8425  2.0 reader          android.hardware.audio.service_64
+  887  5959  2.0 HwBinder:887_5  cameraserver
+  887  1135  2.0 HwBinder:887_1  cameraserver
+  795  1124  2.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+ 9032  9032  1.0 kworker/u9:3-HIPRIO_SYNC_WORK_QUEUE [kworker/u9:3-HIPRIO_SYNC_WORK_QUEUE]
+ 8354  8981  1.0 OkHttp TaskRunn com.woolab.lumella
+ 8354  8934  1.0 MP4WtrVidTrkThr com.woolab.lumella
+  809  8930  1.0 EvtQ_codecPipe  media.hwcodec
+  795  8913  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  8912  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  8909  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  8910  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  809  8841  1.0 poll_avcE_109   media.hwcodec
+ 8354  8833  1.0 MediaCodec_loop com.woolab.lumella
+ 8354  8680  1.0 CameraX-camerax com.woolab.lumella
+ 8354  8669  1.0 CameraX-camerax com.woolab.lumella
+ 8354  8666  1.0 HwBinder:8354_1 com.woolab.lumella
+ 8354  8649  1.0 CameraX-core_ca com.woolab.lumella
+ 8354  8424  1.0 lumella-audio-c com.woolab.lumella
+  830  8422  1.0 AudioIn_286     audioserver
+ 8354  8368  1.0 Binder:8354_1   com.woolab.lumella
+ 8354  8354  1.0 .woolab.lumella com.woolab.lumella
+ 6914  6914  1.0 kworker/u8:4-wmi_rx_diag_event_work_ [kworker/u8:4-wmi_rx_diag_event_work_]
+ 6319  6319  1.0 logcat          logcat
+ 5960  5960  1.0 kworker/1:2-mm_percpu_wq [kworker/1:2-mm_percpu_wq]
+ 4714  4714  1.0 kworker/u9:1-crm_workq-5f0200-40307 [kworker/u9:1-crm_workq-5f0200-40307]
+=== 1790589390
+Threads: 1862 total,   4 running, 1858 sleeping,   0 stopped,   0 zombie
+  Mem:  3865588K total,  3336492K used,   529096K free,     6672K buffers
+ Swap:  2097148K total,   379648K used,  1717500K free,  1784436K cached
+400%cpu 149%user   0%nice  80%sys 163%idle   0%iow   6%irq   2%sirq   0%host
+  PID   TID[%CPU]CMD             NAME
+ 8622  8622 95.0 yes             yes
+ 9146  9146 32.0 top             top
+  795  1197 11.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1196 11.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1200 10.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1198 10.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1201  9.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  809  8838  4.0 EvtQ_c2.qti.avc media.hwcodec
+ 8354  8368  4.0 Binder:8354_1   com.woolab.lumella
+ 8354  8839  2.0 C2OMXNode       com.woolab.lumella
+ 8354  8519  2.0 OkHttp TaskRunn com.woolab.lumella
+ 8354  8424  2.0 lumella-audio-c com.woolab.lumella
+  770  8425  2.0 reader          android.hardware.audio.service_64
+  830  8422  2.0 AudioIn_286     audioserver
+ 8354  8369  2.0 Binder:8354_2   com.woolab.lumella
+ 4527  4527  2.0 kworker/u8:1-wmi_rx_diag_event_work_ [kworker/u8:1-wmi_rx_diag_event_work_]
+  795  5936  2.0 HwBinder:795_3  vendor.qti.camera.provider@2.7-service_64
+  795  1218  2.0 HwBinder:795_1  vendor.qti.camera.provider@2.7-service_64
+  795  1124  2.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+ 9032  9032  1.0 kworker/u9:3-hal_register_write_wq [kworker/u9:3-hal_register_write_wq]
+ 8354  8981  1.0 OkHttp TaskRunn com.woolab.lumella
+  809  8930  1.0 EvtQ_codecPipe  media.hwcodec
+ 8926  8926  1.0 fthread_2       [fthread_2]
+ 8924  8924  1.0 fthread_0       [fthread_0]
+  795  8917  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  8913  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  8912  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  887  8847  1.0 CDU-0-FrameProc cameraserver
+  809  8841  1.0 poll_avcE_109   media.hwcodec
+ 8354  8833  1.0 MediaCodec_loop com.woolab.lumella
+ 8354  8669  1.0 CameraX-camerax com.woolab.lumella
+ 8354  8666  1.0 HwBinder:8354_1 com.woolab.lumella
+ 8354  8649  1.0 CameraX-core_ca com.woolab.lumella
+ 8354  8400  1.0 luma-heartbeat  com.woolab.lumella
+ 8074  8074  1.0 kworker/u8:3-memlat_wq [kworker/u8:3-memlat_wq]
+ 8038  8038  1.0 kworker/u9:2-HIPRIO_SYNC_WORK_QUEUE [kworker/u9:2-HIPRIO_SYNC_WORK_QUEUE]
+ 6914  6914  1.0 kworker/u8:4-wmi_rx_diag_event_work_ [kworker/u8:4-wmi_rx_diag_event_work_]
+  797 31788  1.0 HwBinder:797_D  vendor.qti.hardware.AGMIPC@1.0-service
+  778 26737  1.0 51_see          android.hardware.sensors@2.1-service.multihal
+  771 24934  1.0 bluetooth@1.0-s android.hardware.bluetooth@1.0-service-qti
+=== 1790589393
+Threads: 1862 total,   4 running, 1858 sleeping,   0 stopped,   0 zombie
+  Mem:  3865588K total,  3336680K used,   528908K free,     6672K buffers
+ Swap:  2097148K total,   379648K used,  1717500K free,  1785636K cached
+400%cpu 147%user   1%nice  78%sys 165%idle   0%iow   6%irq   3%sirq   0%host
+  PID   TID[%CPU]CMD             NAME
+ 8622  8622 95.0 yes             yes
+ 9149  9149 33.0 top             top
+  795  1200 11.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1196 11.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1198  9.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1201  9.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1197  8.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  809  8838  3.0 EvtQ_c2.qti.avc media.hwcodec
+ 8354  8376  3.0 Binder:8354_4   com.woolab.lumella
+ 8354  8369  3.0 Binder:8354_2   com.woolab.lumella
+ 8354  8669  2.0 CameraX-camerax com.woolab.lumella
+ 8354  8519  2.0 OkHttp TaskRunn com.woolab.lumella
+ 8354  8424  2.0 lumella-audio-c com.woolab.lumella
+  770  8425  2.0 reader          android.hardware.audio.service_64
+  830  8422  2.0 AudioIn_286     audioserver
+  887  5959  2.0 HwBinder:887_5  cameraserver
+  795  1124  2.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  8917  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  8913  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  8912  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  8909  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  8910  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  887  8847  1.0 CDU-0-FrameProc cameraserver
+  887  8846  1.0 C3Dev-0-ReqQueu cameraserver
+  809  8841  1.0 poll_avcE_109   media.hwcodec
+ 8354  8839  1.0 C2OMXNode       com.woolab.lumella
+ 8354  8834  1.0 CodecLooper     com.woolab.lumella
+ 8354  8680  1.0 CameraX-camerax com.woolab.lumella
+ 8354  8666  1.0 HwBinder:8354_1 com.woolab.lumella
+ 8354  8637  1.0 CameraX-core_ca com.woolab.lumella
+ 8354  8398  1.0 OkHttp TaskRunn com.woolab.lumella
+ 8354  8364  1.0 HeapTaskDaemon  com.woolab.lumella
+ 8074  8074  1.0 kworker/u8:3-memlat_wq [kworker/u8:3-memlat_wq]
+ 8038  8038  1.0 kworker/u9:2-HIPRIO_SYNC_WORK_QUEUE [kworker/u9:2-HIPRIO_SYNC_WORK_QUEUE]
+ 4714  4714  1.0 kworker/u9:1-hal_register_write_wq [kworker/u9:1-hal_register_write_wq]
+ 1296 26750  1.0 IpClient.wlan0  system_server
+  795  6431  1.0 HwBinder:795_5  vendor.qti.camera.provider@2.7-service_64
+  795  5936  1.0 HwBinder:795_3  vendor.qti.camera.provider@2.7-service_64
+ 2058  2137  1.0 ANRWatchDog     com.eg.android.AlipayGGlasses
+ 1830  1830  1.0 ercury.launcher com.ffalconxr.mercury.launcher
+=== 1790589396
+Threads: 1862 total,   3 running, 1859 sleeping,   0 stopped,   0 zombie
+  Mem:  3865588K total,  3341524K used,   524064K free,     6672K buffers
+ Swap:  2097148K total,   379648K used,  1717500K free,  1786972K cached
+400%cpu 140%user   0%nice  84%sys 167%idle   0%iow   6%irq   3%sirq   0%host
+  PID   TID[%CPU]CMD             NAME
+ 8622  8622 95.0 yes             yes
+ 9152  9152 32.0 top             top
+  795  1196 11.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1198 10.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1201  9.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1200  9.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1197  9.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  809  8838  3.0 EvtQ_c2.qti.avc media.hwcodec
+  887  8847  2.0 CDU-0-FrameProc cameraserver
+ 8354  8834  2.0 CodecLooper     com.woolab.lumella
+ 8354  8669  2.0 CameraX-camerax com.woolab.lumella
+ 8354  8424  2.0 lumella-audio-c com.woolab.lumella
+  770  8425  2.0 reader          android.hardware.audio.service_64
+  830  8422  2.0 AudioIn_286     audioserver
+ 8354  8398  2.0 OkHttp TaskRunn com.woolab.lumella
+ 8354  8369  2.0 Binder:8354_2   com.woolab.lumella
+ 8354  8368  2.0 Binder:8354_1   com.woolab.lumella
+  795  6431  2.0 HwBinder:795_5  vendor.qti.camera.provider@2.7-service_64
+  887  5959  2.0 HwBinder:887_5  cameraserver
+  887  1135  2.0 HwBinder:887_1  cameraserver
+  887  1136  2.0 HwBinder:887_2  cameraserver
+  795  1124  2.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1092  2.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+ 8354  8981  1.0 OkHttp TaskRunn com.woolab.lumella
+ 8354  8934  1.0 MP4WtrVidTrkThr com.woolab.lumella
+  809  8930  1.0 EvtQ_codecPipe  media.hwcodec
+  795  8917  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  8910  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  8909  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  887  8846  1.0 C3Dev-0-ReqQueu cameraserver
+ 8354  8637  1.0 CameraX-core_ca com.woolab.lumella
+ 8354  8388  1.0 Binder:8354_5   com.woolab.lumella
+ 8354  8376  1.0 Binder:8354_4   com.woolab.lumella
+ 8354  8363  1.0 Jit thread pool com.woolab.lumella
+ 8354  8354  1.0 .woolab.lumella com.woolab.lumella
+ 8074  8074  1.0 kworker/u8:3-rt-cdm1_0 [kworker/u8:3-rt-cdm1_0]
+ 8038  8038  1.0 kworker/u9:2-hal_register_write_wq [kworker/u9:2-hal_register_write_wq]
+ 6914  6914  1.0 kworker/u8:4-crm_workq-icp_message_q [kworker/u8:4-crm_workq-icp_message_q]
+  368  6321  1.0 logd.reader.per logd
+31316 31316  1.0 kworker/u9:0-hal_register_write_wq [kworker/u9:0-hal_register_write_wq]
+=== 1790589399
+Threads: 1862 total,   2 running, 1860 sleeping,   0 stopped,   0 zombie
+  Mem:  3865588K total,  3341484K used,   524104K free,     6672K buffers
+ Swap:  2097148K total,   379648K used,  1717500K free,  1788168K cached
+400%cpu 139%user   1%nice  87%sys 162%idle   0%iow   7%irq   4%sirq   0%host
+  PID   TID[%CPU]CMD             NAME
+ 8622  8622 94.0 yes             yes
+ 9155  9155 31.0 top             top
+  795  1198 12.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1201 11.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1196 10.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1197  9.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1200  8.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  809  8838  2.0 EvtQ_c2.qti.avc media.hwcodec
+ 8354  8680  2.0 CameraX-camerax com.woolab.lumella
+ 8354  8424  2.0 lumella-audio-c com.woolab.lumella
+ 8354  8368  2.0 Binder:8354_1   com.woolab.lumella
+  797 31788  2.0 HwBinder:797_D  vendor.qti.hardware.AGMIPC@1.0-service
+  795  5936  2.0 HwBinder:795_3  vendor.qti.camera.provider@2.7-service_64
+  887  1135  2.0 HwBinder:887_1  cameraserver
+  795  1124  2.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  198   198  2.0 ueventd         ueventd
+ 8354  8981  1.0 OkHttp TaskRunn com.woolab.lumella
+  809  8930  1.0 EvtQ_codecPipe  media.hwcodec
+  795  8912  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  8909  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  8910  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  887  8846  1.0 C3Dev-0-ReqQueu cameraserver
+  887  8847  1.0 CDU-0-FrameProc cameraserver
+  809  8841  1.0 poll_avcE_109   media.hwcodec
+ 8354  8839  1.0 C2OMXNode       com.woolab.lumella
+ 8354  8834  1.0 CodecLooper     com.woolab.lumella
+ 8354  8833  1.0 MediaCodec_loop com.woolab.lumella
+ 8354  8669  1.0 CameraX-camerax com.woolab.lumella
+ 8354  8666  1.0 HwBinder:8354_1 com.woolab.lumella
+ 8354  8637  1.0 CameraX-core_ca com.woolab.lumella
+ 8354  8519  1.0 OkHttp TaskRunn com.woolab.lumella
+  770  8425  1.0 reader          android.hardware.audio.service_64
+  830  8422  1.0 AudioIn_286     audioserver
+ 8354  8388  1.0 Binder:8354_5   com.woolab.lumella
+ 8354  8376  1.0 Binder:8354_4   com.woolab.lumella
+ 8354  8369  1.0 Binder:8354_2   com.woolab.lumella
+ 8354  8354  1.0 .woolab.lumella com.woolab.lumella
+ 8074  8074  1.0 kworker/u8:3-memlat_wq [kworker/u8:3-memlat_wq]
+ 8038  8038  1.0 kworker/u9:2-hal_register_write_wq [kworker/u9:2-hal_register_write_wq]
+ 7053  7053  1.0 kworker/3:0-mm_percpu_wq [kworker/3:0-mm_percpu_wq]
+=== 1790589402
+Threads: 1852 total,   2 running, 1850 sleeping,   0 stopped,   0 zombie
+  Mem:  3865588K total,  3348932K used,   516656K free,     6672K buffers
+ Swap:  2097148K total,   379648K used,  1717500K free,  1790416K cached
+400%cpu 113%user   3%nice  95%sys 179%idle   0%iow   7%irq   3%sirq   0%host
+  PID   TID[%CPU]CMD             NAME
+ 8354  8665  101 CodecLooper     com.woolab.lumella
+ 8354  8666 91.0 HwBinder:8354_1 com.woolab.lumella
+ 8354  8807 89.0 OkHttp Dispatch com.woolab.lumella
+ 8354  8816 84.0 lumella-camera  com.woolab.lumella
+ 8354  8638 81.0 CameraManager   com.woolab.lumella
+ 8354  8636 81.0 CameraX-schedul com.woolab.lumella
+ 8354  8769 43.0 Binder:8354_6   com.woolab.lumella
+ 9158  9158 32.0 top             top
+ 8354  8834 28.0 CodecLooper     com.woolab.lumella
+ 8354  8932 16.0 MPEG4Writer     com.woolab.lumella
+  795  1201 13.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1198 13.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1197 12.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+ 8354  8804 11.0 lumella-slowpat com.woolab.lumella
+  795  1200 10.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1196  9.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+ 8354  8795  8.0 lumella-wav-tap com.woolab.lumella
+ 8354  8791  3.0 voice-fast-path com.woolab.lumella
+ 8354  8369  3.0 Binder:8354_2   com.woolab.lumella
+  795  1218  3.0 HwBinder:795_1  vendor.qti.camera.provider@2.7-service_64
+  887  1135  3.0 HwBinder:887_1  cameraserver
+  795  8910  2.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  809  8838  2.0 EvtQ_c2.qti.avc media.hwcodec
+ 8354  8805  2.0 brain-submit    com.woolab.lumella
+ 8354  8424  2.0 lumella-audio-c com.woolab.lumella
+  770  8425  2.0 reader          android.hardware.audio.service_64
+ 8354  8398  2.0 OkHttp TaskRunn com.woolab.lumella
+ 8354  8376  2.0 Binder:8354_4   com.woolab.lumella
+ 8354  8364  2.0 HeapTaskDaemon  com.woolab.lumella
+  795  1124  2.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1092  2.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+ 9032  9032  1.0 kworker/u9:3-crm_workq-5f0200-40307 [kworker/u9:3-crm_workq-5f0200-40307]
+ 8925  8925  1.0 fthread_1       [fthread_1]
+  795  8917  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  8913  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  8912  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  8909  1.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  887  8846  1.0 C3Dev-0-ReqQueu cameraserver
+  830  8422  1.0 AudioIn_286     audioserver
+ 8354  8399  1.0 Okio Watchdog   com.woolab.lumella

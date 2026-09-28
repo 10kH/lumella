@@ -11,7 +11,8 @@
 # video is how typos get into the final cut (docs/MACBOOK-SETUP.md, layer B-aux).
 #
 # --stop leaves <take>-FINAL.mp4: the wearer's view stacked over the glasses display, audio
-# carrying both voices. That is the file for the edit; the parts are kept beside it.
+# carrying both voices. That is the file for the edit; the parts are kept beside it, including
+# <take>-learner.wav and <take>-tutor.wav for an edit that wants the voices on separate tracks.
 #
 #   ops/take.sh c7                   # blocking, 180s, screen only
 #   ops/take.sh c7 60 --pov          # blocking, 60s, + wearer's view
@@ -23,9 +24,10 @@
 # noticed (2026-09-14). With --start, screenrecord runs detached ON THE DEVICE, so nothing on
 # this Mac can orphan it.
 #
-# The POV recording has no audio on purpose (rayneo-platform-notes.md §11): the device allows one
-# audio input and the voice path owns it, so asking for audio would end the conversation being
-# filmed. Sound comes from the external camera.
+# The POV recording is video only. Recording the mic in it too made CameraX open the microphone a
+# second time and AAC-encode it in software, on a device the camera already pushes to its limit
+# (artifacts/perf/README.md). The app writes both voices instead, from PCM it already has, on
+# the video's clock: the learner exactly as the tutor heard it, and the tutor's own voice.
 
 set -uo pipefail
 
@@ -55,10 +57,9 @@ for a in "$@"; do
     --start) MODE="start" ;;
     --stop)  MODE="stop" ;;
     --pov)   POV=1 ;;
-    # The tutor's voice without the camera. tutorVoiceTap and povRecorder are started by the
-    # same broadcast but are otherwise independent (MainActivity.kt:1527-1528), so a take that
-    # only needs sound does not have to pay for the camera — which costs ~50% of one core on
-    # this device and makes the conversation stutter (measured 2026-09-18).
+    # Both voices without the camera. The voice taps and the POV are started by the same
+    # broadcast but are otherwise independent, so a take that only needs sound does not pay for
+    # the camera — still the heaviest thing this device does (artifacts/perf/README.md).
     --audio) AUDIO=1 ;;
     ''|*[!0-9]*) echo "unknown argument: $a" >&2; exit 2 ;;
     *)       SEC="$a" ;;
@@ -103,21 +104,30 @@ join_segments() {
   rm -f "$list"
 }
 
-# Mix the learner (video track) and the tutor (tapped WAV) into one file. Both halves stay on
-# disk: the mix is a convenience, and an edit may well want them on separate tracks.
+# Mix the two voice taps into one track, and put it under the wearer's view. Both taps and the
+# silent POV stay on disk: the mix is a convenience, and an edit may well want separate tracks.
 mix_voices() {
   local stamp="$1"
+  local learner="$OUT/$NAME-$stamp-learner.wav" tutor="$OUT/$NAME-$stamp-tutor.wav"
+  local voices="$OUT/$NAME-$stamp-voices.wav"
+  [ -f "$learner" ] && [ -f "$tutor" ] || return 0
+  if ffmpeg -v error -i "$learner" -i "$tutor" \
+       -filter_complex "[0:a][1:a]amix=inputs=2:duration=longest:dropout_transition=0:normalize=0[a]" \
+       -map "[a]" -y "$voices" 2>/dev/null; then
+    echo "  voices $voices  (learner + tutor)"
+  else
+    echo "  voices mix FAILED — both taps are intact, mix by hand" >&2
+    return 0
+  fi
   local pov="$OUT/$NAME-$stamp-pov-JOINED.mp4"
   [ -f "$pov" ] || pov="$OUT/$NAME-$stamp-pov.mp4"
   [ -f "$pov" ] || return 0
-  local wav="$OUT/$NAME-$stamp-tutor.wav"
   local out="$OUT/$NAME-$stamp-pov-MIXED.mp4"
-  if ffmpeg -v error -i "$pov" -i "$wav" \
-       -filter_complex "[0:a][1:a]amix=inputs=2:duration=longest:dropout_transition=0[a]" \
-       -map 0:v -map "[a]" -c:v copy -c:a aac -y "$out" 2>/dev/null; then
-    echo "  mixed  $out  (learner + tutor)"
+  if ffmpeg -v error -i "$pov" -i "$voices" -map 0:v -map 1:a -c:v copy -c:a aac -b:a 128k \
+       -y "$out" 2>/dev/null; then
+    echo "  mixed  $out  (view + both voices)"
   else
-    echo "  mix    FAILED — both halves are intact, mix by hand" >&2
+    echo "  mix    FAILED — view and voices are intact, mux by hand" >&2
   fi
 }
 
@@ -138,13 +148,14 @@ compose() {
   local out="$OUT/$NAME-$stamp-FINAL.mp4"
 
   # The screen track is silent (screenrecord has no audio option at all), so the audio comes
-  # from the POV, which already carries learner + tutor.
+  # from the MIXED POV, which carries learner + tutor. -map 0:a? — a take whose voices failed to
+  # mix still gets its picture.
   # -noautorotate on the POV, then rotate explicitly. Left to itself ffmpeg applies the file's
   # rotation metadata before the filter graph, so the POV arrives portrait and vstack refuses it
   # for not matching the screen's width. Doing it here keeps both inputs 1280 wide.
   if ffmpeg -v error -noautorotate -i "$pov" -i "$screen" -filter_complex \
        "[1:v]crop=640:480:0:0,scale=1280:-2,setsar=1[scr];[0:v]scale=1280:-2,setsar=1[pv];[pv][scr]vstack=inputs=2[v]" \
-       -map "[v]" -map 0:a -c:v libx264 -preset veryfast -crf 20 -c:a aac -y "$out" 2>/dev/null; then
+       -map "[v]" -map "0:a?" -c:v libx264 -preset veryfast -crf 20 -c:a aac -y "$out" 2>/dev/null; then
     local wh
     wh="$(ffprobe -v error -select_streams v -show_entries stream=width,height -of csv=p=0 "$out" 2>/dev/null)"
     echo "  FINAL  $out  ($wh, view over screen)"
@@ -163,14 +174,20 @@ collect() {
     # A photo turn during a take closes the current segment and opens the next, so one take can
     # be $NAME.mp4, $NAME-2.mp4, $NAME-3.mp4 ... Pulling only the first name would silently
     # leave the rest of the take on the device.
+    #
+    # Order by the segment index, not by a field of the name: `sort -t- -k2` read "audio" out of
+    # "perf-audio-path-2.mp4" and put the 122s second segment first, so the joined take played
+    # its end before its beginning (2026-09-28).
     seg_count=0
     for remote in $(adb -s "$DEV" shell "ls $REMOTE_POV_DIR/ 2>/dev/null" | tr -d '\r' \
-                    | grep -E "^$NAME(-[0-9]+)?\.mp4$" | sort -t- -k2 -n); do
+                    | grep -E "^$NAME(-[0-9]+)?\.mp4$" \
+                    | awk -v n="$NAME" '{ i = ($0 == n ".mp4") ? 1 : substr($0, length(n) + 2, length($0) - length(n) - 5); print i "\t" $0 }' \
+                    | sort -n | cut -f2); do
       seg_count=$((seg_count + 1))
       if [ "$seg_count" = "1" ]; then local_name="$OUT/$NAME-$stamp-pov.mp4"
       else local_name="$OUT/$NAME-$stamp-pov-$seg_count.mp4"; fi
       if adb -s "$DEV" pull "$REMOTE_POV_DIR/$remote" "$local_name" >/dev/null 2>&1; then
-        # Delete on the device: POV runs ~189 MB/min and /sdcard holds about 114 minutes of it.
+        # Delete on the device: a POV is ~43 MB/min (720p 24fps, measured 9/28) and takes add up.
         adb -s "$DEV" shell "rm -f $REMOTE_POV_DIR/$remote"
         echo "  pov    $local_name"
       else
@@ -181,16 +198,19 @@ collect() {
     [ "$seg_count" -gt 1 ] && join_segments "$stamp" "$seg_count"
   fi
 
-  # The tutor's voice, captured separately. The video's audio track is the microphone, and the
-  # mic runs with the platform echo canceller so the tutor is deliberately absent from it — a
-  # take otherwise carries only the learner's half of the conversation.
-  local tutor_remote="$REMOTE_POV_DIR/$NAME-tutor.wav"
-  # Reached on --audio too: the wav is the whole point of that mode.
-  if adb -s "$DEV" pull "$tutor_remote" "$OUT/$NAME-$stamp-tutor.wav" >/dev/null 2>&1; then
-    adb -s "$DEV" shell "rm -f $tutor_remote"
-    echo "  tutor  $OUT/$NAME-$stamp-tutor.wav"
-    mix_voices "$stamp"
-  fi
+  # Both voices, tapped by the app on the video's clock. Reached on --audio too: the voices are
+  # the whole point of that mode.
+  local who remote
+  for who in learner tutor; do
+    remote="$REMOTE_POV_DIR/$NAME-$who.wav"
+    if adb -s "$DEV" pull "$remote" "$OUT/$NAME-$stamp-$who.wav" >/dev/null 2>&1; then
+      adb -s "$DEV" shell "rm -f $remote"
+      printf "  %-7s %s\n" "$who" "$OUT/$NAME-$stamp-$who.wav"
+    else
+      echo "  $who MISSING — adb logcat -d | grep 'tap '" >&2
+    fi
+  done
+  mix_voices "$stamp"
 
   compose "$stamp"
 

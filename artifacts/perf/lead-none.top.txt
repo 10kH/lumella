@@ -1,0 +1,2024 @@
+=== 1790589572
+Threads: 1771 total,   1 running, 1770 sleeping,   0 stopped,   0 zombie
+  Mem:  3865588K total,  3199556K used,   666032K free,     6672K buffers
+ Swap:  2097148K total,   379648K used,  1717500K free,  1727516K cached
+400%cpu  32%user   3%nice  37%sys 321%idle   0%iow   5%irq   2%sirq   0%host
+  PID   TID[%CPU]CMD             NAME
+ 9587  9587 33.0 top             top
+ 9318  9318  7.0 .woolab.lumella com.woolab.lumella
+ 9318  9327  5.0 Jit thread pool com.woolab.lumella
+ 9318  9393  3.0 lumella-audio-c com.woolab.lumella
+ 9318  9388  3.0 OkHttp TaskRunn com.woolab.lumella
+ 9318  9380  3.0 OkHttp TaskRunn com.woolab.lumella
+  797 30290  3.0 HwBinder:797_B  vendor.qti.hardware.AGMIPC@1.0-service
+  770  9392  2.0 reader          android.hardware.audio.service_64
+ 8074  8074  2.0 kworker/u8:3-memlat_wq [kworker/u8:3-memlat_wq]
+  830  9390  1.0 AudioIn_28E     audioserver
+ 8038  8038  1.0 kworker/u9:2-hal_register_write_wq [kworker/u9:2-hal_register_write_wq]
+ 4527  4527  1.0 kworker/u8:1-events_unbound [kworker/u8:1-events_unbound]
+31316 31316  1.0 kworker/u9:0-mhi_offload_wq [kworker/u9:0-mhi_offload_wq]
+ 1296 26750  1.0 IpClient.wlan0  system_server
+ 1489 24572  1.0 UsbFfs-worker   adbd
+ 1830  1830  1.0 ercury.launcher com.ffalconxr.mercury.launcher
+  785  1822  1.0 wifi@1.0-servic android.hardware.wifi@1.0-service
+ 1296  1589  1.0 jobscheduler.bg system_server
+ 1296  1585  1.0 SensorService   system_server
+ 1296  1558  1.0 PowerManagerSer system_server
+  797  1185  1.0 AGMIPC@1.0-serv vendor.qti.hardware.AGMIPC@1.0-service
+  332   332  1.0 irq/26-190b6400 [irq/26-190b6400]
+   37    37  1.0 rcuop/3         [rcuop/3]
+ 9583  9583  0.0 sh              sh
+ 1489  9584  0.0 shell svc 9583  adbd
+ 9318  9548  0.0 OkHttp TaskRunn com.woolab.lumella
+ 9318  9391  0.0 AudioPortEventH com.woolab.lumella
+ 9318  9389  0.0 AudioRecord     com.woolab.lumella
+ 9318  9382  0.0 luma-heartbeat  com.woolab.lumella
+ 9318  9381  0.0 Okio Watchdog   com.woolab.lumella
+ 9318  9376  0.0 .openai.com/... com.woolab.lumella
+ 9318  9360  0.0 Binder:9318_4   com.woolab.lumella
+ 9318  9359  0.0 lumella-realtim com.woolab.lumella
+ 9318  9352  0.0 Okio Watchdog   com.woolab.lumella
+ 9318  9350  0.0 OkHttp Connecti com.woolab.lumella
+ 9318  9349  0.0 Binder:9318_4   com.woolab.lumella
+ 9318  9346  0.0 hwuiTask1       com.woolab.lumella
+ 9318  9345  0.0 hwuiTask0       com.woolab.lumella
+ 9318  9339  0.0 Binder:9318_3   com.woolab.lumella
+ 9318  9340  0.0 AudioTrack      com.woolab.lumella
+=== 1790589575
+Threads: 1784 total,   1 running, 1783 sleeping,   0 stopped,   0 zombie
+  Mem:  3865588K total,  3199468K used,   666120K free,     6672K buffers
+ Swap:  2097148K total,   379648K used,  1717500K free,  1727588K cached
+400%cpu  44%user   0%nice  31%sys 316%idle   0%iow   7%irq   2%sirq   0%host
+  PID   TID[%CPU]CMD             NAME
+ 9617  9617 32.0 top             top
+  770  2746  8.0 writer          android.hardware.audio.service_64
+  830  1447  6.0 FastMixer       audioserver
+  797  1222  6.0 HwBinder:797_3  vendor.qti.hardware.AGMIPC@1.0-service
+ 9318  9548  3.0 OkHttp TaskRunn com.woolab.lumella
+ 9318  9393  3.0 lumella-audio-c com.woolab.lumella
+  797 30290  3.0 HwBinder:797_B  vendor.qti.hardware.AGMIPC@1.0-service
+  830  9390  2.0 AudioIn_28E     audioserver
+ 9318  9376  2.0 .openai.com/... com.woolab.lumella
+ 4527  4527  2.0 kworker/u8:1-memlat_wq [kworker/u8:1-memlat_wq]
+  830  1448  2.0 AudioOut_D      audioserver
+  797  1185  2.0 AGMIPC@1.0-serv vendor.qti.hardware.AGMIPC@1.0-service
+  770  9392  1.0 reader          android.hardware.audio.service_64
+ 9318  9380  1.0 OkHttp TaskRunn com.woolab.lumella
+ 9318  9349  1.0 Binder:9318_4   com.woolab.lumella
+ 9318  9327  1.0 Jit thread pool com.woolab.lumella
+ 8299  8299  1.0 kworker/1:1-sdhci_msm_generic_swq [kworker/1:1-sdhci_msm_generic_swq]
+ 8038  8038  1.0 kworker/u9:2-hal_register_write_wq [kworker/u9:2-hal_register_write_wq]
+ 4714  4714  1.0 kworker/u9:1-hal_register_write_wq [kworker/u9:1-hal_register_write_wq]
+  778 26746  1.0 11_see          android.hardware.sensors@2.1-service.multihal
+24178 24178  1.0 irq/359-dwc3    [irq/359-dwc3]
+  785  1822  1.0 wifi@1.0-servic android.hardware.wifi@1.0-service
+ 1816  1816  1.0 dp_rx_thread_3  [dp_rx_thread_3]
+ 1296  1672  1.0 Binder:1296_6   system_server
+ 1296  1558  1.0 PowerManagerSer system_server
+ 1296  1535  1.0 android.io      system_server
+  806   806  1.0 perf-hal-servic vendor.qti.hardware.perf-hal-service
+  555   555  1.0 kgsl_hwsched    [kgsl_hwsched]
+   14    14  1.0 rcuog/0         [rcuog/0]
+ 9318  9619  0.0 OkHttp TaskRunn com.woolab.lumella
+ 9318  9618  0.0 OkHttp TaskRunn com.woolab.lumella
+ 9615  9615  0.0 sh              sh
+ 1489  9616  0.0 shell svc 9615  adbd
+ 9318  9614  0.0 RenderThread    com.woolab.lumella
+ 9318  9613  0.0 Binder:9318_5   com.woolab.lumella
+ 9318  9607  0.0 .vercel.app/... com.woolab.lumella
+ 9318  9606  0.0 .vercel.app/... com.woolab.lumella
+ 9318  9608  0.0 RenderThread    com.woolab.lumella
+  706  9609  0.0 Dns_112_10089   netd
+  706  9612  0.0 Dns_112_10089   netd
+=== 1790589577
+Threads: 1810 total,   1 running, 1809 sleeping,   0 stopped,   0 zombie
+  Mem:  3865588K total,  3228272K used,   637316K free,     6672K buffers
+ Swap:  2097148K total,   379392K used,  1717756K free,  1728156K cached
+400%cpu  89%user   8%nice  68%sys 227%idle   0%iow   6%irq   2%sirq   0%host
+  PID   TID[%CPU]CMD             NAME
+ 9318  9596 34.0 lumella-voicepa com.woolab.lumella
+ 9622  9622 33.0 top             top
+  795  1198  7.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+ 9318  9328  6.0 HeapTaskDaemon  com.woolab.lumella
+ 9318  9380  5.0 OkHttp TaskRunn com.woolab.lumella
+  795  1201  5.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1197  5.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1199  5.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+  795  1200  5.0 vendor.qti.came vendor.qti.camera.provider@2.7-service_64
+ 9318  9624  4.0 CameraX-core_ca com.woolab.lumella
+  795  1220  3.0 HwBinder:795_2  vendor.qti.camera.provider@2.7-service_64
+ 9318  9393  2.0 lumella-audio-c com.woolab.lumella
+  830  9390  2.0 AudioIn_28E     audioserver
+ 9318  9327  2.0 Jit thread pool com.woolab.lumella
+ 6319  6319  2.0 logcat          logcat
+  795  6431  2.0 HwBinder:795_5  vendor.qti.camera.provider@2.7-service_64
+  795  5936  2.0 HwBinder:795_3  vendor.qti.camera.provider@2.7-service_64
+  795  9640  1.0 HwBinder:795_5  vendor.qti.camera.provider@2.7-service_64
+ 9318  9626  1.0 CameraX-core_ca com.woolab.lumella
+ 9318  9619  1.0 OkHttp TaskRunn com.woolab.lumella
+  770  9392  1.0 reader          android.hardware.audio.service_64
+ 9318  9349  1.0 Binder:9318_4   com.woolab.lumella
+ 9318  9339  1.0 Binder:9318_3   com.woolab.lumella
+ 9318  9318  1.0 .woolab.lumella com.woolab.lumella
+ 8955  8955  1.0 kworker/2:0-events [kworker/2:0-events]
+ 8038  8038  1.0 kworker/u9:2-crm_workq-50200-a90307 [kworker/u9:2-crm_workq-50200-a90307]
+  368  6321  1.0 logd.reader.per logd
+ 5002  5002  1.0 kworker/u8:0-memlat_wq [kworker/u8:0-memlat_wq]
+ 4714  4714  1.0 kworker/u9:1-hal_register_write_wq [kworker/u9:1-hal_register_write_wq]
+ 4527  4527  1.0 kworker/u8:1-bwmon_wq [kworker/u8:1-bwmon_wq]
+  797 31788  1.0 HwBinder:797_D  vendor.qti.hardware.AGMIPC@1.0-service
+  797 30290  1.0 HwBinder:797_B  vendor.qti.hardware.AGMIPC@1.0-service
+  778 26746  1.0 11_see          android.hardware.sensors@2.1-service.multihal
+  778 26737  1.0 51_see          android.hardware.sensors@2.1-service.multihal
+  887  5959  1.0 HwBinder:887_5  cameraserver
+  887  5951  1.0 HwBinder:887_3  cameraserver
+  795  5937  1.0 HwBinder:795_4  vendor.qti.camera.provider@2.7-service_64
+ 2674  2895  1.0 pool-2-thread-1 com.rayneo.airuntime
+  797  2749  1.0 HwBinder:797_6  vendor.qti.hardware.AGMIPC@1.0-service
+  770  2746  1.0 writer          android.hardware.audio.service_64
+=== 1790589580
+Threads: 1786 total,   1 running, 1785 sleeping,   0 stopped,   0 zombie
+  Mem:  3865588K total,  3226424K used,   639164K free,     6672K buffers
+ Swap:  2097148K total,   379392K used,  1717756K free,  1728216K cached
+400%cpu  63%user   6%nice  94%sys 226%idle   0%iow   7%irq   4%sirq   0%host
+  PID   TID[%CPU]CMD             NAME
+ 9684  9684 33.0 top             top
+ 9318  9318 11.0 .woolab.lumella com.woolab.lumella
+ 9318  9605  5.0 brain-submit    com.woolab.lumella
+ 9318  9327  5.0 Jit thread pool com.woolab.lumella
+  770  2746  5.0 writer          android.hardware.audio.service_64
+ 9318  9376  4.0 .openai.com/... com.woolab.lumella
+ 9318  9336  3.0 RenderThread    com.woolab.lumella
+  830  1447  3.0 FastMixer       audioserver
+  797  1191  3.0 HwBinder:797_1  vendor.qti.hardware.AGMIPC@1.0-service
+ 9318  9619  2.0 OkHttp TaskRunn com.woolab.lumella
+  770  9392  2.0 reader          android.hardware.audio.service_64
+  830  9390  2.0 AudioIn_28E     audioserver
+ 9318  9328  2.0 HeapTaskDaemon  com.woolab.lumella
+ 6914  6914  2.0 kworker/u8:4-memlat_wq [kworker/u8:4-memlat_wq]
+  797  1222  2.0 HwBinder:797_3  vendor.qti.hardware.AGMIPC@1.0-service
+  800   935  2.0 HwBinder:800_1  vendor.qti.hardware.display.composer-service
+  838   838  2.0 surfaceflinger  surfaceflinger
+ 9318  9613  1.0 Binder:9318_5   com.woolab.lumella
+ 9318  9548  1.0 OkHttp TaskRunn com.woolab.lumella
+ 9318  9393  1.0 lumella-audio-c com.woolab.lumella
+ 8299  8299  1.0 kworker/1:1-mm_percpu_wq [kworker/1:1-mm_percpu_wq]
+ 1830  8292  1.0 DefaultDispatch com.ffalconxr.mercury.launcher
+ 8038  8038  1.0 kworker/u9:2-hal_register_write_wq [kworker/u9:2-hal_register_write_wq]
+  368  6321  1.0 logd.reader.per logd
+ 6319  6319  1.0 logcat          logcat
+ 4527  4527  1.0 kworker/u8:1-memlat_wq [kworker/u8:1-memlat_wq]
+ 3225  3263  1.0 pool-2-thread-1 com.rayneo.record
+  830  2594  1.0 Binder:830_5    audioserver
+ 1830  1830  1.0 ercury.launcher com.ffalconxr.mercury.launcher
+  785  1822  1.0 wifi@1.0-servic android.hardware.wifi@1.0-service
+ 1816  1816  1.0 dp_rx_thread_3  [dp_rx_thread_3]
+ 1814  1814  1.0 dp_rx_thread_1  [dp_rx_thread_1]
+ 1296  1672  1.0 Binder:1296_6   system_server
+ 1296  1648  1.0 WifiHandlerThre system_server
+  797  1646  1.0 HwBinder:797_4  vendor.qti.hardware.AGMIPC@1.0-service
+ 1296  1558  1.0 PowerManagerSer system_server
+ 1296  1549  1.0 batterystats-ha system_server
+  830  1448  1.0 AudioOut_D      audioserver
+  797  1185  1.0 AGMIPC@1.0-serv vendor.qti.hardware.AGMIPC@1.0-service
+  838  1181  1.0 Binder:838_3    surfaceflinger
+=== 1790589583
+Threads: 1786 total,   1 running, 1785 sleeping,   0 stopped,   0 zombie
+  Mem:  3865588K total,  3230052K used,   635536K free,     6672K buffers
+ Swap:  2097148K total,   379392K used,  1717756K free,  1728280K cached
+400%cpu  60%user   7%nice 115%sys 204%idle   0%iow   9%irq   5%sirq   0%host
+  PID   TID[%CPU]CMD             NAME
+ 9688  9688 34.0 top             top
+ 9318  9327  8.0 Jit thread pool com.woolab.lumella
+ 9318  9318  8.0 .woolab.lumella com.woolab.lumella
+  770  2746  7.0 writer          android.hardware.audio.service_64
+ 9318  9376  6.0 .openai.com/... com.woolab.lumella
+  830  1447  5.0 FastMixer       audioserver
+  797  1191  4.0 HwBinder:797_1  vendor.qti.hardware.AGMIPC@1.0-service
+  797  1646  3.0 HwBinder:797_4  vendor.qti.hardware.AGMIPC@1.0-service
+ 9318  9548  2.0 OkHttp TaskRunn com.woolab.lumella
+ 9318  9393  2.0 lumella-audio-c com.woolab.lumella
+  830  9390  2.0 AudioIn_28E     audioserver
+ 5002  5002  2.0 kworker/u8:0-memlat_wq [kworker/u8:0-memlat_wq]
+ 1296 26750  2.0 IpClient.wlan0  system_server
+  830  1448  2.0 AudioOut_D      audioserver
+  797  1222  2.0 HwBinder:797_3  vendor.qti.hardware.AGMIPC@1.0-service
+  797  1185  2.0 AGMIPC@1.0-serv vendor.qti.hardware.AGMIPC@1.0-service
+ 9318  9619  1.0 OkHttp TaskRunn com.woolab.lumella
+  770  9392  1.0 reader          android.hardware.audio.service_64
+ 9318  9336  1.0 RenderThread    com.woolab.lumella
+ 7328  7328  1.0 kworker/1:0-mm_percpu_wq [kworker/1:0-mm_percpu_wq]
+ 6914  6914  1.0 kworker/u8:4-memlat_wq [kworker/u8:4-memlat_wq]
+  368  6321  1.0 logd.reader.per logd
+ 4714  4714  1.0 kworker/u9:1-hal_register_write_wq [kworker/u9:1-hal_register_write_wq]
+  778 26746  1.0 11_see          android.hardware.sensors@2.1-service.multihal
+ 1489 24572  1.0 UsbFfs-worker   adbd
+ 1830  2892  1.0 pool-12-thread- com.ffalconxr.mercury.launcher
+ 2595  2767  1.0 RMonitor_Monito com.sogou.inputmethod.iot
+ 1830  2096  1.0 pool-7-thread-1 com.ffalconxr.mercury.launcher
+  785  1822  1.0 wifi@1.0-servic android.hardware.wifi@1.0-service
+ 1816  1816  1.0 dp_rx_thread_3  [dp_rx_thread_3]
+ 1813  1813  1.0 dp_rx_thread_0  [dp_rx_thread_0]
+ 1296  1606  1.0 UEventObserver  system_server
+ 1296  1558  1.0 PowerManagerSer system_server
+  838   838  1.0 surfaceflinger  surfaceflinger
+  770   837  1.0 HwBinder:770_2  android.hardware.audio.service_64
+  530   530  1.0 wlan_logging_th [wlan_logging_th]
+   13    13  1.0 rcu_preempt     [rcu_preempt]
+ 9686  9686  0.0 sh              sh
+ 1489  9687  0.0 shell svc 9686  adbd
+ 9318  9685  0.0 Binder:9318_6   com.woolab.lumella
+=== 1790589586
+Threads: 1785 total,   1 running, 1784 sleeping,   0 stopped,   0 zombie
+  Mem:  3865588K total,  3228220K used,   637368K free,     6672K buffers
+ Swap:  2097148K total,   379392K used,  1717756K free,  1728284K cached
+400%cpu  52%user   0%nice 100%sys 236%idle   0%iow   7%irq   5%sirq   0%host
+  PID   TID[%CPU]CMD             NAME
+ 9691  9691 33.0 top             top
+  770  2746  7.0 writer          android.hardware.audio.service_64
+  797  1646  5.0 HwBinder:797_4  vendor.qti.hardware.AGMIPC@1.0-service
+  830  1447  5.0 FastMixer       audioserver
+  797  1222  5.0 HwBinder:797_3  vendor.qti.hardware.AGMIPC@1.0-service
+ 9318  9619  3.0 OkHttp TaskRunn com.woolab.lumella
+ 9318  9393  3.0 lumella-audio-c com.woolab.lumella
+ 9318  9376  3.0 .openai.com/... com.woolab.lumella
+ 1813  1813  3.0 dp_rx_thread_0  [dp_rx_thread_0]
+ 9318  9548  2.0 OkHttp TaskRunn com.woolab.lumella
+  770  9392  2.0 reader          android.hardware.audio.service_64
+  830  9390  2.0 AudioIn_28E     audioserver
+ 5002  5002  2.0 kworker/u8:0-kgsl-workqueue [kworker/u8:0-kgsl-workqueue]
+ 4714  4714  2.0 kworker/u9:1-hal_register_write_wq [kworker/u9:1-hal_register_write_wq]
+  830  1448  2.0 AudioOut_D      audioserver
+  797  1185  2.0 AGMIPC@1.0-serv vendor.qti.hardware.AGMIPC@1.0-service
+ 9318  9605  1.0 brain-submit    com.woolab.lumella
+ 8038  8038  1.0 kworker/u9:2-hal_register_write_wq [kworker/u9:2-hal_register_write_wq]
+  778 26746  1.0 11_see          android.hardware.sensors@2.1-service.multihal
+  778 26737  1.0 51_see          android.hardware.sensors@2.1-service.multihal
+ 1830  1830  1.0 ercury.launcher com.ffalconxr.mercury.launcher
+ 1296  1648  1.0 WifiHandlerThre system_server
+ 1296  1534  1.0 android.ui      system_server
+  838  1080  1.0 RenderEngine    surfaceflinger
+  838   896  1.0 HwBinder:838_1  surfaceflinger
+  559   572  1.0 qseecomd        qseecomd
+ 9689  9689  0.0 sh              sh
+ 1489  9690  0.0 shell svc 9689  adbd
+ 9318  9685  0.0 Binder:9318_6   com.woolab.lumella
+ 9318  9677  0.0 lumella-camera  com.woolab.lumella
+ 9318  9676  0.0 CameraX-camerax com.woolab.lumella
+ 9318  9626  0.0 CameraX-core_ca com.woolab.lumella
+ 9318  9623  0.0 CameraX-schedul com.woolab.lumella
+ 9318  9625  0.0 CameraManager   com.woolab.lumella
+ 9318  9624  0.0 CameraX-core_ca com.woolab.lumella
+ 9318  9618  0.0 OkHttp TaskRunn com.woolab.lumella
+ 9318  9613  0.0 Binder:9318_5   com.woolab.lumella
+ 9318  9606  0.0 OkHttp Dispatch com.woolab.lumella
+ 9318  9607  0.0 OkHttp Dispatch com.woolab.lumella
+ 9318  9604  0.0 lumella-slowpat com.woolab.lumella
+=== 1790589589
+Threads: 1785 total,   2 running, 1783 sleeping,   0 stopped,   0 zombie
+  Mem:  3865588K total,  3232124K used,   633464K free,     6672K buffers
+ Swap:  2097148K total,   379392K used,  1717756K free,  1728304K cached
+400%cpu  44%user   0%nice 112%sys 234%idle   0%iow   7%irq   3%sirq   0%host
+  PID   TID[%CPU]CMD             NAME
+ 9694  9694 33.0 top             top
+  770  2746  8.0 writer          android.hardware.audio.service_64
+  830  1447  5.0 FastMixer       audioserver
+  797  1222  5.0 HwBinder:797_3  vendor.qti.hardware.AGMIPC@1.0-service
+ 9318  9393  3.0 lumella-audio-c com.woolab.lumella
+  797  1646  3.0 HwBinder:797_4  vendor.qti.hardware.AGMIPC@1.0-service
+  797  1185  3.0 AGMIPC@1.0-serv vendor.qti.hardware.AGMIPC@1.0-service
+  198   198  3.0 ueventd         ueventd
+ 9318  9619  2.0 OkHttp TaskRunn com.woolab.lumella
+  830  9390  2.0 AudioIn_28E     audioserver
+ 9318  9380  2.0 OkHttp TaskRunn com.woolab.lumella
+ 9318  9376  2.0 .openai.com/... com.woolab.lumella
+ 1813  1813  2.0 dp_rx_thread_0  [dp_rx_thread_0]
+  830  1448  2.0 AudioOut_D      audioserver
+  797   797  2.0 AGMIPC@1.0-serv vendor.qti.hardware.AGMIPC@1.0-service
+  770  9392  1.0 reader          android.hardware.audio.service_64
+ 9318  9381  1.0 Okio Watchdog   com.woolab.lumella
+ 8955  8955  1.0 kworker/2:0-mm_percpu_wq [kworker/2:0-mm_percpu_wq]
+ 8299  8299  1.0 kworker/1:1-events [kworker/1:1-events]
+ 8074  8074  1.0 kworker/u8:3-kgsl-workqueue [kworker/u8:3-kgsl-workqueue]
+ 6914  6914  1.0 kworker/u8:4-wmi_rx_diag_event_work_ [kworker/u8:4-wmi_rx_diag_event_work_]
+ 1296 26750  1.0 IpClient.wlan0  system_server
+  778 26746  1.0 11_see          android.hardware.sensors@2.1-service.multihal
+  778 26737  1.0 51_see          android.hardware.sensors@2.1-service.multihal
+ 2595  2814  1.0 RStack_Of_Main  com.sogou.inputmethod.iot
+  785  1822  1.0 wifi@1.0-servic android.hardware.wifi@1.0-service
+ 1816  1816  1.0 dp_rx_thread_3  [dp_rx_thread_3]
+ 1296  1648  1.0 WifiHandlerThre system_server
+ 1296  1585  1.0 SensorService   system_server
+ 1489  1489  1.0 adbd            adbd
+  800   935  1.0 HwBinder:800_1  vendor.qti.hardware.display.composer-service
+  838   838  1.0 surfaceflinger  surfaceflinger
+  773   773  1.0 health@2.1-serv android.hardware.health@2.1-service
+  368   502  1.0 logd.klogd      logd
+  332   332  1.0 irq/26-190b6400 [irq/26-190b6400]
+   34    34  1.0 ksoftirqd/3     [ksoftirqd/3]
+ 1489  9693  0.0 shell svc 9692  adbd
+ 9692  9692  0.0 sh              sh
+ 9318  9685  0.0 Binder:9318_6   com.woolab.lumella
+ 9318  9677  0.0 lumella-camera  com.woolab.lumella
+=== 1790589592
+Threads: 1785 total,   2 running, 1783 sleeping,   0 stopped,   0 zombie
+  Mem:  3865588K total,  3219868K used,   645720K free,     6672K buffers
+ Swap:  2097148K total,   379392K used,  1717756K free,  1728336K cached
+400%cpu  59%user   3%nice 124%sys 204%idle   0%iow   7%irq   3%sirq   0%host
+  PID   TID[%CPU]CMD             NAME
+ 9702  9702 33.0 top             top
+ 9318  9318 10.0 .woolab.lumella com.woolab.lumella
+  770  2746  7.0 writer          android.hardware.audio.service_64
+  830  1447  5.0 FastMixer       audioserver
+  797  1646  4.0 HwBinder:797_4  vendor.qti.hardware.AGMIPC@1.0-service
+  830  1448  3.0 AudioOut_D      audioserver
+  797  1185  3.0 AGMIPC@1.0-serv vendor.qti.hardware.AGMIPC@1.0-service
+  797   797  3.0 AGMIPC@1.0-serv vendor.qti.hardware.AGMIPC@1.0-service
+ 9318  9619  2.0 OkHttp TaskRunn com.woolab.lumella
+ 9318  9393  2.0 lumella-audio-c com.woolab.lumella
+  770  9392  2.0 reader          android.hardware.audio.service_64
+ 9318  9380  2.0 OkHttp TaskRunn com.woolab.lumella
+ 5002  5002  2.0 kworker/u8:0-wmi_rx_diag_event_work_ [kworker/u8:0-wmi_rx_diag_event_work_]
+  770   837  2.0 HwBinder:770_2  android.hardware.audio.service_64
+ 9318  9605  1.0 brain-submit    com.woolab.lumella
+  830  9390  1.0 AudioIn_28E     audioserver
+ 9318  9336  1.0 RenderThread    com.woolab.lumella
+ 9318  9334  1.0 Profile Saver   com.woolab.lumella
+ 9318  9327  1.0 Jit thread pool com.woolab.lumella
+ 8074  8074  1.0 kworker/u8:3-bwmon_wq [kworker/u8:3-bwmon_wq]
+  368  6321  1.0 logd.reader.per logd
+ 6319  6319  1.0 logcat          logcat
+ 4714  4714  1.0 kworker/u9:1-hal_register_write_wq [kworker/u9:1-hal_register_write_wq]
+ 1296 26750  1.0 IpClient.wlan0  system_server
+  778 26746  1.0 11_see          android.hardware.sensors@2.1-service.multihal
+24178 24178  1.0 irq/359-dwc3    [irq/359-dwc3]
+  785  1822  1.0 wifi@1.0-servic android.hardware.wifi@1.0-service
+ 1813  1813  1.0 dp_rx_thread_0  [dp_rx_thread_0]
+ 1296  1534  1.0 android.ui      system_server
+ 1489  1489  1.0 adbd            adbd
+  797  1222  1.0 HwBinder:797_3  vendor.qti.hardware.AGMIPC@1.0-service
+  800   935  1.0 HwBinder:800_1  vendor.qti.hardware.display.composer-service
+  800   905  1.0 SDM_EventThread vendor.qti.hardware.display.composer-service
+  838   838  1.0 surfaceflinger  surfaceflinger
+  792   792  1.0 poweropt-servic poweropt-service
+  785   785  1.0 wifi@1.0-servic android.hardware.wifi@1.0-service
+  555   555  1.0 kgsl_hwsched    [kgsl_hwsched]
+  532   532  1.0 crtc_commit:155 [crtc_commit:155]
+  368   468  1.0 logd.writer     logd
+  332   332  1.0 irq/26-190b6400 [irq/26-190b6400]
+=== 1790589595
+Threads: 1784 total,   1 running, 1783 sleeping,   0 stopped,   0 zombie
+  Mem:  3865588K total,  3221940K used,   643648K free,     6672K buffers
+ Swap:  2097148K total,   379392K used,  1717756K free,  1728404K cached
+400%cpu  54%user   0%nice 111%sys 223%idle   0%iow   7%irq   5%sirq   0%host
+  PID   TID[%CPU]CMD             NAME
+ 9716  9716 33.0 top             top
+  770  2746  8.0 writer          android.hardware.audio.service_64
+  830  1447  5.0 FastMixer       audioserver
+  797  1222  5.0 HwBinder:797_3  vendor.qti.hardware.AGMIPC@1.0-service
+ 9318  9393  3.0 lumella-audio-c com.woolab.lumella
+  797  1646  3.0 HwBinder:797_4  vendor.qti.hardware.AGMIPC@1.0-service
+  797  1185  3.0 AGMIPC@1.0-serv vendor.qti.hardware.AGMIPC@1.0-service
+  770  9392  2.0 reader          android.hardware.audio.service_64
+  830  9390  2.0 AudioIn_28E     audioserver
+ 9318  9380  2.0 OkHttp TaskRunn com.woolab.lumella
+ 9318  9376  2.0 .openai.com/... com.woolab.lumella
+ 9318  9327  2.0 Jit thread pool com.woolab.lumella
+ 9318  9318  2.0 .woolab.lumella com.woolab.lumella
+ 8038  8038  2.0 kworker/u9:2-hal_register_write_wq [kworker/u9:2-hal_register_write_wq]
+ 1813  1813  2.0 dp_rx_thread_0  [dp_rx_thread_0]
+  830  1448  2.0 AudioOut_D      audioserver
+  797   797  2.0 AGMIPC@1.0-serv vendor.qti.hardware.AGMIPC@1.0-service
+ 9318  9619  1.0 OkHttp TaskRunn com.woolab.lumella
+ 9318  9607  1.0 .vercel.app/... com.woolab.lumella
+ 9318  9388  1.0 even.vercel.app com.woolab.lumella
+ 1830  8289  1.0 DefaultDispatch com.ffalconxr.mercury.launcher
+ 8074  8074  1.0 kworker/u8:3-memlat_wq [kworker/u8:3-memlat_wq]
+ 7328  7328  1.0 kworker/1:0-mm_percpu_wq [kworker/1:0-mm_percpu_wq]
+ 5534  5534  1.0 kworker/0:2H-kblockd [kworker/0:2H-kblockd]
+ 5002  5002  1.0 kworker/u8:0-memlat_wq [kworker/u8:0-memlat_wq]
+ 4714  4714  1.0 kworker/u9:1-hal_register_write_wq [kworker/u9:1-hal_register_write_wq]
+  778 26746  1.0 11_see          android.hardware.sensors@2.1-service.multihal
+  778 26737  1.0 51_see          android.hardware.sensors@2.1-service.multihal
+ 1489 24572  1.0 UsbFfs-worker   adbd
+ 1830  1830  1.0 ercury.launcher com.ffalconxr.mercury.launcher
+  785  1822  1.0 wifi@1.0-servic android.hardware.wifi@1.0-service
+ 1296  1648  1.0 WifiHandlerThre system_server
+ 1296  1558  1.0 PowerManagerSer system_server
+ 1296  1534  1.0 android.ui      system_server
+  923   923  1.0 wificond        wificond
+   30    30  1.0 rcuog/2         [rcuog/2]
+ 1489  9715  0.0 shell svc 9714  adbd
+ 9714  9714  0.0 sh              sh
+ 9318  9685  0.0 Binder:9318_6   com.woolab.lumella
+ 9318  9677  0.0 lumella-camera  com.woolab.lumella
+=== 1790589598
+Threads: 1784 total,   1 running, 1783 sleeping,   0 stopped,   0 zombie
+  Mem:  3865588K total,  3224952K used,   640636K free,     6672K buffers
+ Swap:  2097148K total,   379392K used,  1717756K free,  1728452K cached
+400%cpu  43%user   0%nice  99%sys 245%idle   0%iow   7%irq   6%sirq   0%host
+  PID   TID[%CPU]CMD             NAME
+ 9719  9719 32.0 top             top
+  770  2746  7.0 writer          android.hardware.audio.service_64
+  830  1447  5.0 FastMixer       audioserver
+  797  1646  4.0 HwBinder:797_4  vendor.qti.hardware.AGMIPC@1.0-service
+  797   797  4.0 AGMIPC@1.0-serv vendor.qti.hardware.AGMIPC@1.0-service
+ 9318  9619  3.0 OkHttp TaskRunn com.woolab.lumella
+  830  1448  3.0 AudioOut_D      audioserver
+  797  1222  3.0 HwBinder:797_3  vendor.qti.hardware.AGMIPC@1.0-service
+ 9318  9393  2.0 lumella-audio-c com.woolab.lumella
+  770  9392  2.0 reader          android.hardware.audio.service_64
+  830  9390  2.0 AudioIn_28E     audioserver
+ 8038  8038  2.0 kworker/u9:2-hal_register_write_wq [kworker/u9:2-hal_register_write_wq]
+  368  6321  2.0 logd.reader.per logd
+ 6319  6319  2.0 logcat          logcat
+ 1813  1813  2.0 dp_rx_thread_0  [dp_rx_thread_0]
+  797  1185  2.0 AGMIPC@1.0-serv vendor.qti.hardware.AGMIPC@1.0-service
+  770   837  2.0 HwBinder:770_2  android.hardware.audio.service_64
+ 9318  9380  1.0 OkHttp TaskRunn com.woolab.lumella
+ 8074  8074  1.0 kworker/u8:3-memlat_wq [kworker/u8:3-memlat_wq]
+ 4714  4714  1.0 kworker/u9:1-hal_register_write_wq [kworker/u9:1-hal_register_write_wq]
+  778 26746  1.0 11_see          android.hardware.sensors@2.1-service.multihal
+  778 26737  1.0 51_see          android.hardware.sensors@2.1-service.multihal
+ 1489 24572  1.0 UsbFfs-worker   adbd
+ 2391  2391  1.0 msm_irqbalance  msm_irqbalance
+  785  1822  1.0 wifi@1.0-servic android.hardware.wifi@1.0-service
+ 1816  1816  1.0 dp_rx_thread_3  [dp_rx_thread_3]
+ 1296  1648  1.0 WifiHandlerThre system_server
+  368   468  1.0 logd.writer     logd
+  332   332  1.0 irq/26-190b6400 [irq/26-190b6400]
+   27    27  1.0 ksoftirqd/2     [ksoftirqd/2]
+ 9717  9717  0.0 sh              sh
+ 1489  9718  0.0 shell svc 9717  adbd
+ 9318  9685  0.0 Binder:9318_6   com.woolab.lumella
+ 9318  9677  0.0 lumella-camera  com.woolab.lumella
+ 9318  9676  0.0 CameraX-camerax com.woolab.lumella
+ 9318  9626  0.0 CameraX-core_ca com.woolab.lumella
+ 9318  9624  0.0 CameraX-core_ca com.woolab.lumella
+ 9318  9625  0.0 CameraManager   com.woolab.lumella
+ 9318  9623  0.0 CameraX-schedul com.woolab.lumella
+ 9318  9618  0.0 OkHttp TaskRunn com.woolab.lumella
+=== 1790589601
+Threads: 1784 total,   1 running, 1783 sleeping,   0 stopped,   0 zombie
+  Mem:  3865588K total,  3227236K used,   638352K free,     6672K buffers
+ Swap:  2097148K total,   379392K used,  1717756K free,  1728472K cached
+400%cpu  19%user   0%nice  30%sys 344%idle   0%iow   5%irq   2%sirq   0%host
+  PID   TID[%CPU]CMD             NAME
+ 9722  9722 33.0 top             top
+  770  9392  3.0 reader          android.hardware.audio.service_64
+ 9318  9619  2.0 OkHttp TaskRunn com.woolab.lumella
+ 9318  9393  2.0 lumella-audio-c com.woolab.lumella
+  830  9390  2.0 AudioIn_28E     audioserver
+ 9318  9380  2.0 OkHttp TaskRunn com.woolab.lumella
+ 1723  1723  2.0 ndroid.systemui com.android.systemui
+  797  1646  2.0 HwBinder:797_4  vendor.qti.hardware.AGMIPC@1.0-service
+  797  1185  2.0 AGMIPC@1.0-serv vendor.qti.hardware.AGMIPC@1.0-service
+  797   797  2.0 AGMIPC@1.0-serv vendor.qti.hardware.AGMIPC@1.0-service
+ 8074  8074  1.0 kworker/u8:3-wmi_rx_diag_event_work_ [kworker/u8:3-wmi_rx_diag_event_work_]
+ 8038  8038  1.0 kworker/u9:2-hal_register_write_wq [kworker/u9:2-hal_register_write_wq]
+ 7328  7328  1.0 kworker/1:0-events [kworker/1:0-events]
+ 5002  5002  1.0 kworker/u8:0-memlat_wq [kworker/u8:0-memlat_wq]
+ 4714  4714  1.0 kworker/u9:1-hal_register_write_wq [kworker/u9:1-hal_register_write_wq]
+ 1296 26750  1.0 IpClient.wlan0  system_server
+  778 26746  1.0 11_see          android.hardware.sensors@2.1-service.multihal
+ 1830  1830  1.0 ercury.launcher com.ffalconxr.mercury.launcher
+ 1816  1816  1.0 dp_rx_thread_3  [dp_rx_thread_3]
+ 1296  1657  1.0 ConnectivitySer system_server
+ 1296  1558  1.0 PowerManagerSer system_server
+ 1296  1534  1.0 android.ui      system_server
+  368   502  1.0 logd.klogd      logd
+  332   332  1.0 irq/26-190b6400 [irq/26-190b6400]
+   34    34  1.0 ksoftirqd/3     [ksoftirqd/3]
+   15    15  1.0 rcuop/0         [rcuop/0]
+ 1489  9721  0.0 shell svc 9720  adbd
+ 9720  9720  0.0 sh              sh
+ 9318  9685  0.0 Binder:9318_6   com.woolab.lumella
+ 9318  9677  0.0 lumella-camera  com.woolab.lumella
+ 9318  9676  0.0 CameraX-camerax com.woolab.lumella
+ 9318  9626  0.0 CameraX-core_ca com.woolab.lumella
+ 9318  9623  0.0 CameraX-schedul com.woolab.lumella
+ 9318  9624  0.0 CameraX-core_ca com.woolab.lumella
+ 9318  9625  0.0 CameraManager   com.woolab.lumella
+ 9318  9618  0.0 OkHttp TaskRunn com.woolab.lumella
+ 9318  9613  0.0 Binder:9318_5   com.woolab.lumella
+ 9318  9606  0.0 .vercel.app/... com.woolab.lumella
+ 9318  9607  0.0 OkHttp Dispatch com.woolab.lumella
+ 9318  9604  0.0 lumella-slowpat com.woolab.lumella
+=== 1790589604
+Threads: 1784 total,   1 running, 1783 sleeping,   0 stopped,   0 zombie
+  Mem:  3865588K total,  3217356K used,   648232K free,     6672K buffers
+ Swap:  2097148K total,   379392K used,  1717756K free,  1728488K cached
+400%cpu  34%user   1%nice  25%sys 331%idle   0%iow   5%irq   4%sirq   0%host
+  PID   TID[%CPU]CMD             NAME
+ 9725  9725 33.0 top             top
+  797   797  4.0 AGMIPC@1.0-serv vendor.qti.hardware.AGMIPC@1.0-service
+ 9318  9393  3.0 lumella-audio-c com.woolab.lumella
+  770  9392  3.0 reader          android.hardware.audio.service_64
+  830  9390  3.0 AudioIn_28E     audioserver
+ 9318  9318  3.0 .woolab.lumella com.woolab.lumella
+ 9318  9619  2.0 OkHttp TaskRunn com.woolab.lumella
+ 9318  9380  2.0 OkHttp TaskRunn com.woolab.lumella
+ 2595  2767  2.0 RMonitor_Monito com.sogou.inputmethod.iot
+ 1296  1585  2.0 SensorService   system_server
+ 9318  9607  1.0 .vercel.app/... com.woolab.lumella
+ 9318  9388  1.0 even.vercel.app com.woolab.lumella
+ 9032  9032  1.0 kworker/u9:3-hal_register_write_wq [kworker/u9:3-hal_register_write_wq]
+ 8299  8299  1.0 kworker/1:1-events [kworker/1:1-events]
+ 8074  8074  1.0 kworker/u8:3-wmi_rx_diag_event_work_ [kworker/u8:3-wmi_rx_diag_event_work_]
+ 6914  6914  1.0 kworker/u8:4-memlat_wq [kworker/u8:4-memlat_wq]
+ 5002  5002  1.0 kworker/u8:0-memlat_wq [kworker/u8:0-memlat_wq]
+ 4714  4714  1.0 kworker/u9:1-hal_register_write_wq [kworker/u9:1-hal_register_write_wq]
+ 1296 26991  1.0 NetworkMonitor/ system_server
+  778 26737  1.0 51_see          android.hardware.sensors@2.1-service.multihal
+  785  1822  1.0 wifi@1.0-servic android.hardware.wifi@1.0-service
+ 1816  1816  1.0 dp_rx_thread_3  [dp_rx_thread_3]
+ 1296  1648  1.0 WifiHandlerThre system_server
+ 1296  1534  1.0 android.ui      system_server
+  797  1185  1.0 AGMIPC@1.0-serv vendor.qti.hardware.AGMIPC@1.0-service
+  332   332  1.0 irq/26-190b6400 [irq/26-190b6400]
+   34    34  1.0 ksoftirqd/3     [ksoftirqd/3]
+   15    15  1.0 rcuop/0         [rcuop/0]
+   14    14  1.0 rcuog/0         [rcuog/0]
+   13    13  1.0 rcu_preempt     [rcu_preempt]
+ 9723  9723  0.0 sh              sh
+ 1489  9724  0.0 shell svc 9723  adbd
+ 9318  9685  0.0 Binder:9318_6   com.woolab.lumella
+ 9318  9677  0.0 lumella-camera  com.woolab.lumella
+ 9318  9676  0.0 CameraX-camerax com.woolab.lumella
+ 9318  9626  0.0 CameraX-core_ca com.woolab.lumella
+ 9318  9623  0.0 CameraX-schedul com.woolab.lumella
+ 9318  9624  0.0 CameraX-core_ca com.woolab.lumella
+ 9318  9625  0.0 CameraManager   com.woolab.lumella
+ 9318  9618  0.0 OkHttp TaskRunn com.woolab.lumella
+=== 1790589607
+Threads: 1784 total,   2 running, 1782 sleeping,   0 stopped,   0 zombie
+  Mem:  3865588K total,  3221020K used,   644568K free,     6672K buffers
+ Swap:  2097148K total,   379392K used,  1717756K free,  1728496K cached
+400%cpu  21%user   0%nice  33%sys 338%idle   0%iow   4%irq   4%sirq   0%host
+  PID   TID[%CPU]CMD             NAME
+ 9728  9728 33.0 top             top
+ 9318  9393  4.0 lumella-audio-c com.woolab.lumella
+ 9318  9548  3.0 OkHttp TaskRunn com.woolab.lumella
+  830  9390  3.0 AudioIn_28E     audioserver
+  797  1222  3.0 HwBinder:797_3  vendor.qti.hardware.AGMIPC@1.0-service
+  770  9392  2.0 reader          android.hardware.audio.service_64
+ 9318  9380  2.0 OkHttp TaskRunn com.woolab.lumella
+ 5002  5002  2.0 kworker/u8:0-devfreq_wq [kworker/u8:0-devfreq_wq]
+  785  1822  2.0 wifi@1.0-servic android.hardware.wifi@1.0-service
+ 1296  1648  2.0 WifiHandlerThre system_server
+ 8038  8038  1.0 kworker/u9:2-hal_register_write_wq [kworker/u9:2-hal_register_write_wq]
+ 4714  4714  1.0 kworker/u9:1-hal_register_write_wq [kworker/u9:1-hal_register_write_wq]
+  778 26746  1.0 11_see          android.hardware.sensors@2.1-service.multihal
+24178 24178  1.0 irq/359-dwc3    [irq/359-dwc3]
+ 1816  1816  1.0 dp_rx_thread_3  [dp_rx_thread_3]
+ 1813  1813  1.0 dp_rx_thread_0  [dp_rx_thread_0]
+ 1296  1585  1.0 SensorService   system_server
+  797  1185  1.0 AGMIPC@1.0-serv vendor.qti.hardware.AGMIPC@1.0-service
+  785   785  1.0 wifi@1.0-servic android.hardware.wifi@1.0-service
+  368   468  1.0 logd.writer     logd
+  332   332  1.0 irq/26-190b6400 [irq/26-190b6400]
+   34    34  1.0 ksoftirqd/3     [ksoftirqd/3]
+   27    27  1.0 ksoftirqd/2     [ksoftirqd/2]
+   15    15  1.0 rcuop/0         [rcuop/0]
+ 1489  9727  0.0 shell svc 9726  adbd
+ 9726  9726  0.0 sh              sh
+ 9318  9685  0.0 Binder:9318_6   com.woolab.lumella
+ 9318  9677  0.0 lumella-camera  com.woolab.lumella
+ 9318  9676  0.0 CameraX-camerax com.woolab.lumella
+ 9318  9626  0.0 CameraX-core_ca com.woolab.lumella
+ 9318  9623  0.0 CameraX-schedul com.woolab.lumella
+ 9318  9624  0.0 CameraX-core_ca com.woolab.lumella
+ 9318  9625  0.0 CameraManager   com.woolab.lumella
+ 9318  9619  0.0 OkHttp TaskRunn com.woolab.lumella
+ 9318  9618  0.0 OkHttp TaskRunn com.woolab.lumella
+ 9318  9613  0.0 Binder:9318_5   com.woolab.lumella
+ 9318  9607  0.0 OkHttp Dispatch com.woolab.lumella
+ 9318  9606  0.0 OkHttp Dispatch com.woolab.lumella
+ 9318  9605  0.0 brain-submit    com.woolab.lumella
+ 9318  9604  0.0 lumella-slowpat com.woolab.lumella
+=== 1790589610
+Threads: 1784 total,   2 running, 1782 sleeping,   0 stopped,   0 zombie
+  Mem:  3865588K total,  3211224K used,   654364K free,     6672K buffers
+ Swap:  2097148K total,   379392K used,  1717756K free,  1728524K cached
+400%cpu  29%user   7%nice  30%sys 325%idle   0%iow   5%irq   4%sirq   0%host
+  PID   TID[%CPU]CMD             NAME
+ 9731  9731 34.0 top             top
+ 1296  1441 10.0 HeapTaskDaemon  system_server
+  198   198  5.0 ueventd         ueventd
+ 9318  9393  3.0 lumella-audio-c com.woolab.lumella
+ 9318  9380  3.0 OkHttp TaskRunn com.woolab.lumella
+  797  1222  3.0 HwBinder:797_3  vendor.qti.hardware.AGMIPC@1.0-service
+ 9318  9548  2.0 OkHttp TaskRunn com.woolab.lumella
+  770  9392  2.0 reader          android.hardware.audio.service_64
+  830  9390  2.0 AudioIn_28E     audioserver
+ 1296 26750  2.0 IpClient.wlan0  system_server
+  778 26737  2.0 51_see          android.hardware.sensors@2.1-service.multihal
+  773   773  2.0 health@2.1-serv android.hardware.health@2.1-service
+ 9318  9381  1.0 Okio Watchdog   com.woolab.lumella
+ 9032  9032  1.0 kworker/u9:3-hal_register_write_wq [kworker/u9:3-hal_register_write_wq]
+ 8197  8197  1.0 kworker/3:2-events [kworker/3:2-events]
+ 1830  8097  1.0 DefaultDispatch com.ffalconxr.mercury.launcher
+ 5002  5002  1.0 kworker/u8:0-devfreq_wq [kworker/u8:0-devfreq_wq]
+ 4714  4714  1.0 kworker/u9:1-mhi_offload_wq [kworker/u9:1-mhi_offload_wq]
+ 1830  1830  1.0 ercury.launcher com.ffalconxr.mercury.launcher
+  785  1822  1.0 wifi@1.0-servic android.hardware.wifi@1.0-service
+ 1816  1816  1.0 dp_rx_thread_3  [dp_rx_thread_3]
+ 1813  1813  1.0 dp_rx_thread_0  [dp_rx_thread_0]
+ 1296  1442  1.0 ReferenceQueueD system_server
+   34    34  1.0 ksoftirqd/3     [ksoftirqd/3]
+   30    30  1.0 rcuog/2         [rcuog/2]
+   15    15  1.0 rcuop/0         [rcuop/0]
+ 9729  9729  0.0 sh              sh
+ 1489  9730  0.0 shell svc 9729  adbd
+ 9318  9685  0.0 Binder:9318_6   com.woolab.lumella
+ 9318  9677  0.0 lumella-camera  com.woolab.lumella
+ 9318  9676  0.0 CameraX-camerax com.woolab.lumella
+ 9318  9626  0.0 CameraX-core_ca com.woolab.lumella
+ 9318  9625  0.0 CameraManager   com.woolab.lumella
+ 9318  9623  0.0 CameraX-schedul com.woolab.lumella
+ 9318  9624  0.0 CameraX-core_ca com.woolab.lumella
+ 9318  9619  0.0 OkHttp TaskRunn com.woolab.lumella
+ 9318  9618  0.0 OkHttp TaskRunn com.woolab.lumella
+ 9318  9613  0.0 Binder:9318_5   com.woolab.lumella
+ 9318  9607  0.0 OkHttp Dispatch com.woolab.lumella
+ 9318  9606  0.0 OkHttp Dispatch com.woolab.lumella
+=== 1790589613
+Threads: 1784 total,   1 running, 1783 sleeping,   0 stopped,   0 zombie
+  Mem:  3865588K total,  3215480K used,   650108K free,     6672K buffers
+ Swap:  2097148K total,   379392K used,  1717756K free,  1728592K cached
+400%cpu  43%user   1%nice  45%sys 303%idle   0%iow   5%irq   3%sirq   0%host
+  PID   TID[%CPU]CMD             NAME
+ 9739  9739 33.0 top             top
+ 9318  9318 12.0 .woolab.lumella com.woolab.lumella
+  830  9390  3.0 AudioIn_28E     audioserver
+  797   797  3.0 AGMIPC@1.0-serv vendor.qti.hardware.AGMIPC@1.0-service
+ 9318  9685  2.0 Binder:9318_6   com.woolab.lumella
+ 9318  9548  2.0 OkHttp TaskRunn com.woolab.lumella
+ 9318  9393  2.0 lumella-audio-c com.woolab.lumella
+  770  9392  2.0 reader          android.hardware.audio.service_64
+ 9318  9380  2.0 OkHttp TaskRunn com.woolab.lumella
+ 9318  9376  2.0 .openai.com/... com.woolab.lumella
+ 9318  9381  1.0 Okio Watchdog   com.woolab.lumella
+ 9318  9336  1.0 RenderThread    com.woolab.lumella
+ 9318  9327  1.0 Jit thread pool com.woolab.lumella
+ 9032  9032  1.0 kworker/u9:3-hal_register_write_wq [kworker/u9:3-hal_register_write_wq]
+ 8955  8955  1.0 kworker/2:0-events [kworker/2:0-events]
+ 5002  5002  1.0 kworker/u8:0-memlat_wq [kworker/u8:0-memlat_wq]
+ 4714  4714  1.0 kworker/u9:1-hal_register_write_wq [kworker/u9:1-hal_register_write_wq]
+ 4527  4527  1.0 kworker/u8:1-memlat_wq [kworker/u8:1-memlat_wq]
+ 1296 26750  1.0 IpClient.wlan0  system_server
+  778 26737  1.0 51_see          android.hardware.sensors@2.1-service.multihal
+ 2391  2391  1.0 msm_irqbalance  msm_irqbalance
+ 1830  2004  1.0 ConnectStateMac com.ffalconxr.mercury.launcher
+ 1830  1830  1.0 ercury.launcher com.ffalconxr.mercury.launcher
+  785  1822  1.0 wifi@1.0-servic android.hardware.wifi@1.0-service
+ 1816  1816  1.0 dp_rx_thread_3  [dp_rx_thread_3]
+ 1296  1534  1.0 android.ui      system_server
+ 1489  1489  1.0 adbd            adbd
+  797  1185  1.0 AGMIPC@1.0-serv vendor.qti.hardware.AGMIPC@1.0-service
+ 1110  1110  1.0 gmu_f2h         [gmu_f2h]
+  800   935  1.0 HwBinder:800_1  vendor.qti.hardware.display.composer-service
+  800   905  1.0 SDM_EventThread vendor.qti.hardware.display.composer-service
+  838   896  1.0 HwBinder:838_1  surfaceflinger
+  555   555  1.0 kgsl_hwsched    [kgsl_hwsched]
+   37    37  1.0 rcuop/3         [rcuop/3]
+   34    34  1.0 ksoftirqd/3     [ksoftirqd/3]
+   24    24  1.0 rcuop/1         [rcuop/1]
+   15    15  1.0 rcuop/0         [rcuop/0]
+ 1489  9738  0.0 shell svc 9737  adbd
+ 9737  9737  0.0 sh              sh
+ 9318  9677  0.0 lumella-camera  com.woolab.lumella
+=== 1790589615
+Threads: 1784 total,   1 running, 1783 sleeping,   0 stopped,   0 zombie
+  Mem:  3865588K total,  3218004K used,   647584K free,     6672K buffers
+ Swap:  2097148K total,   379392K used,  1717756K free,  1728616K cached
+400%cpu  34%user   1%nice  36%sys 319%idle   0%iow   7%irq   3%sirq   0%host
+  PID   TID[%CPU]CMD             NAME
+ 9753  9753 33.0 top             top
+ 9318  9318  7.0 .woolab.lumella com.woolab.lumella
+  770  2746  7.0 writer          android.hardware.audio.service_64
+  830  1447  6.0 FastMixer       audioserver
+  797   797  5.0 AGMIPC@1.0-serv vendor.qti.hardware.AGMIPC@1.0-service
+ 9318  9376  3.0 .openai.com/... com.woolab.lumella
+  830  1448  3.0 AudioOut_D      audioserver
+ 9318  9619  2.0 OkHttp TaskRunn com.woolab.lumella
+  770  9392  2.0 reader          android.hardware.audio.service_64
+  830  9390  2.0 AudioIn_28E     audioserver
+ 9318  9380  2.0 OkHttp TaskRunn com.woolab.lumella
+ 9318  9327  2.0 Jit thread pool com.woolab.lumella
+  797  1646  2.0 HwBinder:797_4  vendor.qti.hardware.AGMIPC@1.0-service
+  797  1185  2.0 AGMIPC@1.0-serv vendor.qti.hardware.AGMIPC@1.0-service
+ 9318  9607  1.0 .vercel.app/... com.woolab.lumella
+ 9318  9393  1.0 lumella-audio-c com.woolab.lumella
+ 9318  9336  1.0 RenderThread    com.woolab.lumella
+ 9032  9032  1.0 kworker/u9:3-hal_register_write_wq [kworker/u9:3-hal_register_write_wq]
+ 8990  8990  1.0 kworker/2:1H-kblockd [kworker/2:1H-kblockd]
+ 8955  8955  1.0 kworker/2:0-events [kworker/2:0-events]
+ 7328  7328  1.0 kworker/1:0-mm_percpu_wq [kworker/1:0-mm_percpu_wq]
+ 6914  6914  1.0 kworker/u8:4-bwmon_wq [kworker/u8:4-bwmon_wq]
+ 4714  4714  1.0 kworker/u9:1-hal_register_write_wq [kworker/u9:1-hal_register_write_wq]
+32012 32012  1.0 kworker/u8:6-memlat_wq [kworker/u8:6-memlat_wq]
+ 1296 26750  1.0 IpClient.wlan0  system_server
+  785  1822  1.0 wifi@1.0-servic android.hardware.wifi@1.0-service
+ 1813  1813  1.0 dp_rx_thread_0  [dp_rx_thread_0]
+ 1296  1558  1.0 PowerManagerSer system_server
+  559   572  1.0 qseecomd        qseecomd
+   37    37  1.0 rcuop/3         [rcuop/3]
+   34    34  1.0 ksoftirqd/3     [ksoftirqd/3]
+   27    27  1.0 ksoftirqd/2     [ksoftirqd/2]
+   14    14  1.0 rcuog/0         [rcuog/0]
+   13    13  1.0 rcu_preempt     [rcu_preempt]
+ 1489  9752  0.0 shell svc 9751  adbd
+ 9751  9751  0.0 sh              sh
+ 9318  9685  0.0 Binder:9318_6   com.woolab.lumella
+ 9318  9677  0.0 lumella-camera  com.woolab.lumella
+ 9318  9676  0.0 CameraX-camerax com.woolab.lumella
+ 9318  9626  0.0 CameraX-core_ca com.woolab.lumella
+=== 1790589618
+Threads: 1782 total,   1 running, 1781 sleeping,   0 stopped,   0 zombie
+  Mem:  3865588K total,  3213216K used,   652372K free,     6672K buffers
+ Swap:  2097148K total,   379392K used,  1717756K free,  1728988K cached
+400%cpu  54%user   4%nice  56%sys 275%idle   1%iow   7%irq   3%sirq   0%host
+  PID   TID[%CPU]CMD             NAME
+ 9756  9756 33.0 top             top
+  770  2746  7.0 writer          android.hardware.audio.service_64
+ 9318  9318  5.0 .woolab.lumella com.woolab.lumella
+ 1830  1830  5.0 ercury.launcher com.ffalconxr.mercury.launcher
+  830  1447  5.0 FastMixer       audioserver
+  907  1504  4.0 Binder:907_5    installd
+  797  1191  4.0 HwBinder:797_1  vendor.qti.hardware.AGMIPC@1.0-service
+ 9318  9393  3.0 lumella-audio-c com.woolab.lumella
+  830  9390  3.0 AudioIn_28E     audioserver
+ 9318  9380  3.0 OkHttp TaskRunn com.woolab.lumella
+ 9318  9376  3.0 .openai.com/... com.woolab.lumella
+ 6319  6319  3.0 logcat          logcat
+ 1830  2367  3.0 BleMessage      com.ffalconxr.mercury.launcher
+  797  1646  3.0 HwBinder:797_4  vendor.qti.hardware.AGMIPC@1.0-service
+  830  1448  3.0 AudioOut_D      audioserver
+  797  1185  3.0 AGMIPC@1.0-serv vendor.qti.hardware.AGMIPC@1.0-service
+ 9318  9619  2.0 OkHttp TaskRunn com.woolab.lumella
+  770  9392  2.0 reader          android.hardware.audio.service_64
+  368  6321  2.0 logd.reader.per logd
+ 4527  4527  2.0 kworker/u8:1-memlat_wq [kworker/u8:1-memlat_wq]
+24826 24937  2.0 btu message loo com.android.bluetooth
+  771 24934  2.0 bluetooth@1.0-s android.hardware.bluetooth@1.0-service-qti
+  785  1822  2.0 wifi@1.0-servic android.hardware.wifi@1.0-service
+  797   797  2.0 AGMIPC@1.0-serv vendor.qti.hardware.AGMIPC@1.0-service
+  368   468  2.0 logd.writer     logd
+ 9318  9327  1.0 Jit thread pool com.woolab.lumella
+ 9032  9032  1.0 kworker/u9:3-hal_register_write_wq [kworker/u9:3-hal_register_write_wq]
+ 1830  8289  1.0 DefaultDispatch com.ffalconxr.mercury.launcher
+ 1830  8097  1.0 DefaultDispatch com.ffalconxr.mercury.launcher
+ 6914  6914  1.0 kworker/u8:4-kgsl-lockless-work [kworker/u8:4-kgsl-lockless-work]
+ 6199  6213  1.0 Binder:6199_3   com.rayneo.aispeech:rhotword:com.rayneo.aispeech.wakeup.RayNeoHotwordDetectio
+ 1830  5032  1.0 DefaultDispatch com.ffalconxr.mercury.launcher
+32012 32012  1.0 kworker/u8:6-memlat_wq [kworker/u8:6-memlat_wq]
+24826 25641  1.0 Binder:24826_7  com.android.bluetooth
+24826 24955  1.0 Binder:24826_5  com.android.bluetooth
+24864 24888  1.0 bt_logger       bt_logger
+24826 24889  1.0 hci_thread      com.android.bluetooth
+24826 24890  1.0 HwBinder:24826_ com.android.bluetooth
+24826 24865  1.0 BT Service Call com.android.bluetooth
+ 1830  4887  1.0 Binder:1830_B   com.ffalconxr.mercury.launcher
+=== 1790589621
+Threads: 1785 total,   1 running, 1784 sleeping,   0 stopped,   0 zombie
+  Mem:  3865588K total,  3216884K used,   648704K free,     6672K buffers
+ Swap:  2097148K total,   379392K used,  1717756K free,  1728856K cached
+400%cpu  37%user   1%nice  62%sys 293%idle   0%iow   4%irq   3%sirq   0%host
+  PID   TID[%CPU]CMD             NAME
+ 9769  9769 33.0 top             top
+ 9318  9393  3.0 lumella-audio-c com.woolab.lumella
+ 9318  9619  2.0 OkHttp TaskRunn com.woolab.lumella
+  830  9390  2.0 AudioIn_28E     audioserver
+ 9318  9380  2.0 OkHttp TaskRunn com.woolab.lumella
+  778 26746  2.0 11_see          android.hardware.sensors@2.1-service.multihal
+  830  3422  2.0 Binder:830_6    audioserver
+  797  1191  2.0 HwBinder:797_1  vendor.qti.hardware.AGMIPC@1.0-service
+  770  9392  1.0 reader          android.hardware.audio.service_64
+ 8038  8038  1.0 kworker/u9:2-hal_register_write_wq [kworker/u9:2-hal_register_write_wq]
+ 6914  6914  1.0 kworker/u8:4-memlat_wq [kworker/u8:4-memlat_wq]
+ 6319  6319  1.0 logcat          logcat
+ 4527  4527  1.0 kworker/u8:1-wmi_rx_diag_event_work_ [kworker/u8:1-wmi_rx_diag_event_work_]
+ 1296 26750  1.0 IpClient.wlan0  system_server
+24178 24178  1.0 irq/359-dwc3    [irq/359-dwc3]
+ 1830  1830  1.0 ercury.launcher com.ffalconxr.mercury.launcher
+  785  1822  1.0 wifi@1.0-servic android.hardware.wifi@1.0-service
+  830  1700  1.0 Binder:830_4    audioserver
+  913  1689  1.0 Binder:913_5    media.metrics
+ 1296  1675  1.0 Binder:1296_9   system_server
+ 1296  1669  1.0 AudioPortEventH system_server
+ 1296  1534  1.0 android.ui      system_server
+  830  1447  1.0 FastMixer       audioserver
+   34    34  1.0 ksoftirqd/3     [ksoftirqd/3]
+ 9767  9767  0.0 sh              sh
+ 1489  9768  0.0 shell svc 9767  adbd
+ 1830  9758  0.0 DefaultDispatch com.ffalconxr.mercury.launcher
+ 1830  9757  0.0 DefaultDispatch com.ffalconxr.mercury.launcher
+ 1830  9759  0.0 DefaultDispatch com.ffalconxr.mercury.launcher
+ 9318  9685  0.0 Binder:9318_6   com.woolab.lumella
+ 9318  9677  0.0 lumella-camera  com.woolab.lumella
+ 9318  9676  0.0 CameraX-camerax com.woolab.lumella
+ 9318  9626  0.0 CameraX-core_ca com.woolab.lumella
+ 9318  9624  0.0 CameraX-core_ca com.woolab.lumella
+ 9318  9625  0.0 CameraManager   com.woolab.lumella
+ 9318  9623  0.0 CameraX-schedul com.woolab.lumella
+ 9318  9618  0.0 OkHttp TaskRunn com.woolab.lumella
+ 9318  9613  0.0 Binder:9318_5   com.woolab.lumella
+ 9318  9607  0.0 OkHttp Dispatch com.woolab.lumella
+ 9318  9606  0.0 OkHttp Dispatch com.woolab.lumella
+=== 1790589624
+Threads: 1786 total,   1 running, 1785 sleeping,   0 stopped,   0 zombie
+  Mem:  3865588K total,  3220504K used,   645084K free,     6672K buffers
+ Swap:  2097148K total,   379392K used,  1717756K free,  1728876K cached
+400%cpu  42%user   2%nice  41%sys 307%idle   0%iow   5%irq   3%sirq   0%host
+  PID   TID[%CPU]CMD             NAME
+ 9773  9773 32.0 top             top
+ 9318  9318  5.0 .woolab.lumella com.woolab.lumella
+ 1830  1915  5.0 WM.task-1       com.ffalconxr.mercury.launcher
+ 9318  9619  3.0 OkHttp TaskRunn com.woolab.lumella
+ 9318  9605  3.0 brain-submit    com.woolab.lumella
+ 9318  9393  3.0 lumella-audio-c com.woolab.lumella
+  797  1222  3.0 HwBinder:797_3  vendor.qti.hardware.AGMIPC@1.0-service
+ 1830  9774  2.0 t.rayneo.cn/... com.ffalconxr.mercury.launcher
+  770  9392  2.0 reader          android.hardware.audio.service_64
+  830  9390  2.0 AudioIn_28E     audioserver
+  785  1822  2.0 wifi@1.0-servic android.hardware.wifi@1.0-service
+ 1296  1672  2.0 Binder:1296_6   system_server
+ 9318  9380  1.0 OkHttp TaskRunn com.woolab.lumella
+ 9318  9336  1.0 RenderThread    com.woolab.lumella
+ 9318  9327  1.0 Jit thread pool com.woolab.lumella
+ 8038  8038  1.0 kworker/u9:2-hal_register_write_wq [kworker/u9:2-hal_register_write_wq]
+ 6914  6914  1.0 kworker/u8:4-memlat_wq [kworker/u8:4-memlat_wq]
+ 4714  4714  1.0 kworker/u9:1-hal_register_write_wq [kworker/u9:1-hal_register_write_wq]
+32012 32012  1.0 kworker/u8:6-memlat_wq [kworker/u8:6-memlat_wq]
+ 1296 26750  1.0 IpClient.wlan0  system_server
+  778 26746  1.0 11_see          android.hardware.sensors@2.1-service.multihal
+ 2595  2767  1.0 RMonitor_Monito com.sogou.inputmethod.iot
+ 2058  2137  1.0 ANRWatchDog     com.eg.android.AlipayGGlasses
+ 1830  2033  1.0 WM.task-3       com.ffalconxr.mercury.launcher
+ 1830  1830  1.0 ercury.launcher com.ffalconxr.mercury.launcher
+ 1816  1816  1.0 dp_rx_thread_3  [dp_rx_thread_3]
+ 1813  1813  1.0 dp_rx_thread_0  [dp_rx_thread_0]
+ 1296  1585  1.0 SensorService   system_server
+ 1296  1558  1.0 PowerManagerSer system_server
+ 1296  1296  1.0 system_server   system_server
+  838  1080  1.0 RenderEngine    surfaceflinger
+  706   739  1.0 Binder:706_2    netd
+   34    34  1.0 ksoftirqd/3     [ksoftirqd/3]
+   30    30  1.0 rcuog/2         [rcuog/2]
+   14    14  1.0 rcuog/0         [rcuog/0]
+ 9771  9771  0.0 sh              sh
+ 1489  9772  0.0 shell svc 9771  adbd
+ 1830  9759  0.0 DefaultDispatch com.ffalconxr.mercury.launcher
+ 1830  9757  0.0 DefaultDispatch com.ffalconxr.mercury.launcher
+ 1830  9758  0.0 DefaultDispatch com.ffalconxr.mercury.launcher
+=== 1790589627
+Threads: 1789 total,   1 running, 1788 sleeping,   0 stopped,   0 zombie
+  Mem:  3865588K total,  3224544K used,   641044K free,     6672K buffers
+ Swap:  2097148K total,   379392K used,  1717756K free,  1728876K cached
+400%cpu  29%user   0%nice  30%sys 334%idle   0%iow   4%irq   3%sirq   0%host
+  PID   TID[%CPU]CMD             NAME
+ 9782  9782 33.0 top             top
+ 9318  9393  3.0 lumella-audio-c com.woolab.lumella
+  830  9390  3.0 AudioIn_28E     audioserver
+  797  1222  3.0 HwBinder:797_3  vendor.qti.hardware.AGMIPC@1.0-service
+ 9318  9619  2.0 OkHttp TaskRunn com.woolab.lumella
+  770  9392  2.0 reader          android.hardware.audio.service_64
+ 9318  9381  1.0 Okio Watchdog   com.woolab.lumella
+ 9318  9380  1.0 OkHttp TaskRunn com.woolab.lumella
+ 8299  8299  1.0 kworker/1:1-mm_percpu_wq [kworker/1:1-mm_percpu_wq]
+ 8074  8074  1.0 kworker/u8:3-memlat_wq [kworker/u8:3-memlat_wq]
+ 8038  8038  1.0 kworker/u9:2-hal_register_write_wq [kworker/u9:2-hal_register_write_wq]
+ 6914  6914  1.0 kworker/u8:4-memlat_wq [kworker/u8:4-memlat_wq]
+ 4714  4714  1.0 kworker/u9:1-hal_register_write_wq [kworker/u9:1-hal_register_write_wq]
+ 1296 26750  1.0 IpClient.wlan0  system_server
+  785  1822  1.0 wifi@1.0-servic android.hardware.wifi@1.0-service
+ 1816  1816  1.0 dp_rx_thread_3  [dp_rx_thread_3]
+  797  1185  1.0 AGMIPC@1.0-serv vendor.qti.hardware.AGMIPC@1.0-service
+   37    37  1.0 rcuop/3         [rcuop/3]
+   13    13  1.0 rcu_preempt     [rcu_preempt]
+ 1489  9781  0.0 shell svc 9780  adbd
+ 9780  9780  0.0 sh              sh
+ 9779  9779  0.0 kworker/2:2H    [kworker/2:2H]
+ 1830  9777  0.0 OkHttp TaskRunn com.ffalconxr.mercury.launcher
+ 1830  9778  0.0 Okio Watchdog   com.ffalconxr.mercury.launcher
+ 1830  9774  0.0 OkHttp Dispatch com.ffalconxr.mercury.launcher
+ 1830  9758  0.0 DefaultDispatch com.ffalconxr.mercury.launcher
+ 1830  9757  0.0 DefaultDispatch com.ffalconxr.mercury.launcher
+ 1830  9759  0.0 DefaultDispatch com.ffalconxr.mercury.launcher
+ 9318  9685  0.0 Binder:9318_6   com.woolab.lumella
+ 9318  9677  0.0 lumella-camera  com.woolab.lumella
+ 9318  9676  0.0 CameraX-camerax com.woolab.lumella
+ 9318  9626  0.0 CameraX-core_ca com.woolab.lumella
+ 9318  9624  0.0 CameraX-core_ca com.woolab.lumella
+ 9318  9623  0.0 CameraX-schedul com.woolab.lumella
+ 9318  9625  0.0 CameraManager   com.woolab.lumella
+ 9318  9618  0.0 OkHttp TaskRunn com.woolab.lumella
+ 9318  9613  0.0 Binder:9318_5   com.woolab.lumella
+ 9318  9607  0.0 OkHttp Dispatch com.woolab.lumella
+ 9318  9606  0.0 OkHttp Dispatch com.woolab.lumella
+ 9318  9605  0.0 brain-submit    com.woolab.lumella
+=== 1790589630
+Threads: 1789 total,   1 running, 1788 sleeping,   0 stopped,   0 zombie
+  Mem:  3865588K total,  3215820K used,   649768K free,     6672K buffers
+ Swap:  2097148K total,   379392K used,  1717756K free,  1728876K cached
+400%cpu  37%user   3%nice  30%sys 321%idle   0%iow   5%irq   4%sirq   0%host
+  PID   TID[%CPU]CMD             NAME
+ 9785  9785 33.0 top             top
+  198   198  5.0 ueventd         ueventd
+ 9318  9380  4.0 OkHttp TaskRunn com.woolab.lumella
+ 9318  9393  3.0 lumella-audio-c com.woolab.lumella
+  797  1222  3.0 HwBinder:797_3  vendor.qti.hardware.AGMIPC@1.0-service
+ 9318  9619  2.0 OkHttp TaskRunn com.woolab.lumella
+  770  9392  2.0 reader          android.hardware.audio.service_64
+  830  9390  2.0 AudioIn_28E     audioserver
+ 9318  9381  1.0 Okio Watchdog   com.woolab.lumella
+ 9318  9328  1.0 HeapTaskDaemon  com.woolab.lumella
+ 9032  9032  1.0 kworker/u9:3-mhi_offload_wq [kworker/u9:3-mhi_offload_wq]
+ 1830  8292  1.0 DefaultDispatch com.ffalconxr.mercury.launcher
+ 8197  8197  1.0 kworker/3:2-events [kworker/3:2-events]
+ 8038  8038  1.0 kworker/u9:2-hal_register_write_wq [kworker/u9:2-hal_register_write_wq]
+ 7328  7328  1.0 kworker/1:0-events [kworker/1:0-events]
+ 6914  6914  1.0 kworker/u8:4-memlat_wq [kworker/u8:4-memlat_wq]
+ 4714  4714  1.0 kworker/u9:1-hal_register_write_wq [kworker/u9:1-hal_register_write_wq]
+32012 32012  1.0 kworker/u8:6-wmi_rx_diag_event_work_ [kworker/u8:6-wmi_rx_diag_event_work_]
+ 2646 26895  1.0 Binder:2646_8   com.rayneo.phone
+  778 26737  1.0 51_see          android.hardware.sensors@2.1-service.multihal
+ 1489 24572  1.0 UsbFfs-worker   adbd
+ 1830  2004  1.0 ConnectStateMac com.ffalconxr.mercury.launcher
+ 1830  1974  1.0 Bugly-ThreadMon com.ffalconxr.mercury.launcher
+ 1830  1830  1.0 ercury.launcher com.ffalconxr.mercury.launcher
+  785  1822  1.0 wifi@1.0-servic android.hardware.wifi@1.0-service
+ 1816  1816  1.0 dp_rx_thread_3  [dp_rx_thread_3]
+ 1813  1813  1.0 dp_rx_thread_0  [dp_rx_thread_0]
+ 1296  1558  1.0 PowerManagerSer system_server
+ 1296  1534  1.0 android.ui      system_server
+ 1489  1489  1.0 adbd            adbd
+  797  1185  1.0 AGMIPC@1.0-serv vendor.qti.hardware.AGMIPC@1.0-service
+  773   773  1.0 health@2.1-serv android.hardware.health@2.1-service
+   30    30  1.0 rcuog/2         [rcuog/2]
+ 1489  9784  0.0 shell svc 9783  adbd
+ 9783  9783  0.0 sh              sh
+ 9779  9779  0.0 kworker/2:2H    [kworker/2:2H]
+ 1830  9778  0.0 Okio Watchdog   com.ffalconxr.mercury.launcher
+ 1830  9777  0.0 OkHttp TaskRunn com.ffalconxr.mercury.launcher
+ 1830  9774  0.0 OkHttp Dispatch com.ffalconxr.mercury.launcher
+ 1830  9757  0.0 DefaultDispatch com.ffalconxr.mercury.launcher
+=== 1790589633
+Threads: 1788 total,   1 running, 1787 sleeping,   0 stopped,   0 zombie
+  Mem:  3865588K total,  3220192K used,   645396K free,     6672K buffers
+ Swap:  2097148K total,   379392K used,  1717756K free,  1728936K cached
+400%cpu  51%user   2%nice  38%sys 300%idle   0%iow   5%irq   4%sirq   0%host
+  PID   TID[%CPU]CMD             NAME
+ 9795  9795 34.0 top             top
+ 9318  9318 15.0 .woolab.lumella com.woolab.lumella
+ 9318  9548  3.0 OkHttp TaskRunn com.woolab.lumella
+ 9318  9393  3.0 lumella-audio-c com.woolab.lumella
+ 9318  9380  3.0 OkHttp TaskRunn com.woolab.lumella
+  797  1222  3.0 HwBinder:797_3  vendor.qti.hardware.AGMIPC@1.0-service
+  770  9392  2.0 reader          android.hardware.audio.service_64
+  830  9390  2.0 AudioIn_28E     audioserver
+ 9318  9376  2.0 .openai.com/... com.woolab.lumella
+ 9318  9327  2.0 Jit thread pool com.woolab.lumella
+  785  1822  2.0 wifi@1.0-servic android.hardware.wifi@1.0-service
+ 9318  9619  1.0 OkHttp TaskRunn com.woolab.lumella
+ 9318  9381  1.0 Okio Watchdog   com.woolab.lumella
+ 9318  9336  1.0 RenderThread    com.woolab.lumella
+ 9032  9032  1.0 kworker/u9:3-hal_register_write_wq [kworker/u9:3-hal_register_write_wq]
+ 6914  6914  1.0 kworker/u8:4-memlat_wq [kworker/u8:4-memlat_wq]
+  368  6321  1.0 logd.reader.per logd
+32012 32012  1.0 kworker/u8:6-memlat_wq [kworker/u8:6-memlat_wq]
+ 1296 26750  1.0 IpClient.wlan0  system_server
+  778 26737  1.0 51_see          android.hardware.sensors@2.1-service.multihal
+ 1830  1830  1.0 ercury.launcher com.ffalconxr.mercury.launcher
+ 1816  1816  1.0 dp_rx_thread_3  [dp_rx_thread_3]
+ 1296  1558  1.0 PowerManagerSer system_server
+  797  1185  1.0 AGMIPC@1.0-serv vendor.qti.hardware.AGMIPC@1.0-service
+  838  1151  1.0 app             surfaceflinger
+  838  1153  1.0 RegionSampling  surfaceflinger
+  800   935  1.0 HwBinder:800_1  vendor.qti.hardware.display.composer-service
+  838   838  1.0 surfaceflinger  surfaceflinger
+  341   341  1.0 irq/27-19091000 [irq/27-19091000]
+   37    37  1.0 rcuop/3         [rcuop/3]
+   30    30  1.0 rcuog/2         [rcuog/2]
+ 9793  9793  0.0 sh              sh
+ 1489  9794  0.0 shell svc 9793  adbd
+ 9779  9779  0.0 kworker/2:2H-kblockd [kworker/2:2H-kblockd]
+ 1830  9778  0.0 Okio Watchdog   com.ffalconxr.mercury.launcher
+ 1830  9777  0.0 OkHttp TaskRunn com.ffalconxr.mercury.launcher
+ 1830  9774  0.0 OkHttp Dispatch com.ffalconxr.mercury.launcher
+ 1830  9759  0.0 DefaultDispatch com.ffalconxr.mercury.launcher
+ 1830  9757  0.0 DefaultDispatch com.ffalconxr.mercury.launcher
+ 1830  9758  0.0 DefaultDispatch com.ffalconxr.mercury.launcher
+=== 1790589636
+Threads: 1787 total,   1 running, 1786 sleeping,   0 stopped,   0 zombie
+  Mem:  3865588K total,  3224412K used,   641176K free,     6672K buffers
+ Swap:  2097148K total,   379392K used,  1717756K free,  1728992K cached
+400%cpu  42%user   0%nice  24%sys 320%idle   6%iow   6%irq   2%sirq   0%host
+  PID   TID[%CPU]CMD             NAME
+ 9809  9809 33.0 top             top
+  770  2746  7.0 writer          android.hardware.audio.service_64
+  797 30290  6.0 HwBinder:797_B  vendor.qti.hardware.AGMIPC@1.0-service
+  830  1447  5.0 FastMixer       audioserver
+  830  1448  3.0 AudioOut_D      audioserver
+  797  1185  3.0 AGMIPC@1.0-serv vendor.qti.hardware.AGMIPC@1.0-service
+ 9318  9548  2.0 OkHttp TaskRunn com.woolab.lumella
+ 9318  9393  2.0 lumella-audio-c com.woolab.lumella
+ 9318  9380  2.0 OkHttp TaskRunn com.woolab.lumella
+ 9318  9376  2.0 .openai.com/... com.woolab.lumella
+ 1296 26750  2.0 IpClient.wlan0  system_server
+  797  1222  2.0 HwBinder:797_3  vendor.qti.hardware.AGMIPC@1.0-service
+  770  9392  1.0 reader          android.hardware.audio.service_64
+  830  9390  1.0 AudioIn_28E     audioserver
+ 9318  9336  1.0 RenderThread    com.woolab.lumella
+ 9318  9328  1.0 HeapTaskDaemon  com.woolab.lumella
+ 9318  9318  1.0 .woolab.lumella com.woolab.lumella
+ 6914  6914  1.0 kworker/u8:4-memlat_wq [kworker/u8:4-memlat_wq]
+ 2595  2595  1.0 inputmethod.iot com.sogou.inputmethod.iot
+ 1830  1830  1.0 ercury.launcher com.ffalconxr.mercury.launcher
+  785  1822  1.0 wifi@1.0-servic android.hardware.wifi@1.0-service
+ 1813  1813  1.0 dp_rx_thread_0  [dp_rx_thread_0]
+  530   530  1.0 wlan_logging_th [wlan_logging_th]
+  332   332  1.0 irq/26-190b6400 [irq/26-190b6400]
+   37    37  1.0 rcuop/3         [rcuop/3]
+   31    31  1.0 rcuop/2         [rcuop/2]
+ 1489  9808  0.0 shell svc 9807  adbd
+ 9807  9807  0.0 sh              sh
+ 9779  9779  0.0 kworker/2:2H-kblockd [kworker/2:2H-kblockd]
+ 1830  9777  0.0 OkHttp TaskRunn com.ffalconxr.mercury.launcher
+ 1830  9778  0.0 Okio Watchdog   com.ffalconxr.mercury.launcher
+ 1830  9774  0.0 OkHttp Dispatch com.ffalconxr.mercury.launcher
+ 1830  9757  0.0 DefaultDispatch com.ffalconxr.mercury.launcher
+ 1830  9758  0.0 DefaultDispatch com.ffalconxr.mercury.launcher
+ 1830  9759  0.0 DefaultDispatch com.ffalconxr.mercury.launcher
+ 9318  9685  0.0 Binder:9318_6   com.woolab.lumella
+ 9318  9677  0.0 lumella-camera  com.woolab.lumella
+ 9318  9676  0.0 CameraX-camerax com.woolab.lumella
+ 9318  9626  0.0 CameraX-core_ca com.woolab.lumella
+ 9318  9624  0.0 CameraX-core_ca com.woolab.lumella
+=== 1790589639
+Threads: 1787 total,   1 running, 1786 sleeping,   0 stopped,   0 zombie
+  Mem:  3865588K total,  3227576K used,   638012K free,     6672K buffers
+ Swap:  2097148K total,   379392K used,  1717756K free,  1729008K cached
+400%cpu  41%user   1%nice  31%sys 319%idle   0%iow   6%irq   2%sirq   0%host
+  PID   TID[%CPU]CMD             NAME
+ 9812  9812 33.0 top             top
+  770  2746  8.0 writer          android.hardware.audio.service_64
+ 9318  9318  4.0 .woolab.lumella com.woolab.lumella
+  830  1447  4.0 FastMixer       audioserver
+  797  1222  4.0 HwBinder:797_3  vendor.qti.hardware.AGMIPC@1.0-service
+  797  1191  3.0 HwBinder:797_1  vendor.qti.hardware.AGMIPC@1.0-service
+ 9318  9548  2.0 OkHttp TaskRunn com.woolab.lumella
+ 9318  9393  2.0 lumella-audio-c com.woolab.lumella
+  770  9392  2.0 reader          android.hardware.audio.service_64
+  830  9390  2.0 AudioIn_28E     audioserver
+  830  1448  2.0 AudioOut_D      audioserver
+  797  1185  2.0 AGMIPC@1.0-serv vendor.qti.hardware.AGMIPC@1.0-service
+ 9318  9380  1.0 OkHttp TaskRunn com.woolab.lumella
+ 9318  9376  1.0 .openai.com/... com.woolab.lumella
+ 9318  9336  1.0 RenderThread    com.woolab.lumella
+ 8074  8074  1.0 kworker/u8:3-devfreq_wq [kworker/u8:3-devfreq_wq]
+ 8038  8038  1.0 kworker/u9:2-hal_register_write_wq [kworker/u9:2-hal_register_write_wq]
+  368  6321  1.0 logd.reader.per logd
+  797 30290  1.0 HwBinder:797_B  vendor.qti.hardware.AGMIPC@1.0-service
+ 1296 26750  1.0 IpClient.wlan0  system_server
+  778 26746  1.0 11_see          android.hardware.sensors@2.1-service.multihal
+  785  1822  1.0 wifi@1.0-servic android.hardware.wifi@1.0-service
+ 1816  1816  1.0 dp_rx_thread_3  [dp_rx_thread_3]
+  838  1181  1.0 Binder:838_3    surfaceflinger
+  838  1155  1.0 surfaceflinger  surfaceflinger
+  838  1149  1.0 TimerDispatch   surfaceflinger
+ 1110  1110  1.0 gmu_f2h         [gmu_f2h]
+  838   838  1.0 surfaceflinger  surfaceflinger
+  770   837  1.0 HwBinder:770_2  android.hardware.audio.service_64
+  368   468  1.0 logd.writer     logd
+   37    37  1.0 rcuop/3         [rcuop/3]
+   15    15  1.0 rcuop/0         [rcuop/0]
+ 1489  9811  0.0 shell svc 9810  adbd
+ 9810  9810  0.0 sh              sh
+ 9779  9779  0.0 kworker/2:2H-kblockd [kworker/2:2H-kblockd]
+ 1830  9778  0.0 Okio Watchdog   com.ffalconxr.mercury.launcher
+ 1830  9777  0.0 OkHttp TaskRunn com.ffalconxr.mercury.launcher
+ 1830  9774  0.0 OkHttp Dispatch com.ffalconxr.mercury.launcher
+ 1830  9759  0.0 DefaultDispatch com.ffalconxr.mercury.launcher
+ 1830  9757  0.0 DefaultDispatch com.ffalconxr.mercury.launcher
+=== 1790589642
+Threads: 1787 total,   1 running, 1786 sleeping,   0 stopped,   0 zombie
+  Mem:  3865588K total,  3220620K used,   644968K free,     6672K buffers
+ Swap:  2097148K total,   379392K used,  1717756K free,  1729044K cached
+400%cpu  27%user   2%nice  29%sys 333%idle   0%iow   6%irq   3%sirq   0%host
+  PID   TID[%CPU]CMD             NAME
+ 9815  9815 33.0 top             top
+ 9318  9318  4.0 .woolab.lumella com.woolab.lumella
+ 9318  9548  3.0 OkHttp TaskRunn com.woolab.lumella
+  770  9392  3.0 reader          android.hardware.audio.service_64
+  797  1646  3.0 HwBinder:797_4  vendor.qti.hardware.AGMIPC@1.0-service
+ 9318  9605  2.0 brain-submit    com.woolab.lumella
+ 9318  9393  2.0 lumella-audio-c com.woolab.lumella
+ 9318  9380  2.0 OkHttp TaskRunn com.woolab.lumella
+  785  1822  2.0 wifi@1.0-servic android.hardware.wifi@1.0-service
+  797  1191  2.0 HwBinder:797_1  vendor.qti.hardware.AGMIPC@1.0-service
+  770   837  2.0 HwBinder:770_2  android.hardware.audio.service_64
+  830  9390  1.0 AudioIn_28E     audioserver
+ 9318  9327  1.0 Jit thread pool com.woolab.lumella
+ 8074  8074  1.0 kworker/u8:3-memlat_wq [kworker/u8:3-memlat_wq]
+ 8038  8038  1.0 kworker/u9:2-mhi_offload_wq [kworker/u9:2-mhi_offload_wq]
+ 6914  6914  1.0 kworker/u8:4-wmi_rx_diag_event_work_ [kworker/u8:4-wmi_rx_diag_event_work_]
+  368  6321  1.0 logd.reader.per logd
+ 6319  6319  1.0 logcat          logcat
+ 4527  4527  1.0 kworker/u8:1-memlat_wq [kworker/u8:1-memlat_wq]
+  778 26746  1.0 11_see          android.hardware.sensors@2.1-service.multihal
+ 2799  2878  1.0 yneo.xr.runtime com.rayneo.xr.runtime
+ 1830  1830  1.0 ercury.launcher com.ffalconxr.mercury.launcher
+ 1296  1585  1.0 SensorService   system_server
+ 1296  1558  1.0 PowerManagerSer system_server
+  797  1222  1.0 HwBinder:797_3  vendor.qti.hardware.AGMIPC@1.0-service
+  797  1185  1.0 AGMIPC@1.0-serv vendor.qti.hardware.AGMIPC@1.0-service
+  368   468  1.0 logd.writer     logd
+   15    15  1.0 rcuop/0         [rcuop/0]
+   13    13  1.0 rcu_preempt     [rcu_preempt]
+ 9813  9813  0.0 sh              sh
+ 1489  9814  0.0 shell svc 9813  adbd
+ 9779  9779  0.0 kworker/2:2H-kblockd [kworker/2:2H-kblockd]
+ 1830  9778  0.0 Okio Watchdog   com.ffalconxr.mercury.launcher
+ 1830  9777  0.0 OkHttp TaskRunn com.ffalconxr.mercury.launcher
+ 1830  9774  0.0 OkHttp Dispatch com.ffalconxr.mercury.launcher
+ 1830  9759  0.0 DefaultDispatch com.ffalconxr.mercury.launcher
+ 1830  9758  0.0 DefaultDispatch com.ffalconxr.mercury.launcher
+ 1830  9757  0.0 DefaultDispatch com.ffalconxr.mercury.launcher
+ 9318  9685  0.0 Binder:9318_6   com.woolab.lumella
+ 9318  9677  0.0 lumella-camera  com.woolab.lumella
+=== 1790589645
+Threads: 1787 total,   1 running, 1786 sleeping,   0 stopped,   0 zombie
+  Mem:  3865588K total,  3224312K used,   641276K free,     6672K buffers
+ Swap:  2097148K total,   379392K used,  1717756K free,  1729044K cached
+400%cpu  24%user   0%nice  26%sys 343%idle   0%iow   4%irq   3%sirq   0%host
+  PID   TID[%CPU]CMD             NAME
+ 9818  9818 32.0 top             top
+ 9318  9393  3.0 lumella-audio-c com.woolab.lumella
+ 9318  9380  3.0 OkHttp TaskRunn com.woolab.lumella
+  797  1191  3.0 HwBinder:797_1  vendor.qti.hardware.AGMIPC@1.0-service
+  770  9392  2.0 reader          android.hardware.audio.service_64
+  830  9390  2.0 AudioIn_28E     audioserver
+ 9318  9548  1.0 OkHttp TaskRunn com.woolab.lumella
+ 9032  9032  1.0 kworker/u9:3-hal_register_write_wq [kworker/u9:3-hal_register_write_wq]
+ 1830  8097  1.0 DefaultDispatch com.ffalconxr.mercury.launcher
+ 6914  6914  1.0 kworker/u8:4-memlat_wq [kworker/u8:4-memlat_wq]
+ 4714  4714  1.0 kworker/u9:1-hal_register_write_wq [kworker/u9:1-hal_register_write_wq]
+ 1296 26750  1.0 IpClient.wlan0  system_server
+  778 26737  1.0 51_see          android.hardware.sensors@2.1-service.multihal
+  785  1822  1.0 wifi@1.0-servic android.hardware.wifi@1.0-service
+ 1296  1558  1.0 PowerManagerSer system_server
+ 1296  1534  1.0 android.ui      system_server
+  797  1185  1.0 AGMIPC@1.0-serv vendor.qti.hardware.AGMIPC@1.0-service
+ 1489  9817  0.0 shell svc 9816  adbd
+ 9816  9816  0.0 sh              sh
+ 9779  9779  0.0 kworker/2:2H-kblockd [kworker/2:2H-kblockd]
+ 1830  9777  0.0 OkHttp TaskRunn com.ffalconxr.mercury.launcher
+ 1830  9778  0.0 Okio Watchdog   com.ffalconxr.mercury.launcher
+ 1830  9774  0.0 OkHttp Dispatch com.ffalconxr.mercury.launcher
+ 1830  9757  0.0 DefaultDispatch com.ffalconxr.mercury.launcher
+ 1830  9759  0.0 DefaultDispatch com.ffalconxr.mercury.launcher
+ 1830  9758  0.0 DefaultDispatch com.ffalconxr.mercury.launcher
+ 9318  9685  0.0 Binder:9318_6   com.woolab.lumella
+ 9318  9677  0.0 lumella-camera  com.woolab.lumella
+ 9318  9676  0.0 CameraX-camerax com.woolab.lumella
+ 9318  9626  0.0 CameraX-core_ca com.woolab.lumella
+ 9318  9625  0.0 CameraManager   com.woolab.lumella
+ 9318  9624  0.0 CameraX-core_ca com.woolab.lumella
+ 9318  9623  0.0 CameraX-schedul com.woolab.lumella
+ 9318  9619  0.0 OkHttp TaskRunn com.woolab.lumella
+ 9318  9613  0.0 Binder:9318_5   com.woolab.lumella
+ 9318  9607  0.0 OkHttp Dispatch com.woolab.lumella
+ 9318  9606  0.0 OkHttp Dispatch com.woolab.lumella
+ 9318  9605  0.0 brain-submit    com.woolab.lumella
+ 9318  9604  0.0 lumella-slowpat com.woolab.lumella
+ 9318  9596  0.0 lumella-voicepa com.woolab.lumella
+=== 1790589647
+Threads: 1787 total,   1 running, 1786 sleeping,   0 stopped,   0 zombie
+  Mem:  3865588K total,  3227236K used,   638352K free,     6672K buffers
+ Swap:  2097148K total,   379392K used,  1717756K free,  1729048K cached
+400%cpu  22%user   0%nice  29%sys 342%idle   0%iow   4%irq   3%sirq   0%host
+  PID   TID[%CPU]CMD             NAME
+ 9821  9821 33.0 top             top
+ 9318  9393  4.0 lumella-audio-c com.woolab.lumella
+  797  1191  4.0 HwBinder:797_1  vendor.qti.hardware.AGMIPC@1.0-service
+ 9318  9548  3.0 OkHttp TaskRunn com.woolab.lumella
+  830  9390  3.0 AudioIn_28E     audioserver
+  797  1185  3.0 AGMIPC@1.0-serv vendor.qti.hardware.AGMIPC@1.0-service
+  770  9392  2.0 reader          android.hardware.audio.service_64
+ 8074  8074  2.0 kworker/u8:3-memlat_wq [kworker/u8:3-memlat_wq]
+31316 31316  2.0 kworker/u9:0-hal_register_write_wq [kworker/u9:0-hal_register_write_wq]
+ 9318  9380  1.0 OkHttp TaskRunn com.woolab.lumella
+ 8299  8299  1.0 kworker/1:1-mm_percpu_wq [kworker/1:1-mm_percpu_wq]
+ 6914  6914  1.0 kworker/u8:4-wmi_rx_diag_event_work_ [kworker/u8:4-wmi_rx_diag_event_work_]
+ 4714  4714  1.0 kworker/u9:1-hal_register_write_wq [kworker/u9:1-hal_register_write_wq]
+ 1296 26750  1.0 IpClient.wlan0  system_server
+  778 26746  1.0 11_see          android.hardware.sensors@2.1-service.multihal
+ 2391  2391  1.0 msm_irqbalance  msm_irqbalance
+ 1830  2004  1.0 ConnectStateMac com.ffalconxr.mercury.launcher
+ 1830  1830  1.0 ercury.launcher com.ffalconxr.mercury.launcher
+  785  1822  1.0 wifi@1.0-servic android.hardware.wifi@1.0-service
+ 1816  1816  1.0 dp_rx_thread_3  [dp_rx_thread_3]
+ 1296  1534  1.0 android.ui      system_server
+ 1489  1489  1.0 adbd            adbd
+  332   332  1.0 irq/26-190b6400 [irq/26-190b6400]
+   15    15  1.0 rcuop/0         [rcuop/0]
+ 1489  9820  0.0 shell svc 9819  adbd
+ 9819  9819  0.0 sh              sh
+ 9779  9779  0.0 kworker/2:2H-kblockd [kworker/2:2H-kblockd]
+ 1830  9778  0.0 Okio Watchdog   com.ffalconxr.mercury.launcher
+ 1830  9777  0.0 OkHttp TaskRunn com.ffalconxr.mercury.launcher
+ 1830  9774  0.0 OkHttp Dispatch com.ffalconxr.mercury.launcher
+ 1830  9757  0.0 DefaultDispatch com.ffalconxr.mercury.launcher
+ 1830  9759  0.0 DefaultDispatch com.ffalconxr.mercury.launcher
+ 1830  9758  0.0 DefaultDispatch com.ffalconxr.mercury.launcher
+ 9318  9685  0.0 Binder:9318_6   com.woolab.lumella
+ 9318  9677  0.0 lumella-camera  com.woolab.lumella
+ 9318  9676  0.0 CameraX-camerax com.woolab.lumella
+ 9318  9626  0.0 CameraX-core_ca com.woolab.lumella
+ 9318  9623  0.0 CameraX-schedul com.woolab.lumella
+ 9318  9624  0.0 CameraX-core_ca com.woolab.lumella
+ 9318  9625  0.0 CameraManager   com.woolab.lumella
+=== 1790589650
+Threads: 1787 total,   1 running, 1786 sleeping,   0 stopped,   0 zombie
+  Mem:  3865588K total,  3228432K used,   637156K free,     6672K buffers
+ Swap:  2097148K total,   379392K used,  1717756K free,  1729052K cached
+400%cpu  33%user   0%nice  33%sys 326%idle   0%iow   5%irq   3%sirq   0%host
+  PID   TID[%CPU]CMD             NAME
+ 9824  9824 32.0 top             top
+  198   198  5.0 ueventd         ueventd
+ 9318  9318  4.0 .woolab.lumella com.woolab.lumella
+  770  9392  3.0 reader          android.hardware.audio.service_64
+  830  9390  3.0 AudioIn_28E     audioserver
+ 9318  9548  2.0 OkHttp TaskRunn com.woolab.lumella
+ 9318  9393  2.0 lumella-audio-c com.woolab.lumella
+  797  1191  2.0 HwBinder:797_1  vendor.qti.hardware.AGMIPC@1.0-service
+  797  1185  2.0 AGMIPC@1.0-serv vendor.qti.hardware.AGMIPC@1.0-service
+ 9318  9380  1.0 OkHttp TaskRunn com.woolab.lumella
+ 9318  9336  1.0 RenderThread    com.woolab.lumella
+ 8299  8299  1.0 kworker/1:1-pm  [kworker/1:1-pm]
+ 8197  8197  1.0 kworker/3:2-mm_percpu_wq [kworker/3:2-mm_percpu_wq]
+ 8074  8074  1.0 kworker/u8:3-memlat_wq [kworker/u8:3-memlat_wq]
+ 6914  6914  1.0 kworker/u8:4-memlat_wq [kworker/u8:4-memlat_wq]
+31316 31316  1.0 kworker/u9:0-hal_register_write_wq [kworker/u9:0-hal_register_write_wq]
+  778 26746  1.0 11_see          android.hardware.sensors@2.1-service.multihal
+  778 26737  1.0 51_see          android.hardware.sensors@2.1-service.multihal
+ 2595  2595  1.0 inputmethod.iot com.sogou.inputmethod.iot
+ 1816  1816  1.0 dp_rx_thread_3  [dp_rx_thread_3]
+ 1296  1585  1.0 SensorService   system_server
+ 1296  1534  1.0 android.ui      system_server
+  838   896  1.0 HwBinder:838_1  surfaceflinger
+  838   838  1.0 surfaceflinger  surfaceflinger
+  773   773  1.0 health@2.1-serv android.hardware.health@2.1-service
+  533   533  1.0 crtc_event:155  [crtc_event:155]
+   37    37  1.0 rcuop/3         [rcuop/3]
+   30    30  1.0 rcuog/2         [rcuog/2]
+   13    13  1.0 rcu_preempt     [rcu_preempt]
+ 9822  9822  0.0 sh              sh
+ 1489  9823  0.0 shell svc 9822  adbd
+ 9779  9779  0.0 kworker/2:2H-kblockd [kworker/2:2H-kblockd]
+ 1830  9777  0.0 OkHttp TaskRunn com.ffalconxr.mercury.launcher
+ 1830  9778  0.0 Okio Watchdog   com.ffalconxr.mercury.launcher
+ 1830  9774  0.0 OkHttp Dispatch com.ffalconxr.mercury.launcher
+ 1830  9758  0.0 DefaultDispatch com.ffalconxr.mercury.launcher
+ 1830  9759  0.0 DefaultDispatch com.ffalconxr.mercury.launcher
+ 1830  9757  0.0 DefaultDispatch com.ffalconxr.mercury.launcher
+ 9318  9685  0.0 Binder:9318_6   com.woolab.lumella
+ 9318  9677  0.0 lumella-camera  com.woolab.lumella
+=== 1790589653
+Threads: 1787 total,   1 running, 1786 sleeping,   0 stopped,   0 zombie
+  Mem:  3865588K total,  3234780K used,   630808K free,     6672K buffers
+ Swap:  2097148K total,   379392K used,  1717756K free,  1729128K cached
+400%cpu  41%user   3%nice  38%sys 309%idle   0%iow   6%irq   3%sirq   0%host
+  PID   TID[%CPU]CMD             NAME
+ 9832  9832 32.0 top             top
+ 9318  9318  8.0 .woolab.lumella com.woolab.lumella
+ 9318  9393  3.0 lumella-audio-c com.woolab.lumella
+  797 30290  3.0 HwBinder:797_B  vendor.qti.hardware.AGMIPC@1.0-service
+ 9318  9548  2.0 OkHttp TaskRunn com.woolab.lumella
+  770  9392  2.0 reader          android.hardware.audio.service_64
+  830  9390  2.0 AudioIn_28E     audioserver
+ 9318  9380  2.0 OkHttp TaskRunn com.woolab.lumella
+ 9318  9376  2.0 .openai.com/... com.woolab.lumella
+ 9318  9327  2.0 Jit thread pool com.woolab.lumella
+ 9032  9032  2.0 kworker/u9:3-hal_register_write_wq [kworker/u9:3-hal_register_write_wq]
+ 8074  8074  2.0 kworker/u8:3-memlat_wq [kworker/u8:3-memlat_wq]
+ 6914  6914  2.0 kworker/u8:4-memlat_wq [kworker/u8:4-memlat_wq]
+  785  1822  2.0 wifi@1.0-servic android.hardware.wifi@1.0-service
+ 9318  9685  1.0 Binder:9318_6   com.woolab.lumella
+ 9318  9606  1.0 OkHttp Dispatch com.woolab.lumella
+ 9318  9336  1.0 RenderThread    com.woolab.lumella
+ 6319  6319  1.0 logcat          logcat
+ 4714  4714  1.0 kworker/u9:1-hal_register_write_wq [kworker/u9:1-hal_register_write_wq]
+  770  2746  1.0 writer          android.hardware.audio.service_64
+ 1830  1830  1.0 ercury.launcher com.ffalconxr.mercury.launcher
+ 1816  1816  1.0 dp_rx_thread_3  [dp_rx_thread_3]
+ 1296  1691  1.0 HwBinder:1296_3 system_server
+ 1296  1672  1.0 Binder:1296_6   system_server
+ 1296  1558  1.0 PowerManagerSer system_server
+ 1296  1534  1.0 android.ui      system_server
+ 1489  1489  1.0 adbd            adbd
+  797  1222  1.0 HwBinder:797_3  vendor.qti.hardware.AGMIPC@1.0-service
+  797  1185  1.0 AGMIPC@1.0-serv vendor.qti.hardware.AGMIPC@1.0-service
+  838  1149  1.0 TimerDispatch   surfaceflinger
+  954  1125  1.0 audioadsprpcd   audioadsprpcd
+  838  1080  1.0 RenderEngine    surfaceflinger
+  830  1076  1.0 ApmOutput       audioserver
+  838   838  1.0 surfaceflinger  surfaceflinger
+  773   773  1.0 health@2.1-serv android.hardware.health@2.1-service
+  555   555  1.0 kgsl_hwsched    [kgsl_hwsched]
+  372   372  1.0 servicemanager  servicemanager
+   37    37  1.0 rcuop/3         [rcuop/3]
+   30    30  1.0 rcuog/2         [rcuog/2]
+ 9830  9830  0.0 sh              sh
+=== 1790589656
+Threads: 1787 total,   1 running, 1786 sleeping,   0 stopped,   0 zombie
+  Mem:  3865588K total,  3225348K used,   640240K free,     6672K buffers
+ Swap:  2097148K total,   379392K used,  1717756K free,  1729144K cached
+400%cpu  44%user   5%nice  24%sys 319%idle   0%iow   6%irq   2%sirq   0%host
+  PID   TID[%CPU]CMD             NAME
+ 9846  9846 32.0 top             top
+  770  2746  7.0 writer          android.hardware.audio.service_64
+  830  1447  5.0 FastMixer       audioserver
+ 9318  9328  4.0 HeapTaskDaemon  com.woolab.lumella
+ 9318  9318  4.0 .woolab.lumella com.woolab.lumella
+  830  9390  3.0 AudioIn_28E     audioserver
+  797  1222  3.0 HwBinder:797_3  vendor.qti.hardware.AGMIPC@1.0-service
+  797   797  3.0 AGMIPC@1.0-serv vendor.qti.hardware.AGMIPC@1.0-service
+ 9318  9548  2.0 OkHttp TaskRunn com.woolab.lumella
+ 9318  9393  2.0 lumella-audio-c com.woolab.lumella
+  770  9392  2.0 reader          android.hardware.audio.service_64
+ 9318  9380  2.0 OkHttp TaskRunn com.woolab.lumella
+ 9318  9376  2.0 .openai.com/... com.woolab.lumella
+  797  2749  2.0 HwBinder:797_6  vendor.qti.hardware.AGMIPC@1.0-service
+  830  1448  2.0 AudioOut_D      audioserver
+ 9318  9336  1.0 RenderThread    com.woolab.lumella
+ 9318  9327  1.0 Jit thread pool com.woolab.lumella
+ 8074  8074  1.0 kworker/u8:3-wmi_rx_diag_event_work_ [kworker/u8:3-wmi_rx_diag_event_work_]
+ 4714  4714  1.0 kworker/u9:1-hal_register_write_wq [kworker/u9:1-hal_register_write_wq]
+32012 32012  1.0 kworker/u8:6-memlat_wq [kworker/u8:6-memlat_wq]
+  778 26746  1.0 11_see          android.hardware.sensors@2.1-service.multihal
+  778 26737  1.0 51_see          android.hardware.sensors@2.1-service.multihal
+ 1830  1830  1.0 ercury.launcher com.ffalconxr.mercury.launcher
+  785  1822  1.0 wifi@1.0-servic android.hardware.wifi@1.0-service
+ 1296  1558  1.0 PowerManagerSer system_server
+  797  1185  1.0 AGMIPC@1.0-serv vendor.qti.hardware.AGMIPC@1.0-service
+  800   935  1.0 HwBinder:800_1  vendor.qti.hardware.display.composer-service
+ 1489  9845  0.0 shell svc 9844  adbd
+ 9844  9844  0.0 sh              sh
+ 9779  9779  0.0 kworker/2:2H-kblockd [kworker/2:2H-kblockd]
+ 1830  9777  0.0 OkHttp TaskRunn com.ffalconxr.mercury.launcher
+ 1830  9778  0.0 Okio Watchdog   com.ffalconxr.mercury.launcher
+ 1830  9774  0.0 OkHttp Dispatch com.ffalconxr.mercury.launcher
+ 1830  9759  0.0 DefaultDispatch com.ffalconxr.mercury.launcher
+ 1830  9758  0.0 DefaultDispatch com.ffalconxr.mercury.launcher
+ 1830  9757  0.0 DefaultDispatch com.ffalconxr.mercury.launcher
+ 9318  9685  0.0 Binder:9318_6   com.woolab.lumella
+ 9318  9677  0.0 lumella-camera  com.woolab.lumella
+ 9318  9676  0.0 CameraX-camerax com.woolab.lumella
+ 9318  9626  0.0 CameraX-core_ca com.woolab.lumella
+=== 1790589659
+Threads: 1787 total,   1 running, 1786 sleeping,   0 stopped,   0 zombie
+  Mem:  3865588K total,  3228948K used,   636640K free,     6672K buffers
+ Swap:  2097148K total,   379392K used,  1717756K free,  1729208K cached
+400%cpu  27%user   2%nice  30%sys 335%idle   0%iow   4%irq   2%sirq   0%host
+  PID   TID[%CPU]CMD             NAME
+ 9849  9849 32.0 top             top
+ 9318  9393  3.0 lumella-audio-c com.woolab.lumella
+ 9318  9318  3.0 .woolab.lumella com.woolab.lumella
+  797  2749  3.0 HwBinder:797_6  vendor.qti.hardware.AGMIPC@1.0-service
+ 9318  9548  2.0 OkHttp TaskRunn com.woolab.lumella
+  770  9392  2.0 reader          android.hardware.audio.service_64
+  830  9390  2.0 AudioIn_28E     audioserver
+ 9318  9380  2.0 OkHttp TaskRunn com.woolab.lumella
+ 9318  9388  1.0 even.vercel.app com.woolab.lumella
+ 9318  9376  1.0 .openai.com/... com.woolab.lumella
+ 9032  9032  1.0 kworker/u9:3-mhi_offload_wq [kworker/u9:3-mhi_offload_wq]
+ 6319  6319  1.0 logcat          logcat
+ 4714  4714  1.0 kworker/u9:1-mhi_offload_wq [kworker/u9:1-mhi_offload_wq]
+ 4527  4527  1.0 kworker/u8:1-memlat_wq [kworker/u8:1-memlat_wq]
+32012 32012  1.0 kworker/u8:6-wmi_rx_event_work_queue [kworker/u8:6-wmi_rx_event_work_queue]
+  778 26746  1.0 11_see          android.hardware.sensors@2.1-service.multihal
+  778 26737  1.0 51_see          android.hardware.sensors@2.1-service.multihal
+  771 24934  1.0 bluetooth@1.0-s android.hardware.bluetooth@1.0-service-qti
+ 1830  4886  1.0 Binder:1830_A   com.ffalconxr.mercury.launcher
+ 1830  1830  1.0 ercury.launcher com.ffalconxr.mercury.launcher
+  785  1822  1.0 wifi@1.0-servic android.hardware.wifi@1.0-service
+ 1816  1816  1.0 dp_rx_thread_3  [dp_rx_thread_3]
+ 1296  1585  1.0 SensorService   system_server
+ 1296  1534  1.0 android.ui      system_server
+  797  1185  1.0 AGMIPC@1.0-serv vendor.qti.hardware.AGMIPC@1.0-service
+  368   468  1.0 logd.writer     logd
+  373   373  1.0 hwservicemanage hwservicemanager
+  332   332  1.0 irq/26-190b6400 [irq/26-190b6400]
+   30    30  1.0 rcuog/2         [rcuog/2]
+ 9847  9847  0.0 sh              sh
+ 1489  9848  0.0 shell svc 9847  adbd
+ 9779  9779  0.0 kworker/2:2H-kblockd [kworker/2:2H-kblockd]
+ 1830  9777  0.0 OkHttp TaskRunn com.ffalconxr.mercury.launcher
+ 1830  9778  0.0 Okio Watchdog   com.ffalconxr.mercury.launcher
+ 1830  9774  0.0 OkHttp Dispatch com.ffalconxr.mercury.launcher
+ 1830  9757  0.0 DefaultDispatch com.ffalconxr.mercury.launcher
+ 1830  9759  0.0 DefaultDispatch com.ffalconxr.mercury.launcher
+ 1830  9758  0.0 DefaultDispatch com.ffalconxr.mercury.launcher
+ 9318  9685  0.0 Binder:9318_6   com.woolab.lumella
+ 9318  9677  0.0 lumella-camera  com.woolab.lumella
+=== 1790589662
+Threads: 1785 total,   2 running, 1783 sleeping,   0 stopped,   0 zombie
+  Mem:  3865588K total,  3235812K used,   629776K free,     6672K buffers
+ Swap:  2097148K total,   379392K used,  1717756K free,  1729288K cached
+400%cpu  43%user   1%nice  38%sys 311%idle   0%iow   5%irq   2%sirq   0%host
+  PID   TID[%CPU]CMD             NAME
+ 9853  9853 33.0 top             top
+ 9318  9318 11.0 .woolab.lumella com.woolab.lumella
+ 9318  9605  4.0 brain-submit    com.woolab.lumella
+ 9318  9619  3.0 OkHttp TaskRunn com.woolab.lumella
+ 9318  9607  2.0 .vercel.app/... com.woolab.lumella
+ 9318  9393  2.0 lumella-audio-c com.woolab.lumella
+  830  9390  2.0 AudioIn_28E     audioserver
+ 6914  6914  2.0 kworker/u8:4-memlat_wq [kworker/u8:4-memlat_wq]
+  797 30290  2.0 HwBinder:797_B  vendor.qti.hardware.AGMIPC@1.0-service
+  770  2746  2.0 writer          android.hardware.audio.service_64
+  830  1447  2.0 FastMixer       audioserver
+  797   797  2.0 AGMIPC@1.0-serv vendor.qti.hardware.AGMIPC@1.0-service
+  770  9392  1.0 reader          android.hardware.audio.service_64
+ 9318  9380  1.0 OkHttp TaskRunn com.woolab.lumella
+ 9318  9336  1.0 RenderThread    com.woolab.lumella
+ 9318  9327  1.0 Jit thread pool com.woolab.lumella
+ 9032  9032  1.0 kworker/u9:3-hal_register_write_wq [kworker/u9:3-hal_register_write_wq]
+ 8074  8074  1.0 kworker/u8:3-memlat_wq [kworker/u8:3-memlat_wq]
+ 6319  6319  1.0 logcat          logcat
+  778 26746  1.0 11_see          android.hardware.sensors@2.1-service.multihal
+  778 26737  1.0 51_see          android.hardware.sensors@2.1-service.multihal
+ 1830  2096  1.0 pool-7-thread-1 com.ffalconxr.mercury.launcher
+ 1830  1830  1.0 ercury.launcher com.ffalconxr.mercury.launcher
+  785  1822  1.0 wifi@1.0-servic android.hardware.wifi@1.0-service
+ 1816  1816  1.0 dp_rx_thread_3  [dp_rx_thread_3]
+ 1296  1558  1.0 PowerManagerSer system_server
+  830  1448  1.0 AudioOut_D      audioserver
+  838  1080  1.0 RenderEngine    surfaceflinger
+  830  1076  1.0 ApmOutput       audioserver
+  800   935  1.0 HwBinder:800_1  vendor.qti.hardware.display.composer-service
+  770   837  1.0 HwBinder:770_2  android.hardware.audio.service_64
+  332   332  1.0 irq/26-190b6400 [irq/26-190b6400]
+   13    13  1.0 rcu_preempt     [rcu_preempt]
+ 9851  9851  0.0 sh              sh
+ 1489  9852  0.0 shell svc 9851  adbd
+ 9779  9779  0.0 kworker/2:2H-kblockd [kworker/2:2H-kblockd]
+ 1830  9777  0.0 OkHttp TaskRunn com.ffalconxr.mercury.launcher
+ 1830  9778  0.0 Okio Watchdog   com.ffalconxr.mercury.launcher
+ 1830  9774  0.0 OkHttp Dispatch com.ffalconxr.mercury.launcher
+ 1830  9757  0.0 DefaultDispatch com.ffalconxr.mercury.launcher
+=== 1790589665
+Threads: 1786 total,   2 running, 1784 sleeping,   0 stopped,   0 zombie
+  Mem:  3865588K total,  3234112K used,   631476K free,     6672K buffers
+ Swap:  2097148K total,   379392K used,  1717756K free,  1729304K cached
+400%cpu  23%user   0%nice  29%sys 342%idle   0%iow   3%irq   3%sirq   0%host
+  PID   TID[%CPU]CMD             NAME
+ 9857  9857 33.0 top             top
+ 9318  9393  4.0 lumella-audio-c com.woolab.lumella
+  770  9392  3.0 reader          android.hardware.audio.service_64
+  797 31788  3.0 HwBinder:797_D  vendor.qti.hardware.AGMIPC@1.0-service
+  797  2749  3.0 HwBinder:797_6  vendor.qti.hardware.AGMIPC@1.0-service
+ 9318  9619  2.0 OkHttp TaskRunn com.woolab.lumella
+  830  9390  2.0 AudioIn_28E     audioserver
+ 9318  9380  2.0 OkHttp TaskRunn com.woolab.lumella
+ 6914  6914  2.0 kworker/u8:4-memlat_wq [kworker/u8:4-memlat_wq]
+ 9032  9032  1.0 kworker/u9:3-hal_register_write_wq [kworker/u9:3-hal_register_write_wq]
+32012 32012  1.0 kworker/u8:6-memlat_wq [kworker/u8:6-memlat_wq]
+  778 26746  1.0 11_see          android.hardware.sensors@2.1-service.multihal
+  785  1822  1.0 wifi@1.0-servic android.hardware.wifi@1.0-service
+ 1815  1815  1.0 dp_rx_thread_2  [dp_rx_thread_2]
+  797  1185  1.0 AGMIPC@1.0-serv vendor.qti.hardware.AGMIPC@1.0-service
+  785   785  1.0 wifi@1.0-servic android.hardware.wifi@1.0-service
+   15    15  1.0 rcuop/0         [rcuop/0]
+ 9855  9855  0.0 sh              sh
+ 1489  9856  0.0 shell svc 9855  adbd
+ 1830  9854  0.0 SoundPool_22    com.ffalconxr.mercury.launcher
+ 9779  9779  0.0 kworker/2:2H-kblockd [kworker/2:2H-kblockd]
+ 1830  9778  0.0 Okio Watchdog   com.ffalconxr.mercury.launcher
+ 1830  9777  0.0 OkHttp TaskRunn com.ffalconxr.mercury.launcher
+ 1830  9774  0.0 OkHttp Dispatch com.ffalconxr.mercury.launcher
+ 1830  9757  0.0 DefaultDispatch com.ffalconxr.mercury.launcher
+ 1830  9759  0.0 DefaultDispatch com.ffalconxr.mercury.launcher
+ 1830  9758  0.0 DefaultDispatch com.ffalconxr.mercury.launcher
+ 9318  9685  0.0 Binder:9318_6   com.woolab.lumella
+ 9318  9677  0.0 lumella-camera  com.woolab.lumella
+ 9318  9676  0.0 CameraX-camerax com.woolab.lumella
+ 9318  9626  0.0 CameraX-core_ca com.woolab.lumella
+ 9318  9625  0.0 CameraManager   com.woolab.lumella
+ 9318  9624  0.0 CameraX-core_ca com.woolab.lumella
+ 9318  9623  0.0 CameraX-schedul com.woolab.lumella
+ 9318  9613  0.0 Binder:9318_5   com.woolab.lumella
+ 9318  9606  0.0 OkHttp Dispatch com.woolab.lumella
+ 9318  9607  0.0 OkHttp Dispatch com.woolab.lumella
+ 9318  9605  0.0 brain-submit    com.woolab.lumella
+ 9318  9604  0.0 lumella-slowpat com.woolab.lumella
+ 9318  9596  0.0 lumella-voicepa com.woolab.lumella
+=== 1790589668
+Threads: 1786 total,   1 running, 1785 sleeping,   0 stopped,   0 zombie
+  Mem:  3865588K total,  3238024K used,   627564K free,     6672K buffers
+ Swap:  2097148K total,   379392K used,  1717756K free,  1729308K cached
+400%cpu  25%user   0%nice  32%sys 335%idle   0%iow   4%irq   4%sirq   0%host
+  PID   TID[%CPU]CMD             NAME
+ 9860  9860 33.0 top             top
+ 9318  9393  3.0 lumella-audio-c com.woolab.lumella
+  797  2749  3.0 HwBinder:797_6  vendor.qti.hardware.AGMIPC@1.0-service
+ 9318  9619  2.0 OkHttp TaskRunn com.woolab.lumella
+  830  9390  2.0 AudioIn_28E     audioserver
+ 9318  9380  2.0 OkHttp TaskRunn com.woolab.lumella
+  778 26746  2.0 11_see          android.hardware.sensors@2.1-service.multihal
+  785  1822  2.0 wifi@1.0-servic android.hardware.wifi@1.0-service
+ 1830  9757  1.0 DefaultDispatch com.ffalconxr.mercury.launcher
+  770  9392  1.0 reader          android.hardware.audio.service_64
+ 9032  9032  1.0 kworker/u9:3-hal_register_write_wq [kworker/u9:3-hal_register_write_wq]
+ 6914  6914  1.0 kworker/u8:4-memlat_wq [kworker/u8:4-memlat_wq]
+ 4527  4527  1.0 kworker/u8:1-memlat_wq [kworker/u8:1-memlat_wq]
+32012 32012  1.0 kworker/u8:6-memlat_wq [kworker/u8:6-memlat_wq]
+  778 26737  1.0 51_see          android.hardware.sensors@2.1-service.multihal
+ 2391  2391  1.0 msm_irqbalance  msm_irqbalance
+ 1814  1814  1.0 dp_rx_thread_1  [dp_rx_thread_1]
+ 1296  1585  1.0 SensorService   system_server
+ 1296  1534  1.0 android.ui      system_server
+  797  1185  1.0 AGMIPC@1.0-serv vendor.qti.hardware.AGMIPC@1.0-service
+  559   572  1.0 qseecomd        qseecomd
+   30    30  1.0 rcuog/2         [rcuog/2]
+   15    15  1.0 rcuop/0         [rcuop/0]
+ 9858  9858  0.0 sh              sh
+ 1489  9859  0.0 shell svc 9858  adbd
+ 1830  9854  0.0 SoundPool_22    com.ffalconxr.mercury.launcher
+ 9779  9779  0.0 kworker/2:2H-kblockd [kworker/2:2H-kblockd]
+ 1830  9777  0.0 OkHttp TaskRunn com.ffalconxr.mercury.launcher
+ 1830  9778  0.0 Okio Watchdog   com.ffalconxr.mercury.launcher
+ 1830  9774  0.0 OkHttp Dispatch com.ffalconxr.mercury.launcher
+ 1830  9758  0.0 DefaultDispatch com.ffalconxr.mercury.launcher
+ 1830  9759  0.0 DefaultDispatch com.ffalconxr.mercury.launcher
+ 9318  9685  0.0 Binder:9318_6   com.woolab.lumella
+ 9318  9677  0.0 lumella-camera  com.woolab.lumella
+ 9318  9676  0.0 CameraX-camerax com.woolab.lumella
+ 9318  9626  0.0 CameraX-core_ca com.woolab.lumella
+ 9318  9624  0.0 CameraX-core_ca com.woolab.lumella
+ 9318  9623  0.0 CameraX-schedul com.woolab.lumella
+ 9318  9625  0.0 CameraManager   com.woolab.lumella
+ 9318  9613  0.0 Binder:9318_5   com.woolab.lumella
+=== 1790589671
+Threads: 1785 total,   1 running, 1784 sleeping,   0 stopped,   0 zombie
+  Mem:  3865588K total,  3231092K used,   634496K free,     6672K buffers
+ Swap:  2097148K total,   379392K used,  1717756K free,  1729312K cached
+400%cpu  28%user   3%nice  29%sys 332%idle   0%iow   5%irq   3%sirq   0%host
+  PID   TID[%CPU]CMD             NAME
+ 9863  9863 32.0 top             top
+ 9318  9328  5.0 HeapTaskDaemon  com.woolab.lumella
+ 9318  9393  4.0 lumella-audio-c com.woolab.lumella
+  198   198  4.0 ueventd         ueventd
+  797  2749  3.0 HwBinder:797_6  vendor.qti.hardware.AGMIPC@1.0-service
+ 9318  9619  2.0 OkHttp TaskRunn com.woolab.lumella
+  770  9392  2.0 reader          android.hardware.audio.service_64
+  830  9390  2.0 AudioIn_28E     audioserver
+ 9318  9380  2.0 OkHttp TaskRunn com.woolab.lumella
+31316 31316  2.0 kworker/u9:0-hal_register_write_wq [kworker/u9:0-hal_register_write_wq]
+ 9032  9032  1.0 kworker/u9:3-hal_register_write_wq [kworker/u9:3-hal_register_write_wq]
+ 6920  6920  1.0 kworker/0:1-events [kworker/0:1-events]
+ 6914  6914  1.0 kworker/u8:4-memlat_wq [kworker/u8:4-memlat_wq]
+  368  6321  1.0 logd.reader.per logd
+ 4527  4527  1.0 kworker/u8:1-memlat_wq [kworker/u8:1-memlat_wq]
+32012 32012  1.0 kworker/u8:6-memlat_wq [kworker/u8:6-memlat_wq]
+  778 26746  1.0 11_see          android.hardware.sensors@2.1-service.multihal
+ 1830  1830  1.0 ercury.launcher com.ffalconxr.mercury.launcher
+  785  1822  1.0 wifi@1.0-servic android.hardware.wifi@1.0-service
+ 1816  1816  1.0 dp_rx_thread_3  [dp_rx_thread_3]
+ 1296  1558  1.0 PowerManagerSer system_server
+  797  1185  1.0 AGMIPC@1.0-serv vendor.qti.hardware.AGMIPC@1.0-service
+  773   773  1.0 health@2.1-serv android.hardware.health@2.1-service
+   15    15  1.0 rcuop/0         [rcuop/0]
+   14    14  1.0 rcuog/0         [rcuog/0]
+ 9861  9861  0.0 sh              sh
+ 1489  9862  0.0 shell svc 9861  adbd
+ 9779  9779  0.0 kworker/2:2H-kblockd [kworker/2:2H-kblockd]
+ 1830  9778  0.0 Okio Watchdog   com.ffalconxr.mercury.launcher
+ 1830  9777  0.0 OkHttp TaskRunn com.ffalconxr.mercury.launcher
+ 1830  9774  0.0 OkHttp Dispatch com.ffalconxr.mercury.launcher
+ 1830  9757  0.0 DefaultDispatch com.ffalconxr.mercury.launcher
+ 1830  9758  0.0 DefaultDispatch com.ffalconxr.mercury.launcher
+ 1830  9759  0.0 DefaultDispatch com.ffalconxr.mercury.launcher
+ 9318  9685  0.0 Binder:9318_6   com.woolab.lumella
+ 9318  9677  0.0 lumella-camera  com.woolab.lumella
+ 9318  9676  0.0 CameraX-camerax com.woolab.lumella
+ 9318  9626  0.0 CameraX-core_ca com.woolab.lumella
+ 9318  9623  0.0 CameraX-schedul com.woolab.lumella
+ 9318  9625  0.0 CameraManager   com.woolab.lumella
+=== 1790589674
+Threads: 1785 total,   1 running, 1784 sleeping,   0 stopped,   0 zombie
+  Mem:  3865588K total,  3234384K used,   631204K free,     6672K buffers
+ Swap:  2097148K total,   379392K used,  1717756K free,  1729380K cached
+400%cpu  41%user   1%nice  50%sys 297%idle   0%iow   7%irq   4%sirq   0%host
+  PID   TID[%CPU]CMD             NAME
+ 9871  9871 34.0 top             top
+ 9318  9318  5.0 .woolab.lumella com.woolab.lumella
+ 9318  9376  3.0 .openai.com/... com.woolab.lumella
+ 9318  9336  3.0 RenderThread    com.woolab.lumella
+  797  2749  3.0 HwBinder:797_6  vendor.qti.hardware.AGMIPC@1.0-service
+ 9318  9685  2.0 Binder:9318_6   com.woolab.lumella
+ 9318  9619  2.0 OkHttp TaskRunn com.woolab.lumella
+ 9318  9548  2.0 OkHttp TaskRunn com.woolab.lumella
+ 9318  9393  2.0 lumella-audio-c com.woolab.lumella
+  770  9392  2.0 reader          android.hardware.audio.service_64
+  830  9390  2.0 AudioIn_28E     audioserver
+ 9318  9381  2.0 Okio Watchdog   com.woolab.lumella
+ 6914  6914  2.0 kworker/u8:4-kgsl-workqueue [kworker/u8:4-kgsl-workqueue]
+  770  2746  2.0 writer          android.hardware.audio.service_64
+  785  1822  2.0 wifi@1.0-servic android.hardware.wifi@1.0-service
+ 9318  9606  1.0 OkHttp Dispatch com.woolab.lumella
+ 9318  9607  1.0 OkHttp Dispatch com.woolab.lumella
+ 9032  9032  1.0 kworker/u9:3-hal_register_write_wq [kworker/u9:3-hal_register_write_wq]
+ 8074  8074  1.0 kworker/u8:3-kgsl-lockless-work [kworker/u8:3-kgsl-lockless-work]
+  368  6321  1.0 logd.reader.per logd
+ 6319  6319  1.0 logcat          logcat
+31316 31316  1.0 kworker/u9:0-hal_register_write_wq [kworker/u9:0-hal_register_write_wq]
+  778 26746  1.0 11_see          android.hardware.sensors@2.1-service.multihal
+  778 26737  1.0 51_see          android.hardware.sensors@2.1-service.multihal
+  830  3422  1.0 Binder:830_6    audioserver
+ 2595  2767  1.0 RMonitor_Monito com.sogou.inputmethod.iot
+ 1816  1816  1.0 dp_rx_thread_3  [dp_rx_thread_3]
+ 1813  1813  1.0 dp_rx_thread_0  [dp_rx_thread_0]
+ 1296  1675  1.0 Binder:1296_9   system_server
+ 1296  1648  1.0 WifiHandlerThre system_server
+  830  1613  1.0 TimeCheckThread audioserver
+ 1489  1489  1.0 adbd            adbd
+  830  1448  1.0 AudioOut_D      audioserver
+  797  1185  1.0 AGMIPC@1.0-serv vendor.qti.hardware.AGMIPC@1.0-service
+  838  1080  1.0 RenderEngine    surfaceflinger
+  800   935  1.0 HwBinder:800_1  vendor.qti.hardware.display.composer-service
+  800   897  1.0 composer-servic vendor.qti.hardware.display.composer-service
+  838   838  1.0 surfaceflinger  surfaceflinger
+  770   837  1.0 HwBinder:770_2  android.hardware.audio.service_64
+  797   797  1.0 AGMIPC@1.0-serv vendor.qti.hardware.AGMIPC@1.0-service
+=== 1790589677
+Threads: 1786 total,   2 running, 1784 sleeping,   0 stopped,   0 zombie
+  Mem:  3865588K total,  3235888K used,   629700K free,     6672K buffers
+ Swap:  2097148K total,   379392K used,  1717756K free,  1729384K cached
+400%cpu  34%user   0%nice  36%sys 320%idle   0%iow   6%irq   4%sirq   0%host
+  PID   TID[%CPU]CMD             NAME
+ 9885  9885 33.0 top             top
+  770  2746  7.0 writer          android.hardware.audio.service_64
+  797  1646  7.0 HwBinder:797_4  vendor.qti.hardware.AGMIPC@1.0-service
+  830  1447  5.0 FastMixer       audioserver
+ 9318  9393  3.0 lumella-audio-c com.woolab.lumella
+ 9318  9619  2.0 OkHttp TaskRunn com.woolab.lumella
+  770  9392  2.0 reader          android.hardware.audio.service_64
+  830  9390  2.0 AudioIn_28E     audioserver
+ 9318  9380  2.0 OkHttp TaskRunn com.woolab.lumella
+ 9318  9376  2.0 .openai.com/... com.woolab.lumella
+  830  1448  2.0 AudioOut_D      audioserver
+  797   797  2.0 AGMIPC@1.0-serv vendor.qti.hardware.AGMIPC@1.0-service
+ 8074  8074  1.0 kworker/u8:3-wmi_rx_diag_event_work_ [kworker/u8:3-wmi_rx_diag_event_work_]
+ 6914  6914  1.0 kworker/u8:4-adb [kworker/u8:4-adb]
+31316 31316  1.0 kworker/u9:0-hal_register_write_wq [kworker/u9:0-hal_register_write_wq]
+ 1296 26750  1.0 IpClient.wlan0  system_server
+  778 26746  1.0 11_see          android.hardware.sensors@2.1-service.multihal
+  778 26737  1.0 51_see          android.hardware.sensors@2.1-service.multihal
+ 1830  1830  1.0 ercury.launcher com.ffalconxr.mercury.launcher
+  785  1822  1.0 wifi@1.0-servic android.hardware.wifi@1.0-service
+ 1296  1648  1.0 WifiHandlerThre system_server
+ 1296  1585  1.0 SensorService   system_server
+  797  1185  1.0 AGMIPC@1.0-serv vendor.qti.hardware.AGMIPC@1.0-service
+  198   198  1.0 ueventd         ueventd
+ 9886  9886  0.0 kworker/2:1     [kworker/2:1]
+ 1489  9884  0.0 shell svc 9883  adbd
+ 9883  9883  0.0 sh              sh
+ 9779  9779  0.0 kworker/2:2H-kblockd [kworker/2:2H-kblockd]
+ 1830  9778  0.0 Okio Watchdog   com.ffalconxr.mercury.launcher
+ 1830  9777  0.0 OkHttp TaskRunn com.ffalconxr.mercury.launcher
+ 1830  9774  0.0 OkHttp Dispatch com.ffalconxr.mercury.launcher
+ 1830  9757  0.0 DefaultDispatch com.ffalconxr.mercury.launcher
+ 1830  9758  0.0 DefaultDispatch com.ffalconxr.mercury.launcher
+ 1830  9759  0.0 DefaultDispatch com.ffalconxr.mercury.launcher
+ 9318  9685  0.0 Binder:9318_6   com.woolab.lumella
+ 9318  9677  0.0 lumella-camera  com.woolab.lumella
+ 9318  9676  0.0 CameraX-camerax com.woolab.lumella
+ 9318  9626  0.0 CameraX-core_ca com.woolab.lumella
+ 9318  9623  0.0 CameraX-schedul com.woolab.lumella
+ 9318  9625  0.0 CameraManager   com.woolab.lumella
+=== 1790589679
+Threads: 1785 total,   2 running, 1783 sleeping,   0 stopped,   0 zombie
+  Mem:  3865588K total,  3240576K used,   625012K free,     6672K buffers
+ Swap:  2097148K total,   379392K used,  1717756K free,  1729424K cached
+400%cpu  28%user   1%nice  30%sys 332%idle   0%iow   4%irq   5%sirq   0%host
+  PID   TID[%CPU]CMD             NAME
+ 9889  9889 32.0 top             top
+ 9318  9318  5.0 .woolab.lumella com.woolab.lumella
+  797   797  3.0 AGMIPC@1.0-serv vendor.qti.hardware.AGMIPC@1.0-service
+ 9318  9606  2.0 .vercel.app/... com.woolab.lumella
+ 9318  9393  2.0 lumella-audio-c com.woolab.lumella
+  770  9392  2.0 reader          android.hardware.audio.service_64
+  830  9390  2.0 AudioIn_28E     audioserver
+ 9318  9380  2.0 OkHttp TaskRunn com.woolab.lumella
+ 9318  9619  1.0 OkHttp TaskRunn com.woolab.lumella
+ 9318  9327  1.0 Jit thread pool com.woolab.lumella
+ 8074  8074  1.0 kworker/u8:3-memlat_wq [kworker/u8:3-memlat_wq]
+ 7328  7328  1.0 kworker/1:0-mm_percpu_wq [kworker/1:0-mm_percpu_wq]
+ 6914  6914  1.0 kworker/u8:4-kgsl-lockless-work [kworker/u8:4-kgsl-lockless-work]
+ 4527  4527  1.0 kworker/u8:1-memlat_wq [kworker/u8:1-memlat_wq]
+31316 31316  1.0 kworker/u9:0-mhi_offload_wq [kworker/u9:0-mhi_offload_wq]
+ 1296 26750  1.0 IpClient.wlan0  system_server
+  778 26746  1.0 11_see          android.hardware.sensors@2.1-service.multihal
+  778 26737  1.0 51_see          android.hardware.sensors@2.1-service.multihal
+24178 24178  1.0 irq/359-dwc3    [irq/359-dwc3]
+  770  2746  1.0 writer          android.hardware.audio.service_64
+  785  1822  1.0 wifi@1.0-servic android.hardware.wifi@1.0-service
+ 1816  1816  1.0 dp_rx_thread_3  [dp_rx_thread_3]
+ 1813  1813  1.0 dp_rx_thread_0  [dp_rx_thread_0]
+ 1296  1585  1.0 SensorService   system_server
+ 1296  1558  1.0 PowerManagerSer system_server
+  830  1447  1.0 FastMixer       audioserver
+  797  1185  1.0 AGMIPC@1.0-serv vendor.qti.hardware.AGMIPC@1.0-service
+  706   723  1.0 SkDestroyListen netd
+  368   502  1.0 logd.klogd      logd
+  332   332  1.0 irq/26-190b6400 [irq/26-190b6400]
+   13    13  1.0 rcu_preempt     [rcu_preempt]
+ 1489  9888  0.0 shell svc 9887  adbd
+ 9887  9887  0.0 sh              sh
+ 9886  9886  0.0 kworker/2:1     [kworker/2:1]
+ 9779  9779  0.0 kworker/2:2H-kblockd [kworker/2:2H-kblockd]
+ 1830  9778  0.0 Okio Watchdog   com.ffalconxr.mercury.launcher
+ 1830  9777  0.0 OkHttp TaskRunn com.ffalconxr.mercury.launcher
+ 1830  9774  0.0 OkHttp Dispatch com.ffalconxr.mercury.launcher
+ 1830  9757  0.0 DefaultDispatch com.ffalconxr.mercury.launcher
+ 1830  9758  0.0 DefaultDispatch com.ffalconxr.mercury.launcher
+=== 1790589682
+Threads: 1781 total,   1 running, 1780 sleeping,   0 stopped,   0 zombie
+  Mem:  3865588K total,  3234196K used,   631392K free,     6672K buffers
+ Swap:  2097148K total,   379392K used,  1717756K free,  1729436K cached
+400%cpu  25%user   2%nice  34%sys 332%idle   0%iow   4%irq   3%sirq   0%host
+  PID   TID[%CPU]CMD             NAME
+ 9892  9892 33.0 top             top
+ 9318  9619  3.0 OkHttp TaskRunn com.woolab.lumella
+  770  9392  3.0 reader          android.hardware.audio.service_64
+ 9318  9380  3.0 OkHttp TaskRunn com.woolab.lumella
+ 9318  9328  3.0 HeapTaskDaemon  com.woolab.lumella
+  797  1646  3.0 HwBinder:797_4  vendor.qti.hardware.AGMIPC@1.0-service
+ 9318  9393  2.0 lumella-audio-c com.woolab.lumella
+  830  9390  2.0 AudioIn_28E     audioserver
+ 8955  8955  1.0 kworker/2:0-events [kworker/2:0-events]
+ 8074  8074  1.0 kworker/u8:3-memlat_wq [kworker/u8:3-memlat_wq]
+ 6914  6914  1.0 kworker/u8:4-wmi_rx_diag_event_work_ [kworker/u8:4-wmi_rx_diag_event_work_]
+31316 31316  1.0 kworker/u9:0-hal_register_write_wq [kworker/u9:0-hal_register_write_wq]
+  778 26746  1.0 11_see          android.hardware.sensors@2.1-service.multihal
+ 1296  1648  1.0 WifiHandlerThre system_server
+  785   785  1.0 wifi@1.0-servic android.hardware.wifi@1.0-service
+ 1489  9891  0.0 shell svc 9890  adbd
+ 9890  9890  0.0 sh              sh
+ 9886  9886  0.0 kworker/2:1     [kworker/2:1]
+ 9779  9779  0.0 kworker/2:2H-kblockd [kworker/2:2H-kblockd]
+ 1830  9777  0.0 OkHttp TaskRunn com.ffalconxr.mercury.launcher
+ 1830  9778  0.0 Okio Watchdog   com.ffalconxr.mercury.launcher
+ 1830  9774  0.0 OkHttp Dispatch com.ffalconxr.mercury.launcher
+ 1830  9758  0.0 DefaultDispatch com.ffalconxr.mercury.launcher
+ 1830  9759  0.0 DefaultDispatch com.ffalconxr.mercury.launcher
+ 1830  9757  0.0 DefaultDispatch com.ffalconxr.mercury.launcher
+ 9318  9685  0.0 Binder:9318_6   com.woolab.lumella
+ 9318  9677  0.0 lumella-camera  com.woolab.lumella
+ 9318  9676  0.0 CameraX-camerax com.woolab.lumella
+ 9318  9626  0.0 CameraX-core_ca com.woolab.lumella
+ 9318  9625  0.0 CameraManager   com.woolab.lumella
+ 9318  9623  0.0 CameraX-schedul com.woolab.lumella
+ 9318  9624  0.0 CameraX-core_ca com.woolab.lumella
+ 9318  9613  0.0 Binder:9318_5   com.woolab.lumella
+ 9318  9606  0.0 OkHttp Dispatch com.woolab.lumella
+ 9318  9607  0.0 OkHttp Dispatch com.woolab.lumella
+ 9318  9604  0.0 lumella-slowpat com.woolab.lumella
+ 9318  9605  0.0 brain-submit    com.woolab.lumella
+ 9318  9596  0.0 lumella-voicepa com.woolab.lumella
+ 9318  9597  0.0 voice-fast-path com.woolab.lumella
+ 9318  9548  0.0 OkHttp TaskRunn com.woolab.lumella
+=== 1790589685
+Threads: 1779 total,   1 running, 1778 sleeping,   0 stopped,   0 zombie
+  Mem:  3865588K total,  3235156K used,   630432K free,     6672K buffers
+ Swap:  2097148K total,   379392K used,  1717756K free,  1729440K cached
+400%cpu  24%user   0%nice  35%sys 334%idle   0%iow   4%irq   3%sirq   0%host
+  PID   TID[%CPU]CMD             NAME
+ 9896  9896 34.0 top             top
+ 9318  9393  3.0 lumella-audio-c com.woolab.lumella
+  830  9390  3.0 AudioIn_28E     audioserver
+ 9318  9380  3.0 OkHttp TaskRunn com.woolab.lumella
+  797   797  3.0 AGMIPC@1.0-serv vendor.qti.hardware.AGMIPC@1.0-service
+ 9318  9619  2.0 OkHttp TaskRunn com.woolab.lumella
+  770  9392  2.0 reader          android.hardware.audio.service_64
+  785  1822  2.0 wifi@1.0-servic android.hardware.wifi@1.0-service
+ 1296  1648  2.0 WifiHandlerThre system_server
+  797  1185  2.0 AGMIPC@1.0-serv vendor.qti.hardware.AGMIPC@1.0-service
+ 9318  9381  1.0 Okio Watchdog   com.woolab.lumella
+ 9032  9032  1.0 kworker/u9:3-hal_register_write_wq [kworker/u9:3-hal_register_write_wq]
+ 6914  6914  1.0 kworker/u8:4-bwmon_wq [kworker/u8:4-bwmon_wq]
+ 4714  4714  1.0 kworker/u9:1-hal_register_write_wq [kworker/u9:1-hal_register_write_wq]
+ 4527  4527  1.0 kworker/u8:1-memlat_wq [kworker/u8:1-memlat_wq]
+32012 32012  1.0 kworker/u8:6-devfreq_wq [kworker/u8:6-devfreq_wq]
+ 1296 26750  1.0 IpClient.wlan0  system_server
+  778 26746  1.0 11_see          android.hardware.sensors@2.1-service.multihal
+ 1296  1558  1.0 PowerManagerSer system_server
+ 1296  1534  1.0 android.ui      system_server
+  332   332  1.0 irq/26-190b6400 [irq/26-190b6400]
+   30    30  1.0 rcuog/2         [rcuog/2]
+ 9893  9893  0.0 sh              sh
+ 1489  9894  0.0 shell svc 9893  adbd
+ 9886  9886  0.0 kworker/2:1     [kworker/2:1]
+ 9779  9779  0.0 kworker/2:2H-kblockd [kworker/2:2H-kblockd]
+ 1830  9778  0.0 Okio Watchdog   com.ffalconxr.mercury.launcher
+ 1830  9777  0.0 OkHttp TaskRunn com.ffalconxr.mercury.launcher
+ 1830  9758  0.0 DefaultDispatch com.ffalconxr.mercury.launcher
+ 1830  9759  0.0 DefaultDispatch com.ffalconxr.mercury.launcher
+ 1830  9757  0.0 DefaultDispatch com.ffalconxr.mercury.launcher
+ 9318  9685  0.0 Binder:9318_6   com.woolab.lumella
+ 9318  9677  0.0 lumella-camera  com.woolab.lumella
+ 9318  9676  0.0 CameraX-camerax com.woolab.lumella
+ 9318  9626  0.0 CameraX-core_ca com.woolab.lumella
+ 9318  9624  0.0 CameraX-core_ca com.woolab.lumella
+ 9318  9623  0.0 CameraX-schedul com.woolab.lumella
+ 9318  9625  0.0 CameraManager   com.woolab.lumella
+ 9318  9613  0.0 Binder:9318_5   com.woolab.lumella
+ 9318  9606  0.0 OkHttp Dispatch com.woolab.lumella
+=== 1790589688
+Threads: 1779 total,   1 running, 1778 sleeping,   0 stopped,   0 zombie
+  Mem:  3865588K total,  3238164K used,   627424K free,     6672K buffers
+ Swap:  2097148K total,   379392K used,  1717756K free,  1729532K cached
+400%cpu  24%user   1%nice  34%sys 334%idle   0%iow   5%irq   2%sirq   0%host
+  PID   TID[%CPU]CMD             NAME
+ 9901  9901 33.0 top             top
+  770  2746  7.0 writer          android.hardware.audio.service_64
+  797 31788  4.0 HwBinder:797_D  vendor.qti.hardware.AGMIPC@1.0-service
+  830  1447  4.0 FastMixer       audioserver
+  797  2749  3.0 HwBinder:797_6  vendor.qti.hardware.AGMIPC@1.0-service
+  830  1448  3.0 AudioOut_D      audioserver
+  797  1185  3.0 AGMIPC@1.0-serv vendor.qti.hardware.AGMIPC@1.0-service
+ 9318  9393  2.0 lumella-audio-c com.woolab.lumella
+  770  9392  2.0 reader          android.hardware.audio.service_64
+ 9318  9380  2.0 OkHttp TaskRunn com.woolab.lumella
+32012 32012  2.0 kworker/u8:6-memlat_wq [kworker/u8:6-memlat_wq]
+  785  1822  2.0 wifi@1.0-servic android.hardware.wifi@1.0-service
+ 9318  9619  1.0 OkHttp TaskRunn com.woolab.lumella
+  830  9390  1.0 AudioIn_28E     audioserver
+ 6914  6914  1.0 kworker/u8:4-kgsl-lockless-work [kworker/u8:4-kgsl-lockless-work]
+ 4527  4527  1.0 kworker/u8:1-wmi_rx_diag_event_work_ [kworker/u8:1-wmi_rx_diag_event_work_]
+31316 31316  1.0 kworker/u9:0-mhi_offload_wq [kworker/u9:0-mhi_offload_wq]
+ 1830  1830  1.0 ercury.launcher com.ffalconxr.mercury.launcher
+ 1816  1816  1.0 dp_rx_thread_3  [dp_rx_thread_3]
+  830  1076  1.0 ApmOutput       audioserver
+  923   923  1.0 wificond        wificond
+  797   797  1.0 AGMIPC@1.0-serv vendor.qti.hardware.AGMIPC@1.0-service
+  559   572  1.0 qseecomd        qseecomd
+  368   468  1.0 logd.writer     logd
+  332   332  1.0 irq/26-190b6400 [irq/26-190b6400]
+   30    30  1.0 rcuog/2         [rcuog/2]
+ 9899  9899  0.0 sh              sh
+ 1489  9900  0.0 shell svc 9899  adbd
+ 9886  9886  0.0 kworker/2:1     [kworker/2:1]
+ 9779  9779  0.0 kworker/2:2H-kblockd [kworker/2:2H-kblockd]
+ 1830  9778  0.0 Okio Watchdog   com.ffalconxr.mercury.launcher
+ 1830  9777  0.0 OkHttp TaskRunn com.ffalconxr.mercury.launcher
+ 1830  9757  0.0 DefaultDispatch com.ffalconxr.mercury.launcher
+ 1830  9759  0.0 DefaultDispatch com.ffalconxr.mercury.launcher
+ 1830  9758  0.0 DefaultDispatch com.ffalconxr.mercury.launcher
+ 9318  9685  0.0 Binder:9318_6   com.woolab.lumella
+ 9318  9677  0.0 lumella-camera  com.woolab.lumella
+ 9318  9676  0.0 CameraX-camerax com.woolab.lumella
+ 9318  9626  0.0 CameraX-core_ca com.woolab.lumella
+ 9318  9624  0.0 CameraX-core_ca com.woolab.lumella
+=== 1790589691
+Threads: 1780 total,   1 running, 1779 sleeping,   0 stopped,   0 zombie
+  Mem:  3865588K total,  3240372K used,   625216K free,     6672K buffers
+ Swap:  2097148K total,   379136K used,  1718012K free,  1729548K cached
+400%cpu  38%user   1%nice  39%sys 305%idle   7%iow   7%irq   3%sirq   0%host
+  PID   TID[%CPU]CMD             NAME
+ 9905  9905 34.0 top             top
+  198   198  5.0 ueventd         ueventd
+  838   838  4.0 surfaceflinger  surfaceflinger
+  797 31788  3.0 HwBinder:797_D  vendor.qti.hardware.AGMIPC@1.0-service
+ 1830  2080  3.0 RenderThread    com.ffalconxr.mercury.launcher
+  838  1080  3.0 RenderEngine    surfaceflinger
+  800   935  3.0 HwBinder:800_1  vendor.qti.hardware.display.composer-service
+ 9318  9619  2.0 OkHttp TaskRunn com.woolab.lumella
+ 9318  9548  2.0 OkHttp TaskRunn com.woolab.lumella
+ 9318  9393  2.0 lumella-audio-c com.woolab.lumella
+  770  9392  2.0 reader          android.hardware.audio.service_64
+  830  9390  2.0 AudioIn_28E     audioserver
+ 6914  6914  2.0 kworker/u8:4-wmi_rx_diag_event_work_ [kworker/u8:4-wmi_rx_diag_event_work_]
+ 1830  4886  2.0 Binder:1830_A   com.ffalconxr.mercury.launcher
+ 1830  1830  2.0 ercury.launcher com.ffalconxr.mercury.launcher
+  797  1646  2.0 HwBinder:797_4  vendor.qti.hardware.AGMIPC@1.0-service
+ 1296  1533  2.0 android.fg      system_server
+  838   957  2.0 Binder:838_2    surfaceflinger
+ 9318  9381  1.0 Okio Watchdog   com.woolab.lumella
+ 9032  9032  1.0 kworker/u9:3-hal_register_write_wq [kworker/u9:3-hal_register_write_wq]
+ 8955  8955  1.0 kworker/2:0-mm_percpu_wq [kworker/2:0-mm_percpu_wq]
+ 8197  8197  1.0 kworker/3:2-events [kworker/3:2-events]
+  368  6321  1.0 logd.reader.per logd
+ 6319  6319  1.0 logcat          logcat
+ 4527  4527  1.0 kworker/u8:1-memlat_wq [kworker/u8:1-memlat_wq]
+32012 32012  1.0 kworker/u8:6-memlat_wq [kworker/u8:6-memlat_wq]
+31316 31316  1.0 kworker/u9:0-hal_register_write_wq [kworker/u9:0-hal_register_write_wq]
+  778 26737  1.0 51_see          android.hardware.sensors@2.1-service.multihal
+ 1830  2419  1.0 Binder:1830_8   com.ffalconxr.mercury.launcher
+ 1830  2004  1.0 ConnectStateMac com.ffalconxr.mercury.launcher
+  785  1822  1.0 wifi@1.0-servic android.hardware.wifi@1.0-service
+ 1296  1672  1.0 Binder:1296_6   system_server
+ 1296  1595  1.0 SettingsProvide system_server
+ 1296  1558  1.0 PowerManagerSer system_server
+ 1296  1537  1.0 android.anim    system_server
+  797  1185  1.0 AGMIPC@1.0-serv vendor.qti.hardware.AGMIPC@1.0-service
+  838  1154  1.0 RegSampIdle     surfaceflinger
+  838  1151  1.0 app             surfaceflinger
+  800   897  1.0 composer-servic vendor.qti.hardware.display.composer-service
+  770   837  1.0 HwBinder:770_2  android.hardware.audio.service_64
+=== 1790589694
+Threads: 1781 total,   2 running, 1779 sleeping,   0 stopped,   0 zombie
+  Mem:  3865588K total,  3243928K used,   621660K free,     6672K buffers
+ Swap:  2097148K total,   379136K used,  1718012K free,  1729548K cached
+400%cpu  27%user   0%nice  32%sys 335%idle   0%iow   4%irq   2%sirq   0%host
+  PID   TID[%CPU]CMD             NAME
+ 9910  9910 33.0 top             top
+  797  1646  4.0 HwBinder:797_4  vendor.qti.hardware.AGMIPC@1.0-service
+ 9318  9548  3.0 OkHttp TaskRunn com.woolab.lumella
+ 9318  9393  3.0 lumella-audio-c com.woolab.lumella
+  770  9392  3.0 reader          android.hardware.audio.service_64
+  830  9390  3.0 AudioIn_28E     audioserver
+ 9318  9619  2.0 OkHttp TaskRunn com.woolab.lumella
+ 4714  4714  2.0 kworker/u9:1-mhi_offload_wq [kworker/u9:1-mhi_offload_wq]
+ 4527  4527  2.0 kworker/u8:1-memlat_wq [kworker/u8:1-memlat_wq]
+ 9318  9381  1.0 Okio Watchdog   com.woolab.lumella
+ 6914  6914  1.0 kworker/u8:4-memlat_wq [kworker/u8:4-memlat_wq]
+32012 32012  1.0 kworker/u8:6-bwmon_wq [kworker/u8:6-bwmon_wq]
+31316 31316  1.0 kworker/u9:0-hal_register_write_wq [kworker/u9:0-hal_register_write_wq]
+ 1296 26750  1.0 IpClient.wlan0  system_server
+  778 26737  1.0 51_see          android.hardware.sensors@2.1-service.multihal
+ 2595  2767  1.0 RMonitor_Monito com.sogou.inputmethod.iot
+ 1830  2004  1.0 ConnectStateMac com.ffalconxr.mercury.launcher
+ 1830  1830  1.0 ercury.launcher com.ffalconxr.mercury.launcher
+  785  1822  1.0 wifi@1.0-servic android.hardware.wifi@1.0-service
+ 1816  1816  1.0 dp_rx_thread_3  [dp_rx_thread_3]
+ 1814  1814  1.0 dp_rx_thread_1  [dp_rx_thread_1]
+  797  1185  1.0 AGMIPC@1.0-serv vendor.qti.hardware.AGMIPC@1.0-service
+  559   572  1.0 qseecomd        qseecomd
+  332   332  1.0 irq/26-190b6400 [irq/26-190b6400]
+   37    37  1.0 rcuop/3         [rcuop/3]
+   34    34  1.0 ksoftirqd/3     [ksoftirqd/3]
+   14    14  1.0 rcuog/0         [rcuog/0]
+ 1489  9909  0.0 shell svc 9907  adbd
+ 9907  9907  0.0 sh              sh
+ 9906  9906  0.0 kworker/3:1     [kworker/3:1]
+ 1830  9902  0.0 SoundPool_23    com.ffalconxr.mercury.launcher
+ 9886  9886  0.0 kworker/2:1     [kworker/2:1]
+ 9779  9779  0.0 kworker/2:2H-kblockd [kworker/2:2H-kblockd]
+ 1830  9778  0.0 Okio Watchdog   com.ffalconxr.mercury.launcher
+ 1830  9777  0.0 OkHttp TaskRunn com.ffalconxr.mercury.launcher
+ 1830  9758  0.0 DefaultDispatch com.ffalconxr.mercury.launcher
+ 1830  9759  0.0 DefaultDispatch com.ffalconxr.mercury.launcher
+ 1830  9757  0.0 DefaultDispatch com.ffalconxr.mercury.launcher
+ 9318  9685  0.0 Binder:9318_6   com.woolab.lumella
+ 9318  9677  0.0 lumella-camera  com.woolab.lumella
+=== 1790589697
+Threads: 1780 total,   1 running, 1779 sleeping,   0 stopped,   0 zombie
+  Mem:  3865588K total,  3247212K used,   618376K free,     6672K buffers
+ Swap:  2097148K total,   379136K used,  1718012K free,  1729552K cached
+400%cpu  28%user   0%nice  33%sys 332%idle   0%iow   4%irq   3%sirq   0%host
+  PID   TID[%CPU]CMD             NAME
+ 9913  9913 33.0 top             top
+  797  1646  4.0 HwBinder:797_4  vendor.qti.hardware.AGMIPC@1.0-service
+ 9318  9393  3.0 lumella-audio-c com.woolab.lumella
+  830  9390  3.0 AudioIn_28E     audioserver
+ 9318  9619  2.0 OkHttp TaskRunn com.woolab.lumella
+ 9318  9548  2.0 OkHttp TaskRunn com.woolab.lumella
+  770  9392  2.0 reader          android.hardware.audio.service_64
+ 4714  4714  2.0 kworker/u9:1-hal_register_write_wq [kworker/u9:1-hal_register_write_wq]
+  785  1822  2.0 wifi@1.0-servic android.hardware.wifi@1.0-service
+  198   198  2.0 ueventd         ueventd
+ 9318  9381  1.0 Okio Watchdog   com.woolab.lumella
+ 4527  4527  1.0 kworker/u8:1+bwmon_wq [kworker/u8:1+bwmon_wq]
+32012 32012  1.0 kworker/u8:6-wmi_rx_diag_event_work_ [kworker/u8:6-wmi_rx_diag_event_work_]
+31316 31316  1.0 kworker/u9:0-hal_register_write_wq [kworker/u9:0-hal_register_write_wq]
+ 1296 26750  1.0 IpClient.wlan0  system_server
+  778 26746  1.0 11_see          android.hardware.sensors@2.1-service.multihal
+  778 26737  1.0 51_see          android.hardware.sensors@2.1-service.multihal
+ 3225  3263  1.0 pool-2-thread-1 com.rayneo.record
+ 1816  1816  1.0 dp_rx_thread_3  [dp_rx_thread_3]
+ 1296  1585  1.0 SensorService   system_server
+  797  1185  1.0 AGMIPC@1.0-serv vendor.qti.hardware.AGMIPC@1.0-service
+  773   773  1.0 health@2.1-serv android.hardware.health@2.1-service
+  332   332  1.0 irq/26-190b6400 [irq/26-190b6400]
+   34    34  1.0 ksoftirqd/3     [ksoftirqd/3]
+   15    15  1.0 rcuop/0         [rcuop/0]
+ 1489  9912  0.0 shell svc 9911  adbd
+ 9911  9911  0.0 sh              sh
+ 9906  9906  0.0 kworker/3:1     [kworker/3:1]
+ 9886  9886  0.0 kworker/2:1-events [kworker/2:1-events]
+ 9779  9779  0.0 kworker/2:2H-kblockd [kworker/2:2H-kblockd]
+ 1830  9778  0.0 Okio Watchdog   com.ffalconxr.mercury.launcher
+ 1830  9777  0.0 OkHttp TaskRunn com.ffalconxr.mercury.launcher
+ 1830  9758  0.0 DefaultDispatch com.ffalconxr.mercury.launcher
+ 1830  9759  0.0 DefaultDispatch com.ffalconxr.mercury.launcher
+ 1830  9757  0.0 DefaultDispatch com.ffalconxr.mercury.launcher
+ 9318  9685  0.0 Binder:9318_6   com.woolab.lumella
+ 9318  9677  0.0 lumella-camera  com.woolab.lumella
+ 9318  9676  0.0 CameraX-camerax com.woolab.lumella
+ 9318  9626  0.0 CameraX-core_ca com.woolab.lumella
+ 9318  9625  0.0 CameraManager   com.woolab.lumella

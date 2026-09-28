@@ -17,6 +17,8 @@ import com.ffalcon.mercury.android.sdk.ui.activity.BaseMirrorActivity
 import com.woolab.tutor.slowpath.EndpointPedagogyAgentClient
 import com.woolab.lumella.audio.AudioCapture
 import com.woolab.lumella.audio.AudioPlayback
+import com.woolab.lumella.audio.TakeClock
+import com.woolab.lumella.audio.WavTap
 import com.woolab.lumella.brain.BrainFactory
 import com.woolab.lumella.camera.GlassesCamera
 import com.woolab.lumella.camera.ImageEncoder
@@ -207,6 +209,35 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
     }
 
 
+    /** The current take's clock, while filming; the camera's segment callbacks drive it. */
+    @Volatile private var takeClock: TakeClock? = null
+
+    /**
+     * Both voices of a take as WAVs beside the video: `<name>-learner.wav` (the mic, exactly as
+     * the tutor heard it) and `<name>-tutor.wav` (the tutor's own PCM). The POV itself is silent;
+     * see [GlassesCamera.startRecording] for why.
+     */
+    private fun startTakeVoices(name: String, followVideo: Boolean) {
+        stopTakeVoices()
+        val dir = getExternalFilesDir(null)
+        val clock = TakeClock(followVideo)
+        val warn: (String) -> Unit = { Log.w(TAG, it) }
+        takeClock = clock
+        audioPlayback.tap = WavTap(java.io.File(dir, "$name-tutor.wav"), 24_000, clock, live = false, warn = warn)
+        audioCapture.tap = WavTap(java.io.File(dir, "$name-learner.wav"), 24_000, clock, live = true, warn = warn)
+        Log.i(TAG, "debug: voices -> $dir/$name-{learner,tutor}.wav")
+    }
+
+    private fun stopTakeVoices() {
+        val tutor = audioPlayback.tap
+        val learner = audioCapture.tap
+        audioPlayback.tap = null
+        audioCapture.tap = null
+        takeClock = null
+        tutor?.close()
+        learner?.close()
+    }
+
     /** Answers the model's tool calls and keeps repeated looking bounded. @see CapturePolicy */
     private val capturePolicy = CapturePolicy()
     /** 08/05 requirement 2: current voice-driven display state, mirrored onto [mBindingPair]. */
@@ -221,9 +252,11 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
 
         config = AppConfig.fromBuildConfig()
         camera = GlassesCamera(this, this).apply {
-            // Keep the tutor voice tap on the video's clock across segment boundaries.
-            onSegmentGap = { dark ->
-                if (dark) audioPlayback.pauseVoiceClock() else audioPlayback.resumeVoiceClock()
+            // Keep the voice taps on the video's clock, segment by segment.
+            recordingClock = object : GlassesCamera.RecordingClock {
+                override fun rolling(segmentRecordedMs: Long) { takeClock?.rolling(segmentRecordedMs) }
+                override fun dark() { takeClock?.dark() }
+                override fun segmentEnded(recordedMs: Long) { takeClock?.segmentEnded(recordedMs) }
             }
         }
         audioPlayback = AudioPlayback().apply { start() }
@@ -1337,29 +1370,25 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
                             val name = intent.getStringExtra("name")?.takeIf { it.isNotBlank() }
                                 ?: "take-${System.currentTimeMillis()}"
                             val dest = java.io.File(getExternalFilesDir(null), "$name.mp4")
-                            val withAudio = intent.getBooleanExtra("audio", true)
-                            // camera=false records only the tutor's voice. The POV encoder costs
-                            // about a core on this device (ELLA measured 119% for the camera
-                            // provider during a POV take), which makes the conversation stutter;
-                            // a take that only needs the voice and the screen should not pay it.
+                            // camera=false records only the voices. The camera is still the
+                            // heaviest thing this device does (its HAL alone ~100% of a core at
+                            // 24fps, artifacts/perf), and a take that only needs the voices and
+                            // the screen should not pay it.
                             val withCamera = intent.getBooleanExtra("camera", true)
-                            Log.i(TAG, "debug: start recording -> ${dest.absolutePath} audio=$withAudio camera=$withCamera")
+                            Log.i(TAG, "debug: start recording -> ${dest.absolutePath} camera=$withCamera")
+                            // Taps first, on a clock that waits for the camera's first frame, so
+                            // not a word falls between the two starts.
+                            startTakeVoices(name, followVideo = withCamera)
                             if (withCamera) {
-                                camera.startRecording(dest, withAudio) { msg -> Log.i(TAG, "debug: rec $msg") }
+                                camera.startRecording(dest) { msg -> Log.i(TAG, "debug: rec $msg") }
                             }
-                            // The video's audio is the mic, and the mic has the tutor echo-cancelled
-                            // out of it. Capture the tutor's own PCM alongside so the take has both
-                            // voices; they are mixed in the edit.
-                            val voiceFile = java.io.File(getExternalFilesDir(null), "$name-tutor.wav")
-                            audioPlayback.startVoiceTap(voiceFile)
-                            Log.i(TAG, "debug: tutor voice -> ${voiceFile.absolutePath}")
                         }
                         DEBUG_REC_STOP_ACTION -> {
                             Log.i(TAG, "debug: stop recording")
                             // Safe when no POV take is running: stopRecording on an idle
                             // recorder reports and returns.
                             camera.stopRecording { msg -> Log.i(TAG, "debug: rec $msg") }
-                            audioPlayback.stopVoiceTap()
+                            stopTakeVoices()
                         }
                         DEBUG_SPEECH_ACTION -> {
                             Log.i(TAG, "debug: toggleSpeechTurn triggered via broadcast")
@@ -1394,6 +1423,7 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
     /** Graceful teardown: stop capture/playback/camera, close transport + WS client, end the brain session, stop heartbeat. */
     private fun teardown() {
         debugCaptureReceiver?.let { r -> runCatching { unregisterReceiver(r) } }
+        runCatching { stopTakeVoices() }
         runCatching { audioCapture.stop() }
         runCatching { audioPlayback.stop() }
         runCatching { camera.shutdown() }

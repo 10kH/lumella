@@ -1,0 +1,609 @@
+{
+ "label": "cam-noaudio",
+ "mode": "pov",
+ "summary": {
+  "cpuTotalMeanPct": 203.9,
+  "cpuTotalPeakPct": 292.0,
+  "playback": {
+   "responses": 7,
+   "underrunsTotal": 2,
+   "responsesWithUnderrun": 2,
+   "stretchMax": 1.01,
+   "stretchMedian": 1.0,
+   "maxWriteMs": 706,
+   "maxTapMs": 63
+  },
+  "capture": {
+   "windows": 40,
+   "lateReadsTotal": 0,
+   "maxCycleMs": 63,
+   "bufferMs": 40
+  },
+  "ttfaMs": {
+   "n": 7,
+   "median": 861,
+   "max": 6202
+  },
+  "ruleGapAfter3": "목적어에 주격 조사를 씀: 을/를 대신 이/가",
+  "ruleGapAfter6": null
+ },
+ "cpu": {
+  "samples": 37,
+  "processes": [
+   {
+    "name": "vendor.qti.camera.provider@2.7-service_64",
+    "meanPct": 87.2,
+    "peakPct": 97.0
+   },
+   {
+    "name": "com.woolab.lumella",
+    "meanPct": 39.3,
+    "peakPct": 297.0
+   },
+   {
+    "name": "cameraserver",
+    "meanPct": 10.2,
+    "peakPct": 15.0
+   },
+   {
+    "name": "media.hwcodec",
+    "meanPct": 7.3,
+    "peakPct": 13.0
+   },
+   {
+    "name": "vendor.qti.hardware.AGMIPC@1.0-service",
+    "meanPct": 5.2,
+    "peakPct": 14.0
+   },
+   {
+    "name": "audioserver",
+    "meanPct": 4.4,
+    "peakPct": 11.0
+   },
+   {
+    "name": "android.hardware.audio.service_64",
+    "meanPct": 4.1,
+    "peakPct": 11.0
+   },
+   {
+    "name": "ueventd",
+    "meanPct": 1.0,
+    "peakPct": 5.0
+   },
+   {
+    "name": "android.hardware.wifi@1.0-service",
+    "meanPct": 0.9,
+    "peakPct": 3.0
+   },
+   {
+    "name": "system_server",
+    "meanPct": 0.5,
+    "peakPct": 5.0
+   }
+  ],
+  "threads": [
+   {
+    "name": "vendor.qti.camera.provider@2.7-service_64 / vendor.qti.came",
+    "meanPct": 83.2,
+    "peakPct": 92.0
+   },
+   {
+    "name": "media.hwcodec / EvtQ_c2.qti.avc",
+    "meanPct": 5.1,
+    "peakPct": 9.0
+   },
+   {
+    "name": "com.woolab.lumella / OkHttp TaskRunn",
+    "meanPct": 4.9,
+    "peakPct": 41.0
+   },
+   {
+    "name": "com.woolab.lumella / CameraX-camerax",
+    "meanPct": 4.2,
+    "peakPct": 8.0
+   },
+   {
+    "name": "com.woolab.lumella / .woolab.lumella",
+    "meanPct": 3.7,
+    "peakPct": 21.0
+   },
+   {
+    "name": "cameraserver / CDU-0-FrameProc",
+    "meanPct": 3.1,
+    "peakPct": 4.0
+   },
+   {
+    "name": "android.hardware.audio.service_64 / writer",
+    "meanPct": 2.7,
+    "peakPct": 9.0
+   },
+   {
+    "name": "com.woolab.lumella / lumella-audio-c",
+    "meanPct": 2.5,
+    "peakPct": 3.0
+   },
+   {
+    "name": "com.woolab.lumella / Binder:4078_4",
+    "meanPct": 2.1,
+    "peakPct": 5.0
+   },
+   {
+    "name": "com.woolab.lumella / lumella-camera",
+    "meanPct": 2.0,
+    "peakPct": 75.0
+   },
+   {
+    "name": "com.woolab.lumella / MP4WtrCtrlHlpLo",
+    "meanPct": 2.0,
+    "peakPct": 61.0
+   },
+   {
+    "name": "com.woolab.lumella / HeapTaskDaemon",
+    "meanPct": 2.0,
+    "peakPct": 11.0
+   },
+   {
+    "name": "audioserver / AudioIn_25E",
+    "meanPct": 2.0,
+    "peakPct": 3.0
+   },
+   {
+    "name": "cameraserver / HwBinder:887_3",
+    "meanPct": 2.0,
+    "peakPct": 4.0
+   },
+   {
+    "name": "com.woolab.lumella / MPEG4Writer",
+    "meanPct": 1.7,
+    "peakPct": 64.0
+   }
+  ]
+ },
+ "slowPath": {
+  "after3": {
+   "ruleGap": "목적어에 주격 조사를 씀: 을/를 대신 이/가",
+   "grammarErrors": 3,
+   "turns": 3,
+   "lastConsolidatedTurnId": 3,
+   "errorSpans": [
+    "친구가",
+    "빵이",
+    "영화가"
+   ]
+  },
+  "after6": {
+   "ruleGap": null,
+   "grammarErrors": 3,
+   "turns": 6,
+   "lastConsolidatedTurnId": 6,
+   "errorSpans": [
+    "친구가",
+    "빵이",
+    "영화가"
+   ]
+  },
+  "warnings": []
+ },
+ "playback": [
+  {
+   "underruns": 0,
+   "audioMs": 3100,
+   "wallMs": 3072,
+   "stretch": 0.99,
+   "chunks": 12,
+   "maxWriteMs": 587,
+   "sumWriteMs": 2881,
+   "maxTapMs": 5,
+   "bufferFrames": 1928
+  },
+  {
+   "underruns": 0,
+   "audioMs": 8300,
+   "wallMs": 8203,
+   "stretch": 0.99,
+   "chunks": 33,
+   "maxWriteMs": 522,
+   "sumWriteMs": 7760,
+   "maxTapMs": 3,
+   "bufferFrames": 1928
+  },
+  {
+   "underruns": 0,
+   "audioMs": 5350,
+   "wallMs": 5372,
+   "stretch": 1.0,
+   "chunks": 21,
+   "maxWriteMs": 592,
+   "sumWriteMs": 5045,
+   "maxTapMs": 9,
+   "bufferFrames": 1928
+  },
+  {
+   "underruns": 0,
+   "audioMs": 5050,
+   "wallMs": 5037,
+   "stretch": 1.0,
+   "chunks": 20,
+   "maxWriteMs": 524,
+   "sumWriteMs": 4814,
+   "maxTapMs": 7,
+   "bufferFrames": 1928
+  },
+  {
+   "underruns": 1,
+   "audioMs": 4350,
+   "wallMs": 4398,
+   "stretch": 1.01,
+   "chunks": 17,
+   "maxWriteMs": 592,
+   "sumWriteMs": 4164,
+   "maxTapMs": 20,
+   "bufferFrames": 1928
+  },
+  {
+   "underruns": 0,
+   "audioMs": 3450,
+   "wallMs": 3454,
+   "stretch": 1.0,
+   "chunks": 13,
+   "maxWriteMs": 706,
+   "sumWriteMs": 3283,
+   "maxTapMs": 24,
+   "bufferFrames": 1928
+  },
+  {
+   "underruns": 1,
+   "audioMs": 4450,
+   "wallMs": 4505,
+   "stretch": 1.01,
+   "chunks": 17,
+   "maxWriteMs": 702,
+   "sumWriteMs": 4208,
+   "maxTapMs": 63,
+   "bufferFrames": 1928
+  }
+ ],
+ "capture": [
+  {
+   "reads": 123,
+   "lateReads": 0,
+   "maxCycleMs": 45,
+   "maxHandleMs": 3,
+   "bufferMs": 40
+  },
+  {
+   "reads": 125,
+   "lateReads": 0,
+   "maxCycleMs": 44,
+   "maxHandleMs": 2,
+   "bufferMs": 40
+  },
+  {
+   "reads": 125,
+   "lateReads": 0,
+   "maxCycleMs": 44,
+   "maxHandleMs": 3,
+   "bufferMs": 40
+  },
+  {
+   "reads": 125,
+   "lateReads": 0,
+   "maxCycleMs": 44,
+   "maxHandleMs": 2,
+   "bufferMs": 40
+  },
+  {
+   "reads": 126,
+   "lateReads": 0,
+   "maxCycleMs": 44,
+   "maxHandleMs": 2,
+   "bufferMs": 40
+  },
+  {
+   "reads": 125,
+   "lateReads": 0,
+   "maxCycleMs": 45,
+   "maxHandleMs": 3,
+   "bufferMs": 40
+  },
+  {
+   "reads": 125,
+   "lateReads": 0,
+   "maxCycleMs": 45,
+   "maxHandleMs": 2,
+   "bufferMs": 40
+  },
+  {
+   "reads": 125,
+   "lateReads": 0,
+   "maxCycleMs": 44,
+   "maxHandleMs": 2,
+   "bufferMs": 40
+  },
+  {
+   "reads": 126,
+   "lateReads": 0,
+   "maxCycleMs": 44,
+   "maxHandleMs": 2,
+   "bufferMs": 40
+  },
+  {
+   "reads": 125,
+   "lateReads": 0,
+   "maxCycleMs": 44,
+   "maxHandleMs": 3,
+   "bufferMs": 40
+  },
+  {
+   "reads": 126,
+   "lateReads": 0,
+   "maxCycleMs": 44,
+   "maxHandleMs": 3,
+   "bufferMs": 40
+  },
+  {
+   "reads": 125,
+   "lateReads": 0,
+   "maxCycleMs": 44,
+   "maxHandleMs": 6,
+   "bufferMs": 40
+  },
+  {
+   "reads": 125,
+   "lateReads": 0,
+   "maxCycleMs": 51,
+   "maxHandleMs": 29,
+   "bufferMs": 40
+  },
+  {
+   "reads": 126,
+   "lateReads": 0,
+   "maxCycleMs": 60,
+   "maxHandleMs": 17,
+   "bufferMs": 40
+  },
+  {
+   "reads": 125,
+   "lateReads": 0,
+   "maxCycleMs": 60,
+   "maxHandleMs": 10,
+   "bufferMs": 40
+  },
+  {
+   "reads": 126,
+   "lateReads": 0,
+   "maxCycleMs": 50,
+   "maxHandleMs": 13,
+   "bufferMs": 40
+  },
+  {
+   "reads": 125,
+   "lateReads": 0,
+   "maxCycleMs": 60,
+   "maxHandleMs": 21,
+   "bufferMs": 40
+  },
+  {
+   "reads": 126,
+   "lateReads": 0,
+   "maxCycleMs": 48,
+   "maxHandleMs": 10,
+   "bufferMs": 40
+  },
+  {
+   "reads": 126,
+   "lateReads": 0,
+   "maxCycleMs": 49,
+   "maxHandleMs": 13,
+   "bufferMs": 40
+  },
+  {
+   "reads": 126,
+   "lateReads": 0,
+   "maxCycleMs": 49,
+   "maxHandleMs": 5,
+   "bufferMs": 40
+  },
+  {
+   "reads": 125,
+   "lateReads": 0,
+   "maxCycleMs": 59,
+   "maxHandleMs": 19,
+   "bufferMs": 40
+  },
+  {
+   "reads": 125,
+   "lateReads": 0,
+   "maxCycleMs": 52,
+   "maxHandleMs": 15,
+   "bufferMs": 40
+  },
+  {
+   "reads": 126,
+   "lateReads": 0,
+   "maxCycleMs": 50,
+   "maxHandleMs": 4,
+   "bufferMs": 40
+  },
+  {
+   "reads": 125,
+   "lateReads": 0,
+   "maxCycleMs": 50,
+   "maxHandleMs": 3,
+   "bufferMs": 40
+  },
+  {
+   "reads": 125,
+   "lateReads": 0,
+   "maxCycleMs": 63,
+   "maxHandleMs": 9,
+   "bufferMs": 40
+  },
+  {
+   "reads": 126,
+   "lateReads": 0,
+   "maxCycleMs": 49,
+   "maxHandleMs": 7,
+   "bufferMs": 40
+  },
+  {
+   "reads": 126,
+   "lateReads": 0,
+   "maxCycleMs": 48,
+   "maxHandleMs": 5,
+   "bufferMs": 40
+  },
+  {
+   "reads": 126,
+   "lateReads": 0,
+   "maxCycleMs": 44,
+   "maxHandleMs": 10,
+   "bufferMs": 40
+  },
+  {
+   "reads": 125,
+   "lateReads": 0,
+   "maxCycleMs": 57,
+   "maxHandleMs": 5,
+   "bufferMs": 40
+  },
+  {
+   "reads": 126,
+   "lateReads": 0,
+   "maxCycleMs": 50,
+   "maxHandleMs": 12,
+   "bufferMs": 40
+  },
+  {
+   "reads": 125,
+   "lateReads": 0,
+   "maxCycleMs": 56,
+   "maxHandleMs": 32,
+   "bufferMs": 40
+  },
+  {
+   "reads": 126,
+   "lateReads": 0,
+   "maxCycleMs": 47,
+   "maxHandleMs": 4,
+   "bufferMs": 40
+  },
+  {
+   "reads": 126,
+   "lateReads": 0,
+   "maxCycleMs": 46,
+   "maxHandleMs": 9,
+   "bufferMs": 40
+  },
+  {
+   "reads": 125,
+   "lateReads": 0,
+   "maxCycleMs": 52,
+   "maxHandleMs": 19,
+   "bufferMs": 40
+  },
+  {
+   "reads": 126,
+   "lateReads": 0,
+   "maxCycleMs": 47,
+   "maxHandleMs": 8,
+   "bufferMs": 40
+  },
+  {
+   "reads": 125,
+   "lateReads": 0,
+   "maxCycleMs": 45,
+   "maxHandleMs": 5,
+   "bufferMs": 40
+  },
+  {
+   "reads": 125,
+   "lateReads": 0,
+   "maxCycleMs": 45,
+   "maxHandleMs": 6,
+   "bufferMs": 40
+  },
+  {
+   "reads": 126,
+   "lateReads": 0,
+   "maxCycleMs": 49,
+   "maxHandleMs": 5,
+   "bufferMs": 40
+  },
+  {
+   "reads": 125,
+   "lateReads": 0,
+   "maxCycleMs": 43,
+   "maxHandleMs": 3,
+   "bufferMs": 40
+  },
+  {
+   "reads": 125,
+   "lateReads": 0,
+   "maxCycleMs": 44,
+   "maxHandleMs": 2,
+   "bufferMs": 40
+  }
+ ],
+ "ttfaMs": [
+  714,
+  6202,
+  861,
+  777,
+  774,
+  952,
+  1059
+ ],
+ "thermal": {
+  "start": [
+   "cpu-0-0 43400",
+   "cpu-0-1 42200",
+   "cpu-0-2 42600",
+   "cpu-0-3 41800",
+   "freq 1996800 1996800 1996800 1996800"
+  ],
+  "end": [
+   "cpu-0-0 49300",
+   "cpu-0-1 47700",
+   "cpu-0-2 48100",
+   "cpu-0-3 48100",
+   "freq 1996800 1996800 1996800 1996800"
+  ]
+ },
+ "files": {
+  "pov": [
+   {
+    "path": "/Users/woody/shots/perf-cam-noaudio-182513-pov.mp4",
+    "codec": "h264",
+    "width": 720,
+    "height": 480,
+    "durationS": 121.7,
+    "frames": 2920,
+    "effectiveFps": 24.0
+   },
+   {
+    "path": "/Users/woody/shots/perf-cam-noaudio-182513-pov-2.mp4",
+    "codec": "h264",
+    "width": 720,
+    "height": 480,
+    "durationS": 11.0,
+    "frames": 264,
+    "effectiveFps": 23.9
+   }
+  ],
+  "screen": {
+   "path": "/Users/woody/shots/perf-cam-noaudio-182513-screen.mp4",
+   "codec": "h264",
+   "width": 1280,
+   "height": 480,
+   "durationS": 136.9,
+   "frames": 250,
+   "effectiveFps": 1.8
+  },
+  "tutorWav": {
+   "path": "/Users/woody/shots/perf-cam-noaudio-182513-tutor.wav",
+   "durationS": 135.5,
+   "voicedPct": 12.4
+  }
+ }
+}

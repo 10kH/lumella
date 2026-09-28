@@ -1,0 +1,1142 @@
+09-28 19:40:36.746 I/.woolab.lumell(19189): Late-enabling -Xcheck:jni
+09-28 19:40:36.819 D/CompatibilityChangeReporter(19189): Compat change id reported: 171979766; UID 10089; state: ENABLED
+09-28 19:40:36.984 I/Perf    (19189): Connecting to perf service.
+09-28 19:40:36.991 V/GraphicsEnvironment(19189): ANGLE Developer option for 'com.woolab.lumella' set to: 'default'
+09-28 19:40:36.992 V/GraphicsEnvironment(19189): ANGLE GameManagerService for com.woolab.lumella: false
+09-28 19:40:36.992 V/GraphicsEnvironment(19189): Neither updatable production driver nor prerelease driver is supported.
+09-28 19:40:36.995 D/NetworkSecurityConfig(19189): Using Network Security Config from resource network_security_config debugBuild: true
+09-28 19:40:36.998 D/NetworkSecurityConfig(19189): Using Network Security Config from resource network_security_config debugBuild: true
+09-28 19:40:37.114 I/SoundPool(19189): tag250929005 SoundPool(maxStreams=4, attr={ content_type=4, usage=6, flags=0x800, tags= })
+09-28 19:40:37.116 W/SoundPool(19189): Use of stream types is deprecated for operations other than volume control
+09-28 19:40:37.116 W/SoundPool(19189): See the documentation of SoundPool() for what to use instead with android.media.AudioAttributes to qualify your playback use case
+09-28 19:40:37.120 D/hzhang2ring(19189): mRingScaleForGD =70.0,mRingScaleForRing=400.0
+09-28 19:40:37.120 D/GestureDetectorWithSound(19189): disable touch sound for type mercury_system_long_press_right
+09-28 19:40:37.190 D/AppCompatDelegate(19189): Checking for metadata for AppLocalesMetadataHolderService : Service not found
+09-28 19:40:37.253 W/.woolab.lumell(19189): Accessing hidden method Landroid/view/View;->computeFitSystemWindows(Landroid/graphics/Rect;Landroid/graphics/Rect;)Z (unsupported, reflection, allowed)
+09-28 19:40:37.254 W/.woolab.lumell(19189): Accessing hidden method Landroid/view/ViewGroup;->makeOptionalFitsSystemWindows()V (unsupported, reflection, allowed)
+09-28 19:40:37.571 W/System  (19189): ClassLoader referenced unknown path: /system/framework/tcmclient.jar
+09-28 19:40:37.600 I/Choreographer(19189): Skipped 34 frames!  The application may be doing too much work on its main thread.
+09-28 19:40:37.693 I/AdrenoGLES-0(19189): QUALCOMM build                   : 02da1206c8, Ifb54304dce
+09-28 19:40:37.693 I/AdrenoGLES-0(19189): Build Date                       : 02/28/25
+09-28 19:40:37.693 I/AdrenoGLES-0(19189): OpenGL ES Shader Compiler Version: E031.50.02.00
+09-28 19:40:37.693 I/AdrenoGLES-0(19189): Local Branch                     : 
+09-28 19:40:37.693 I/AdrenoGLES-0(19189): Remote Branch                    : refs/tags/AU_LINUX_ANDROID_LA.VENDOR.14.3.4.11.00.00.1126.413
+09-28 19:40:37.693 I/AdrenoGLES-0(19189): Remote Branch                    : NONE
+09-28 19:40:37.693 I/AdrenoGLES-0(19189): Reconstruct Branch               : NOTHING
+09-28 19:40:37.693 I/AdrenoGLES-0(19189): Build Config                     : S P 16.1.2 AArch64
+09-28 19:40:37.693 I/AdrenoGLES-0(19189): Driver Path                      : /vendor/lib64/egl/libGLESv2_adreno.so
+09-28 19:40:37.693 I/AdrenoGLES-0(19189): Driver Version                   : 0819.0
+09-28 19:40:37.693 I/AdrenoGLES-0(19189): Process Name                     : com.woolab.lumella
+09-28 19:40:37.702 I/AdrenoGLES-0(19189): PFP: 0x016dd112, ME: 0x00000000
+09-28 19:40:37.708 W/Adreno-AppProfiles(19189): Could not find QSPM HAL service. Skipping adreno profile processing.
+09-28 19:40:37.807 I/OpenGLRenderer(19189): Davey! duration=784ms; Flags=1, FrameTimelineVsyncId=1015249, IntendedVsync=57504903950875, Vsync=57505470617519, InputEventId=0, HandleInputStart=57505485564258, AnimationStart=57505485572018, PerformTraversalsStart=57505485810299, DrawStart=57505624197226, FrameDeadline=57504920617541, FrameInterval=57505485195664, FrameStartTime=16666666, SyncQueued=57505629598893, SyncStart=57505629706497, IssueDrawCommandsStart=57505630142903, SwapBuffers=57505679839518, FrameCompleted=57505688379883, DequeueBufferDuration=21562, QueueBufferDuration=1150312, GpuCompleted=57505687478841, SwapBuffersCompleted=57505688379883, DisplayPresentTime=0, 
+09-28 19:40:43.217 D/ProfileInstaller(19189): Installing profile for com.woolab.lumella
+09-28 19:40:45.173 I/lumella (19189): Resolved lumaBaseUrl from remote config (was BuildConfig fallback http://192.168.35.170:8010)
+09-28 19:40:45.176 I/lumella (19189): status=CONNECTING
+09-28 19:40:46.971 I/lumella (19189): brain ready: session=orch_31b8fe120a866b57 (voice was already up)
+09-28 19:40:47.603 I/lumella (19189): status=READY
+09-28 19:40:47.605 I/AudioRecord(19189): set(): sai Format 0x1 is linear
+09-28 19:40:47.650 I/android.media.AudioRecord(19189): tag250902005 setPreferredDeviceToSpeakerMic res:true
+09-28 19:40:47.651 W/AudioRecord(19189): restoreRecord_l(1039): dead IAudioRecord, creating a new one from start()
+09-28 19:40:47.665 I/lumella (19189): 연속 청취 시작 (핸즈프리): recording=true
+09-28 19:40:47.917 I/lumella (19189): status=READY
+09-28 19:40:52.692 I/lumella (19189): perf: capture reads=123 lateReads=0 lostReads=0 maxCycleMs=44 maxHandleMs=4 chunkMs=40 bufferMs=400
+09-28 19:40:57.691 I/lumella (19189): perf: capture reads=125 lateReads=0 lostReads=0 maxCycleMs=45 maxHandleMs=4 chunkMs=40 bufferMs=400
+09-28 19:41:02.730 I/lumella (19189): perf: capture reads=126 lateReads=0 lostReads=0 maxCycleMs=45 maxHandleMs=3 chunkMs=40 bufferMs=400
+09-28 19:41:07.729 I/lumella (19189): perf: capture reads=125 lateReads=0 lostReads=0 maxCycleMs=45 maxHandleMs=2 chunkMs=40 bufferMs=400
+09-28 19:41:12.734 I/lumella (19189): perf: capture reads=125 lateReads=0 lostReads=0 maxCycleMs=45 maxHandleMs=2 chunkMs=40 bufferMs=400
+09-28 19:41:17.772 I/lumella (19189): perf: capture reads=126 lateReads=0 lostReads=0 maxCycleMs=44 maxHandleMs=3 chunkMs=40 bufferMs=400
+09-28 19:41:22.774 I/lumella (19189): perf: capture reads=125 lateReads=0 lostReads=0 maxCycleMs=45 maxHandleMs=3 chunkMs=40 bufferMs=400
+09-28 19:41:27.810 I/lumella (19189): perf: capture reads=126 lateReads=0 lostReads=0 maxCycleMs=45 maxHandleMs=2 chunkMs=40 bufferMs=400
+09-28 19:41:32.813 I/lumella (19189): perf: capture reads=125 lateReads=0 lostReads=0 maxCycleMs=45 maxHandleMs=3 chunkMs=40 bufferMs=400
+09-28 19:41:37.626 I/lumella (19189): debug: start recording -> /storage/emulated/0/Android/data/com.woolab.lumella/files/perf-hd24-pov-a.mp4 camera=true
+09-28 19:41:37.632 I/lumella (19189): debug: voices -> /storage/emulated/0/Android/data/com.woolab.lumella/files/perf-hd24-pov-a-{learner,tutor}.wav
+09-28 19:41:37.666 I/CameraManagerGlobal(19189): Connecting to camera service
+09-28 19:41:37.672 W/libc    (19189): Access denied finding property "vendor.camera.aux.packagelist"
+09-28 19:41:37.672 W/libc    (19189): Access denied finding property "vendor.camera.aux.packagelist"
+09-28 19:41:37.673 W/libc    (19189): Access denied finding property "vendor.camera.aux.packagelist"
+09-28 19:41:37.697 D/CameraRepository(19189): Added camera: 0
+09-28 19:41:37.732 I/Camera2CameraInfo(19189): Device Level: INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED
+09-28 19:41:37.742 D/CameraRepository(19189): Added camera: 1
+09-28 19:41:37.744 I/Camera2CameraInfo(19189): Device Level: INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED
+09-28 19:41:37.745 D/CameraValidator(19189): Verifying camera lens facing on MercuryLiteXR, lensFacingInteger: null
+09-28 19:41:37.814 D/CameraOrientationUtil(19189): getRelativeImageRotation: destRotationDegrees=0, sourceRotationDegrees=90, isOppositeFacing=true, result=90
+09-28 19:41:37.816 D/CameraOrientationUtil(19189): getRelativeImageRotation: destRotationDegrees=0, sourceRotationDegrees=90, isOppositeFacing=true, result=90
+09-28 19:41:37.824 D/RecorderVideoCapabilities(19189): profiles = ImmutableEncoderProfilesProxy{defaultDurationSeconds=30, recommendedFileFormat=2, audioProfiles=[AudioProfileProxy{codec=3, mediaType=audio/mp4a-latm, bitrate=156000, sampleRate=48000, channels=2, profile=1}], videoProfiles=[VideoProfileProxy{codec=2, mediaType=video/avc, bitrate=20000000, frameRate=30, width=1920, height=1080, profile=-1, bitDepth=8, chromaSubsampling=0, hdrFormat=0}]}
+09-28 19:41:37.825 D/RecorderVideoCapabilities(19189): profiles = ImmutableEncoderProfilesProxy{defaultDurationSeconds=30, recommendedFileFormat=2, audioProfiles=[AudioProfileProxy{codec=3, mediaType=audio/mp4a-latm, bitrate=156000, sampleRate=48000, channels=2, profile=1}], videoProfiles=[VideoProfileProxy{codec=2, mediaType=video/avc, bitrate=14000000, frameRate=30, width=1280, height=720, profile=-1, bitDepth=8, chromaSubsampling=0, hdrFormat=0}]}
+09-28 19:41:37.826 D/RecorderVideoCapabilities(19189): profiles = ImmutableEncoderProfilesProxy{defaultDurationSeconds=30, recommendedFileFormat=2, audioProfiles=[AudioProfileProxy{codec=3, mediaType=audio/mp4a-latm, bitrate=156000, sampleRate=48000, channels=2, profile=1}], videoProfiles=[VideoProfileProxy{codec=2, mediaType=video/avc, bitrate=2000000, frameRate=30, width=720, height=480, profile=-1, bitDepth=8, chromaSubsampling=0, hdrFormat=0}]}
+09-28 19:41:37.826 D/QualitySelector(19189): supportedQualities = [ConstantQuality{value=6, name=FHD}, ConstantQuality{value=5, name=HD}, ConstantQuality{value=4, name=SD}]
+09-28 19:41:37.826 D/QualitySelector(19189): Select quality by fallbackStrategy = RuleStrategy{fallbackQuality=ConstantQuality{value=4, name=SD}, fallbackRule=3}
+09-28 19:41:37.827 D/QualitySelector(19189): sizeSortedQualities = [ConstantQuality{value=8, name=UHD}, ConstantQuality{value=6, name=FHD}, ConstantQuality{value=5, name=HD}, ConstantQuality{value=4, name=SD}], fallback quality = ConstantQuality{value=4, name=SD}, largerQualities = [ConstantQuality{value=5, name=HD}, ConstantQuality{value=6, name=FHD}], smallerQualities = []
+09-28 19:41:37.827 D/VideoCapture(19189): Found selectedQualities [ConstantQuality{value=5, name=HD}, ConstantQuality{value=6, name=FHD}] by QualitySelector{preferredQualities=[ConstantQuality{value=5, name=HD}], fallbackStrategy=RuleStrategy{fallbackQuality=ConstantQuality{value=4, name=SD}, fallbackRule=3}}
+09-28 19:41:37.849 I/lumella (19189): perf: capture reads=126 lateReads=0 lostReads=0 maxCycleMs=44 maxHandleMs=2 chunkMs=40 bufferMs=400
+09-28 19:41:37.864 D/VideoCapture(19189): Set custom ordered resolutions = [1280x720, 1920x1080]
+09-28 19:41:37.874 D/RecorderVideoCapabilities(19189): profiles = ImmutableEncoderProfilesProxy{defaultDurationSeconds=30, recommendedFileFormat=2, audioProfiles=[AudioProfileProxy{codec=3, mediaType=audio/mp4a-latm, bitrate=156000, sampleRate=48000, channels=2, profile=1}], videoProfiles=[VideoProfileProxy{codec=2, mediaType=video/avc, bitrate=20000000, frameRate=30, width=1920, height=1080, profile=-1, bitDepth=8, chromaSubsampling=0, hdrFormat=0}]}
+09-28 19:41:37.874 D/RecorderVideoCapabilities(19189): profiles = ImmutableEncoderProfilesProxy{defaultDurationSeconds=30, recommendedFileFormat=2, audioProfiles=[AudioProfileProxy{codec=3, mediaType=audio/mp4a-latm, bitrate=156000, sampleRate=48000, channels=2, profile=1}], videoProfiles=[VideoProfileProxy{codec=2, mediaType=video/avc, bitrate=14000000, frameRate=30, width=1280, height=720, profile=-1, bitDepth=8, chromaSubsampling=0, hdrFormat=0}]}
+09-28 19:41:37.875 D/RecorderVideoCapabilities(19189): profiles = ImmutableEncoderProfilesProxy{defaultDurationSeconds=30, recommendedFileFormat=2, audioProfiles=[AudioProfileProxy{codec=3, mediaType=audio/mp4a-latm, bitrate=156000, sampleRate=48000, channels=2, profile=1}], videoProfiles=[VideoProfileProxy{codec=2, mediaType=video/avc, bitrate=2000000, frameRate=30, width=720, height=480, profile=-1, bitDepth=8, chromaSubsampling=0, hdrFormat=0}]}
+09-28 19:41:37.875 D/QualitySelector(19189): supportedQualities = [ConstantQuality{value=6, name=FHD}, ConstantQuality{value=5, name=HD}, ConstantQuality{value=4, name=SD}]
+09-28 19:41:37.875 D/QualitySelector(19189): Select quality by fallbackStrategy = RuleStrategy{fallbackQuality=ConstantQuality{value=4, name=SD}, fallbackRule=3}
+09-28 19:41:37.875 D/QualitySelector(19189): sizeSortedQualities = [ConstantQuality{value=8, name=UHD}, ConstantQuality{value=6, name=FHD}, ConstantQuality{value=5, name=HD}, ConstantQuality{value=4, name=SD}], fallback quality = ConstantQuality{value=4, name=SD}, largerQualities = [ConstantQuality{value=5, name=HD}, ConstantQuality{value=6, name=FHD}], smallerQualities = []
+09-28 19:41:37.876 D/VideoCapture(19189): Found selectedQualities [ConstantQuality{value=5, name=HD}, ConstantQuality{value=6, name=FHD}] by QualitySelector{preferredQualities=[ConstantQuality{value=5, name=HD}], fallbackStrategy=RuleStrategy{fallbackQuality=ConstantQuality{value=4, name=SD}, fallbackRule=3}}
+09-28 19:41:37.878 D/VideoCapture(19189): Set custom ordered resolutions = [1280x720, 1920x1080]
+09-28 19:41:37.880 D/VideoCapture(19189): onSuggestedStreamSpecUpdated: StreamSpec{resolution=1280x720, dynamicRange=DynamicRange@47f4bd9{encoding=SDR, bitDepth=8}, expectedFrameRateRange=[24, 24], implementationOptions=androidx.camera.camera2.impl.Camera2ImplConfig@9ad244c}
+09-28 19:41:37.881 D/Camera2CameraImpl(19189): {Camera@680d543[id=0]} Use case androidx.camera.video.VideoCapture-2ceba380-ea30-4f9f-9530-20cebc73a12349454813 INACTIVE
+09-28 19:41:37.881 D/RecorderVideoCapabilities(19189): profiles = ImmutableEncoderProfilesProxy{defaultDurationSeconds=30, recommendedFileFormat=2, audioProfiles=[AudioProfileProxy{codec=3, mediaType=audio/mp4a-latm, bitrate=156000, sampleRate=48000, channels=2, profile=1}], videoProfiles=[VideoProfileProxy{codec=2, mediaType=video/avc, bitrate=20000000, frameRate=30, width=1920, height=1080, profile=-1, bitDepth=8, chromaSubsampling=0, hdrFormat=0}]}
+09-28 19:41:37.882 D/RecorderVideoCapabilities(19189): profiles = ImmutableEncoderProfilesProxy{defaultDurationSeconds=30, recommendedFileFormat=2, audioProfiles=[AudioProfileProxy{codec=3, mediaType=audio/mp4a-latm, bitrate=156000, sampleRate=48000, channels=2, profile=1}], videoProfiles=[VideoProfileProxy{codec=2, mediaType=video/avc, bitrate=14000000, frameRate=30, width=1280, height=720, profile=-1, bitDepth=8, chromaSubsampling=0, hdrFormat=0}]}
+09-28 19:41:37.882 D/RecorderVideoCapabilities(19189): profiles = ImmutableEncoderProfilesProxy{defaultDurationSeconds=30, recommendedFileFormat=2, audioProfiles=[AudioProfileProxy{codec=3, mediaType=audio/mp4a-latm, bitrate=156000, sampleRate=48000, channels=2, profile=1}], videoProfiles=[VideoProfileProxy{codec=2, mediaType=video/avc, bitrate=2000000, frameRate=30, width=720, height=480, profile=-1, bitDepth=8, chromaSubsampling=0, hdrFormat=0}]}
+09-28 19:41:37.883 D/RecorderVideoCapabilities(19189): Using supported quality of ConstantQuality{value=5, name=HD} for size 1280x720
+09-28 19:41:37.884 D/UseCaseAttachState(19189): Active and attached use case: [] for camera: 0
+09-28 19:41:37.884 D/VideoConfigUtil(19189): MediaSpec video mime matches EncoderProfiles. Using EncoderProfiles to derive VIDEO settings [mime type: video/avc]
+09-28 19:41:37.887 D/VidEncVdPrflRslvr(19189): Resolved frame rate 24fps [Video profile frame rate: 30fps, Expected operating range: <UNSPECIFIED>]
+09-28 19:41:37.887 D/VidEncVdPrflRslvr(19189): Resolved VIDEO frame rate: 24fps
+09-28 19:41:37.887 D/VidEncVdPrflRslvr(19189): Using resolved VIDEO bitrate from EncoderProfiles
+09-28 19:41:37.888 D/VideoConfigUtil(19189): Base Bitrate(14000000bps) * Bit Depth Ratio (8 / 8) * Frame Rate Ratio(24 / 30) * Width Ratio(1280 / 1280) * Height Ratio(720 / 720) = 11200000
+09-28 19:41:37.888 D/VideoConfigUtil(19189): Clamped to range [6000000, 6000000] -> 6000000bps
+09-28 19:41:37.889 W/VideoConfigUtil(19189): Unsupported mime type video/avc or profile level -1. Data space is unspecified.
+09-28 19:41:37.960 W/VideoCapabilities(19189): Unsupported mime image/vnd.android.heic
+09-28 19:41:37.961 W/VideoCapabilities(19189): Unsupported mime image/vnd.android.heic
+09-28 19:41:37.985 I/Codec2Client(19189): Available Codec2 services: "default" "software"
+09-28 19:41:37.986 I/CCodec  (19189): setting up 'default' as default (vendor) store
+09-28 19:41:37.993 I/CCodec  (19189): Created component [c2.qti.avc.encoder]
+09-28 19:41:37.994 D/ReflectedParamUpdater(19189): extent() != 1 for single value type: output.buffers.pool-ids.values
+09-28 19:41:37.999 D/ReflectedParamUpdater(19189): ignored struct field coding.gop.values
+09-28 19:41:38.000 D/ReflectedParamUpdater(19189): extent() != 1 for single value type: vendor.qti-ext-enc-temporal-layer-bitrate.layerBitrates
+09-28 19:41:38.001 D/ReflectedParamUpdater(19189): ignored struct field coding.qp.values
+09-28 19:41:38.003 D/ReflectedParamUpdater(19189): extent() != 1 for single value type: vendor.qti-ext-enc-info-metadata-cvp.reserved
+09-28 19:41:38.007 I/CCodecConfig(19189): query failed after returning 24 values (BAD_INDEX)
+09-28 19:41:38.007 W/ColorUtils(19189): expected specified color aspects (0:0:255:255)
+09-28 19:41:38.011 I/hw-BpHwBinder(19189): onLastStrongRef automatically unlinking death recipients
+09-28 19:41:38.012 D/CameraOrientationUtil(19189): getRelativeImageRotation: destRotationDegrees=180, sourceRotationDegrees=90, isOppositeFacing=true, result=270
+09-28 19:41:38.013 D/VideoCapture(19189): camera timebase = REALTIME, processing timebase = UPTIME
+09-28 19:41:38.016 D/DeferrableSurface(19189): Surface created[total_surfaces=1, used_surfaces=0](androidx.camera.core.processing.SurfaceEdge$SettableSurface@e32a19b}
+09-28 19:41:38.018 D/DeferrableSurface(19189): Surface created[total_surfaces=2, used_surfaces=0](androidx.camera.core.SurfaceRequest$2@98fbc77}
+09-28 19:41:38.020 D/DeferrableSurface(19189): New surface in use[total_surfaces=2, used_surfaces=1](androidx.camera.core.SurfaceRequest$2@98fbc77}
+09-28 19:41:38.020 D/DeferrableSurface(19189): use count+1, useCount=1 androidx.camera.core.SurfaceRequest$2@98fbc77
+09-28 19:41:38.021 D/Recorder(19189): Surface is requested in state: CONFIGURING, Current surface: 0
+09-28 19:41:38.023 D/CameraOrientationUtil(19189): getRelativeImageRotation: destRotationDegrees=180, sourceRotationDegrees=90, isOppositeFacing=true, result=270
+09-28 19:41:38.023 D/RecorderVideoCapabilities(19189): profiles = ImmutableEncoderProfilesProxy{defaultDurationSeconds=30, recommendedFileFormat=2, audioProfiles=[AudioProfileProxy{codec=3, mediaType=audio/mp4a-latm, bitrate=156000, sampleRate=48000, channels=2, profile=1}], videoProfiles=[VideoProfileProxy{codec=2, mediaType=video/avc, bitrate=20000000, frameRate=30, width=1920, height=1080, profile=-1, bitDepth=8, chromaSubsampling=0, hdrFormat=0}]}
+09-28 19:41:38.023 D/RecorderVideoCapabilities(19189): profiles = ImmutableEncoderProfilesProxy{defaultDurationSeconds=30, recommendedFileFormat=2, audioProfiles=[AudioProfileProxy{codec=3, mediaType=audio/mp4a-latm, bitrate=156000, sampleRate=48000, channels=2, profile=1}], videoProfiles=[VideoProfileProxy{codec=2, mediaType=video/avc, bitrate=14000000, frameRate=30, width=1280, height=720, profile=-1, bitDepth=8, chromaSubsampling=0, hdrFormat=0}]}
+09-28 19:41:38.024 D/RecorderVideoCapabilities(19189): profiles = ImmutableEncoderProfilesProxy{defaultDurationSeconds=30, recommendedFileFormat=2, audioProfiles=[AudioProfileProxy{codec=3, mediaType=audio/mp4a-latm, bitrate=156000, sampleRate=48000, channels=2, profile=1}], videoProfiles=[VideoProfileProxy{codec=2, mediaType=video/avc, bitrate=2000000, frameRate=30, width=720, height=480, profile=-1, bitDepth=8, chromaSubsampling=0, hdrFormat=0}]}
+09-28 19:41:38.024 D/Recorder(19189): Using supported quality of ConstantQuality{value=5, name=HD} for surface size 1280x720
+09-28 19:41:38.024 D/Recorder(19189): Try to safely release video encoder: null
+09-28 19:41:38.025 D/VideoEncoderSession(19189): Create VideoEncoderSession: VideoEncoderSession@54385993 for androidx.camera.core.SurfaceRequest@82d3e76
+09-28 19:41:38.025 D/VideoConfigUtil(19189): MediaSpec video mime matches EncoderProfiles. Using EncoderProfiles to derive VIDEO settings [mime type: video/avc]
+09-28 19:41:38.026 D/VidEncVdPrflRslvr(19189): Resolved frame rate 24fps [Video profile frame rate: 30fps, Expected operating range: <UNSPECIFIED>]
+09-28 19:41:38.026 D/VidEncVdPrflRslvr(19189): Resolved VIDEO frame rate: 24fps
+09-28 19:41:38.026 D/VidEncVdPrflRslvr(19189): Using resolved VIDEO bitrate from EncoderProfiles
+09-28 19:41:38.027 D/VideoConfigUtil(19189): Base Bitrate(14000000bps) * Bit Depth Ratio (8 / 8) * Frame Rate Ratio(24 / 30) * Width Ratio(1280 / 1280) * Height Ratio(720 / 720) = 11200000
+09-28 19:41:38.027 D/VideoConfigUtil(19189): Clamped to range [6000000, 6000000] -> 6000000bps
+09-28 19:41:38.028 W/VideoConfigUtil(19189): Unsupported mime type video/avc or profile level -1. Data space is unspecified.
+09-28 19:41:38.030 D/Camera2CameraImpl(19189): {Camera@680d543[id=0]} Use case androidx.camera.video.VideoCapture-2ceba380-ea30-4f9f-9530-20cebc73a12349454813 ACTIVE
+09-28 19:41:38.030 D/UseCaseAttachState(19189): Active and attached use case: [] for camera: 0
+09-28 19:41:38.032 D/VideoEncoder(19189): mInputTimebase = UPTIME
+09-28 19:41:38.032 D/Camera2CameraImpl(19189): {Camera@680d543[id=0]} Use cases [androidx.camera.video.VideoCapture-2ceba380-ea30-4f9f-9530-20cebc73a12349454813] now ATTACHED
+09-28 19:41:38.033 D/VideoEncoder(19189): mMediaFormat = {color-format=2130708361, i-frame-interval=1, mime=video/avc, width=1280, bitrate=6000000, frame-rate=24, height=720}
+09-28 19:41:38.033 D/UseCaseAttachState(19189): All use case: [androidx.camera.video.VideoCapture-2ceba380-ea30-4f9f-9530-20cebc73a12349454813] for camera: 0
+09-28 19:41:38.035 D/Recorder(19189): Transitioning Recorder internal state: CONFIGURING --> PENDING_RECORDING
+09-28 19:41:38.035 I/lumella (19189): debug: rec recording -> /storage/emulated/0/Android/data/com.woolab.lumella/files/perf-hd24-pov-a.mp4
+09-28 19:41:38.035 D/VideoCapture(19189): Stream info update: old: StreamInfo{id=0, streamState=INACTIVE, inProgressTransformationInfo=null} new: StreamInfo{id=0, streamState=INACTIVE, inProgressTransformationInfo=null}
+09-28 19:41:38.036 D/MeteringRepeating(19189): MeteringSession SurfaceTexture size: 640x480
+09-28 19:41:38.036 I/CCodec  (19189): setting up 'default' as default (vendor) store
+09-28 19:41:38.038 D/DeferrableSurface(19189): Surface created[total_surfaces=3, used_surfaces=1](androidx.camera.core.impl.ImmediateSurface@78dd95a}
+09-28 19:41:38.040 D/UseCaseAttachState(19189): Active and attached use case: [androidx.camera.video.VideoCapture-2ceba380-ea30-4f9f-9530-20cebc73a12349454813, MeteringRepeating182381697] for camera: 0
+09-28 19:41:38.041 I/CCodec  (19189): Created component [c2.qti.avc.encoder]
+09-28 19:41:38.042 D/ReflectedParamUpdater(19189): extent() != 1 for single value type: output.buffers.pool-ids.values
+09-28 19:41:38.044 D/Camera2CameraImpl(19189): {Camera@680d543[id=0]} Resetting Capture Session
+09-28 19:41:38.045 D/Camera2CameraImpl(19189): {Camera@680d543[id=0]} Releasing session in state INITIALIZED
+09-28 19:41:38.046 D/Camera2CameraImpl(19189): {Camera@680d543[id=0]} Attempting to force open the camera.
+09-28 19:41:38.047 D/ReflectedParamUpdater(19189): ignored struct field coding.gop.values
+09-28 19:41:38.047 D/CameraStateRegistry(19189): tryOpenCamera(Camera@680d543[id=0]) [Available Cameras: 1, Already Open: false (Previous state: null)] --> SUCCESS
+09-28 19:41:38.048 D/ReflectedParamUpdater(19189): extent() != 1 for single value type: vendor.qti-ext-enc-temporal-layer-bitrate.layerBitrates
+09-28 19:41:38.048 D/CameraStateRegistry(19189): Recalculating open cameras:
+09-28 19:41:38.048 D/CameraStateRegistry(19189): Camera                                       State                 
+09-28 19:41:38.048 D/CameraStateRegistry(19189): -------------------------------------------------------------------
+09-28 19:41:38.048 D/CameraStateRegistry(19189): Camera@680d543[id=0]                         OPENING               
+09-28 19:41:38.048 D/CameraStateRegistry(19189): Camera@c35464a[id=1]                         UNKNOWN               
+09-28 19:41:38.048 D/CameraStateRegistry(19189): -------------------------------------------------------------------
+09-28 19:41:38.048 D/CameraStateRegistry(19189): Open count: 1 (Max allowed: 1)
+09-28 19:41:38.048 D/ReflectedParamUpdater(19189): ignored struct field coding.qp.values
+09-28 19:41:38.049 D/Camera2CameraImpl(19189): {Camera@680d543[id=0]} Opening camera.
+09-28 19:41:38.049 D/Camera2CameraImpl(19189): {Camera@680d543[id=0]} Transitioning camera internal state: INITIALIZED --> OPENING
+09-28 19:41:38.050 D/CameraStateMachine(19189): New public camera state CameraState{type=OPENING, error=null} from OPENING and null
+09-28 19:41:38.050 D/CameraStateMachine(19189): Publishing new public camera state CameraState{type=OPENING, error=null}
+09-28 19:41:38.051 D/UseCaseAttachState(19189): All use case: [androidx.camera.video.VideoCapture-2ceba380-ea30-4f9f-9530-20cebc73a12349454813, MeteringRepeating182381697] for camera: 0
+09-28 19:41:38.051 D/ReflectedParamUpdater(19189): extent() != 1 for single value type: vendor.qti-ext-enc-info-metadata-cvp.reserved
+09-28 19:41:38.055 I/CCodecConfig(19189): query failed after returning 24 values (BAD_INDEX)
+09-28 19:41:38.055 W/ColorUtils(19189): expected specified color aspects (0:0:255:255)
+09-28 19:41:38.055 W/libc    (19189): Access denied finding property "persist.vendor.camera.privapp.list"
+09-28 19:41:38.057 I/VideoEncoder(19189): Selected encoder: c2.qti.avc.encoder
+09-28 19:41:38.059 W/libc    (19189): Access denied finding property "vendor.camera.aux.packagelist"
+09-28 19:41:38.060 I/hw-BpHwBinder(19189): onLastStrongRef automatically unlinking death recipients
+09-28 19:41:38.063 I/CCodec  (19189): setting up 'default' as default (vendor) store
+09-28 19:41:38.067 I/CCodec  (19189): Created component [c2.qti.avc.encoder]
+09-28 19:41:38.069 D/Camera2CameraImpl(19189): {Camera@680d543[id=0]} Use case androidx.camera.video.VideoCapture-2ceba380-ea30-4f9f-9530-20cebc73a12349454813 ACTIVE
+09-28 19:41:38.069 D/ReflectedParamUpdater(19189): extent() != 1 for single value type: output.buffers.pool-ids.values
+09-28 19:41:38.070 D/UseCaseAttachState(19189): Active and attached use case: [androidx.camera.video.VideoCapture-2ceba380-ea30-4f9f-9530-20cebc73a12349454813, MeteringRepeating182381697] for camera: 0
+09-28 19:41:38.075 D/ReflectedParamUpdater(19189): ignored struct field coding.gop.values
+09-28 19:41:38.076 D/Camera2CameraImpl(19189): {Camera@680d543[id=0]} CameraDevice.onOpened()
+09-28 19:41:38.076 D/ReflectedParamUpdater(19189): extent() != 1 for single value type: vendor.qti-ext-enc-temporal-layer-bitrate.layerBitrates
+09-28 19:41:38.077 D/Camera2CameraImpl(19189): {Camera@680d543[id=0]} Transitioning camera internal state: OPENING --> OPENED
+09-28 19:41:38.077 D/ReflectedParamUpdater(19189): ignored struct field coding.qp.values
+09-28 19:41:38.078 D/CameraStateRegistry(19189): Recalculating open cameras:
+09-28 19:41:38.078 D/CameraStateRegistry(19189): Camera                                       State                 
+09-28 19:41:38.078 D/CameraStateRegistry(19189): -------------------------------------------------------------------
+09-28 19:41:38.078 D/CameraStateRegistry(19189): Camera@680d543[id=0]                         OPEN                  
+09-28 19:41:38.078 D/CameraStateRegistry(19189): Camera@c35464a[id=1]                         UNKNOWN               
+09-28 19:41:38.078 D/CameraStateRegistry(19189): -------------------------------------------------------------------
+09-28 19:41:38.078 D/CameraStateRegistry(19189): Open count: 1 (Max allowed: 1)
+09-28 19:41:38.078 D/CameraStateMachine(19189): New public camera state CameraState{type=OPEN, error=null} from OPEN and null
+09-28 19:41:38.078 D/CameraStateMachine(19189): Publishing new public camera state CameraState{type=OPEN, error=null}
+09-28 19:41:38.080 D/UseCaseAttachState(19189): All use case: [androidx.camera.video.VideoCapture-2ceba380-ea30-4f9f-9530-20cebc73a12349454813, MeteringRepeating182381697] for camera: 0
+09-28 19:41:38.080 D/ReflectedParamUpdater(19189): extent() != 1 for single value type: vendor.qti-ext-enc-info-metadata-cvp.reserved
+09-28 19:41:38.083 I/CCodecConfig(19189): query failed after returning 24 values (BAD_INDEX)
+09-28 19:41:38.084 W/ColorUtils(19189): expected specified color aspects (0:0:255:255)
+09-28 19:41:38.088 I/MediaCodec(19189): MediaCodec will operate in async mode
+09-28 19:41:38.089 D/UseCaseAttachState(19189): Active and attached use case: [androidx.camera.video.VideoCapture-2ceba380-ea30-4f9f-9530-20cebc73a12349454813, MeteringRepeating182381697] for camera: 0
+09-28 19:41:38.095 D/CodecSeeding(19189): Seed: codec c2.qti.avc.encoder, mediatype video/avc, overrideable 1
+09-28 19:41:38.095 D/CodecProperties(19189): setTuningValue(vq-target-bpp,0)
+09-28 19:41:38.095 D/CodecProperties(19189): setTuningValue(vq-target-bpp-1080p,1.90)
+09-28 19:41:38.095 D/CodecProperties(19189): setTuningValue(vq-target-bpp-720p,2.25)
+09-28 19:41:38.095 D/CodecProperties(19189): setTuningValue(vq-target-bpp-540p,2.65)
+09-28 19:41:38.095 D/CodecProperties(19189): setTuningValue(vq-target-bpp-480p,3.00)
+09-28 19:41:38.095 D/CodecProperties(19189): setTuningValue(vq-target-bpp-320x240,0)
+09-28 19:41:38.095 D/CodecProperties(19189): setTuningValue(vq-target-qpmax,-1)
+09-28 19:41:38.095 D/CodecProperties(19189): setTuningValue(vq-target-qpmax-1080p,45)
+09-28 19:41:38.095 D/CodecProperties(19189): setTuningValue(vq-target-qpmax-720p,43)
+09-28 19:41:38.096 D/CodecProperties(19189): setTuningValue(vq-target-qpmax-540p,42)
+09-28 19:41:38.096 D/CodecProperties(19189): setTuningValue(vq-target-qpmax-480p,38)
+09-28 19:41:38.096 D/CodecProperties(19189): setTuningValue(vq-bitrate-phaseout,1.75)
+09-28 19:41:38.096 D/CodecProperties(19189): setTuningValue(vq-boost-missing-qp,0.20)
+09-28 19:41:38.096 D/CodecProperties(19189): setFeatureValue(can-swap-width-height,1)
+09-28 19:41:38.096 D/CodecProperties(19189): setFeatureValue(intra-refresh,0)
+09-28 19:41:38.096 D/CodecProperties(19189): setFeatureValue(video-minimum-quality,0)
+09-28 19:41:38.096 D/CodecProperties(19189): setFeatureValue(_vq_eligible.device,1)
+09-28 19:41:38.096 D/CodecProperties(19189): setFeatureValue(_quality.target,1)
+09-28 19:41:38.096 D/CodecSeeding(19189): Seed: codec c2.qti.avc.encoder, mediatype video/avc, overrideable 0
+09-28 19:41:38.097 D/VQApply (19189): minquality: codec claims to implement minquality=1
+09-28 19:41:38.099 W/ColorUtils(19189): expected specified color aspects (0:0:255:255)
+09-28 19:41:38.100 W/Codec2Client(19189): query -- param skipped: index = 3254781982.
+09-28 19:41:38.100 I/CCodecConfig(19189): query failed after returning 25 values (BAD_INDEX)
+09-28 19:41:38.104 D/VideoEncoder(19189): Transitioning encoder internal state: null --> CONFIGURED
+09-28 19:41:38.104 D/Recorder(19189): Video source has transitioned to state: ACTIVE_NON_STREAMING
+09-28 19:41:38.104 D/VideoEncoderSession(19189): provide surface: Surface(name=null)/@0x97eb398
+09-28 19:41:38.105 D/SyncCaptureSessionBase(19189): [androidx.camera.camera2.internal.SynchronizedCaptureSessionBaseImpl@ab4c257] getSurface...done
+09-28 19:41:38.106 D/Recorder(19189): VideoEncoder is created. androidx.camera.video.internal.encoder.EncoderImpl@70d2fd6
+09-28 19:41:38.106 D/Recorder(19189): Transitioning streamId: 0 --> 159298456
+09-28 19:41:38.106 D/CaptureSession(19189): Opening capture session.
+09-28 19:41:38.106 D/VideoCapture(19189): Stream info update: old: StreamInfo{id=0, streamState=INACTIVE, inProgressTransformationInfo=null} new: StreamInfo{id=159298456, streamState=INACTIVE, inProgressTransformationInfo=null}
+09-28 19:41:38.106 D/Recorder(19189): Transitioning Recorder internal state: PENDING_RECORDING --> RECORDING
+09-28 19:41:38.107 D/VideoCapture(19189): Stream info update: old: StreamInfo{id=159298456, streamState=INACTIVE, inProgressTransformationInfo=null} new: StreamInfo{id=159298456, streamState=ACTIVE, inProgressTransformationInfo=null}
+09-28 19:41:38.107 D/VideoCapture(19189): A newer surface update is requested. Previous surface update cancelled.
+09-28 19:41:38.109 D/Recorder(19189): Sending VideoRecordEvent Start
+09-28 19:41:38.110 I/lumella (19189): recording started -> /storage/emulated/0/Android/data/com.woolab.lumella/files/perf-hd24-pov-a.mp4
+09-28 19:41:38.112 D/VideoEncoder(19189): Start on 15:59:25.992
+09-28 19:41:38.115 W/Codec2Client(19189): query -- param skipped: index = 1342179345.
+09-28 19:41:38.115 W/Codec2Client(19189): query -- param skipped: index = 2415921170.
+09-28 19:41:38.115 D/DeferrableSurface(19189): New surface in use[total_surfaces=3, used_surfaces=2](androidx.camera.core.impl.ImmediateSurface@78dd95a}
+09-28 19:41:38.116 D/DeferrableSurface(19189): use count+1, useCount=1 androidx.camera.core.impl.ImmediateSurface@78dd95a
+09-28 19:41:38.116 D/DeferrableSurface(19189): use count+1, useCount=2 androidx.camera.core.SurfaceRequest$2@98fbc77
+09-28 19:41:38.116 I/CCodecBufferChannel(19189): [c2.qti.avc.encoder#573] Created output block pool with allocatorID 16 => poolID 216 - OK
+09-28 19:41:38.118 D/VideoEncoder(19189): Transitioning encoder internal state: CONFIGURED --> STARTED
+09-28 19:41:38.192 D/Camera2CameraImpl(19189): {Camera@680d543[id=0]} Use case androidx.camera.video.VideoCapture-2ceba380-ea30-4f9f-9530-20cebc73a12349454813 UPDATED
+09-28 19:41:38.194 D/UseCaseAttachState(19189): Active and attached use case: [androidx.camera.video.VideoCapture-2ceba380-ea30-4f9f-9530-20cebc73a12349454813, MeteringRepeating182381697] for camera: 0
+09-28 19:41:38.199 D/CaptureSession(19189): Attempting to send capture request onConfigured
+09-28 19:41:38.199 D/CaptureSession(19189): Issuing request for session.
+09-28 19:41:38.200 D/Camera2CaptureRequestBuilder(19189): createCaptureRequest
+09-28 19:41:38.206 D/CaptureSession(19189): CameraCaptureSession.onConfigured() mState=OPENED
+09-28 19:41:38.207 D/CaptureSession(19189): CameraCaptureSession.onReady() OPENED
+09-28 19:41:39.072 D/C2OMXNode(19189): dataspace changed to 0x104 pixel format: 0x7fa30c06
+09-28 19:41:39.072 D/VideoCapture(19189): cameraCaptureResult timestampNs = 194495518192343, current system uptimeMs = 57566957, current system realtimeMs = 194495597
+09-28 19:41:39.073 D/Recorder(19189): Video source has transitioned to state: ACTIVE_STREAMING
+09-28 19:41:39.086 D/C2Store (19189): debug.c2.use_dmabufheaps set, forcing DMABUF Heaps
+09-28 19:41:39.086 D/C2Store (19189): Using DMABUF Heaps
+09-28 19:41:39.088 D/Codec2-OutputBufferQueue(19189): set max dequeue count 11 from update
+09-28 19:41:39.090 D/VideoEncoder(19189): Drop buffer by codec config.
+09-28 19:41:39.091 D/VideoEncoder(19189): data timestampUs = 57566878402, data timebase = UPTIME, current system uptimeMs = 57566976, current system realtimeMs = 194495616
+09-28 19:41:39.092 D/Recorder(19189): Received video keyframe. Starting muxer...
+09-28 19:41:39.098 D/Recorder(19189): Update stream transformation info: TransformationInfo{getCropRect=Rect(0, 0 - 1280, 720), getRotationDegrees=270, getTargetRotation=-1, hasCameraTransform=true, getSensorToBufferTransform=Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 0.0][0.0, 0.0, 1.0]}, getMirroring=false}
+09-28 19:41:39.098 D/VideoCapture(19189): Stream info update: old: StreamInfo{id=159298456, streamState=ACTIVE, inProgressTransformationInfo=null} new: StreamInfo{id=159298456, streamState=ACTIVE, inProgressTransformationInfo=TransformationInfo{getCropRect=Rect(0, 0 - 1280, 720), getRotationDegrees=270, getTargetRotation=-1, hasCameraTransform=true, getSensorToBufferTransform=Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 0.0][0.0, 0.0, 1.0]}, getMirroring=false}}
+09-28 19:41:39.099 I/MPEG4Writer(19189): limits: 4503599627370495/0 bytes/us, bit rate: -1 bps and the estimated moov size 3192 bytes
+09-28 19:41:39.100 D/Recorder(19189): First video time: 57566878402 (15:59:26.878)
+09-28 19:41:39.101 I/MPEG4Writer(19189): setStartTimestampUs: 57566878402
+09-28 19:41:39.101 I/MPEG4Writer(19189): Earliest track starting time: 57566878402
+09-28 19:41:39.101 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 50 more Status ...
+09-28 19:41:41.247 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:41:41.284 D/PipelineWatcher(19189): DEBUG: elapsed 0 / 12
+09-28 19:41:41.304 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 36 more Status ...
+09-28 19:41:42.832 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:41:42.850 I/lumella (19189): perf: capture reads=125 lateReads=0 lostReads=0 maxCycleMs=47 maxHandleMs=7 chunkMs=40 bufferMs=400
+09-28 19:41:42.864 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 40 more Status ...
+09-28 19:41:44.580 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:41:44.602 D/PipelineWatcher(19189): DEBUG: elapsed 0 / 12
+09-28 19:41:44.626 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 8 more Status ...
+09-28 19:41:44.987 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:41:44.990 I/lumella (19189): debug: 음성 감지 주입
+09-28 19:41:45.067 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 24 more Status ...
+09-28 19:41:46.079 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:41:46.085 I/lumella (19189): debug: 음성 종료 주입
+09-28 19:41:46.085 I/lumella (19189): turn end (VAD): audioChunks=1457
+09-28 19:41:46.164 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 6 more Status ...
+09-28 19:41:46.423 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:41:46.430 D/lumella (19189): 응답 경계: 억제 해제 + 리셋
+09-28 19:41:46.454 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 9 more Status ...
+09-28 19:41:46.864 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:41:46.902 I/lumella (19189): 튜터 발화 시작 (TTFA 817ms)
+09-28 19:41:46.905 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 5 more Status ...
+09-28 19:41:47.165 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:41:47.176 I/lumella (19189): debug: 입력 전사 주입 = 어제 친구가 만났어요
+09-28 19:41:47.207 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 14 more Status ...
+09-28 19:41:47.824 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:41:47.851 I/lumella (19189): perf: capture reads=125 lateReads=0 lostReads=0 maxCycleMs=67 maxHandleMs=7 chunkMs=40 bufferMs=400
+09-28 19:41:47.877 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 0 more Status ...
+09-28 19:41:47.907 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:41:47.923 D/PipelineWatcher(19189): DEBUG: elapsed 0 / 12
+09-28 19:41:47.946 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 37 more Status ...
+09-28 19:41:49.530 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:41:49.573 I/lumella (19189): 튜터 발화 끝
+09-28 19:41:49.574 I/lumella (19189): perf: playback underruns=0 audioMs=2700 wallMs=2650 chunks=10 maxWriteMs=772 sumWriteMs=2560 maxTapMs=0 bufferFrames=12000 minLeadMs=243 maxGapMs=29 minLeadAtChunk=1
+09-28 19:41:49.580 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:41:49.584 I/lumella (19189): 음성 명령: 사진 촬영 (call_id=call_xcklZyp7Q6XfGxYn)
+09-28 19:41:49.652 I/lumella (19189): capture during recording; closing segment to lift a frame
+09-28 19:41:49.655 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:41:49.717 D/Recorder(19189): Transitioning Recorder internal state: RECORDING --> STOPPING
+09-28 19:41:49.723 D/VideoEncoder(19189): Transitioning encoder internal state: STARTED --> STOPPING
+09-28 19:41:49.723 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:41:49.723 D/VideoEncoder(19189): Stop on 15:59:37.602
+09-28 19:41:49.724 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 1 more Status ...
+09-28 19:41:49.781 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:41:49.831 D/VideoEncoder(19189): Drop buffer by not in start-stop range.
+09-28 19:41:49.836 D/VideoEncoder(19189): Transitioning encoder internal state: STOPPING --> CONFIGURED
+09-28 19:41:49.836 D/Recorder(19189): Encodings end successfully.
+09-28 19:41:49.836 V/MediaWriter(19189): Track event err/info msg:101, trackId:1, type:1000,val:-1011
+09-28 19:41:49.836 I/MPEG4Writer(19189): Received total/0-length (257/0) buffers and encoded 257 frames. - Video
+09-28 19:41:49.837 I/MPEG4Writer(19189): Adjust the moov start time from 57566878402 us -> 57566878402 us
+09-28 19:41:49.837 I/MPEG4Writer(19189): MOOV atom was written to the file
+09-28 19:41:49.853 W/GraphicBufferSource(19189): onFrameAvailable: EOS is sent, ignoring frame
+09-28 19:41:49.862 E/MPEG4Writer(19189): Stop() called but track is not started or stopped
+09-28 19:41:49.863 D/Recorder(19189): Sending VideoRecordEvent Finalize
+09-28 19:41:49.864 D/Recorder(19189): Update stream transformation info: null
+09-28 19:41:49.864 D/Recorder(19189): Transitioning Recorder internal state: STOPPING --> IDLING
+09-28 19:41:49.864 I/lumella (19189): recording finalized ok=true err=0 bytes=file:///storage/emulated/0/Android/data/com.woolab.lumella/files/perf-hd24-pov-a.mp4
+09-28 19:41:49.865 D/Recorder(19189): Video source has transitioned to state: INACTIVE
+09-28 19:41:49.866 D/DeferrableSurface(19189): surface closed,  useCount=2 closed=true androidx.camera.core.SurfaceRequest$2@98fbc77
+09-28 19:41:49.866 D/DeferrableSurface(19189): surface closed,  useCount=0 closed=true androidx.camera.core.processing.SurfaceEdge$SettableSurface@e32a19b
+09-28 19:41:49.866 D/DeferrableSurface(19189): Surface terminated[total_surfaces=2, used_surfaces=2](androidx.camera.core.processing.SurfaceEdge$SettableSurface@e32a19b}
+09-28 19:41:49.866 D/DeferrableSurface(19189): use count-1,  useCount=1 closed=true androidx.camera.core.SurfaceRequest$2@98fbc77
+09-28 19:41:49.868 I/lumella (19189): debug: rec finalized /storage/emulated/0/Android/data/com.woolab.lumella/files/perf-hd24-pov-a.mp4
+09-28 19:41:49.869 D/Camera2CameraImpl(19189): {Camera@680d543[id=0]} Use cases [androidx.camera.video.VideoCapture-2ceba380-ea30-4f9f-9530-20cebc73a12349454813] now DETACHED for camera
+09-28 19:41:49.870 D/UseCaseAttachState(19189): All use case: [MeteringRepeating182381697] for camera: 0
+09-28 19:41:49.871 D/MeteringRepeating(19189): MeteringRepeating clear!
+09-28 19:41:49.871 D/DeferrableSurface(19189): surface closed,  useCount=1 closed=true androidx.camera.core.impl.ImmediateSurface@78dd95a
+09-28 19:41:49.872 D/Camera2CameraImpl(19189): {Camera@680d543[id=0]} Resetting Capture Session
+09-28 19:41:49.874 D/Camera2CameraImpl(19189): {Camera@680d543[id=0]} Releasing session in state OPENED
+09-28 19:41:49.874 D/UseCaseAttachState(19189): Active and attached use case: [] for camera: 0
+09-28 19:41:49.876 D/UseCaseAttachState(19189): Active and attached use case: [] for camera: 0
+09-28 19:41:49.878 D/Camera2CameraImpl(19189): {Camera@680d543[id=0]} Closing camera.
+09-28 19:41:49.878 D/Camera2CameraImpl(19189): {Camera@680d543[id=0]} Transitioning camera internal state: OPENED --> CLOSING
+09-28 19:41:49.879 D/CameraStateRegistry(19189): Recalculating open cameras:
+09-28 19:41:49.879 D/CameraStateRegistry(19189): Camera                                       State                 
+09-28 19:41:49.879 D/CameraStateRegistry(19189): -------------------------------------------------------------------
+09-28 19:41:49.879 D/CameraStateRegistry(19189): Camera@680d543[id=0]                         CLOSING               
+09-28 19:41:49.879 D/CameraStateRegistry(19189): Camera@c35464a[id=1]                         UNKNOWN               
+09-28 19:41:49.879 D/CameraStateRegistry(19189): -------------------------------------------------------------------
+09-28 19:41:49.879 D/CameraStateRegistry(19189): Open count: 1 (Max allowed: 1)
+09-28 19:41:49.880 D/CameraStateMachine(19189): New public camera state CameraState{type=CLOSING, error=null} from CLOSING and null
+09-28 19:41:49.880 D/CameraStateMachine(19189): Publishing new public camera state CameraState{type=CLOSING, error=null}
+09-28 19:41:49.880 D/Camera2CameraImpl(19189): {Camera@680d543[id=0]} Resetting Capture Session
+09-28 19:41:49.881 D/Camera2CameraImpl(19189): {Camera@680d543[id=0]} Releasing session in state CLOSING
+09-28 19:41:49.881 D/CaptureSession(19189): onSessionFinished()
+09-28 19:41:49.896 W/GraphicBufferSource(19189): onFrameAvailable: EOS is sent, ignoring frame
+09-28 19:41:50.053 D/CameraOrientationUtil(19189): getRelativeImageRotation: destRotationDegrees=0, sourceRotationDegrees=90, isOppositeFacing=true, result=90
+09-28 19:41:50.053 D/CameraOrientationUtil(19189): getRelativeImageRotation: destRotationDegrees=0, sourceRotationDegrees=90, isOppositeFacing=true, result=90
+09-28 19:41:50.055 D/RecorderVideoCapabilities(19189): profiles = ImmutableEncoderProfilesProxy{defaultDurationSeconds=30, recommendedFileFormat=2, audioProfiles=[AudioProfileProxy{codec=3, mediaType=audio/mp4a-latm, bitrate=156000, sampleRate=48000, channels=2, profile=1}], videoProfiles=[VideoProfileProxy{codec=2, mediaType=video/avc, bitrate=20000000, frameRate=30, width=1920, height=1080, profile=-1, bitDepth=8, chromaSubsampling=0, hdrFormat=0}]}
+09-28 19:41:50.055 D/RecorderVideoCapabilities(19189): profiles = ImmutableEncoderProfilesProxy{defaultDurationSeconds=30, recommendedFileFormat=2, audioProfiles=[AudioProfileProxy{codec=3, mediaType=audio/mp4a-latm, bitrate=156000, sampleRate=48000, channels=2, profile=1}], videoProfiles=[VideoProfileProxy{codec=2, mediaType=video/avc, bitrate=14000000, frameRate=30, width=1280, height=720, profile=-1, bitDepth=8, chromaSubsampling=0, hdrFormat=0}]}
+09-28 19:41:50.056 D/RecorderVideoCapabilities(19189): profiles = ImmutableEncoderProfilesProxy{defaultDurationSeconds=30, recommendedFileFormat=2, audioProfiles=[AudioProfileProxy{codec=3, mediaType=audio/mp4a-latm, bitrate=156000, sampleRate=48000, channels=2, profile=1}], videoProfiles=[VideoProfileProxy{codec=2, mediaType=video/avc, bitrate=2000000, frameRate=30, width=720, height=480, profile=-1, bitDepth=8, chromaSubsampling=0, hdrFormat=0}]}
+09-28 19:41:50.056 D/QualitySelector(19189): supportedQualities = [ConstantQuality{value=6, name=FHD}, ConstantQuality{value=5, name=HD}, ConstantQuality{value=4, name=SD}]
+09-28 19:41:50.056 D/QualitySelector(19189): Select quality by fallbackStrategy = RuleStrategy{fallbackQuality=ConstantQuality{value=4, name=SD}, fallbackRule=3}
+09-28 19:41:50.056 D/QualitySelector(19189): sizeSortedQualities = [ConstantQuality{value=8, name=UHD}, ConstantQuality{value=6, name=FHD}, ConstantQuality{value=5, name=HD}, ConstantQuality{value=4, name=SD}], fallback quality = ConstantQuality{value=4, name=SD}, largerQualities = [ConstantQuality{value=5, name=HD}, ConstantQuality{value=6, name=FHD}], smallerQualities = []
+09-28 19:41:50.057 D/VideoCapture(19189): Found selectedQualities [ConstantQuality{value=5, name=HD}, ConstantQuality{value=6, name=FHD}] by QualitySelector{preferredQualities=[ConstantQuality{value=5, name=HD}], fallbackStrategy=RuleStrategy{fallbackQuality=ConstantQuality{value=4, name=SD}, fallbackRule=3}}
+09-28 19:41:50.059 D/VideoCapture(19189): Set custom ordered resolutions = [1280x720, 1920x1080]
+09-28 19:41:50.065 D/RecorderVideoCapabilities(19189): profiles = ImmutableEncoderProfilesProxy{defaultDurationSeconds=30, recommendedFileFormat=2, audioProfiles=[AudioProfileProxy{codec=3, mediaType=audio/mp4a-latm, bitrate=156000, sampleRate=48000, channels=2, profile=1}], videoProfiles=[VideoProfileProxy{codec=2, mediaType=video/avc, bitrate=20000000, frameRate=30, width=1920, height=1080, profile=-1, bitDepth=8, chromaSubsampling=0, hdrFormat=0}]}
+09-28 19:41:50.065 D/RecorderVideoCapabilities(19189): profiles = ImmutableEncoderProfilesProxy{defaultDurationSeconds=30, recommendedFileFormat=2, audioProfiles=[AudioProfileProxy{codec=3, mediaType=audio/mp4a-latm, bitrate=156000, sampleRate=48000, channels=2, profile=1}], videoProfiles=[VideoProfileProxy{codec=2, mediaType=video/avc, bitrate=14000000, frameRate=30, width=1280, height=720, profile=-1, bitDepth=8, chromaSubsampling=0, hdrFormat=0}]}
+09-28 19:41:50.066 D/RecorderVideoCapabilities(19189): profiles = ImmutableEncoderProfilesProxy{defaultDurationSeconds=30, recommendedFileFormat=2, audioProfiles=[AudioProfileProxy{codec=3, mediaType=audio/mp4a-latm, bitrate=156000, sampleRate=48000, channels=2, profile=1}], videoProfiles=[VideoProfileProxy{codec=2, mediaType=video/avc, bitrate=2000000, frameRate=30, width=720, height=480, profile=-1, bitDepth=8, chromaSubsampling=0, hdrFormat=0}]}
+09-28 19:41:50.066 D/QualitySelector(19189): supportedQualities = [ConstantQuality{value=6, name=FHD}, ConstantQuality{value=5, name=HD}, ConstantQuality{value=4, name=SD}]
+09-28 19:41:50.066 D/QualitySelector(19189): Select quality by fallbackStrategy = RuleStrategy{fallbackQuality=ConstantQuality{value=4, name=SD}, fallbackRule=3}
+09-28 19:41:50.066 D/QualitySelector(19189): sizeSortedQualities = [ConstantQuality{value=8, name=UHD}, ConstantQuality{value=6, name=FHD}, ConstantQuality{value=5, name=HD}, ConstantQuality{value=4, name=SD}], fallback quality = ConstantQuality{value=4, name=SD}, largerQualities = [ConstantQuality{value=5, name=HD}, ConstantQuality{value=6, name=FHD}], smallerQualities = []
+09-28 19:41:50.067 D/VideoCapture(19189): Found selectedQualities [ConstantQuality{value=5, name=HD}, ConstantQuality{value=6, name=FHD}] by QualitySelector{preferredQualities=[ConstantQuality{value=5, name=HD}], fallbackStrategy=RuleStrategy{fallbackQuality=ConstantQuality{value=4, name=SD}, fallbackRule=3}}
+09-28 19:41:50.068 D/VideoCapture(19189): Set custom ordered resolutions = [1280x720, 1920x1080]
+09-28 19:41:50.069 D/VideoCapture(19189): onSuggestedStreamSpecUpdated: StreamSpec{resolution=1280x720, dynamicRange=DynamicRange@47f4bd9{encoding=SDR, bitDepth=8}, expectedFrameRateRange=[24, 24], implementationOptions=androidx.camera.camera2.impl.Camera2ImplConfig@6aa41c3}
+09-28 19:41:50.071 D/RecorderVideoCapabilities(19189): profiles = ImmutableEncoderProfilesProxy{defaultDurationSeconds=30, recommendedFileFormat=2, audioProfiles=[AudioProfileProxy{codec=3, mediaType=audio/mp4a-latm, bitrate=156000, sampleRate=48000, channels=2, profile=1}], videoProfiles=[VideoProfileProxy{codec=2, mediaType=video/avc, bitrate=20000000, frameRate=30, width=1920, height=1080, profile=-1, bitDepth=8, chromaSubsampling=0, hdrFormat=0}]}
+09-28 19:41:50.071 D/RecorderVideoCapabilities(19189): profiles = ImmutableEncoderProfilesProxy{defaultDurationSeconds=30, recommendedFileFormat=2, audioProfiles=[AudioProfileProxy{codec=3, mediaType=audio/mp4a-latm, bitrate=156000, sampleRate=48000, channels=2, profile=1}], videoProfiles=[VideoProfileProxy{codec=2, mediaType=video/avc, bitrate=14000000, frameRate=30, width=1280, height=720, profile=-1, bitDepth=8, chromaSubsampling=0, hdrFormat=0}]}
+09-28 19:41:50.071 D/RecorderVideoCapabilities(19189): profiles = ImmutableEncoderProfilesProxy{defaultDurationSeconds=30, recommendedFileFormat=2, audioProfiles=[AudioProfileProxy{codec=3, mediaType=audio/mp4a-latm, bitrate=156000, sampleRate=48000, channels=2, profile=1}], videoProfiles=[VideoProfileProxy{codec=2, mediaType=video/avc, bitrate=2000000, frameRate=30, width=720, height=480, profile=-1, bitDepth=8, chromaSubsampling=0, hdrFormat=0}]}
+09-28 19:41:50.072 D/RecorderVideoCapabilities(19189): Using supported quality of ConstantQuality{value=5, name=HD} for size 1280x720
+09-28 19:41:50.072 D/VideoConfigUtil(19189): MediaSpec video mime matches EncoderProfiles. Using EncoderProfiles to derive VIDEO settings [mime type: video/avc]
+09-28 19:41:50.072 D/VidEncVdPrflRslvr(19189): Resolved frame rate 24fps [Video profile frame rate: 30fps, Expected operating range: <UNSPECIFIED>]
+09-28 19:41:50.072 D/VidEncVdPrflRslvr(19189): Resolved VIDEO frame rate: 24fps
+09-28 19:41:50.073 D/VidEncVdPrflRslvr(19189): Using resolved VIDEO bitrate from EncoderProfiles
+09-28 19:41:50.074 D/VideoConfigUtil(19189): Base Bitrate(14000000bps) * Bit Depth Ratio (8 / 8) * Frame Rate Ratio(24 / 30) * Width Ratio(1280 / 1280) * Height Ratio(720 / 720) = 11200000
+09-28 19:41:50.074 D/VideoConfigUtil(19189): Clamped to range [6000000, 6000000] -> 6000000bps
+09-28 19:41:50.074 W/VideoConfigUtil(19189): Unsupported mime type video/avc or profile level -1. Data space is unspecified.
+09-28 19:41:50.078 I/CCodec  (19189): setting up 'default' as default (vendor) store
+09-28 19:41:50.083 I/CCodec  (19189): Created component [c2.qti.avc.encoder]
+09-28 19:41:50.087 D/ReflectedParamUpdater(19189): ignored struct field coding.gop.values
+09-28 19:41:50.088 D/ReflectedParamUpdater(19189): extent() != 1 for single value type: vendor.qti-ext-enc-temporal-layer-bitrate.layerBitrates
+09-28 19:41:50.088 D/ReflectedParamUpdater(19189): ignored struct field coding.qp.values
+09-28 19:41:50.092 D/ReflectedParamUpdater(19189): extent() != 1 for single value type: vendor.qti-ext-enc-info-metadata-cvp.reserved
+09-28 19:41:50.095 D/ReflectedParamUpdater(19189): extent() != 1 for single value type: output.buffers.pool-ids.values
+09-28 19:41:50.101 I/CCodecConfig(19189): query failed after returning 24 values (BAD_INDEX)
+09-28 19:41:50.102 W/ColorUtils(19189): expected specified color aspects (0:0:255:255)
+09-28 19:41:50.111 I/hw-BpHwBinder(19189): onLastStrongRef automatically unlinking death recipients
+09-28 19:41:50.119 D/CameraOrientationUtil(19189): getRelativeImageRotation: destRotationDegrees=180, sourceRotationDegrees=90, isOppositeFacing=true, result=270
+09-28 19:41:50.120 D/VideoCapture(19189): camera timebase = REALTIME, processing timebase = UPTIME
+09-28 19:41:50.120 D/DeferrableSurface(19189): Surface created[total_surfaces=3, used_surfaces=2](androidx.camera.core.processing.SurfaceEdge$SettableSurface@6599a40}
+09-28 19:41:50.122 D/DeferrableSurface(19189): Surface created[total_surfaces=4, used_surfaces=2](androidx.camera.core.SurfaceRequest$2@35e1a6c}
+09-28 19:41:50.124 D/DeferrableSurface(19189): New surface in use[total_surfaces=4, used_surfaces=3](androidx.camera.core.SurfaceRequest$2@35e1a6c}
+09-28 19:41:50.125 D/DeferrableSurface(19189): use count+1, useCount=1 androidx.camera.core.SurfaceRequest$2@35e1a6c
+09-28 19:41:50.125 D/Recorder(19189): Surface is requested in state: CONFIGURING, Current surface: 0
+09-28 19:41:50.127 D/RecorderVideoCapabilities(19189): profiles = ImmutableEncoderProfilesProxy{defaultDurationSeconds=30, recommendedFileFormat=2, audioProfiles=[AudioProfileProxy{codec=3, mediaType=audio/mp4a-latm, bitrate=156000, sampleRate=48000, channels=2, profile=1}], videoProfiles=[VideoProfileProxy{codec=2, mediaType=video/avc, bitrate=20000000, frameRate=30, width=1920, height=1080, profile=-1, bitDepth=8, chromaSubsampling=0, hdrFormat=0}]}
+09-28 19:41:50.127 D/RecorderVideoCapabilities(19189): profiles = ImmutableEncoderProfilesProxy{defaultDurationSeconds=30, recommendedFileFormat=2, audioProfiles=[AudioProfileProxy{codec=3, mediaType=audio/mp4a-latm, bitrate=156000, sampleRate=48000, channels=2, profile=1}], videoProfiles=[VideoProfileProxy{codec=2, mediaType=video/avc, bitrate=14000000, frameRate=30, width=1280, height=720, profile=-1, bitDepth=8, chromaSubsampling=0, hdrFormat=0}]}
+09-28 19:41:50.127 D/RecorderVideoCapabilities(19189): profiles = ImmutableEncoderProfilesProxy{defaultDurationSeconds=30, recommendedFileFormat=2, audioProfiles=[AudioProfileProxy{codec=3, mediaType=audio/mp4a-latm, bitrate=156000, sampleRate=48000, channels=2, profile=1}], videoProfiles=[VideoProfileProxy{codec=2, mediaType=video/avc, bitrate=2000000, frameRate=30, width=720, height=480, profile=-1, bitDepth=8, chromaSubsampling=0, hdrFormat=0}]}
+09-28 19:41:50.128 D/CameraOrientationUtil(19189): getRelativeImageRotation: destRotationDegrees=180, sourceRotationDegrees=90, isOppositeFacing=true, result=270
+09-28 19:41:50.128 D/Recorder(19189): Using supported quality of ConstantQuality{value=5, name=HD} for surface size 1280x720
+09-28 19:41:50.128 D/Recorder(19189): Try to safely release video encoder: null
+09-28 19:41:50.129 D/VideoEncoderSession(19189): Create VideoEncoderSession: VideoEncoderSession@74531505 for androidx.camera.core.SurfaceRequest@2e5371f
+09-28 19:41:50.129 D/VideoConfigUtil(19189): MediaSpec video mime matches EncoderProfiles. Using EncoderProfiles to derive VIDEO settings [mime type: video/avc]
+09-28 19:41:50.129 D/VidEncVdPrflRslvr(19189): Resolved frame rate 24fps [Video profile frame rate: 30fps, Expected operating range: <UNSPECIFIED>]
+09-28 19:41:50.129 I/lumella (19189): debug: 모델이 본 프레임 저장 /storage/emulated/0/Android/data/com.woolab.lumella/files/model-saw.jpg
+09-28 19:41:50.130 D/VidEncVdPrflRslvr(19189): Resolved VIDEO frame rate: 24fps
+09-28 19:41:50.130 D/VidEncVdPrflRslvr(19189): Using resolved VIDEO bitrate from EncoderProfiles
+09-28 19:41:50.131 D/VideoConfigUtil(19189): Base Bitrate(14000000bps) * Bit Depth Ratio (8 / 8) * Frame Rate Ratio(24 / 30) * Width Ratio(1280 / 1280) * Height Ratio(720 / 720) = 11200000
+09-28 19:41:50.131 D/VideoConfigUtil(19189): Clamped to range [6000000, 6000000] -> 6000000bps
+09-28 19:41:50.131 W/VideoConfigUtil(19189): Unsupported mime type video/avc or profile level -1. Data space is unspecified.
+09-28 19:41:50.131 D/VideoEncoder(19189): mInputTimebase = UPTIME
+09-28 19:41:50.132 D/VideoEncoder(19189): mMediaFormat = {color-format=2130708361, i-frame-interval=1, mime=video/avc, width=1280, bitrate=6000000, frame-rate=24, height=720}
+09-28 19:41:50.133 D/Recorder(19189): Transitioning Recorder internal state: CONFIGURING --> PENDING_RECORDING
+09-28 19:41:50.133 I/lumella (19189): segment resume: recording -> /storage/emulated/0/Android/data/com.woolab.lumella/files/perf-hd24-pov-a-2.mp4
+09-28 19:41:50.133 D/VideoCapture(19189): Stream info update: old: StreamInfo{id=0, streamState=INACTIVE, inProgressTransformationInfo=null} new: StreamInfo{id=0, streamState=INACTIVE, inProgressTransformationInfo=null}
+09-28 19:41:50.140 I/CCodec  (19189): setting up 'default' as default (vendor) store
+09-28 19:41:50.149 I/lumella (19189): photo -> realtime model: chars=145476 sent=true
+09-28 19:41:50.149 I/CCodec  (19189): Created component [c2.qti.avc.encoder]
+09-28 19:41:50.156 D/ReflectedParamUpdater(19189): ignored struct field coding.gop.values
+09-28 19:41:50.157 D/ReflectedParamUpdater(19189): extent() != 1 for single value type: vendor.qti-ext-enc-temporal-layer-bitrate.layerBitrates
+09-28 19:41:50.158 D/ReflectedParamUpdater(19189): ignored struct field coding.qp.values
+09-28 19:41:50.161 D/ReflectedParamUpdater(19189): extent() != 1 for single value type: vendor.qti-ext-enc-info-metadata-cvp.reserved
+09-28 19:41:50.164 D/ReflectedParamUpdater(19189): extent() != 1 for single value type: output.buffers.pool-ids.values
+09-28 19:41:50.169 I/CCodecConfig(19189): query failed after returning 24 values (BAD_INDEX)
+09-28 19:41:50.170 W/ColorUtils(19189): expected specified color aspects (0:0:255:255)
+09-28 19:41:50.177 I/VideoEncoder(19189): Selected encoder: c2.qti.avc.encoder
+09-28 19:41:50.181 I/hw-BpHwBinder(19189): onLastStrongRef automatically unlinking death recipients
+09-28 19:41:50.185 I/CCodec  (19189): setting up 'default' as default (vendor) store
+09-28 19:41:50.190 I/CCodec  (19189): Created component [c2.qti.avc.encoder]
+09-28 19:41:50.195 D/ReflectedParamUpdater(19189): ignored struct field coding.gop.values
+09-28 19:41:50.196 D/ReflectedParamUpdater(19189): extent() != 1 for single value type: vendor.qti-ext-enc-temporal-layer-bitrate.layerBitrates
+09-28 19:41:50.197 D/ReflectedParamUpdater(19189): ignored struct field coding.qp.values
+09-28 19:41:50.201 D/ReflectedParamUpdater(19189): extent() != 1 for single value type: vendor.qti-ext-enc-info-metadata-cvp.reserved
+09-28 19:41:50.204 D/ReflectedParamUpdater(19189): extent() != 1 for single value type: output.buffers.pool-ids.values
+09-28 19:41:50.208 I/CCodecConfig(19189): query failed after returning 24 values (BAD_INDEX)
+09-28 19:41:50.208 W/ColorUtils(19189): expected specified color aspects (0:0:255:255)
+09-28 19:41:50.210 I/MediaCodec(19189): MediaCodec will operate in async mode
+09-28 19:41:50.211 D/VQApply (19189): minquality: codec claims to implement minquality=1
+09-28 19:41:50.214 W/ColorUtils(19189): expected specified color aspects (0:0:255:255)
+09-28 19:41:50.215 W/Codec2Client(19189): query -- param skipped: index = 3254781982.
+09-28 19:41:50.216 I/CCodecConfig(19189): query failed after returning 25 values (BAD_INDEX)
+09-28 19:41:50.219 D/VideoEncoder(19189): Transitioning encoder internal state: null --> CONFIGURED
+09-28 19:41:50.219 D/Recorder(19189): Video source has transitioned to state: ACTIVE_NON_STREAMING
+09-28 19:41:50.220 D/VideoEncoderSession(19189): provide surface: Surface(name=null)/@0x7281370
+09-28 19:41:50.220 D/Recorder(19189): VideoEncoder is created. androidx.camera.video.internal.encoder.EncoderImpl@bdd6f6e
+09-28 19:41:50.220 D/Recorder(19189): Transitioning streamId: 0 --> 120066928
+09-28 19:41:50.220 D/VideoCapture(19189): Stream info update: old: StreamInfo{id=0, streamState=INACTIVE, inProgressTransformationInfo=null} new: StreamInfo{id=120066928, streamState=INACTIVE, inProgressTransformationInfo=null}
+09-28 19:41:50.221 D/Recorder(19189): Transitioning Recorder internal state: PENDING_RECORDING --> RECORDING
+09-28 19:41:50.221 D/VideoCapture(19189): Stream info update: old: StreamInfo{id=120066928, streamState=INACTIVE, inProgressTransformationInfo=null} new: StreamInfo{id=120066928, streamState=ACTIVE, inProgressTransformationInfo=null}
+09-28 19:41:50.221 D/Recorder(19189): Sending VideoRecordEvent Start
+09-28 19:41:50.221 D/VideoCapture(19189): A newer surface update is requested. Previous surface update cancelled.
+09-28 19:41:50.221 D/VideoEncoder(19189): Start on 15:59:38.106
+09-28 19:41:50.222 I/lumella (19189): recording started -> /storage/emulated/0/Android/data/com.woolab.lumella/files/perf-hd24-pov-a-2.mp4
+09-28 19:41:50.224 W/Codec2Client(19189): query -- param skipped: index = 1342179345.
+09-28 19:41:50.224 W/Codec2Client(19189): query -- param skipped: index = 2415921170.
+09-28 19:41:50.225 I/CCodecBufferChannel(19189): [c2.qti.avc.encoder#538] Created output block pool with allocatorID 16 => poolID 220 - OK
+09-28 19:41:50.227 D/VideoEncoder(19189): Transitioning encoder internal state: CONFIGURED --> STARTED
+09-28 19:41:50.362 W/GraphicBufferSource(19189): released unpopulated slots: [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63]
+09-28 19:41:50.364 W/libc    (19189): Access denied finding property "vendor.camera.aux.packagelist"
+09-28 19:41:50.365 D/UseCaseAttachState(19189): Active and attached use case: [] for camera: 0
+09-28 19:41:50.367 D/Camera2CameraImpl(19189): {Camera@680d543[id=0]} Use case androidx.camera.video.VideoCapture-f7042644-d3e7-4d66-9460-879eceb88fb9219010685 INACTIVE
+09-28 19:41:50.367 D/UseCaseAttachState(19189): Active and attached use case: [] for camera: 0
+09-28 19:41:50.368 D/Camera2CameraImpl(19189): {Camera@680d543[id=0]} Use case androidx.camera.video.VideoCapture-f7042644-d3e7-4d66-9460-879eceb88fb9219010685 ACTIVE
+09-28 19:41:50.368 D/UseCaseAttachState(19189): Active and attached use case: [] for camera: 0
+09-28 19:41:50.370 D/Camera2CameraImpl(19189): {Camera@680d543[id=0]} Use cases [androidx.camera.video.VideoCapture-f7042644-d3e7-4d66-9460-879eceb88fb9219010685] now ATTACHED
+09-28 19:41:50.370 D/UseCaseAttachState(19189): All use case: [androidx.camera.video.VideoCapture-f7042644-d3e7-4d66-9460-879eceb88fb9219010685] for camera: 0
+09-28 19:41:50.372 D/MeteringRepeating(19189): MeteringSession SurfaceTexture size: 640x480
+09-28 19:41:50.373 D/DeferrableSurface(19189): Surface created[total_surfaces=5, used_surfaces=3](androidx.camera.core.impl.ImmediateSurface@e73a21}
+09-28 19:41:50.375 D/UseCaseAttachState(19189): Active and attached use case: [androidx.camera.video.VideoCapture-f7042644-d3e7-4d66-9460-879eceb88fb9219010685, MeteringRepeating189627700] for camera: 0
+09-28 19:41:50.377 D/Camera2CameraImpl(19189): {Camera@680d543[id=0]} Resetting Capture Session
+09-28 19:41:50.378 D/Camera2CameraImpl(19189): {Camera@680d543[id=0]} Releasing session in state CLOSING
+09-28 19:41:50.379 D/Camera2CameraImpl(19189): {Camera@680d543[id=0]} Transitioning camera internal state: CLOSING --> REOPENING
+09-28 19:41:50.379 D/CameraStateRegistry(19189): Recalculating open cameras:
+09-28 19:41:50.379 D/CameraStateRegistry(19189): Camera                                       State                 
+09-28 19:41:50.379 D/CameraStateRegistry(19189): -------------------------------------------------------------------
+09-28 19:41:50.379 D/CameraStateRegistry(19189): Camera@680d543[id=0]                         OPENING               
+09-28 19:41:50.379 D/CameraStateRegistry(19189): Camera@c35464a[id=1]                         UNKNOWN               
+09-28 19:41:50.379 D/CameraStateRegistry(19189): -------------------------------------------------------------------
+09-28 19:41:50.379 D/CameraStateRegistry(19189): Open count: 1 (Max allowed: 1)
+09-28 19:41:50.380 D/CameraStateMachine(19189): New public camera state CameraState{type=OPENING, error=null} from OPENING and null
+09-28 19:41:50.380 D/CameraStateMachine(19189): Publishing new public camera state CameraState{type=OPENING, error=null}
+09-28 19:41:50.380 D/Camera2CameraImpl(19189): {Camera@680d543[id=0]} Use case androidx.camera.video.VideoCapture-f7042644-d3e7-4d66-9460-879eceb88fb9219010685 ACTIVE
+09-28 19:41:50.381 D/UseCaseAttachState(19189): Active and attached use case: [androidx.camera.video.VideoCapture-f7042644-d3e7-4d66-9460-879eceb88fb9219010685, MeteringRepeating189627700] for camera: 0
+09-28 19:41:50.384 D/Camera2CameraImpl(19189): {Camera@680d543[id=0]} Use case androidx.camera.video.VideoCapture-f7042644-d3e7-4d66-9460-879eceb88fb9219010685 UPDATED
+09-28 19:41:50.385 D/UseCaseAttachState(19189): Active and attached use case: [androidx.camera.video.VideoCapture-f7042644-d3e7-4d66-9460-879eceb88fb9219010685, MeteringRepeating189627700] for camera: 0
+09-28 19:41:50.387 D/DeferrableSurface(19189): use count-1,  useCount=0 closed=true androidx.camera.core.impl.ImmediateSurface@78dd95a
+09-28 19:41:50.387 D/DeferrableSurface(19189): Surface no longer in use[total_surfaces=5, used_surfaces=2](androidx.camera.core.impl.ImmediateSurface@78dd95a}
+09-28 19:41:50.387 D/DeferrableSurface(19189): Surface terminated[total_surfaces=4, used_surfaces=2](androidx.camera.core.impl.ImmediateSurface@78dd95a}
+09-28 19:41:50.388 D/DeferrableSurface(19189): use count-1,  useCount=0 closed=true androidx.camera.core.SurfaceRequest$2@98fbc77
+09-28 19:41:50.388 D/DeferrableSurface(19189): Surface no longer in use[total_surfaces=4, used_surfaces=1](androidx.camera.core.SurfaceRequest$2@98fbc77}
+09-28 19:41:50.388 D/DeferrableSurface(19189): Surface terminated[total_surfaces=3, used_surfaces=1](androidx.camera.core.SurfaceRequest$2@98fbc77}
+09-28 19:41:50.389 D/Camera2CameraImpl(19189): {Camera@680d543[id=0]} CameraDevice.onClosed()
+09-28 19:41:50.389 D/VideoEncoderSession(19189): Surface can be closed: 159298456
+09-28 19:41:50.389 D/VideoEncoderSession(19189): closeInternal in READY state
+09-28 19:41:50.389 D/Camera2CameraImpl(19189): {Camera@680d543[id=0]} Attempting to open the camera.
+09-28 19:41:50.389 D/Recorder(19189): VideoEncoder can be released: androidx.camera.video.internal.encoder.EncoderImpl@70d2fd6
+09-28 19:41:50.390 D/Recorder(19189): Transitioning streamId: 159298456 --> 0
+09-28 19:41:50.390 D/Camera2CameraImpl(19189): {Camera@680d543[id=0]} No cameras available. Waiting for available camera before opening camera.
+09-28 19:41:50.390 D/Recorder(19189): Transitioning audio state: INITIALIZING --> INITIALIZING
+09-28 19:41:50.390 D/Recorder(19189): Releasing video encoder.
+09-28 19:41:50.390 D/Recorder(19189): Releasing video encoder: androidx.camera.video.internal.encoder.EncoderImpl@70d2fd6
+09-28 19:41:50.390 D/VideoEncoderSession(19189): VideoEncoder is releasing: androidx.camera.video.internal.encoder.EncoderImpl@70d2fd6
+09-28 19:41:50.390 D/Camera2CameraImpl(19189): {Camera@680d543[id=0]} Transitioning camera internal state: REOPENING --> PENDING_OPEN
+09-28 19:41:50.391 D/Recorder(19189): Transitioning Recorder internal state: IDLING --> CONFIGURING
+09-28 19:41:50.391 D/CameraStateRegistry(19189): Recalculating open cameras:
+09-28 19:41:50.391 D/CameraStateRegistry(19189): Camera                                       State                 
+09-28 19:41:50.391 D/CameraStateRegistry(19189): -------------------------------------------------------------------
+09-28 19:41:50.391 D/CameraStateRegistry(19189): Camera@680d543[id=0]                         PENDING_OPEN          
+09-28 19:41:50.391 D/CameraStateRegistry(19189): Camera@c35464a[id=1]                         UNKNOWN               
+09-28 19:41:50.391 D/CameraStateRegistry(19189): -------------------------------------------------------------------
+09-28 19:41:50.391 D/CameraStateRegistry(19189): Open count: 0 (Max allowed: 1)
+09-28 19:41:50.391 D/CameraStateMachine(19189): New public camera state CameraState{type=PENDING_OPEN, error=null} from PENDING_OPEN and null
+09-28 19:41:50.392 D/CameraStateMachine(19189): Publishing new public camera state CameraState{type=PENDING_OPEN, error=null}
+09-28 19:41:50.392 D/Camera2CameraImpl(19189): {Camera@680d543[id=0]} Attempting to open the camera.
+09-28 19:41:50.393 D/CameraStateRegistry(19189): tryOpenCamera(Camera@680d543[id=0]) [Available Cameras: 1, Already Open: false (Previous state: PENDING_OPEN)] --> SUCCESS
+09-28 19:41:50.393 D/CameraStateRegistry(19189): Recalculating open cameras:
+09-28 19:41:50.393 D/CameraStateRegistry(19189): Camera                                       State                 
+09-28 19:41:50.393 D/CameraStateRegistry(19189): -------------------------------------------------------------------
+09-28 19:41:50.393 D/CameraStateRegistry(19189): Camera@680d543[id=0]                         OPENING               
+09-28 19:41:50.393 D/CameraStateRegistry(19189): Camera@c35464a[id=1]                         UNKNOWN               
+09-28 19:41:50.393 D/CameraStateRegistry(19189): -------------------------------------------------------------------
+09-28 19:41:50.393 D/CameraStateRegistry(19189): Open count: 1 (Max allowed: 1)
+09-28 19:41:50.394 D/Camera2CameraImpl(19189): {Camera@680d543[id=0]} Opening camera.
+09-28 19:41:50.394 D/Camera2CameraImpl(19189): {Camera@680d543[id=0]} Transitioning camera internal state: PENDING_OPEN --> OPENING
+09-28 19:41:50.395 D/CameraStateMachine(19189): New public camera state CameraState{type=OPENING, error=null} from OPENING and null
+09-28 19:41:50.395 D/CameraStateMachine(19189): Publishing new public camera state CameraState{type=OPENING, error=null}
+09-28 19:41:50.396 D/UseCaseAttachState(19189): All use case: [androidx.camera.video.VideoCapture-f7042644-d3e7-4d66-9460-879eceb88fb9219010685, MeteringRepeating189627700] for camera: 0
+09-28 19:41:50.400 W/libc    (19189): Access denied finding property "persist.vendor.camera.privapp.list"
+09-28 19:41:50.400 I/hw-BpHwBinder(19189): onLastStrongRef automatically unlinking death recipients
+09-28 19:41:50.403 W/libc    (19189): Access denied finding property "vendor.camera.aux.packagelist"
+09-28 19:41:50.405 I/CCodec  (19189): setting up 'default' as default (vendor) store
+09-28 19:41:50.409 I/CCodec  (19189): Created component [c2.qti.avc.encoder]
+09-28 19:41:50.409 D/Camera2CameraImpl(19189): {Camera@680d543[id=0]} CameraDevice.onOpened()
+09-28 19:41:50.410 D/Camera2CameraImpl(19189): {Camera@680d543[id=0]} Transitioning camera internal state: OPENING --> OPENED
+09-28 19:41:50.411 D/CameraStateRegistry(19189): Recalculating open cameras:
+09-28 19:41:50.411 D/CameraStateRegistry(19189): Camera                                       State                 
+09-28 19:41:50.411 D/CameraStateRegistry(19189): -------------------------------------------------------------------
+09-28 19:41:50.411 D/CameraStateRegistry(19189): Camera@680d543[id=0]                         OPEN                  
+09-28 19:41:50.411 D/CameraStateRegistry(19189): Camera@c35464a[id=1]                         UNKNOWN               
+09-28 19:41:50.411 D/CameraStateRegistry(19189): -------------------------------------------------------------------
+09-28 19:41:50.411 D/CameraStateRegistry(19189): Open count: 1 (Max allowed: 1)
+09-28 19:41:50.412 D/CameraStateMachine(19189): New public camera state CameraState{type=OPEN, error=null} from OPEN and null
+09-28 19:41:50.412 D/CameraStateMachine(19189): Publishing new public camera state CameraState{type=OPEN, error=null}
+09-28 19:41:50.413 D/UseCaseAttachState(19189): All use case: [androidx.camera.video.VideoCapture-f7042644-d3e7-4d66-9460-879eceb88fb9219010685, MeteringRepeating189627700] for camera: 0
+09-28 19:41:50.415 D/UseCaseAttachState(19189): Active and attached use case: [androidx.camera.video.VideoCapture-f7042644-d3e7-4d66-9460-879eceb88fb9219010685, MeteringRepeating189627700] for camera: 0
+09-28 19:41:50.415 D/ReflectedParamUpdater(19189): ignored struct field coding.gop.values
+09-28 19:41:50.416 D/ReflectedParamUpdater(19189): extent() != 1 for single value type: vendor.qti-ext-enc-temporal-layer-bitrate.layerBitrates
+09-28 19:41:50.416 D/ReflectedParamUpdater(19189): ignored struct field coding.qp.values
+09-28 19:41:50.417 D/SyncCaptureSessionBase(19189): [androidx.camera.camera2.internal.SynchronizedCaptureSessionBaseImpl@9bbbdc9] getSurface...done
+09-28 19:41:50.417 D/CaptureSession(19189): Opening capture session.
+09-28 19:41:50.420 D/ReflectedParamUpdater(19189): extent() != 1 for single value type: vendor.qti-ext-enc-info-metadata-cvp.reserved
+09-28 19:41:50.420 D/DeferrableSurface(19189): New surface in use[total_surfaces=3, used_surfaces=2](androidx.camera.core.impl.ImmediateSurface@e73a21}
+09-28 19:41:50.421 D/DeferrableSurface(19189): use count+1, useCount=1 androidx.camera.core.impl.ImmediateSurface@e73a21
+09-28 19:41:50.421 D/DeferrableSurface(19189): use count+1, useCount=2 androidx.camera.core.SurfaceRequest$2@35e1a6c
+09-28 19:41:50.423 D/ReflectedParamUpdater(19189): extent() != 1 for single value type: output.buffers.pool-ids.values
+09-28 19:41:50.425 I/CCodecConfig(19189): query failed after returning 24 values (BAD_INDEX)
+09-28 19:41:50.425 W/ColorUtils(19189): expected specified color aspects (0:0:255:255)
+09-28 19:41:50.427 I/MediaCodec(19189): MediaCodec will operate in async mode
+09-28 19:41:50.428 D/VQApply (19189): minquality: codec claims to implement minquality=1
+09-28 19:41:50.430 W/ColorUtils(19189): expected specified color aspects (0:0:255:255)
+09-28 19:41:50.431 W/Codec2Client(19189): query -- param skipped: index = 3254781982.
+09-28 19:41:50.431 I/CCodecConfig(19189): query failed after returning 25 values (BAD_INDEX)
+09-28 19:41:50.434 D/VideoEncoder(19189): Transitioning encoder internal state: CONFIGURED --> RELEASED
+09-28 19:41:50.434 I/hw-BpHwBinder(19189): onLastStrongRef automatically unlinking death recipients
+09-28 19:41:50.489 D/CaptureSession(19189): Attempting to send capture request onConfigured
+09-28 19:41:50.489 D/CaptureSession(19189): Issuing request for session.
+09-28 19:41:50.490 D/Camera2CaptureRequestBuilder(19189): createCaptureRequest
+09-28 19:41:50.494 D/CaptureSession(19189): CameraCaptureSession.onConfigured() mState=OPENED
+09-28 19:41:50.494 D/CaptureSession(19189): CameraCaptureSession.onReady() OPENED
+09-28 19:41:50.871 D/lumella (19189): 응답 경계: 억제 해제 + 리셋
+09-28 19:41:51.245 D/PipelineWatcher(19189): DEBUG: elapsed 0 / 12
+09-28 19:41:51.390 D/VideoCapture(19189): cameraCaptureResult timestampNs = 194507839891041, current system uptimeMs = 57579275, current system realtimeMs = 194507915
+09-28 19:41:51.391 D/Recorder(19189): Video source has transitioned to state: ACTIVE_STREAMING
+09-28 19:41:51.391 D/C2OMXNode(19189): dataspace changed to 0x104 pixel format: 0x7fa30c06
+09-28 19:41:51.409 D/Codec2-OutputBufferQueue(19189): set max dequeue count 11 from update
+09-28 19:41:51.412 D/VideoEncoder(19189): Drop buffer by codec config.
+09-28 19:41:51.412 D/VideoEncoder(19189): data timestampUs = 57579200100, data timebase = UPTIME, current system uptimeMs = 57579297, current system realtimeMs = 194507937
+09-28 19:41:51.413 D/Recorder(19189): Received video keyframe. Starting muxer...
+09-28 19:41:51.416 D/Recorder(19189): Update stream transformation info: TransformationInfo{getCropRect=Rect(0, 0 - 1280, 720), getRotationDegrees=270, getTargetRotation=-1, hasCameraTransform=true, getSensorToBufferTransform=Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 0.0][0.0, 0.0, 1.0]}, getMirroring=false}
+09-28 19:41:51.417 D/VideoCapture(19189): Stream info update: old: StreamInfo{id=120066928, streamState=ACTIVE, inProgressTransformationInfo=null} new: StreamInfo{id=120066928, streamState=ACTIVE, inProgressTransformationInfo=TransformationInfo{getCropRect=Rect(0, 0 - 1280, 720), getRotationDegrees=270, getTargetRotation=-1, hasCameraTransform=true, getSensorToBufferTransform=Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 0.0][0.0, 0.0, 1.0]}, getMirroring=false}}
+09-28 19:41:51.418 I/MPEG4Writer(19189): limits: 4503599627370495/0 bytes/us, bit rate: -1 bps and the estimated moov size 3192 bytes
+09-28 19:41:51.419 D/Recorder(19189): First video time: 57579200100 (15:59:39.200)
+09-28 19:41:51.419 I/MPEG4Writer(19189): setStartTimestampUs: 57579200100
+09-28 19:41:51.419 I/MPEG4Writer(19189): Earliest track starting time: 57579200100
+09-28 19:41:51.419 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 2 more Status ...
+09-28 19:41:51.555 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:41:51.557 I/lumella (19189): 튜터 발화 시작 (TTFA 5472ms)
+09-28 19:41:51.557 W/AudioTrack(19189): restartIfDisabled(1037): releaseBuffer() track 0xb400007de75a8f00 disabled due to previous underrun, restarting
+09-28 19:41:51.666 I/.woolab.lumell(19189): Background concurrent copying GC freed 19632(2605KB) AllocSpace objects, 17(2072KB) LOS objects, 49% free, 5517KB/10MB, paused 240us,70us total 103.819ms
+09-28 19:41:51.675 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 28 more Status ...
+09-28 19:41:52.812 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:41:52.853 I/lumella (19189): perf: capture reads=125 lateReads=0 lostReads=0 maxCycleMs=47 maxHandleMs=5 chunkMs=40 bufferMs=400
+09-28 19:41:52.862 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 43 more Status ...
+09-28 19:41:54.696 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:41:54.707 D/PipelineWatcher(19189): DEBUG: elapsed 0 / 12
+09-28 19:41:54.736 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 36 more Status ...
+09-28 19:41:56.271 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:41:56.454 I/.woolab.lumell(19189): Background concurrent copying GC freed 22519(4029KB) AllocSpace objects, 66(1760KB) LOS objects, 49% free, 5310KB/10MB, paused 229us,327us total 155.663ms
+09-28 19:41:56.533 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 35 more Status ...
+09-28 19:41:57.821 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:41:57.854 I/lumella (19189): perf: capture reads=125 lateReads=0 lostReads=0 maxCycleMs=53 maxHandleMs=5 chunkMs=40 bufferMs=400
+09-28 19:41:57.866 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 2 more Status ...
+09-28 19:41:57.989 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:41:58.033 D/PipelineWatcher(19189): DEBUG: elapsed 0 / 12
+09-28 19:41:58.034 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 50 more Status ...
+09-28 19:42:00.158 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:42:00.186 I/lumella (19189): 튜터 발화 끝
+09-28 19:42:00.186 I/lumella (19189): perf: playback underruns=0 audioMs=8850 wallMs=8627 chunks=35 maxWriteMs=508 sumWriteMs=8249 maxTapMs=0 bufferFrames=12000 minLeadMs=245 maxGapMs=40 minLeadAtChunk=1
+09-28 19:42:00.188 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 27 more Status ...
+09-28 19:42:01.366 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:42:01.368 D/PipelineWatcher(19189): DEBUG: elapsed 0 / 12
+09-28 19:42:01.407 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 34 more Status ...
+09-28 19:42:02.852 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:42:02.892 I/lumella (19189): perf: capture reads=126 lateReads=0 lostReads=0 maxCycleMs=50 maxHandleMs=6 chunkMs=40 bufferMs=400
+09-28 19:42:02.902 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 1 more Status ...
+09-28 19:42:02.979 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:42:03.016 I/.woolab.lumell(19189): Background concurrent copying GC freed 24014(4701KB) AllocSpace objects, 19(664KB) LOS objects, 49% free, 5357KB/10MB, paused 106us,126us total 123.947ms
+09-28 19:42:03.038 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 39 more Status ...
+09-28 19:42:04.689 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:42:04.698 D/PipelineWatcher(19189): DEBUG: elapsed 0 / 12
+09-28 19:42:04.729 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 12 more Status ...
+09-28 19:42:05.280 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:42:05.302 I/lumella (19189): debug: 음성 감지 주입
+09-28 19:42:05.448 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 25 more Status ...
+09-28 19:42:06.406 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:42:06.439 I/lumella (19189): debug: 음성 종료 주입
+09-28 19:42:06.439 I/lumella (19189): turn end (VAD): audioChunks=509
+09-28 19:42:06.574 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 6 more Status ...
+09-28 19:42:06.740 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:42:06.767 D/lumella (19189): 응답 경계: 억제 해제 + 리셋
+09-28 19:42:06.775 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 9 more Status ...
+09-28 19:42:07.198 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:42:07.201 I/lumella (19189): 튜터 발화 시작 (TTFA 760ms)
+09-28 19:42:07.202 W/AudioTrack(19189): restartIfDisabled(1037): releaseBuffer() track 0xb400007de75a8f00 disabled due to previous underrun, restarting
+09-28 19:42:07.348 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 8 more Status ...
+09-28 19:42:07.615 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:42:07.626 I/lumella (19189): debug: 입력 전사 주입 = 오늘 아침에 빵이 먹었어요
+09-28 19:42:07.684 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 5 more Status ...
+09-28 19:42:07.904 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:42:07.910 I/lumella (19189): perf: capture reads=125 lateReads=0 lostReads=0 maxCycleMs=64 maxHandleMs=11 chunkMs=40 bufferMs=400
+09-28 19:42:07.939 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 0 more Status ...
+09-28 19:42:07.988 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:42:08.026 D/PipelineWatcher(19189): DEBUG: elapsed 0 / 12
+09-28 19:42:08.031 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 41 more Status ...
+09-28 19:42:09.782 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:42:09.828 I/.woolab.lumell(19189): Background concurrent copying GC freed 21931(3865KB) AllocSpace objects, 67(1412KB) LOS objects, 49% free, 5396KB/10MB, paused 198us,267us total 138.769ms
+09-28 19:42:09.832 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 26 more Status ...
+09-28 19:42:10.961 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:42:10.976 I/lumella (19189): 튜터 발화 끝
+09-28 19:42:10.977 I/lumella (19189): perf: playback underruns=0 audioMs=3800 wallMs=3773 chunks=15 maxWriteMs=773 sumWriteMs=3268 maxTapMs=3 bufferFrames=12000 minLeadMs=-51 maxGapMs=293 minLeadAtChunk=1
+09-28 19:42:10.983 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 7 more Status ...
+09-28 19:42:11.317 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:42:11.326 D/PipelineWatcher(19189): DEBUG: elapsed 0 / 12
+09-28 19:42:11.362 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 36 more Status ...
+09-28 19:42:12.899 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:42:12.910 I/lumella (19189): perf: capture reads=125 lateReads=0 lostReads=0 maxCycleMs=46 maxHandleMs=7 chunkMs=40 bufferMs=400
+09-28 19:42:12.941 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 40 more Status ...
+09-28 19:42:14.649 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:42:14.659 D/PipelineWatcher(19189): DEBUG: elapsed 0 / 12
+09-28 19:42:14.689 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 76 more Status ...
+09-28 19:42:17.901 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:42:17.931 I/.woolab.lumell(19189): Background concurrent copying GC freed 29209(5472KB) AllocSpace objects, 2(32KB) LOS objects, 49% free, 5366KB/10MB, paused 94us,111us total 111.802ms
+09-28 19:42:17.939 I/lumella (19189): perf: capture reads=126 lateReads=0 lostReads=0 maxCycleMs=45 maxHandleMs=6 chunkMs=40 bufferMs=400
+09-28 19:42:17.957 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 0 more Status ...
+09-28 19:42:17.977 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:42:17.986 D/PipelineWatcher(19189): DEBUG: elapsed 0 / 12
+09-28 19:42:18.040 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 78 more Status ...
+09-28 19:42:21.312 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:42:21.338 D/PipelineWatcher(19189): DEBUG: elapsed 0 / 12
+09-28 19:42:21.370 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 37 more Status ...
+09-28 19:42:22.934 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:42:22.985 I/lumella (19189): perf: capture reads=126 lateReads=0 lostReads=0 maxCycleMs=50 maxHandleMs=6 chunkMs=40 bufferMs=400
+09-28 19:42:22.995 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 39 more Status ...
+09-28 19:42:24.654 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:42:24.667 D/PipelineWatcher(19189): DEBUG: elapsed 0 / 12
+09-28 19:42:24.697 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 25 more Status ...
+09-28 19:42:25.774 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:42:25.779 I/lumella (19189): debug: 음성 감지 주입
+09-28 19:42:25.862 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 23 more Status ...
+09-28 19:42:26.821 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:42:26.858 I/.woolab.lumell(19189): Background concurrent copying GC freed 26902(5384KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 5401KB/10MB, paused 95us,134us total 118.043ms
+09-28 19:42:26.860 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:42:26.898 I/lumella (19189): debug: 음성 종료 주입
+09-28 19:42:26.899 I/lumella (19189): turn end (VAD): audioChunks=511
+09-28 19:42:26.904 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 7 more Status ...
+09-28 19:42:27.235 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:42:27.247 D/lumella (19189): 응답 경계: 억제 해제 + 리셋
+09-28 19:42:27.271 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 13 more Status ...
+09-28 19:42:27.866 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:42:27.867 I/lumella (19189): 튜터 발화 시작 (TTFA 967ms)
+09-28 19:42:27.868 W/AudioTrack(19189): restartIfDisabled(1037): releaseBuffer() track 0xb400007de75a8f00 disabled due to previous underrun, restarting
+09-28 19:42:27.994 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:42:27.995 D/PipelineWatcher(19189): DEBUG: elapsed 0 / 12
+09-28 19:42:27.997 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 0 more Status ...
+09-28 19:42:28.000 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:42:28.033 I/lumella (19189): perf: capture reads=126 lateReads=0 lostReads=0 maxCycleMs=60 maxHandleMs=4 chunkMs=40 bufferMs=400
+09-28 19:42:28.046 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:42:28.065 I/lumella (19189): debug: 입력 전사 주입 = 내일 영화가 볼 거예요
+09-28 19:42:28.093 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 77 more Status ...
+09-28 19:42:31.332 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:42:31.344 D/PipelineWatcher(19189): DEBUG: elapsed 0 / 12
+09-28 19:42:31.350 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 17 more Status ...
+09-28 19:42:32.117 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:42:32.119 I/lumella (19189): 튜터 발화 끝
+09-28 19:42:32.120 I/lumella (19189): perf: playback underruns=0 audioMs=4350 wallMs=4249 chunks=17 maxWriteMs=772 sumWriteMs=4081 maxTapMs=0 bufferFrames=12000 minLeadMs=195 maxGapMs=34 minLeadAtChunk=13
+09-28 19:42:32.235 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 14 more Status ...
+09-28 19:42:32.780 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:42:32.933 I/.woolab.lumell(19189): Background concurrent copying GC freed 22331(4091KB) AllocSpace objects, 47(1252KB) LOS objects, 49% free, 5545KB/10MB, paused 341us,203us total 180.277ms
+09-28 19:42:32.938 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 5 more Status ...
+09-28 19:42:33.069 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:42:33.072 I/lumella (19189): perf: capture reads=126 lateReads=0 lostReads=0 maxCycleMs=50 maxHandleMs=5 chunkMs=40 bufferMs=400
+09-28 19:42:33.108 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 35 more Status ...
+09-28 19:42:34.602 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:42:34.653 D/PipelineWatcher(19189): DEBUG: elapsed 0 / 12
+09-28 19:42:34.660 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 78 more Status ...
+09-28 19:42:37.935 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:42:37.958 D/PipelineWatcher(19189): DEBUG: elapsed 0 / 12
+09-28 19:42:37.980 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 1 more Status ...
+09-28 19:42:38.074 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:42:38.099 I/lumella (19189): perf: capture reads=126 lateReads=0 lostReads=0 maxCycleMs=45 maxHandleMs=4 chunkMs=40 bufferMs=400
+09-28 19:42:38.108 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 74 more Status ...
+09-28 19:42:41.230 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:42:41.278 D/PipelineWatcher(19189): DEBUG: elapsed 0 / 12
+09-28 19:42:41.289 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 13 more Status ...
+09-28 19:42:41.853 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:42:41.972 I/.woolab.lumell(19189): Background concurrent copying GC freed 29643(5667KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 5432KB/10MB, paused 262us,269us total 114.498ms
+09-28 19:42:41.986 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 28 more Status ...
+09-28 19:42:43.108 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:42:43.139 I/lumella (19189): perf: capture reads=126 lateReads=0 lostReads=0 maxCycleMs=44 maxHandleMs=4 chunkMs=40 bufferMs=400
+09-28 19:42:43.145 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 33 more Status ...
+09-28 19:42:44.569 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:42:44.587 D/PipelineWatcher(19189): DEBUG: elapsed 0 / 12
+09-28 19:42:44.618 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 39 more Status ...
+09-28 19:42:46.270 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:42:46.277 I/lumella (19189): debug: 음성 감지 주입
+09-28 19:42:46.361 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 25 more Status ...
+09-28 19:42:47.403 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:42:47.404 I/lumella (19189): debug: 음성 종료 주입
+09-28 19:42:47.404 I/lumella (19189): turn end (VAD): audioChunks=513
+09-28 19:42:47.555 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 5 more Status ...
+09-28 19:42:47.695 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:42:47.727 D/lumella (19189): 응답 경계: 억제 해제 + 리셋
+09-28 19:42:47.738 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 3 more Status ...
+09-28 19:42:47.901 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:42:47.914 D/PipelineWatcher(19189): DEBUG: elapsed 0 / 12
+09-28 19:42:47.954 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 4 more Status ...
+09-28 19:42:48.152 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:42:48.177 I/lumella (19189): perf: capture reads=126 lateReads=0 lostReads=0 maxCycleMs=66 maxHandleMs=6 chunkMs=40 bufferMs=400
+09-28 19:42:48.192 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 0 more Status ...
+09-28 19:42:48.227 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:42:48.283 I/lumella (19189): 튜터 발화 시작 (TTFA 879ms)
+09-28 19:42:48.284 W/AudioTrack(19189): restartIfDisabled(1037): releaseBuffer() track 0xb400007de75a8f00 disabled due to previous underrun, restarting
+09-28 19:42:48.501 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 5 more Status ...
+09-28 19:42:48.627 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:42:48.636 I/lumella (19189): debug: 입력 전사 주입 = 어제 친구를 만났어요
+09-28 19:42:48.637 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 26 more Status ...
+09-28 19:42:49.705 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:42:49.711 I/.woolab.lumell(19189): Background concurrent copying GC freed 26143(4624KB) AllocSpace objects, 33(708KB) LOS objects, 49% free, 5740KB/11MB, paused 104us,238us total 118.088ms
+09-28 19:42:49.729 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 35 more Status ...
+09-28 19:42:51.236 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:42:51.252 D/PipelineWatcher(19189): DEBUG: elapsed 0 / 12
+09-28 19:42:51.277 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 29 more Status ...
+09-28 19:42:52.524 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:42:52.543 I/lumella (19189): 튜터 발화 끝
+09-28 19:42:52.544 I/lumella (19189): perf: playback underruns=0 audioMs=4400 wallMs=4258 chunks=17 maxWriteMs=763 sumWriteMs=3779 maxTapMs=0 bufferFrames=12000 minLeadMs=81 maxGapMs=123 minLeadAtChunk=1
+09-28 19:42:52.743 I/.woolab.lumell(19189): Background young concurrent copying GC freed 19538(3986KB) AllocSpace objects, 63(1608KB) LOS objects, 49% free, 5759KB/11MB, paused 7.676ms,455us total 147.375ms
+09-28 19:42:52.762 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 14 more Status ...
+09-28 19:42:53.184 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:42:53.191 I/lumella (19189): perf: capture reads=125 lateReads=0 lostReads=0 maxCycleMs=56 maxHandleMs=9 chunkMs=40 bufferMs=400
+09-28 19:42:53.249 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 31 more Status ...
+09-28 19:42:54.559 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:42:54.574 D/PipelineWatcher(19189): DEBUG: elapsed 0 / 12
+09-28 19:42:54.606 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 65 more Status ...
+09-28 19:42:57.352 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:42:57.383 I/.woolab.lumell(19189): Background concurrent copying GC freed 30141(5823KB) AllocSpace objects, 4(72KB) LOS objects, 49% free, 5635KB/11MB, paused 98us,134us total 121.115ms
+09-28 19:42:57.409 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 11 more Status ...
+09-28 19:42:57.899 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:42:57.904 D/PipelineWatcher(19189): DEBUG: elapsed 0 / 12
+09-28 19:42:57.935 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 5 more Status ...
+09-28 19:42:58.191 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:42:58.220 I/lumella (19189): perf: capture reads=126 lateReads=0 lostReads=0 maxCycleMs=47 maxHandleMs=7 chunkMs=40 bufferMs=400
+09-28 19:42:58.227 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 70 more Status ...
+09-28 19:43:01.188 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:43:01.233 D/PipelineWatcher(19189): DEBUG: elapsed 0 / 12
+09-28 19:43:01.234 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 46 more Status ...
+09-28 19:43:03.185 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:43:03.220 I/lumella (19189): perf: capture reads=125 lateReads=0 lostReads=0 maxCycleMs=53 maxHandleMs=4 chunkMs=40 bufferMs=400
+09-28 19:43:03.228 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 30 more Status ...
+09-28 19:43:04.522 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:43:04.566 D/PipelineWatcher(19189): DEBUG: elapsed 0 / 12
+09-28 19:43:04.567 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 50 more Status ...
+09-28 19:43:06.709 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:43:06.755 W/.woolab.lumell(19189): Suspending all threads took: 5.252ms
+09-28 19:43:06.762 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 0 more Status ...
+09-28 19:43:06.790 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:43:06.792 I/.woolab.lumell(19189): Background concurrent copying GC freed 27955(5694KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 5776KB/11MB, paused 210us,5.655ms total 179.876ms
+09-28 19:43:06.822 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 0 more Status ...
+09-28 19:43:06.873 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:43:06.881 I/lumella (19189): debug: 음성 감지 주입
+09-28 19:43:07.083 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 22 more Status ...
+09-28 19:43:07.852 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:43:07.899 D/PipelineWatcher(19189): DEBUG: elapsed 0 / 12
+09-28 19:43:07.900 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 3 more Status ...
+09-28 19:43:08.074 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:43:08.081 I/lumella (19189): debug: 음성 종료 주입
+09-28 19:43:08.081 I/lumella (19189): turn end (VAD): audioChunks=517
+09-28 19:43:08.209 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 0 more Status ...
+09-28 19:43:08.218 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:43:08.236 I/lumella (19189): perf: capture reads=125 lateReads=0 lostReads=0 maxCycleMs=53 maxHandleMs=13 chunkMs=40 bufferMs=400
+09-28 19:43:08.247 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 4 more Status ...
+09-28 19:43:08.394 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:43:08.430 D/lumella (19189): 응답 경계: 억제 해제 + 리셋
+09-28 19:43:08.453 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 10 more Status ...
+09-28 19:43:08.902 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:43:08.928 I/lumella (19189): 튜터 발화 시작 (TTFA 847ms)
+09-28 19:43:08.931 W/AudioTrack(19189): restartIfDisabled(1037): releaseBuffer() track 0xb400007de75a8f00 disabled due to previous underrun, restarting
+09-28 19:43:09.071 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 9 more Status ...
+09-28 19:43:09.406 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:43:09.424 I/lumella (19189): debug: 입력 전사 주입 = 오늘 아침에 빵을 먹었어요
+09-28 19:43:09.467 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 42 more Status ...
+09-28 19:43:11.185 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:43:11.233 D/PipelineWatcher(19189): DEBUG: elapsed 0 / 12
+09-28 19:43:11.236 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 47 more Status ...
+09-28 19:43:13.227 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:43:13.232 I/lumella (19189): perf: capture reads=125 lateReads=0 lostReads=0 maxCycleMs=58 maxHandleMs=15 chunkMs=40 bufferMs=400
+09-28 19:43:13.276 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 3 more Status ...
+09-28 19:43:13.444 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:43:13.465 I/.woolab.lumell(19189): Background concurrent copying GC freed 24099(4456KB) AllocSpace objects, 73(1504KB) LOS objects, 49% free, 5698KB/11MB, paused 2.429ms,110us total 144.480ms
+09-28 19:43:13.480 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 25 more Status ...
+09-28 19:43:14.570 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:43:14.587 D/PipelineWatcher(19189): DEBUG: elapsed 0 / 12
+09-28 19:43:14.613 I/lumella (19189): 튜터 발화 끝
+09-28 19:43:14.616 I/lumella (19189): perf: playback underruns=0 audioMs=5800 wallMs=5680 chunks=23 maxWriteMs=511 sumWriteMs=5359 maxTapMs=0 bufferFrames=12000 minLeadMs=212 maxGapMs=99 minLeadAtChunk=3
+09-28 19:43:14.721 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 78 more Status ...
+09-28 19:43:17.901 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:43:17.929 D/PipelineWatcher(19189): DEBUG: elapsed 0 / 12
+09-28 19:43:17.936 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 6 more Status ...
+09-28 19:43:18.238 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:43:18.257 I/lumella (19189): perf: capture reads=126 lateReads=0 lostReads=0 maxCycleMs=44 maxHandleMs=9 chunkMs=40 bufferMs=400
+09-28 19:43:18.287 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 70 more Status ...
+09-28 19:43:21.229 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:43:21.234 D/PipelineWatcher(19189): DEBUG: elapsed 0 / 12
+09-28 19:43:21.272 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 14 more Status ...
+09-28 19:43:21.908 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:43:21.912 I/.woolab.lumell(19189): Background concurrent copying GC freed 28613(5681KB) AllocSpace objects, 2(32KB) LOS objects, 49% free, 5775KB/11MB, paused 171us,126us total 133.619ms
+09-28 19:43:21.957 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 30 more Status ...
+09-28 19:43:23.231 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:43:23.260 I/lumella (19189): perf: capture reads=125 lateReads=0 lostReads=0 maxCycleMs=47 maxHandleMs=8 chunkMs=40 bufferMs=400
+09-28 19:43:23.268 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 30 more Status ...
+09-28 19:43:24.560 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:43:24.569 D/PipelineWatcher(19189): DEBUG: elapsed 0 / 12
+09-28 19:43:24.603 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 69 more Status ...
+09-28 19:43:27.526 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:43:27.568 I/lumella (19189): debug: 음성 감지 주입
+09-28 19:43:27.664 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 7 more Status ...
+09-28 19:43:27.893 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:43:27.901 D/PipelineWatcher(19189): DEBUG: elapsed 0 / 12
+09-28 19:43:27.933 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 7 more Status ...
+09-28 19:43:28.270 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:43:28.298 I/lumella (19189): perf: capture reads=126 lateReads=0 lostReads=0 maxCycleMs=44 maxHandleMs=3 chunkMs=40 bufferMs=400
+09-28 19:43:28.330 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 7 more Status ...
+09-28 19:43:28.652 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:43:28.694 I/lumella (19189): debug: 음성 종료 주입
+09-28 19:43:28.695 I/lumella (19189): turn end (VAD): audioChunks=515
+09-28 19:43:28.700 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 6 more Status ...
+09-28 19:43:28.972 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:43:29.019 D/lumella (19189): 응답 경계: 억제 해제 + 리셋
+09-28 19:43:29.032 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 12 more Status ...
+09-28 19:43:29.566 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:43:29.594 I/lumella (19189): 튜터 발화 시작 (TTFA 900ms)
+09-28 19:43:29.595 W/AudioTrack(19189): restartIfDisabled(1037): releaseBuffer() track 0xb400007de75a8f00 disabled due to previous underrun, restarting
+09-28 19:43:29.714 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 4 more Status ...
+09-28 19:43:29.818 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:43:29.838 I/lumella (19189): debug: 입력 전사 주입 = 내일 영화를 볼 거예요
+09-28 19:43:29.881 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 32 more Status ...
+09-28 19:43:31.228 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:43:31.231 D/PipelineWatcher(19189): DEBUG: elapsed 0 / 12
+09-28 19:43:31.294 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 47 more Status ...
+09-28 19:43:33.293 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:43:33.311 I/lumella (19189): perf: capture reads=125 lateReads=0 lostReads=0 maxCycleMs=54 maxHandleMs=4 chunkMs=40 bufferMs=400
+09-28 19:43:33.315 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 0 more Status ...
+09-28 19:43:33.372 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:43:33.392 I/lumella (19189): 튜터 발화 끝
+09-28 19:43:33.392 I/lumella (19189): perf: playback underruns=0 audioMs=4050 wallMs=3792 chunks=16 maxWriteMs=508 sumWriteMs=3544 maxTapMs=0 bufferFrames=12000 minLeadMs=164 maxGapMs=74 minLeadAtChunk=11
+09-28 19:43:33.476 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 0 more Status ...
+09-28 19:43:33.498 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:43:33.614 W/.woolab.lumell(19189): Suspending all threads took: 7.797ms
+09-28 19:43:33.666 I/.woolab.lumell(19189): Background concurrent copying GC freed 26342(4433KB) AllocSpace objects, 66(1512KB) LOS objects, 49% free, 5729KB/11MB, paused 320us,8.215ms total 233.978ms
+09-28 19:43:33.682 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 25 more Status ...
+09-28 19:43:34.568 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:43:34.583 D/PipelineWatcher(19189): DEBUG: elapsed 0 / 12
+09-28 19:43:34.612 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 78 more Status ...
+09-28 19:43:37.901 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:43:37.911 D/PipelineWatcher(19189): DEBUG: elapsed 0 / 12
+09-28 19:43:37.933 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 8 more Status ...
+09-28 19:43:38.315 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:43:38.338 I/lumella (19189): perf: capture reads=126 lateReads=0 lostReads=0 maxCycleMs=50 maxHandleMs=5 chunkMs=40 bufferMs=400
+09-28 19:43:38.359 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 68 more Status ...
+09-28 19:43:41.227 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:43:41.232 D/PipelineWatcher(19189): DEBUG: elapsed 0 / 12
+09-28 19:43:41.286 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 48 more Status ...
+09-28 19:43:43.334 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:43:43.339 I/lumella (19189): perf: capture reads=125 lateReads=0 lostReads=0 maxCycleMs=49 maxHandleMs=6 chunkMs=40 bufferMs=400
+09-28 19:43:43.356 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 28 more Status ...
+09-28 19:43:44.563 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:43:44.583 D/PipelineWatcher(19189): DEBUG: elapsed 0 / 12
+09-28 19:43:44.608 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 78 more Status ...
+09-28 19:43:47.895 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:43:47.905 D/PipelineWatcher(19189): DEBUG: elapsed 0 / 12
+09-28 19:43:47.944 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 8 more Status ...
+09-28 19:43:48.308 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:43:48.338 I/lumella (19189): perf: capture reads=125 lateReads=0 lostReads=0 maxCycleMs=45 maxHandleMs=8 chunkMs=40 bufferMs=400
+09-28 19:43:48.365 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 68 more Status ...
+09-28 19:43:51.226 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:43:51.241 D/PipelineWatcher(19189): DEBUG: elapsed 0 / 12
+09-28 19:43:51.273 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 48 more Status ...
+09-28 19:43:53.317 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:43:53.339 I/lumella (19189): perf: capture reads=125 lateReads=0 lostReads=0 maxCycleMs=44 maxHandleMs=4 chunkMs=40 bufferMs=400
+09-28 19:43:53.360 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 18 more Status ...
+09-28 19:43:54.165 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:43:54.181 I/lumella (19189): debug: stop recording
+09-28 19:43:54.194 D/Recorder(19189): Transitioning Recorder internal state: RECORDING --> STOPPING
+09-28 19:43:54.195 I/lumella (19189): debug: rec stopping
+09-28 19:43:54.200 D/VideoEncoder(19189): Transitioning encoder internal state: STARTED --> STOPPING
+09-28 19:43:54.201 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:43:54.201 D/VideoEncoder(19189): Stop on 16:01:42.080
+09-28 19:43:54.224 D/Recorder(19189): Sending VideoRecordEvent Status
+    ... 0 more Status ...
+09-28 19:43:54.267 D/Recorder(19189): Sending VideoRecordEvent Status
+09-28 19:43:54.329 D/VideoEncoder(19189): Drop buffer by not in start-stop range.
+09-28 19:43:54.333 D/VideoEncoder(19189): Transitioning encoder internal state: STOPPING --> CONFIGURED
+09-28 19:43:54.334 D/Recorder(19189): Encodings end successfully.
+09-28 19:43:54.334 V/MediaWriter(19189): Track event err/info msg:101, trackId:1, type:1000,val:-1011
+09-28 19:43:54.334 I/MPEG4Writer(19189): Received total/0-length (2949/0) buffers and encoded 2949 frames. - Video
+09-28 19:43:54.335 I/MPEG4Writer(19189): Adjust the moov start time from 57579200100 us -> 57579200100 us
+09-28 19:43:54.336 I/MPEG4Writer(19189): The mp4 file will not be streamable.
+09-28 19:43:54.336 I/MPEG4Writer(19189): MOOV atom was written to the file
+09-28 19:43:54.342 W/GraphicBufferSource(19189): onFrameAvailable: EOS is sent, ignoring frame
+09-28 19:43:54.384 W/GraphicBufferSource(19189): onFrameAvailable: EOS is sent, ignoring frame
+09-28 19:43:54.420 W/GraphicBufferSource(19189): onFrameAvailable: EOS is sent, ignoring frame
+09-28 19:43:54.447 E/MPEG4Writer(19189): Stop() called but track is not started or stopped
+09-28 19:43:54.447 D/Recorder(19189): Sending VideoRecordEvent Finalize
+09-28 19:43:54.448 D/Recorder(19189): Update stream transformation info: null
+09-28 19:43:54.448 D/Recorder(19189): Transitioning Recorder internal state: STOPPING --> IDLING
+09-28 19:43:54.448 I/lumella (19189): recording finalized ok=true err=0 bytes=file:///storage/emulated/0/Android/data/com.woolab.lumella/files/perf-hd24-pov-a-2.mp4
+09-28 19:43:54.451 D/Recorder(19189): Video source has transitioned to state: INACTIVE
+09-28 19:43:54.452 D/DeferrableSurface(19189): surface closed,  useCount=2 closed=true androidx.camera.core.SurfaceRequest$2@35e1a6c
+09-28 19:43:54.452 D/DeferrableSurface(19189): surface closed,  useCount=0 closed=true androidx.camera.core.processing.SurfaceEdge$SettableSurface@6599a40
+09-28 19:43:54.452 D/DeferrableSurface(19189): Surface terminated[total_surfaces=2, used_surfaces=2](androidx.camera.core.processing.SurfaceEdge$SettableSurface@6599a40}
+09-28 19:43:54.453 D/DeferrableSurface(19189): use count-1,  useCount=1 closed=true androidx.camera.core.SurfaceRequest$2@35e1a6c
+09-28 19:43:54.454 I/lumella (19189): segment resume: finalized /storage/emulated/0/Android/data/com.woolab.lumella/files/perf-hd24-pov-a-2.mp4
+09-28 19:43:54.454 D/Camera2CameraImpl(19189): {Camera@680d543[id=0]} Use cases [androidx.camera.video.VideoCapture-f7042644-d3e7-4d66-9460-879eceb88fb9219010685] now DETACHED for camera
+09-28 19:43:54.456 D/UseCaseAttachState(19189): All use case: [MeteringRepeating189627700] for camera: 0
+09-28 19:43:54.456 D/MeteringRepeating(19189): MeteringRepeating clear!
+09-28 19:43:54.457 D/DeferrableSurface(19189): surface closed,  useCount=1 closed=true androidx.camera.core.impl.ImmediateSurface@e73a21
+09-28 19:43:54.458 D/Camera2CameraImpl(19189): {Camera@680d543[id=0]} Resetting Capture Session
+09-28 19:43:54.460 D/Camera2CameraImpl(19189): {Camera@680d543[id=0]} Releasing session in state OPENED
+09-28 19:43:54.460 D/UseCaseAttachState(19189): Active and attached use case: [] for camera: 0
+09-28 19:43:54.463 D/UseCaseAttachState(19189): Active and attached use case: [] for camera: 0
+09-28 19:43:54.466 W/GraphicBufferSource(19189): onFrameAvailable: EOS is sent, ignoring frame
+09-28 19:43:54.466 D/Camera2CameraImpl(19189): {Camera@680d543[id=0]} Closing camera.
+09-28 19:43:54.467 D/Camera2CameraImpl(19189): {Camera@680d543[id=0]} Transitioning camera internal state: OPENED --> CLOSING
+09-28 19:43:54.469 D/CameraStateRegistry(19189): Recalculating open cameras:
+09-28 19:43:54.469 D/CameraStateRegistry(19189): Camera                                       State                 
+09-28 19:43:54.469 D/CameraStateRegistry(19189): -------------------------------------------------------------------
+09-28 19:43:54.469 D/CameraStateRegistry(19189): Camera@680d543[id=0]                         CLOSING               
+09-28 19:43:54.469 D/CameraStateRegistry(19189): Camera@c35464a[id=1]                         UNKNOWN               
+09-28 19:43:54.469 D/CameraStateRegistry(19189): -------------------------------------------------------------------
+09-28 19:43:54.469 D/CameraStateRegistry(19189): Open count: 1 (Max allowed: 1)
+09-28 19:43:54.470 D/CameraStateMachine(19189): New public camera state CameraState{type=CLOSING, error=null} from CLOSING and null
+09-28 19:43:54.470 D/CameraStateMachine(19189): Publishing new public camera state CameraState{type=CLOSING, error=null}
+09-28 19:43:54.471 D/Camera2CameraImpl(19189): {Camera@680d543[id=0]} Resetting Capture Session
+09-28 19:43:54.472 D/Camera2CameraImpl(19189): {Camera@680d543[id=0]} Releasing session in state CLOSING
+09-28 19:43:54.472 D/CaptureSession(19189): onSessionFinished()
+09-28 19:43:54.570 D/PipelineWatcher(19189): DEBUG: elapsed 0 / 12
+09-28 19:43:55.082 W/GraphicBufferSource(19189): released unpopulated slots: [9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63]
+09-28 19:43:55.085 W/libc    (19189): Access denied finding property "vendor.camera.aux.packagelist"
+09-28 19:43:55.086 D/UseCaseAttachState(19189): Active and attached use case: [] for camera: 0
+09-28 19:43:55.088 D/DeferrableSurface(19189): use count-1,  useCount=0 closed=true androidx.camera.core.impl.ImmediateSurface@e73a21
+09-28 19:43:55.089 D/DeferrableSurface(19189): Surface no longer in use[total_surfaces=2, used_surfaces=1](androidx.camera.core.impl.ImmediateSurface@e73a21}
+09-28 19:43:55.089 D/DeferrableSurface(19189): Surface terminated[total_surfaces=1, used_surfaces=1](androidx.camera.core.impl.ImmediateSurface@e73a21}
+09-28 19:43:55.090 D/DeferrableSurface(19189): use count-1,  useCount=0 closed=true androidx.camera.core.SurfaceRequest$2@35e1a6c
+09-28 19:43:55.090 D/DeferrableSurface(19189): Surface no longer in use[total_surfaces=1, used_surfaces=0](androidx.camera.core.SurfaceRequest$2@35e1a6c}
+09-28 19:43:55.090 D/DeferrableSurface(19189): Surface terminated[total_surfaces=0, used_surfaces=0](androidx.camera.core.SurfaceRequest$2@35e1a6c}
+09-28 19:43:55.091 D/VideoEncoderSession(19189): Surface can be closed: 120066928
+09-28 19:43:55.091 D/VideoEncoderSession(19189): closeInternal in READY state
+09-28 19:43:55.091 D/Recorder(19189): VideoEncoder can be released: androidx.camera.video.internal.encoder.EncoderImpl@bdd6f6e
+09-28 19:43:55.091 D/Camera2CameraImpl(19189): {Camera@680d543[id=0]} CameraDevice.onClosed()
+09-28 19:43:55.092 D/Recorder(19189): Transitioning streamId: 120066928 --> 0
+09-28 19:43:55.092 D/Recorder(19189): Transitioning audio state: INITIALIZING --> INITIALIZING
+09-28 19:43:55.092 D/Recorder(19189): Releasing video encoder.
+09-28 19:43:55.092 D/Recorder(19189): Releasing video encoder: androidx.camera.video.internal.encoder.EncoderImpl@bdd6f6e
+09-28 19:43:55.092 D/VideoEncoderSession(19189): VideoEncoder is releasing: androidx.camera.video.internal.encoder.EncoderImpl@bdd6f6e
+09-28 19:43:55.093 D/Camera2CameraImpl(19189): {Camera@680d543[id=0]} Transitioning camera internal state: CLOSING --> INITIALIZED
+09-28 19:43:55.093 D/Recorder(19189): Transitioning Recorder internal state: IDLING --> CONFIGURING
+09-28 19:43:55.094 D/CameraStateRegistry(19189): Recalculating open cameras:
+09-28 19:43:55.094 D/CameraStateRegistry(19189): Camera                                       State                 
+09-28 19:43:55.094 D/CameraStateRegistry(19189): -------------------------------------------------------------------
+09-28 19:43:55.094 D/CameraStateRegistry(19189): Camera@680d543[id=0]                         CLOSED                
+09-28 19:43:55.094 D/CameraStateRegistry(19189): Camera@c35464a[id=1]                         UNKNOWN               
+09-28 19:43:55.094 D/CameraStateRegistry(19189): -------------------------------------------------------------------
+09-28 19:43:55.094 D/CameraStateRegistry(19189): Open count: 0 (Max allowed: 1)
+09-28 19:43:55.094 D/CameraStateMachine(19189): New public camera state CameraState{type=CLOSED, error=null} from CLOSED and null
+09-28 19:43:55.095 D/CameraStateMachine(19189): Publishing new public camera state CameraState{type=CLOSED, error=null}
+09-28 19:43:55.110 I/hw-BpHwBinder(19189): onLastStrongRef automatically unlinking death recipients
+09-28 19:43:55.118 I/CCodec  (19189): setting up 'default' as default (vendor) store
+09-28 19:43:55.125 I/CCodec  (19189): Created component [c2.qti.avc.encoder]
+09-28 19:43:55.127 D/ReflectedParamUpdater(19189): extent() != 1 for single value type: output.buffers.pool-ids.values
+09-28 19:43:55.133 D/ReflectedParamUpdater(19189): ignored struct field coding.gop.values
+09-28 19:43:55.134 D/ReflectedParamUpdater(19189): extent() != 1 for single value type: vendor.qti-ext-enc-temporal-layer-bitrate.layerBitrates
+09-28 19:43:55.135 D/ReflectedParamUpdater(19189): ignored struct field coding.qp.values
+09-28 19:43:55.138 D/ReflectedParamUpdater(19189): extent() != 1 for single value type: vendor.qti-ext-enc-info-metadata-cvp.reserved
+09-28 19:43:55.144 I/CCodecConfig(19189): query failed after returning 24 values (BAD_INDEX)
+09-28 19:43:55.145 W/ColorUtils(19189): expected specified color aspects (0:0:255:255)
+09-28 19:43:55.148 I/MediaCodec(19189): MediaCodec will operate in async mode
+09-28 19:43:55.149 D/VQApply (19189): minquality: codec claims to implement minquality=1
+09-28 19:43:55.153 W/ColorUtils(19189): expected specified color aspects (0:0:255:255)
+09-28 19:43:55.155 W/Codec2Client(19189): query -- param skipped: index = 3254781982.
+09-28 19:43:55.156 I/CCodecConfig(19189): query failed after returning 25 values (BAD_INDEX)
+09-28 19:43:55.160 D/VideoEncoder(19189): Transitioning encoder internal state: CONFIGURED --> RELEASED
+09-28 19:43:55.160 I/hw-BpHwBinder(19189): onLastStrongRef automatically unlinking death recipients
+09-28 19:43:55.162 I/BpBinder(19189): onLastStrongRef automatically unlinking death recipients: android.media.IResourceManagerService
+09-28 19:43:58.341 I/lumella (19189): perf: capture reads=125 lateReads=0 lostReads=0 maxCycleMs=51 maxHandleMs=6 chunkMs=40 bufferMs=400
+09-28 19:44:03.378 I/lumella (19189): perf: capture reads=126 lateReads=0 lostReads=0 maxCycleMs=44 maxHandleMs=2 chunkMs=40 bufferMs=400
+09-28 19:44:08.381 I/lumella (19189): perf: capture reads=125 lateReads=0 lostReads=0 maxCycleMs=44 maxHandleMs=2 chunkMs=40 bufferMs=400
+09-28 19:44:13.418 I/lumella (19189): perf: capture reads=126 lateReads=0 lostReads=0 maxCycleMs=44 maxHandleMs=2 chunkMs=40 bufferMs=400

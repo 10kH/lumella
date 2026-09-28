@@ -8,8 +8,12 @@
 # writes artifacts/perf/<label>.json with:
 #   cpu        per-process and top-thread CPU%, sampled every 2s during the run (top -H)
 #   playback   per-response AudioTrack underruns, audio time vs wall time, write() blocking
-#   capture    per-5s-window late reads and worst read cycle (AudioRecord side)
+#   capture    per-5s-window late reads (not scheduled), lost reads (buffer overran), worst cycle
 #   ttfa       per-turn time to first tutor audio
+#
+# STRESS=N adds N busy loops on the device for the whole run: the load of a worse day (the
+# heavier POV baseline ran ~80 points above the lighter one on identical settings), applied on
+# purpose, to see whether the audio path holds with less headroom than a quiet run leaves.
 #   thermal    CPU zone temperatures and frequencies at start and end
 #   files      POV and screen recordings: codec, resolution, effective fps (ffprobe)
 #   diagnosis  ruleGap after turn 3 and after turn 6 (the slow path must not regress)
@@ -66,6 +70,13 @@ if [ "$STATUS" != "status=READY" ]; then
 fi
 thermal > "$WORK/thermal-start.txt"
 
+STRESS="${STRESS:-0}"
+if [ "$STRESS" -gt 0 ]; then
+  adbs shell "for i in \$(seq $STRESS); do yes > /dev/null 2>&1 & done" >/dev/null 2>&1
+  trap 'adbs shell pkill -x yes >/dev/null 2>&1; rm -rf "$WORK"' EXIT
+  echo "[$LABEL] stress: $(adbs shell pgrep -x yes | tr -d '\r' | grep -c .) busy loops"
+fi
+
 TAKE="perf-$LABEL"
 case "$MODE" in
   audio) ./ops/take.sh "$TAKE" --start --audio >/dev/null 2>&1 ;;
@@ -103,6 +114,7 @@ adbs shell "run-as $PKG cat files/learner-state.json" > "$WORK/state-6.json" 2>/
 
 kill $SAMPLER 2>/dev/null || true
 wait $SAMPLER 2>/dev/null || true
+[ "$STRESS" -gt 0 ] && adbs shell pkill -x yes >/dev/null 2>&1
 
 STOP_OUT=""
 case "$MODE" in
@@ -110,6 +122,7 @@ case "$MODE" in
 esac
 thermal > "$WORK/thermal-end.txt"
 adbs logcat -d -v time | grep "( *$PID)" > "$WORK/logcat.txt" || true
+cp "$WORK/top.txt" "$OUT_DIR/$LABEL.top.txt" 2>/dev/null || true
 
 # Recorded files, if any
 # Match take.sh's labelled lines, not file-name fragments: a label like "baseline-pov" puts
@@ -118,10 +131,11 @@ adbs logcat -d -v time | grep "( *$PID)" > "$WORK/logcat.txt" || true
 POV_FILE="$(echo "$STOP_OUT" | awk '$1=="pov" && $2 ~ /\.mp4$/ {print $2}' | tr '\n' ' ' | sed 's/ $//' || true)"
 SCREEN_FILE="$(echo "$STOP_OUT" | awk '$1=="screen" {print $2; exit}' || true)"
 TUTOR_FILE="$(echo "$STOP_OUT" | awk '$1=="tutor" {print $2; exit}' || true)"
+LEARNER_FILE="$(echo "$STOP_OUT" | awk '$1=="learner" {print $2; exit}' || true)"
 
-python3 - "$LABEL" "$MODE" "$WORK" "$OUT_DIR/$LABEL.json" "$POV_FILE" "$SCREEN_FILE" "$TUTOR_FILE" <<'PY'
+python3 - "$LABEL" "$MODE" "$WORK" "$OUT_DIR/$LABEL.json" "$POV_FILE" "$SCREEN_FILE" "$TUTOR_FILE" "$LEARNER_FILE" <<'PY'
 import json, re, sys, subprocess, os, statistics
-label, mode, work, out, pov, screen, tutor = sys.argv[1:8]
+label, mode, work, out, pov, screen, tutor, learner = sys.argv[1:9]
 
 def rd(n):
     try: return open(os.path.join(work, n), encoding='utf-8', errors='replace').read()
@@ -140,7 +154,12 @@ for line in rd('top.txt').splitlines():
     m=re.match(r'\s*(\d+)\s+(\d+)\s+([\d.]+)\s(.{15})\s+(\S.*)$', line)
     if not m: continue
     cpu=float(m.group(3)); thread=m.group(4).strip(); name=m.group(5).strip()
-    if name == 'top': continue   # the sampler itself
+    if name == 'top':
+        # The sampler itself: top -H walks ~1,900 threads and costs 15-20% of a core, which the
+        # header's busy figure includes. Take it out of the whole-device number too, not just
+        # the rows — before 2026-09-28 it was only dropped from the rows.
+        if busy: busy[-1] -= cpu
+        continue
     cur[('proc', name)] = cur.get(('proc', name), 0.0) + cpu
     cur[('thr', name + ' / ' + thread)] = cur.get(('thr', name + ' / ' + thread), 0.0) + cpu
 def agg(kind, top_n):
@@ -155,13 +174,21 @@ total=busy
 # --- Playback per response
 log=rd('logcat.txt')
 playback=[]
-for m in re.finditer(r'perf: playback underruns=(-?\d+) audioMs=(\d+) wallMs=(\d+) chunks=(\d+) maxWriteMs=(\d+) sumWriteMs=(\d+) maxTapMs=(\d+) bufferFrames=(-?\d+)', log):
-    u,a,w,c,mw,sw,mt,bf=map(int,m.groups())
+# minLeadMs/maxGapMs arrived 2026-09-28: a negative lead means the data came late (network or
+# server), a positive one with underruns means this device did not run the writer in time.
+for m in re.finditer(r'perf: playback underruns=(-?\d+) audioMs=(\d+) wallMs=(\d+) chunks=(\d+) maxWriteMs=(\d+) sumWriteMs=(\d+) maxTapMs=(\d+) bufferFrames=(-?\d+)(?: minLeadMs=(-?\d+) maxGapMs=(\d+))?(?: minLeadAtChunk=(\d+))?', log):
+    g=m.groups(); u,a,w,c,mw,sw,mt,bf=map(int,g[:8])
     playback.append({'underruns':u,'audioMs':a,'wallMs':w,'stretch':round(w/a,2) if a else None,
-                     'chunks':c,'maxWriteMs':mw,'sumWriteMs':sw,'maxTapMs':mt,'bufferFrames':bf})
+                     'chunks':c,'maxWriteMs':mw,'sumWriteMs':sw,'maxTapMs':mt,'bufferFrames':bf,
+                     'minLeadMs':int(g[8]) if g[8] is not None else None,'maxGapMs':int(g[9]) if g[9] is not None else None,
+                     'minLeadAtChunk':int(g[10]) if g[10] is not None else None})
 capture=[]
-for m in re.finditer(r'perf: capture reads=(\d+) lateReads=(\d+) maxCycleMs=(\d+) maxHandleMs=(\d+) bufferMs=(\d+)', log):
-    r,l,mc,mh,b=map(int,m.groups()); capture.append({'reads':r,'lateReads':l,'maxCycleMs':mc,'maxHandleMs':mh,'bufferMs':b})
+# lostReads/chunkMs arrived with the larger capture buffer (2026-09-28); before it the buffer WAS
+# one chunk, so a late read and a lost read were the same event.
+for m in re.finditer(r'perf: capture reads=(\d+) lateReads=(\d+)(?: lostReads=(\d+))? maxCycleMs=(\d+) maxHandleMs=(\d+)(?: chunkMs=(\d+))? bufferMs=(\d+)', log):
+    r,l,lo,mc,mh,ch,b=m.groups()
+    capture.append({'reads':int(r),'lateReads':int(l),'lostReads':int(lo) if lo is not None else int(l),
+                    'maxCycleMs':int(mc),'maxHandleMs':int(mh),'chunkMs':int(ch) if ch is not None else int(b),'bufferMs':int(b)})
 ttfa=[int(x) for x in re.findall(r'튜터 발화 시작 \(TTFA (-?\d+)ms\)', log)]
 
 # --- Files
@@ -204,9 +231,10 @@ def summarise_pb(pb):
             'maxWriteMs':max(p['maxWriteMs'] for p in pb),'maxTapMs':max(p['maxTapMs'] for p in pb)}
 def summarise_cap(cp):
     if not cp: return None
-    return {'windows':len(cp),'lateReadsTotal':sum(c['lateReads'] for c in cp),'maxCycleMs':max(c['maxCycleMs'] for c in cp),'bufferMs':cp[0]['bufferMs']}
+    return {'windows':len(cp),'lateReadsTotal':sum(c['lateReads'] for c in cp),'lostReadsTotal':sum(c['lostReads'] for c in cp),
+            'maxCycleMs':max(c['maxCycleMs'] for c in cp),'chunkMs':cp[0]['chunkMs'],'bufferMs':cp[0]['bufferMs']}
 
-result={'label':label,'mode':mode,
+result={'label':label,'mode':mode,'stress':int(os.environ.get('STRESS','0')),
   'summary':{'cpuTotalMeanPct':round(statistics.mean(total),1) if total else None,
              'cpuTotalPeakPct':round(max(total),1) if total else None,
              'playback':summarise_pb(playback),'capture':summarise_cap(capture),
@@ -217,9 +245,20 @@ result={'label':label,'mode':mode,
               'warnings':slowWarn[:10]},
   'playback':playback,'capture':capture,'ttfaMs':ttfa,
   'thermal':{'start':rd('thermal-start.txt').strip().splitlines(),'end':rd('thermal-end.txt').strip().splitlines()},
-  'files':{'pov':[probe(p) for p in pov.split()] if pov else None,'screen':probe(screen),'tutorWav':voiced(tutor)}}
+  'files':{'pov':[probe(p) for p in pov.split()] if pov else None,'screen':probe(screen),'tutorWav':voiced(tutor),'learnerWav':voiced(learner)}}
 json.dump(result, open(out,'w'), ensure_ascii=False, indent=1)
-open(out.replace('.json','.logcat.txt'),'w').write(log)
+# CameraX logs a Status event per encoded frame — 80% of a POV run's log. A run of them is kept
+# as its first and last line: the first is when frames actually started reaching the file (the
+# take clock hangs on it), the last when they stopped.
+def collapse_status(text):
+    out=[]; run=[]
+    for line in text.splitlines():
+        if 'Sending VideoRecordEvent Status' in line: run.append(line); continue
+        if run: out += [run[0]] + ([f'    ... {len(run)-2} more Status ...', run[-1]] if len(run) > 1 else []); run=[]
+        out.append(line)
+    if run: out += [run[0]] + ([f'    ... {len(run)-2} more Status ...', run[-1]] if len(run) > 1 else [])
+    return '\n'.join(out) + '\n'
+open(out.replace('.json','.logcat.txt'),'w').write(collapse_status(log))
 s=result['summary']
 print(f"[{label}] cpu mean {s['cpuTotalMeanPct']}% peak {s['cpuTotalPeakPct']}% | playback {s['playback']} | capture {s['capture']} | ttfa {s['ttfaMs']} | ruleGap@3 {'set' if s['ruleGapAfter3'] else s['ruleGapAfter3']} @6 {s['ruleGapAfter6']}")
 PY
