@@ -64,6 +64,12 @@ class GlassesCamera(context: Context, private val lifecycleOwner: LifecycleOwner
     private var recordingProvider: ProcessCameraProvider? = null
     /** The clock of the take [activeRecording] belongs to. Main-thread only. */
     private var activeClock: RecordingClock? = null
+    /**
+     * [activeRecording] has been told to stop and its Finalize is pending (50ms-1s). A photo
+     * request in that window must not start a turn: it would take the post-stop generation and
+     * resume a segment for a take that has ended. Main-thread only.
+     */
+    private var stopping = false
 
     /**
      * The in-flight segment's file; non-null while recording. A photo turn during a take closes
@@ -273,17 +279,25 @@ class GlassesCamera(context: Context, private val lifecycleOwner: LifecycleOwner
             onEvent("busy: already recording")
             return
         }
+        val generation = takeGeneration
         val providerFuture = ProcessCameraProvider.getInstance(appContext)
         providerFuture.addListener({
+            // The provider can take a moment (longer when cold). A stop or another start in that
+            // hop found nothing recording yet; honour it here instead of starting regardless.
+            if (generation != takeGeneration || activeRecording != null) {
+                Log.i(TAG, "segment start superseded before the camera bound: ${destination.name}")
+                // Nothing records for this clock now (for a take that just ended, harmless).
+                clock?.rolling(0)
+                onEvent("superseded")
+                return@addListener
+            }
             try {
                 val provider = providerFuture.get()
                 val recorder = Recorder.Builder()
-                    // Cap the encoder's bitrate. Recording both layers at full rate left
-                    // cameraserver at 116% CPU with 77% of four cores idle, and the tutor's
-                    // replies dragged — TTFA stayed inside budget at 730ms but the speech
-                    // took seconds to finish. 6 Mbps is ample for 720p footage that gets
-                    // scaled down in the edit, and it buys back the headroom the realtime
-                    // audio path needs.
+                    // 6 Mbps. First capped here (from the 1080p default) when full-rate recording
+                    // left cameraserver at 116% and the tutor's speech dragging. Measured again
+                    // 2026-09-28 at 720p 24fps: 3 Mbps saves ~8 points of 400 (210.6 vs 218.2%),
+                    // and with playback already at zero underruns the picture is worth more.
                     .setTargetVideoEncodingBitRate(6_000_000)
                     .setQualitySelector(
                         // HIGHEST alone fails on devices whose best profile the encoder
@@ -343,7 +357,8 @@ class GlassesCamera(context: Context, private val lifecycleOwner: LifecycleOwner
                 activeClock = clock
                 // Main executor: the listener runs on one thread, so this needs no guard.
                 var rolled = false
-                activeRecording = videoCapture.output
+                var self: Recording? = null
+                self = videoCapture.output
                     .prepareRecording(appContext, FileOutputOptions.Builder(destination).build())
                     .start(ContextCompat.getMainExecutor(appContext)) { event ->
                         when (event) {
@@ -365,7 +380,9 @@ class GlassesCamera(context: Context, private val lifecycleOwner: LifecycleOwner
                                     "recording finalized ok=$ok err=${event.error} " +
                                         "bytes=${event.outputResults.outputUri}",
                                 )
-                                releaseRecording()
+                                // Only this recording's own state: a Finalize is never allowed to
+                                // unbind whatever recording came after it.
+                                if (activeRecording === self) releaseRecording()
                                 onEvent(
                                     if (ok) "finalized ${destination.absolutePath}"
                                     else "failed code=${event.error}",
@@ -387,6 +404,7 @@ class GlassesCamera(context: Context, private val lifecycleOwner: LifecycleOwner
                             else -> Unit
                         }
                     }
+                activeRecording = self
                 onEvent("recording -> ${destination.absolutePath}")
             } catch (e: Exception) {
                 releaseRecording()
@@ -411,6 +429,7 @@ class GlassesCamera(context: Context, private val lifecycleOwner: LifecycleOwner
                 return@post
             }
             activeClock?.dark()
+            stopping = true
             rec.stop()
             onEvent("stopping")
         }
@@ -420,6 +439,7 @@ class GlassesCamera(context: Context, private val lifecycleOwner: LifecycleOwner
     private fun releaseRecording() {
         activeRecording = null
         activeClock = null
+        stopping = false
         recordingFile = null
         runCatching { recordingProvider?.unbindAll() }
             .onFailure { Log.w(TAG, "unbind after recording failed: ${it.message}") }
@@ -438,8 +458,10 @@ class GlassesCamera(context: Context, private val lifecycleOwner: LifecycleOwner
     ) {
         mainHandler.post {
             val rec = activeRecording
-            if (rec == null || recordingFile != current) {
-                onError("Recording ended before the photo")
+            if (rec == null || stopping || recordingFile != current) {
+                // Also refuses a second photo while the first is between segments: it would
+                // replace the pending resume, and the first tool call would never be answered.
+                onError("Recording is ending or busy with a photo; try again")
                 return@post
             }
             val generation = takeGeneration
@@ -462,6 +484,7 @@ class GlassesCamera(context: Context, private val lifecycleOwner: LifecycleOwner
                 }
             }
             clock?.dark()
+            stopping = true
             rec.stop()
         }
     }

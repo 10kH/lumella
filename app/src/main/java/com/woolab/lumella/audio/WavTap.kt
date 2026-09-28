@@ -32,7 +32,9 @@ import java.util.concurrent.TimeUnit
  *    stretch (where the video resumes), and to leave a hole where audio was really lost. A
  *    late read loses nothing until it is later than the capture buffer ([liveSlackMs]) — the
  *    buffered audio comes out on the next reads — so only a stall past that is padded, and only
- *    by the part the buffer could not hold.
+ *    by the part the buffer could not hold. A mic cannot run ahead of real time, so a file more
+ *    than [liveSlackMs] ahead of the clock means the clock stepped back (a video that came after
+ *    being given up on, [TakeClock]); chunks are dropped until the clock has caught up.
  *
  * **The header is kept current**, once per second of audio ([HEADER_EVERY_MS]). It used to be written only on
  * close, so an app killed mid-take left `RIFF` and `data` sizes of 0 and ffprobe refused the
@@ -117,15 +119,18 @@ class WavTap(
                     resync = true
                     return
                 }
-                // Where this chunk would start if it had just been heard.
-                val chunkStart = bytesAt(at.elapsedMs) - pcm.size
+                val now = bytesAt(at.elapsedMs)
+                if (dataBytes - now > bytesAt(liveSlackMs)) return
                 if (resync) {
-                    padTo(raf, chunkStart)
+                    // Where this chunk would start if it had just been heard.
+                    padTo(raf, now - pcm.size)
                     resync = false
-                } else if (chunkStart - dataBytes > bytesAt(liveSlackMs)) {
-                    // Later than the source's buffer: what it could not hold is gone. The chunk
-                    // in hand is the oldest the buffer kept, heard liveSlackMs before now.
-                    padTo(raf, chunkStart - bytesAt(liveSlackMs))
+                } else {
+                    // The oldest audio the source still held when this read came back. Past the
+                    // end of the file means the stall outlasted the buffer: what came between is
+                    // gone, and this chunk starts there.
+                    val oldestKept = now - bytesAt(liveSlackMs)
+                    if (oldestKept > dataBytes) padTo(raf, oldestKept)
                 }
             } else {
                 padTo(raf, bytesAt(at.elapsedMs))

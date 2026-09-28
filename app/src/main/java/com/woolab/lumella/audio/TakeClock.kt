@@ -21,7 +21,9 @@ package com.woolab.lumella.audio
  * and never delivered, a resume that never started). The clock then rolls on by the wall from
  * the moment it went dark, and says so through [warn]: the voices are the only record left,
  * and a clock frozen for the rest of the take would drop every word the learner says and stack
- * the tutor's replies back to back.
+ * the tutor's replies back to back. If the frame does come after all, the clock goes back to the
+ * video ([rolling]) — it is the reference whenever it exists — and the taps catch up with the
+ * step back ([WavTap]).
  *
  * Without a camera ([followVideo] false) it is simply the wall clock from construction.
  */
@@ -42,6 +44,8 @@ class TakeClock(
     private var darkSinceMs: Long? = null
     /** Exact length of the segments already closed, as the recorder measured them. */
     private var closedMs = 0L
+    /** Rolling by the wall because the video was given up on, not because a frame arrived. */
+    private var gaveUp = false
 
     init {
         val now = nowMs()
@@ -56,6 +60,7 @@ class TakeClock(
             warn("take clock: no video frame for ${now - since}ms; voices follow the wall clock")
             anchorWallMs = since
             darkSinceMs = null
+            gaveUp = true
         }
         val anchor = anchorWallMs ?: return Stamp(baseMs, dark = true)
         return Stamp(baseMs + (now - anchor), dark = false)
@@ -67,10 +72,12 @@ class TakeClock(
      */
     @Synchronized
     fun rolling(segmentRecordedMs: Long) {
-        if (anchorWallMs != null) return
+        if (anchorWallMs != null && !gaveUp) return
+        if (gaveUp) warn("take clock: video frame arrived after all; back on the video's clock")
         baseMs = closedMs + segmentRecordedMs
         anchorWallMs = nowMs()
         darkSinceMs = null
+        gaveUp = false
     }
 
     /** A stop was requested: freeze at the current estimate. Idempotent. */
@@ -81,6 +88,7 @@ class TakeClock(
         baseMs += now - anchor
         anchorWallMs = null
         darkSinceMs = now
+        gaveUp = false
     }
 
     /** The segment closed having recorded exactly [recordedMs]. */
@@ -90,6 +98,7 @@ class TakeClock(
         baseMs = closedMs
         if (anchorWallMs != null) darkSinceMs = nowMs()
         anchorWallMs = null
+        gaveUp = false
     }
 
     companion object {

@@ -248,5 +248,5 @@
   13.0,
   16.5
  ],
- "reading": "Sentence 1 (9.5-11s) is in the learner tap at -37..-40 dBFS; the server VAD heard it and the tutor answered (TTFA 654ms). Sentences 2 and 3 were spoken over and just after the tutor's reply and sit at -70..-75 dBFS: the VOICE_COMMUNICATION echo canceller suppresses the mic during double-talk. The tap records exactly what the realtime API heard, suppression included. A learner who waits for the tutor is recorded at full level; one who talks over it is not, and a Voice Memo is the backup for that."
+ "reading": "Sentence 1 (9.5-11s) is in the learner tap at -37.5..-40.6 dBFS; the server VAD heard it and the tutor answered (TTFA 654ms). Sentences 2 and 3 sit at -70..-76 dBFS: sentence 2 was spoken over the tutor's reply (loud 13.0-16.5s), sentence 3 about 2s after it ended (18.5-20s). The VOICE_COMMUNICATION echo canceller suppresses double-talk and, here, the moments right after it. The tap records exactly what the realtime API heard, suppression included. How long a learner must wait after the tutor to be recorded at full level is not measured; a Voice Memo runs as backup."
 }

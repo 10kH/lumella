@@ -86,6 +86,8 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
         private const val DEBUG_EVENT_ACTION = "com.woolab.lumella.DEBUG_EVENT"
         private const val DEBUG_REC_START_ACTION = "com.woolab.lumella.DEBUG_REC_START"
         private const val DEBUG_REC_STOP_ACTION = "com.woolab.lumella.DEBUG_REC_STOP"
+        /** Two taps, each allowed 2s to drain ([WavTap.close]). */
+        private const val TAP_CLOSE_WAIT_MS = 4_500L
         /** This app's own tutoring language, per `switch_tutor_language`'s own-language check. */
         private const val OWN_TUTOR_LANGUAGE = "korean"
         /** lumella (Korean) hands off to ELLA (English) — explicit component, no implicit intent. */
@@ -218,6 +220,9 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
      * see [GlassesCamera.startRecording] for why.
      */
     private fun startTakeVoices(name: String, followVideo: Boolean) {
+        // take.sh's retry reuses the take name 3s after a stop. The previous take's files must be
+        // finished before new taps truncate them, or a slow close writes into the new file.
+        tapCloser?.join(TAP_CLOSE_WAIT_MS)
         val dir = getExternalFilesDir(null)
         val warn: (String) -> Unit = { Log.w(TAG, it) }
         val clock = TakeClock(followVideo, warn = warn)
@@ -241,11 +246,14 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
         takeClock = null
         // close() waits for each writer to drain: milliseconds normally, up to 2s each on a
         // failing disk. Not on the main thread, which this is (the debug receiver, onDestroy).
-        Thread({
+        tapCloser = Thread({
             tutor?.close()
             learner?.close()
-        }, "lumella-tap-close").start()
+        }, "lumella-tap-close").apply { start() }
     }
+
+    /** The last take's closing thread; [startTakeVoices] waits for it. Main-thread only. */
+    private var tapCloser: Thread? = null
 
     /** The camera's view of a take's clock. The camera carries it from segment to segment. */
     private fun TakeClock.asRecordingClock(): GlassesCamera.RecordingClock {

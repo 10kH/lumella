@@ -1,0 +1,22 @@
+== photo 0.05s after stop | files: rta005x-learner.wav rta005x-tutor.wav rta005x.mp4 | rta005x-2.mp4 growth over 3s: none -> none
+09-28 21:23:34.370 I/lumella (30054): debug: start recording -> /storage/emulated/0/Android/data/com.woolab.lumella/files/rta005x.mp4 camera=true
+09-28 21:23:34.433 I/lumella (30054): debug: rec recording -> /storage/emulated/0/Android/data/com.woolab.lumella/files/rta005x.mp4
+09-28 21:23:34.496 I/lumella (30054): recording started -> /storage/emulated/0/Android/data/com.woolab.lumella/files/rta005x.mp4
+09-28 21:23:40.463 I/lumella (30054): debug: stop recording
+09-28 21:23:40.464 I/lumella (30054): debug: rec stopping
+09-28 21:23:40.590 I/lumella (30054): recording finalized ok=true err=0 bytes=file:///storage/emulated/0/Android/data/com.woolab.lumella/files/rta005x.mp4
+09-28 21:23:40.592 I/lumella (30054): debug: rec finalized /storage/emulated/0/Android/data/com.woolab.lumella/files/rta005x.mp4
+09-28 21:23:40.604 I/lumella (30054): debug: capturePhoto triggered via broadcast
+09-28 21:23:40.665 I/lumella (30054): capture requested; lifecycle=RESUMED
+09-28 21:23:42.663 I/lumella (30054): photo -> realtime model: chars=217800 sent=true
+== photo 0.3s after stop | files: rta03x-learner.wav rta03x-tutor.wav rta03x.mp4 | rta03x-2.mp4 growth over 3s: none -> none
+09-28 21:23:50.136 I/lumella (30054): debug: start recording -> /storage/emulated/0/Android/data/com.woolab.lumella/files/rta03x.mp4 camera=true
+09-28 21:23:50.199 I/lumella (30054): debug: rec recording -> /storage/emulated/0/Android/data/com.woolab.lumella/files/rta03x.mp4
+09-28 21:23:50.265 I/lumella (30054): recording started -> /storage/emulated/0/Android/data/com.woolab.lumella/files/rta03x.mp4
+09-28 21:23:56.221 I/lumella (30054): debug: stop recording
+09-28 21:23:56.223 I/lumella (30054): debug: rec stopping
+09-28 21:23:56.407 I/lumella (30054): recording finalized ok=true err=0 bytes=file:///storage/emulated/0/Android/data/com.woolab.lumella/files/rta03x.mp4
+09-28 21:23:56.412 I/lumella (30054): debug: rec finalized /storage/emulated/0/Android/data/com.woolab.lumella/files/rta03x.mp4
+09-28 21:23:56.593 I/lumella (30054): debug: capturePhoto triggered via broadcast
+09-28 21:23:56.646 I/lumella (30054): capture requested; lifecycle=RESUMED
+09-28 21:23:58.284 I/lumella (30054): photo -> realtime model: chars=217364 sent=true

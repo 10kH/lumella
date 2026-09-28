@@ -1,10 +1,30 @@
-      20:41:04.717ebug: rec recording -> /storage/emulated/0/Android/data/com.woolab.lumella/files/
-      20:41:10.937ebug: rec finalized /storage/emulated/0/Android/data/com.woolab.lumella/files/rtq
-      20:41:11.117ebug: rec recording -> /storage/emulated/0/Android/data/com.woolab.lumella/files/
-      20:41:19.322ebug: rec finalized /storage/emulated/0/Android/data/com.woolab.lumella/files/rtq
----- gap 0.1s
-      20:41:24.095ebug: rec recording -> /storage/emulated/0/Android/data/com.woolab.lumella/files/
-      20:41:30.412ebug: rec finalized /storage/emulated/0/Android/data/com.woolab.lumella/files/rtq
-      20:41:31.257ebug: rec recording -> /storage/emulated/0/Android/data/com.woolab.lumella/files/
-      20:41:39.455ebug: rec finalized /storage/emulated/0/Android/data/com.woolab.lumella/files/rtq
----- gap 1.0s
+== STOP->START 0.1s | rtqa.mp4 5.2s, rtqa-tutor 5.1s | rtqb.mp4 6.1s, rtqb-tutor 6.0s, rtqb-learner 6.0s
+09-28 21:24:06.131 I/lumella (30054): debug: start recording -> /storage/emulated/0/Android/data/com.woolab.lumella/files/rtqa.mp4 camera=true
+09-28 21:24:06.190 I/lumella (30054): debug: rec recording -> /storage/emulated/0/Android/data/com.woolab.lumella/files/rtqa.mp4
+09-28 21:24:06.253 I/lumella (30054): recording started -> /storage/emulated/0/Android/data/com.woolab.lumella/files/rtqa.mp4
+09-28 21:24:12.222 I/lumella (30054): debug: stop recording
+09-28 21:24:12.223 I/lumella (30054): debug: rec stopping
+09-28 21:24:12.385 I/lumella (30054): recording finalized ok=true err=0 bytes=file:///storage/emulated/0/Android/data/com.woolab.lumella/files/rtqa.mp4
+09-28 21:24:12.388 I/lumella (30054): debug: rec finalized /storage/emulated/0/Android/data/com.woolab.lumella/files/rtqa.mp4
+09-28 21:24:12.412 I/lumella (30054): debug: start recording -> /storage/emulated/0/Android/data/com.woolab.lumella/files/rtqb.mp4 camera=true
+09-28 21:24:12.474 I/lumella (30054): debug: rec recording -> /storage/emulated/0/Android/data/com.woolab.lumella/files/rtqb.mp4
+09-28 21:24:12.537 I/lumella (30054): recording started -> /storage/emulated/0/Android/data/com.woolab.lumella/files/rtqb.mp4
+09-28 21:24:20.513 I/lumella (30054): debug: stop recording
+09-28 21:24:20.515 I/lumella (30054): debug: rec stopping
+09-28 21:24:20.770 I/lumella (30054): recording finalized ok=true err=0 bytes=file:///storage/emulated/0/Android/data/com.woolab.lumella/files/rtqb.mp4
+09-28 21:24:20.773 I/lumella (30054): debug: rec finalized /storage/emulated/0/Android/data/com.woolab.lumella/files/rtqb.mp4
+== STOP->START 1.0s | rtqa.mp4 5.6s, rtqa-tutor 5.4s | rtqb.mp4 7.1s, rtqb-tutor 7.0s, rtqb-learner 7.0s
+09-28 21:24:26.380 I/lumella (30054): debug: start recording -> /storage/emulated/0/Android/data/com.woolab.lumella/files/rtqa.mp4 camera=true
+09-28 21:24:26.444 I/lumella (30054): debug: rec recording -> /storage/emulated/0/Android/data/com.woolab.lumella/files/rtqa.mp4
+09-28 21:24:26.508 I/lumella (30054): recording started -> /storage/emulated/0/Android/data/com.woolab.lumella/files/rtqa.mp4
+09-28 21:24:32.471 I/lumella (30054): debug: stop recording
+09-28 21:24:32.473 I/lumella (30054): debug: rec stopping
+09-28 21:24:32.657 I/lumella (30054): recording finalized ok=true err=0 bytes=file:///storage/emulated/0/Android/data/com.woolab.lumella/files/rtqa.mp4
+09-28 21:24:32.661 I/lumella (30054): debug: rec finalized /storage/emulated/0/Android/data/com.woolab.lumella/files/rtqa.mp4
+09-28 21:24:33.556 I/lumella (30054): debug: start recording -> /storage/emulated/0/Android/data/com.woolab.lumella/files/rtqb.mp4 camera=true
+09-28 21:24:33.611 I/lumella (30054): debug: rec recording -> /storage/emulated/0/Android/data/com.woolab.lumella/files/rtqb.mp4
+09-28 21:24:33.673 I/lumella (30054): recording started -> /storage/emulated/0/Android/data/com.woolab.lumella/files/rtqb.mp4
+09-28 21:24:41.662 I/lumella (30054): debug: stop recording
+09-28 21:24:41.663 I/lumella (30054): debug: rec stopping
+09-28 21:24:41.875 I/lumella (30054): recording finalized ok=true err=0 bytes=file:///storage/emulated/0/Android/data/com.woolab.lumella/files/rtqb.mp4
+09-28 21:24:41.877 I/lumella (30054): debug: rec finalized /storage/emulated/0/Android/data/com.woolab.lumella/files/rtqb.mp4

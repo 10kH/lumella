@@ -1,22 +1,35 @@
-      20:40:02.427apture during recording; closing segment to lift a frame
-      20:40:02.621ebug: stop recording
-      20:40:02.622ebug: rec stopping
-      20:40:02.671ecording finalized ok=true err=0 bytes=file:///storage/emulated/0/Android/data/com.woolab.l
-      20:40:02.850ake ended during a photo turn; not resuming rtphoto01x-2.mp4
----- gap 0.1s
-      20:40:17.222apture during recording; closing segment to lift a frame
-      20:40:17.452ecording finalized ok=true err=0 bytes=file:///storage/emulated/0/Android/data/com.woolab.l
-      20:40:17.689egment resume: recording -> /storage/emulated/0/Android/data/com.woolab.lumella/files/rtpho
-      20:40:17.800ebug: stop recording
-      20:40:17.801ebug: rec stopping
-      20:40:18.812ecording finalized ok=false err=8 bytes=
-      20:40:18.815egment resume: failed code=8
----- gap 0.5s
-      20:40:32.500apture during recording; closing segment to lift a frame
-      20:40:32.786ecording finalized ok=true err=0 bytes=file:///storage/emulated/0/Android/data/com.woolab.l
-      20:40:33.209egment resume: recording -> /storage/emulated/0/Android/data/com.woolab.lumella/files/rtpho
-      20:40:33.509ebug: stop recording
-      20:40:33.511ebug: rec stopping
-      20:40:34.451ecording finalized ok=false err=8 bytes=
-      20:40:34.454egment resume: failed code=8
----- gap 0.9s
+== stop 0.1s after photo request | files: rtp01x-learner.wav rtp01x-tutor.wav rtp01x.mp4 | rtp01x-2.mp4 growth over 3s: none -> none | rtp01x.mp4 4.1s, learner 4.0s, tutor 4.0s
+09-28 21:22:47.763 I/lumella (30054): debug: start recording -> /storage/emulated/0/Android/data/com.woolab.lumella/files/rtp01x.mp4 camera=true
+09-28 21:22:48.188 I/lumella (30054): debug: rec recording -> /storage/emulated/0/Android/data/com.woolab.lumella/files/rtp01x.mp4
+09-28 21:22:48.259 I/lumella (30054): recording started -> /storage/emulated/0/Android/data/com.woolab.lumella/files/rtp01x.mp4
+09-28 21:22:53.882 I/lumella (30054): capture during recording; closing segment to lift a frame
+09-28 21:22:54.097 I/lumella (30054): debug: stop recording
+09-28 21:22:54.099 I/lumella (30054): debug: rec stopping
+09-28 21:22:54.212 I/lumella (30054): recording finalized ok=true err=0 bytes=file:///storage/emulated/0/Android/data/com.woolab.lumella/files/rtp01x.mp4
+09-28 21:22:54.215 I/lumella (30054): debug: rec finalized /storage/emulated/0/Android/data/com.woolab.lumella/files/rtp01x.mp4
+09-28 21:22:54.393 I/lumella (30054): take ended during a photo turn; not resuming rtp01x-2.mp4
+== stop 0.5s after photo request | files: rtp05x-learner.wav rtp05x-tutor.wav rtp05x.mp4 | rtp05x-2.mp4 growth over 3s: none -> none | rtp05x.mp4 5.4s, learner 5.4s, tutor 5.4s
+09-28 21:23:02.894 I/lumella (30054): debug: start recording -> /storage/emulated/0/Android/data/com.woolab.lumella/files/rtp05x.mp4 camera=true
+09-28 21:23:02.974 I/lumella (30054): debug: rec recording -> /storage/emulated/0/Android/data/com.woolab.lumella/files/rtp05x.mp4
+09-28 21:23:03.040 I/lumella (30054): recording started -> /storage/emulated/0/Android/data/com.woolab.lumella/files/rtp05x.mp4
+09-28 21:23:09.004 I/lumella (30054): capture during recording; closing segment to lift a frame
+09-28 21:23:09.349 I/lumella (30054): recording finalized ok=true err=0 bytes=file:///storage/emulated/0/Android/data/com.woolab.lumella/files/rtp05x.mp4
+09-28 21:23:09.352 I/lumella (30054): debug: rec finalized /storage/emulated/0/Android/data/com.woolab.lumella/files/rtp05x.mp4
+09-28 21:23:09.618 I/lumella (30054): segment resume: recording -> /storage/emulated/0/Android/data/com.woolab.lumella/files/rtp05x-2.mp4
+09-28 21:23:09.618 I/lumella (30054): debug: stop recording
+09-28 21:23:09.619 I/lumella (30054): debug: rec stopping
+09-28 21:23:09.620 I/lumella (30054): recording finalized ok=false err=8 bytes=
+09-28 21:23:09.622 I/lumella (30054): segment resume: failed code=8
+== stop 0.9s after photo request | files: rtp09x-learner.wav rtp09x-tutor.wav rtp09x.mp4 | rtp09x-2.mp4 growth over 3s: none -> none | rtp09x.mp4 5.3s, learner 5.2s, tutor 5.2s
+09-28 21:23:18.451 I/lumella (30054): debug: start recording -> /storage/emulated/0/Android/data/com.woolab.lumella/files/rtp09x.mp4 camera=true
+09-28 21:23:18.518 I/lumella (30054): debug: rec recording -> /storage/emulated/0/Android/data/com.woolab.lumella/files/rtp09x.mp4
+09-28 21:23:18.582 I/lumella (30054): recording started -> /storage/emulated/0/Android/data/com.woolab.lumella/files/rtp09x.mp4
+09-28 21:23:24.552 I/lumella (30054): capture during recording; closing segment to lift a frame
+09-28 21:23:24.857 I/lumella (30054): recording finalized ok=true err=0 bytes=file:///storage/emulated/0/Android/data/com.woolab.lumella/files/rtp09x.mp4
+09-28 21:23:24.860 I/lumella (30054): debug: rec finalized /storage/emulated/0/Android/data/com.woolab.lumella/files/rtp09x.mp4
+09-28 21:23:25.100 I/lumella (30054): segment resume: recording -> /storage/emulated/0/Android/data/com.woolab.lumella/files/rtp09x-2.mp4
+09-28 21:23:25.184 I/lumella (30054): recording started -> /storage/emulated/0/Android/data/com.woolab.lumella/files/rtp09x-2.mp4
+09-28 21:23:25.535 I/lumella (30054): debug: stop recording
+09-28 21:23:25.536 I/lumella (30054): debug: rec stopping
+09-28 21:23:26.549 I/lumella (30054): recording finalized ok=false err=8 bytes=
+09-28 21:23:26.552 I/lumella (30054): segment resume: failed code=8

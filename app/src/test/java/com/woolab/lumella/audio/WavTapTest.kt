@@ -163,7 +163,22 @@ class WavTapTest {
         now = 1_040; t.write(chunk(40, 2))
         t.close()
 
-        assertEquals("the oldest kept audio was heard 400ms before now", 600..639, span(2))
+        assertEquals("the oldest kept audio was heard 400ms before now", 640..679, span(2))
+    }
+
+    @Test
+    fun aFrameThatComesAfterTheGiveUpPutsTheVoicesBackOnTheVideo() {
+        val c = TakeClock(followVideo = true, giveUpAfterMs = 5_000) { now }
+        val learner = tap(c, live = true, slackMs = 400)
+        now = 6_000; learner.write(chunk(40, 9)) // given up: rolls from 0, this lands at 5960
+        now = 7_000; c.rolling(0)                 // the first frame did come: video time 0
+        now = 7_040; learner.write(chunk(40, 8))  // file is ~6s ahead of the video: dropped
+        // ...until the video's clock has caught up with the file
+        now = 13_040; learner.write(chunk(40, 1))
+        learner.close()
+
+        assertEquals(null, span(8))
+        assertEquals(6_000..6_039, span(1))
     }
 
     @Test
