@@ -604,7 +604,7 @@ class GlassesCamera(context: Context, private val lifecycleOwner: LifecycleOwner
         private const val POV_FPS = 24
         /** How long a take start waits for an in-flight still: open wait 5s + 3 attempts 600ms apart. */
         private const val STILL_WAIT_MS = 10_000L
-        /** Refusals while busy with another photo; callers compare against these. */
+        /** Refusals while busy with another photo (ELLA's MainActivity matches on them to keep its status). */
         const val BUSY_BETWEEN_SEGMENTS = "Recording is between segments or ending; try again"
         const val BUSY_STILL = "Capture already in progress"
         private const val STILL_POLL_MS = 100L
