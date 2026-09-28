@@ -177,8 +177,14 @@ compose() {
       "[1:v]crop=640:480:0:0,scale=1280:960,setsar=1[scr];[0:v]scale=-2:960,setsar=1[pv];[pv][scr]hstack=inputs=2[v]" \
       -map "[v]" -map "0:a?" -c:v libx264 -preset veryfast -crf 20 -c:a aac -y "$out" 2>/dev/null && ok=1
   elif [ -f "$voices" ]; then
-    ffmpeg -v error -i "$screen" -i "$voices" -filter_complex "[0:v]crop=640:480:0:0,scale=1280:960,setsar=1[v]" \
-      -map "[v]" -map 1:a -c:v libx264 -preset veryfast -crf 20 -c:a aac -shortest -y "$out" 2>/dev/null && ok=1
+    # screenrecord writes a frame only when the display changes, so its file ends at the last
+    # change, not at the end of the take. Hold that last frame, and cut at the voices' length
+    # with -t: -shortest overshoots by tens of seconds against an endless padded stream.
+    local dur
+    dur="$(ffprobe -v error -show_entries format=duration -of csv=p=0 "$voices" 2>/dev/null)"
+    [ -n "$dur" ] && ffmpeg -v error -i "$screen" -i "$voices" \
+      -filter_complex "[0:v]crop=640:480:0:0,scale=1280:960,setsar=1,tpad=stop_mode=clone:stop=-1[v]" \
+      -map "[v]" -map 1:a -c:v libx264 -preset veryfast -crf 20 -c:a aac -t "$dur" -y "$out" 2>/dev/null && ok=1
   else
     return 0
   fi
