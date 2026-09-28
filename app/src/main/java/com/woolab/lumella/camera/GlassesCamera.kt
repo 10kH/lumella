@@ -129,7 +129,7 @@ class GlassesCamera(context: Context, private val lifecycleOwner: LifecycleOwner
             return
         }
         if (!capturing.compareAndSet(false, true)) {
-            onError("Capture already in progress")
+            onError(BUSY_STILL)
             return
         }
         mainHandler.post {
@@ -290,7 +290,16 @@ class GlassesCamera(context: Context, private val lifecycleOwner: LifecycleOwner
         onEvent: (String) -> Unit,
     ) {
         val generation = takeGeneration
-        if (capturing.get() && waitedMs < STILL_WAIT_MS) {
+        if (capturing.get() && waitedMs >= STILL_WAIT_MS) {
+            // The still has outlived its own worst case (5s open wait plus retries). Binding over
+            // it is exactly the 0.25s-take failure; the camera is stuck, so this segment records
+            // nothing and the voices carry on by the wall clock.
+            Log.w(TAG, "still in flight after ${waitedMs}ms; not binding the recording over it")
+            takeLostVideo(generation, clock)
+            onEvent("camera busy with a photo")
+            return
+        }
+        if (capturing.get()) {
             // A still is mid-flight (bound, opening, or retrying). Binding the recorder now tears
             // it down, and the still's own release then unbinds the recorder: the take came back
             // as a 0.25s file while its voices ran on (ELLA QA red-team, 2026-09-29: a photo,
@@ -497,7 +506,7 @@ class GlassesCamera(context: Context, private val lifecycleOwner: LifecycleOwner
                 // Between segments, not yet a frame in this one, or the take is ending. Also
                 // refuses a second photo while the first is between segments: it would replace
                 // the pending resume, and the first tool call would never be answered.
-                onError("Recording is between segments or ending; try again")
+                onError(BUSY_BETWEEN_SEGMENTS)
                 return@post
             }
             Log.i(TAG, "capture during recording; closing segment to lift a frame")
@@ -593,8 +602,11 @@ class GlassesCamera(context: Context, private val lifecycleOwner: LifecycleOwner
         private const val TAG = "lumella"
 
         private const val POV_FPS = 24
-        /** How long a take start waits for an in-flight still (open wait 5s + retries). */
-        private const val STILL_WAIT_MS = 7_000L
+        /** How long a take start waits for an in-flight still: open wait 5s + 3 attempts 600ms apart. */
+        private const val STILL_WAIT_MS = 10_000L
+        /** Refusals while busy with another photo; callers compare against these. */
+        const val BUSY_BETWEEN_SEGMENTS = "Recording is between segments or ending; try again"
+        const val BUSY_STILL = "Capture already in progress"
         private const val STILL_POLL_MS = 100L
         private const val CAMERA_OPEN_TIMEOUT_MS = 5_000L
         private const val ANALYSIS_JPEG_QUALITY = 90
