@@ -1,5 +1,5 @@
-# ./gradlew :app:testDebugUnitTest on the tree committed with this file (JDK 17), exit 0, run 2026-09-28T15:03:18.459Z UTC
-# TakeClock/WavTap and their 21 tests moved to ../tutor-capture (its ./gradlew test: 21 passed)
+# ./gradlew :app:testDebugUnitTest on the tree committed with this file (JDK 17), exit 0, run 2026-09-28T15:46:11.069Z UTC
+# with ../tutor-capture at af4b0de (its ./gradlew test: 22 passed)
 # suite                                                                tests skip fail err
 com.woolab.lumella.AppConfigTest                                          3   0   0   0
 com.woolab.lumella.CapturePolicyTest                                     11   0   0   0
