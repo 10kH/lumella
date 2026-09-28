@@ -125,7 +125,7 @@ class WavTap(
         val raf = out ?: return
         if (broken || finished) return
         try {
-            stepBackIfNeeded(raf, at)
+            if (stepBackIfNeeded(raf, at)) return
             if (live) {
                 if (at.dark) {
                     resync = true
@@ -166,10 +166,7 @@ class WavTap(
         if (finished) return
         finished = true
         try {
-            if (!broken) {
-                stepBackIfNeeded(raf, at)
-                padTo(raf, bytesAt(at.elapsedMs))
-            }
+            if (!broken && !stepBackIfNeeded(raf, at)) padTo(raf, bytesAt(at.elapsedMs))
             raf.seek(0)
             raf.write(header(dataBytes))
         } catch (e: IOException) {
@@ -184,18 +181,26 @@ class WavTap(
      * Not to the current position — by the next write the clock may have run past the old end of
      * the file, and nothing would be cut. The usual placement then fills up to now.
      */
-    private fun stepBackIfNeeded(raf: RandomAccessFile, at: TakeClock.Stamp) {
-        if (at.epoch == epoch) return
+    /**
+     * Returns true if [at] is stale: stamped before a step back this file has already applied.
+     * A stamp can reach the writer late — several threads stamp and queue (the audio thread, the
+     * close thread, the debug tone) with nothing ordering the two steps — and such a chunk was
+     * heard before the video resumed, so it is dropped rather than placed on the old timeline.
+     */
+    private fun stepBackIfNeeded(raf: RandomAccessFile, at: TakeClock.Stamp): Boolean {
+        if (at.epoch < epoch) return true
+        if (at.epoch == epoch) return false
         // The first step back this file has not seen: nothing after it had video under it.
         val target = bytesAt(at.stepBacks[epoch])
         epoch = at.epoch
         resync = true
-        if (target >= dataBytes) return
+        if (target >= dataBytes) return false
         warn("tap $name: clock stepped back ${(dataBytes - target) / 2 * 1000 / sampleRateHz}ms; cutting the file back")
         raf.setLength(HEADER_BYTES + target)
         raf.seek(HEADER_BYTES + target)
         dataBytes = target
         headerBytes = 0L
+        return false
     }
 
     /** Byte offset of [ms] of audio; always a whole sample. */

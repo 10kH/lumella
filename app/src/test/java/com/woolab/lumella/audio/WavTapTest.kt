@@ -352,6 +352,43 @@ class WavTapTest {
         assertEquals(36 + data, riff)
     }
 
+    @Test
+    fun aStampFromBeforeAStepBackArrivingAfterItIsHarmless() {
+        val c = TakeClock(followVideo = true, giveUpAfterMs = 5_000) { now }
+        val held = HoldingExecutor()
+        val tutor = WavTap(File(dir, "t.wav"), RATE, c, false, { warnings += it }, executor = held)
+        now = 6_000; tutor.write(chunk(100, 1))   // stamped in epoch 0
+        now = 7_000; c.firstFrame(0)              // step back
+        now = 8_000; tutor.write(chunk(100, 2))   // stamped in epoch 1
+        held.runInReverse()                       // the writer sees epoch 1 first, then epoch 0
+        now = 9_000; tutor.close()                // video time 2000
+        held.runInReverse()
+
+        assertEquals("the later stamp is placed on the video's clock", 1_000..1_099, span(2))
+        assertEquals("the stale one, heard before the video resumed, is dropped — no crash", null, span(1))
+        assertEquals("and the file ends where the video does", 2_000, samples().size)
+    }
+
+    /** Holds queued writes so a test can run them out of order. */
+    private class HoldingExecutor : java.util.concurrent.AbstractExecutorService() {
+        private val queue = ArrayList<Runnable>()
+        @Volatile private var shut = false
+        override fun execute(command: Runnable) {
+            if (shut) throw java.util.concurrent.RejectedExecutionException()
+            queue += command
+        }
+        fun runInReverse() {
+            val batch = queue.reversed()
+            queue.clear()
+            batch.forEach { it.run() }
+        }
+        override fun shutdown() { shut = true }
+        override fun shutdownNow(): MutableList<Runnable> { shut = true; return mutableListOf() }
+        override fun isShutdown() = shut
+        override fun isTerminated() = shut && queue.isEmpty()
+        override fun awaitTermination(timeout: Long, unit: java.util.concurrent.TimeUnit) = true
+    }
+
     /** Runs each write inline, so the file can be read mid-take. */
     private class DirectExecutor : java.util.concurrent.AbstractExecutorService() {
         @Volatile private var shut = false
