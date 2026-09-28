@@ -1,0 +1,29 @@
+# ./gradlew :app:testDebugUnitTest at 22a45f7 (JDK 17), exit 0, run 2026-09-28T13:28:25.461Z
+# suite                                                                tests skip fail err
+com.woolab.lumella.AppConfigTest                                          3   0   0   0
+com.woolab.lumella.CapturePolicyTest                                     11   0   0   0
+com.woolab.lumella.CoachIndicatorLabelTest                               29   0   0   0
+com.woolab.lumella.DisplaySettingsConcurrencyTest                         2   0   0   0
+com.woolab.lumella.DisplaySettingsDriftTest                               1   0   0   0
+com.woolab.lumella.DisplaySettingsTest                                    6   0   0   0
+com.woolab.lumella.RealtimeProtocolTest                                   3   0   0   0
+com.woolab.lumella.RealtimeServerEventMappingTest                         1   0   0   0
+com.woolab.lumella.RemoteConfigResolverTest                               9   0   0   0
+com.woolab.lumella.RightTapDecisionTest                                  11   0   0   0
+com.woolab.lumella.RightTapRulesDriftTest                                 1   0   0   0
+com.woolab.lumella.SubtitleFitTest                                        6   0   0   0
+com.woolab.lumella.SubtitleRetentionAdversarialTest                      11   0   0   0
+com.woolab.lumella.SubtitleRetentionDriftTest                             1   0   0   0
+com.woolab.lumella.SubtitleRetentionTest                                  6   0   0   0
+com.woolab.lumella.TokenServiceCredentialProviderTest                     8   0   0   0
+com.woolab.lumella.TurnGateTest                                           9   0   0   0
+com.woolab.lumella.audio.WavTapTest                                      20   0   0   0
+com.woolab.lumella.brain.BrainFactoryTest                                 7   0   0   0
+com.woolab.lumella.camera.GlassesCameraSegmentNameTest                    4   0   0   0
+com.woolab.lumella.config.EllaMaConfigTest                                5   0   0   0
+com.woolab.lumella.slowpath.PendingTurnBinderTest                         8   0   0   0
+com.woolab.lumella.slowpath.TurnEvidenceAssemblerTest                     4   0   0   0
+com.woolab.lumella.voice.OpenAiRealtimeTransportSessionPersonaTest        8   0   0   0
+com.woolab.lumella.voice.OpenAiRealtimeTransportTest                     93   0   0   0
+com.woolab.lumella.voice.VoiceFastPathTest                                7   0   0   0
+TOTAL 274 tests, 0 skipped, 0 failures, 0 errors
