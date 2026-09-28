@@ -180,8 +180,7 @@ class WavTap(
      * The clock stepped back since the last write: cut the file back to where the video resumed.
      * Not to the current position — by the next write the clock may have run past the old end of
      * the file, and nothing would be cut. The usual placement then fills up to now.
-     */
-    /**
+     *
      * Returns true if [at] is stale: stamped before a step back this file has already applied.
      * A stamp can reach the writer late — several threads stamp and queue (the audio thread, the
      * close thread, the debug tone) with nothing ordering the two steps — and such a chunk was
