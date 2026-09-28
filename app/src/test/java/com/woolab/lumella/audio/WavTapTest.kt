@@ -88,11 +88,11 @@ class WavTapTest {
     fun aPhotoTurnsGapIsNotCountedAsRecordedTime() {
         val c = TakeClock(followVideo = true) { now }
         val t = tap(c, live = false)
-        c.rolling(0)
+        c.firstFrame(0)
         t.write(chunk(100, 1))
         now = 500; c.dark()            // photo turn: stop requested
         now = 700; c.segmentEnded(500) // the recorder counted 500ms
-        now = 2_000; c.rolling(0)      // next segment's first frame
+        now = 2_000; c.firstFrame(0)      // next segment's first frame
         now = 2_500
         t.write(chunk(100, 2))
         t.close()
@@ -123,14 +123,14 @@ class WavTapTest {
     fun learnerAudioHeardWhileTheVideoWasDarkIsDropped() {
         val c = TakeClock(followVideo = true) { now }
         val t = tap(c, live = true)
-        c.rolling(0)
+        c.firstFrame(0)
         now = 40; t.write(chunk(40, 1))
         now = 80; t.write(chunk(40, 2))
         now = 90; c.dark()
         now = 100; c.segmentEnded(90)
         now = 120; t.write(chunk(40, 9))
         now = 160; t.write(chunk(40, 9))
-        now = 200; c.rolling(0)
+        now = 200; c.firstFrame(0)
         now = 240; t.write(chunk(40, 3))
         t.close()
 
@@ -167,18 +167,45 @@ class WavTapTest {
     }
 
     @Test
-    fun aFrameThatComesAfterTheGiveUpPutsTheVoicesBackOnTheVideo() {
+    fun aFrameThatComesAfterTheGiveUpCutsTheLearnerBackToTheVideo() {
         val c = TakeClock(followVideo = true, giveUpAfterMs = 5_000) { now }
         val learner = tap(c, live = true, slackMs = 400)
-        now = 6_000; learner.write(chunk(40, 9)) // given up: rolls from 0, this lands at 5960
-        now = 7_000; c.rolling(0)                 // the first frame did come: video time 0
-        now = 7_040; learner.write(chunk(40, 8))  // file is ~6s ahead of the video: dropped
-        // ...until the video's clock has caught up with the file
-        now = 13_040; learner.write(chunk(40, 1))
+        // Continuous 40ms reads. 6s without a frame: given up, the voices follow the wall.
+        var t = 5_040L
+        while (t <= 7_000L) { now = t; learner.write(chunk(40, 9)); t += 40 }
+        now = 7_000; c.firstFrame(0)              // the first frame did come: video time 0
+        while (t <= 7_400L) { now = t; learner.write(chunk(40, 1)); t += 40 }
         learner.close()
 
-        assertEquals(null, span(8))
-        assertEquals(6_000..6_039, span(1))
+        assertEquals("speech from before the video is cut", null, span(9))
+        assertEquals("what follows lines up with the video", 0..399, span(1))
+    }
+
+    @Test
+    fun aFrameThatComesAfterTheGiveUpCutsTheTutorBackToo() {
+        val c = TakeClock(followVideo = true, giveUpAfterMs = 5_000) { now }
+        val tutor = tap(c, live = false)
+        now = 6_000; tutor.write(chunk(100, 9))   // given up: lands at 6000
+        now = 7_000; c.firstFrame(0)
+        now = 8_000; tutor.write(chunk(100, 1))   // video time 1000
+        tutor.close()
+
+        assertEquals(null, span(9))
+        assertEquals(1_000..1_099, span(1))
+    }
+
+    @Test
+    fun aGivenUpClockStaysOnTheWallWhenAFramelessSegmentEnds() {
+        val c = TakeClock(followVideo = true, giveUpAfterMs = 5_000) { now }
+        val tutor = tap(c, live = false)
+        now = 5_500; tutor.write(chunk(100, 1))   // given up at 5s: wall time
+        now = 6_000; c.segmentEnded(0)            // the segment ends with no frame in it
+        c.noVideo()                               // and no resume is coming
+        now = 6_500; tutor.write(chunk(100, 2))
+        tutor.close()
+
+        assertEquals(5_500..5_599, span(1))
+        assertEquals("no step back to the empty video", 6_500..6_599, span(2))
     }
 
     @Test
@@ -187,7 +214,7 @@ class WavTapTest {
         val learner = tap(c, live = true)
         // The recorder's Start event would be here, ~1.5s before any frame is in the file.
         now = 40; learner.write(chunk(40, 9))
-        now = 1_500; c.rolling(0)              // first Status: data is in the file
+        now = 1_500; c.firstFrame(0)              // first Status: data is in the file
         now = 1_540; learner.write(chunk(40, 1))
         now = 1_800
         learner.close()
@@ -201,10 +228,10 @@ class WavTapTest {
     fun theRecordersOwnSegmentLengthCorrectsTheEstimate() {
         val c = TakeClock(followVideo = true) { now }
         val t = tap(c, live = false)
-        c.rolling(0)
+        c.firstFrame(0)
         now = 1_000; c.dark()              // stop requested at 1000ms of video...
         now = 1_200; c.segmentEnded(1_150) // ...but frames kept landing until 1150ms
-        now = 3_000; c.rolling(0)
+        now = 3_000; c.firstFrame(0)
         t.write(chunk(100, 1))
         t.close()
 
@@ -228,9 +255,9 @@ class WavTapTest {
     fun aRecordingThatEndsByItselfLetsTheVoicesCarryOn() {
         val c = TakeClock(followVideo = true) { now }
         val t = tap(c, live = true)
-        c.rolling(0)
+        c.firstFrame(0)
         now = 1_000; c.segmentEnded(1_000) // no stop was asked for: the camera went away
-        c.rolling(0)                        // what GlassesCamera does when no resume is pending
+        c.noVideo()                         // what GlassesCamera does when no resume is pending
         now = 1_040; t.write(chunk(40, 1))
         t.close()
 
@@ -240,8 +267,8 @@ class WavTapTest {
     @Test
     fun onlyTheFirstFrameOfASegmentAnchorsTheClock() {
         val c = TakeClock(followVideo = true) { now }
-        now = 100; c.rolling(0)
-        now = 600; c.rolling(480) // every later Status is ignored
+        now = 100; c.firstFrame(0)
+        now = 600; c.firstFrame(480) // every later Status is ignored
         assertEquals(500L, c.stamp().elapsedMs)
     }
 

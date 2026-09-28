@@ -32,9 +32,12 @@ import java.util.concurrent.TimeUnit
  *    stretch (where the video resumes), and to leave a hole where audio was really lost. A
  *    late read loses nothing until it is later than the capture buffer ([liveSlackMs]) — the
  *    buffered audio comes out on the next reads — so only a stall past that is padded, and only
- *    by the part the buffer could not hold. A mic cannot run ahead of real time, so a file more
- *    than [liveSlackMs] ahead of the clock means the clock stepped back (a video that came after
- *    being given up on, [TakeClock]); chunks are dropped until the clock has caught up.
+ *    by the part the buffer could not hold.
+ *
+ * **When the clock steps back** — a video that came after the clock gave up on it
+ * ([TakeClock.Stamp.epoch]) — both taps cut the file back to the new position and carry on from
+ * there. What they wrote in between was voices with no video under them, placed ahead of a video
+ * that now starts; keeping it would leave the whole rest of the take out of step.
  *
  * **The header is kept current**, once per second of audio ([HEADER_EVERY_MS]). It used to be written only on
  * close, so an app killed mid-take left `RIFF` and `data` sizes of 0 and ffprobe refused the
@@ -72,6 +75,8 @@ class WavTap(
     private var headerBytes = 0L
     /** Live taps: the next chunk follows a dark stretch (or is the first), so the clock places it. */
     private var resync = true
+    /** The clock's step-back count this file was written under. */
+    private var epoch = 0
     private var broken = false
     private var finished = false
 
@@ -110,17 +115,24 @@ class WavTap(
         }
     }
 
+    /**
+     * Closed and nothing left to write. False while a writer that outlived [close]'s wait still
+     * holds the file — a new tap on the same name must not truncate it under that writer.
+     */
+    val drained: Boolean get() = closed && executor.isTerminated
+
     private fun append(at: TakeClock.Stamp, pcm: ByteArray) {
         val raf = out ?: return
         if (broken || finished) return
         try {
+            // A live chunk was heard just before its stamp, so it starts one chunk earlier.
+            stepBackIfNeeded(raf, at, if (live) pcm.size.toLong() else 0L)
             if (live) {
                 if (at.dark) {
                     resync = true
                     return
                 }
                 val now = bytesAt(at.elapsedMs)
-                if (dataBytes - now > bytesAt(liveSlackMs)) return
                 if (resync) {
                     // Where this chunk would start if it had just been heard.
                     padTo(raf, now - pcm.size)
@@ -155,7 +167,10 @@ class WavTap(
         if (finished) return
         finished = true
         try {
-            if (!broken) padTo(raf, bytesAt(at.elapsedMs))
+            if (!broken) {
+                stepBackIfNeeded(raf, at, 0L)
+                padTo(raf, bytesAt(at.elapsedMs))
+            }
             raf.seek(0)
             raf.write(header(dataBytes))
         } catch (e: IOException) {
@@ -163,6 +178,20 @@ class WavTap(
         } finally {
             runCatching { raf.close() }
         }
+    }
+
+    /** The clock stepped back since the last write: cut the file back to where it now stands. */
+    private fun stepBackIfNeeded(raf: RandomAccessFile, at: TakeClock.Stamp, chunkBytes: Long) {
+        if (at.epoch == epoch) return
+        epoch = at.epoch
+        resync = true
+        val target = maxOf(0L, bytesAt(at.elapsedMs) - chunkBytes)
+        if (target >= dataBytes) return
+        warn("tap $name: clock stepped back ${(dataBytes - target) / 2 * 1000 / sampleRateHz}ms; cutting the file back")
+        raf.setLength(HEADER_BYTES + target)
+        raf.seek(HEADER_BYTES + target)
+        dataBytes = target
+        headerBytes = 0L
     }
 
     /** Byte offset of [ms] of audio; always a whole sample. */

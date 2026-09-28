@@ -90,18 +90,30 @@ class GlassesCamera(context: Context, private val lifecycleOwner: LifecycleOwner
     private var takeGeneration = 0
 
     /**
+     * A take is running, from [startRecording] to [stopRecording] — including the ~0.5s between a
+     * photo turn's Finalize and the next segment, when nothing is recording and [recordingFile]
+     * is null. Photo requests are routed by this, not by [recordingFile]: in that gap a second
+     * photo used to take the still path, whose unbindAll tore down the resuming recording and
+     * left the rest of the take without video, silently. Cleared too when the take loses its
+     * video for good.
+     */
+    @Volatile private var takeActive = false
+
+    /**
      * What a take's recording is doing, for anything that must stay on its clock — the voice
      * taps, via [com.woolab.lumella.audio.TakeClock], which explains why each event is the one it
      * is. Passed per take and carried from segment to segment, so a late event from one take can
      * never land on the next take's clock.
      */
     interface RecordingClock {
+        /** A segment's first frame is in the file, [segmentRecordedMs] into the segment. */
+        fun firstFrame(segmentRecordedMs: Long)
         /**
-         * A segment's first frame is in the file. Also sent when nothing will record for this
-         * take (start failed, camera busy, recording ended by itself): the voices then follow
-         * the wall clock rather than wait for a video that is not coming.
+         * Nothing will record for this take from here (camera busy, start failed, recording
+         * ended by itself): the voices follow the wall rather than wait for a video that is not
+         * coming.
          */
-        fun rolling(segmentRecordedMs: Long)
+        fun noVideo()
         /** A stop was requested (photo turn or end of take); frames may still land briefly. */
         fun dark()
         /** A segment closed having recorded exactly [recordedMs], by the recorder's own count. */
@@ -113,15 +125,13 @@ class GlassesCamera(context: Context, private val lifecycleOwner: LifecycleOwner
      * Safe to call from any thread; binding is marshalled to the main thread as CameraX requires.
      */
     fun captureImage(onCaptured: (ByteArray) -> Unit, onError: (String) -> Unit) {
-        val live = recordingFile
-        if (live != null) {
+        if (takeActive) {
             // This hardware binds ONE use case at a time, so a still cannot be taken while the
             // recording holds the camera, and an in-progress MP4 has no moov atom to read a
             // frame back from. Close the current segment, lift the frame out of it, and open the
             // next one. The take continues as consecutive files that join in the edit, and the
             // wearer keeps both the footage and the image turn.
-            Log.i(TAG, "capture during recording; closing segment to lift a frame")
-            segmentAndCapture(live, onCaptured, onError)
+            segmentAndCapture(onCaptured, onError)
             return
         }
         if (!capturing.compareAndSet(false, true)) {
@@ -265,21 +275,28 @@ class GlassesCamera(context: Context, private val lifecycleOwner: LifecycleOwner
      * Not exercised by JVM unit tests (real camera stack); verify on device.
      */
     fun startRecording(destination: File, clock: RecordingClock?, onEvent: (String) -> Unit) {
+        takeActive = true
         mainHandler.post {
             takeGeneration++
             startSegment(destination, clock, onEvent)
         }
     }
 
+    /** The current take will record no more video. Main thread. */
+    private fun takeLostVideo(generation: Int, clock: RecordingClock?) {
+        clock?.noVideo()
+        if (generation == takeGeneration) takeActive = false
+    }
+
     /** One segment of a take. Main thread. */
     private fun startSegment(destination: File, clock: RecordingClock?, onEvent: (String) -> Unit) {
+        val generation = takeGeneration
         if (activeRecording != null) {
             // This take will not record, so its voices must not wait for a first frame.
-            clock?.rolling(0)
+            takeLostVideo(generation, clock)
             onEvent("busy: already recording")
             return
         }
-        val generation = takeGeneration
         val providerFuture = ProcessCameraProvider.getInstance(appContext)
         providerFuture.addListener({
             // The provider can take a moment (longer when cold). A stop or another start in that
@@ -287,7 +304,7 @@ class GlassesCamera(context: Context, private val lifecycleOwner: LifecycleOwner
             if (generation != takeGeneration || activeRecording != null) {
                 Log.i(TAG, "segment start superseded before the camera bound: ${destination.name}")
                 // Nothing records for this clock now (for a take that just ended, harmless).
-                clock?.rolling(0)
+                takeLostVideo(generation, clock)
                 onEvent("superseded")
                 return@addListener
             }
@@ -370,7 +387,7 @@ class GlassesCamera(context: Context, private val lifecycleOwner: LifecycleOwner
                             // is actually in the file.
                             is VideoRecordEvent.Status -> if (!rolled) {
                                 rolled = true
-                                clock?.rolling(event.recordingStats.recordedDurationNanos / 1_000_000)
+                                clock?.firstFrame(event.recordingStats.recordedDurationNanos / 1_000_000)
                             }
                             is VideoRecordEvent.Finalize -> {
                                 clock?.segmentEnded(event.recordingStats.recordedDurationNanos / 1_000_000)
@@ -398,7 +415,7 @@ class GlassesCamera(context: Context, private val lifecycleOwner: LifecycleOwner
                                     // voices are already closed; harmless) or the recording
                                     // ending by itself — then the video is over and the
                                     // voices carry on by the wall clock.
-                                    clock?.rolling(0)
+                                    takeLostVideo(generation, clock)
                                 }
                             }
                             else -> Unit
@@ -409,7 +426,7 @@ class GlassesCamera(context: Context, private val lifecycleOwner: LifecycleOwner
             } catch (e: Exception) {
                 releaseRecording()
                 // Nothing will record, so there is no video clock to wait for.
-                clock?.rolling(0)
+                takeLostVideo(generation, clock)
                 onEvent("start failed: ${e.message}")
             }
         }, ContextCompat.getMainExecutor(appContext))
@@ -421,6 +438,7 @@ class GlassesCamera(context: Context, private val lifecycleOwner: LifecycleOwner
      * complete once Finalize arrives.
      */
     fun stopRecording(onEvent: (String) -> Unit) {
+        takeActive = false
         mainHandler.post {
             takeGeneration++
             val rec = activeRecording
@@ -452,18 +470,20 @@ class GlassesCamera(context: Context, private val lifecycleOwner: LifecycleOwner
      * keeps running. Segments are named `<take>.mp4`, `<take>-2.mp4`, ... in order.
      */
     private fun segmentAndCapture(
-        current: File,
         onCaptured: (ByteArray) -> Unit,
         onError: (String) -> Unit,
     ) {
         mainHandler.post {
             val rec = activeRecording
-            if (rec == null || stopping || recordingFile != current) {
-                // Also refuses a second photo while the first is between segments: it would
-                // replace the pending resume, and the first tool call would never be answered.
-                onError("Recording is ending or busy with a photo; try again")
+            val current = recordingFile
+            if (rec == null || stopping || current == null) {
+                // Between segments, or the take is ending. Also refuses a second photo while the
+                // first is between segments: it would replace the pending resume, and the first
+                // tool call would never be answered.
+                onError("Recording is between segments or ending; try again")
                 return@post
             }
+            Log.i(TAG, "capture during recording; closing segment to lift a frame")
             val generation = takeGeneration
             val clock = activeClock
             val next = nextSegment(current)

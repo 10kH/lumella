@@ -12,18 +12,20 @@ package com.woolab.lumella.audio
  *  - **At every photo turn**, while one segment closes and the next comes up. Counting that
  *    pushed the tutor a further 1.5s late at every photo (149.7s WAV against 146.6s of video).
  *
- * So the clock rolls only between a segment's first frame ([rolling]) and the request to stop
+ * So the clock rolls only between a segment's first frame ([firstFrame]) and the request to stop
  * it ([dark]), and at each segment's end it takes the recorder's own measured length
  * ([segmentEnded]) — the frames written after the stop was requested are counted too, and any
  * estimate error is gone before the next segment starts.
  *
- * **A video that shows no frame for [giveUpAfterMs] is not coming back** (a camera that opened
- * and never delivered, a resume that never started). The clock then rolls on by the wall from
- * the moment it went dark, and says so through [warn]: the voices are the only record left,
- * and a clock frozen for the rest of the take would drop every word the learner says and stack
- * the tutor's replies back to back. If the frame does come after all, the clock goes back to the
- * video ([rolling]) — it is the reference whenever it exists — and the taps catch up with the
- * step back ([WavTap]).
+ * **When no video is coming** the voices are the only record, and a clock frozen for the rest of
+ * the take would drop every word the learner says and stack the tutor's replies back to back.
+ * The camera says so when it knows ([noVideo]: busy, start failed, recording ended by itself), and
+ * a video that shows no frame for [giveUpAfterMs] is given up on without being told. Either way
+ * the clock rolls on by the wall, continuing from where it stood.
+ *
+ * **If a frame comes after the clock gave up,** the video is the reference again and the clock
+ * steps back to it. That is the one time video time moves backwards, and [Stamp.epoch] counts it
+ * so the taps can cut back to the new position ([WavTap]) rather than stay ahead for good.
  *
  * Without a camera ([followVideo] false) it is simply the wall clock from construction.
  */
@@ -33,8 +35,11 @@ class TakeClock(
     private val warn: (String) -> Unit = {},
     private val nowMs: () -> Long = System::currentTimeMillis,
 ) {
-    /** Video time at the moment of the call, and whether the video was recording then. */
-    data class Stamp(val elapsedMs: Long, val dark: Boolean)
+    /**
+     * Video time at the moment of the call, whether the video was recording then, and how many
+     * times the clock has stepped back so far.
+     */
+    data class Stamp(val elapsedMs: Long, val dark: Boolean, val epoch: Int = 0)
 
     /** Video time at [anchorWallMs], or the frozen video time while dark. */
     private var baseMs = 0L
@@ -44,8 +49,12 @@ class TakeClock(
     private var darkSinceMs: Long? = null
     /** Exact length of the segments already closed, as the recorder measured them. */
     private var closedMs = 0L
-    /** Rolling by the wall because the video was given up on, not because a frame arrived. */
+    /**
+     * The clock is on the wall because the video was given up on, and has not seen a frame since:
+     * the next [firstFrame] is a step back to the video.
+     */
     private var gaveUp = false
+    private var epoch = 0
 
     init {
         val now = nowMs()
@@ -62,22 +71,37 @@ class TakeClock(
             darkSinceMs = null
             gaveUp = true
         }
-        val anchor = anchorWallMs ?: return Stamp(baseMs, dark = true)
-        return Stamp(baseMs + (now - anchor), dark = false)
+        val anchor = anchorWallMs ?: return Stamp(baseMs, dark = true, epoch = epoch)
+        return Stamp(baseMs + (now - anchor), dark = false, epoch = epoch)
     }
 
     /**
      * A segment's first frame is in the file; it had recorded [segmentRecordedMs] by then
-     * (normally ~0). Later calls within the same segment are ignored.
+     * (normally ~0). Later calls within the same segment are ignored — unless the clock had given
+     * up on the video, in which case it steps back to it.
      */
     @Synchronized
-    fun rolling(segmentRecordedMs: Long) {
+    fun firstFrame(segmentRecordedMs: Long) {
         if (anchorWallMs != null && !gaveUp) return
-        if (gaveUp) warn("take clock: video frame arrived after all; back on the video's clock")
+        if (gaveUp) {
+            warn("take clock: a video frame came after all; back on the video's clock")
+            epoch++
+            gaveUp = false
+        }
         baseMs = closedMs + segmentRecordedMs
         anchorWallMs = nowMs()
         darkSinceMs = null
-        gaveUp = false
+    }
+
+    /**
+     * Nothing will record for this take from here: roll on by the wall from where the clock
+     * stands. A no-op while already rolling (including after a give-up).
+     */
+    @Synchronized
+    fun noVideo() {
+        if (anchorWallMs != null) return
+        anchorWallMs = nowMs()
+        darkSinceMs = null
     }
 
     /** A stop was requested: freeze at the current estimate. Idempotent. */
@@ -88,17 +112,25 @@ class TakeClock(
         baseMs += now - anchor
         anchorWallMs = null
         darkSinceMs = now
-        gaveUp = false
     }
 
-    /** The segment closed having recorded exactly [recordedMs]. */
+    /**
+     * The segment closed having recorded exactly [recordedMs]. Normally the clock takes that as
+     * the truth. On a given-up clock the voices have been following the wall, and they keep doing
+     * so — the step back waits for an actual frame.
+     */
     @Synchronized
     fun segmentEnded(recordedMs: Long) {
         closedMs += recordedMs
-        baseMs = closedMs
-        if (anchorWallMs != null) darkSinceMs = nowMs()
+        val now = nowMs()
+        val anchor = anchorWallMs
+        if (gaveUp) {
+            if (anchor != null) baseMs += now - anchor
+        } else {
+            baseMs = closedMs
+        }
+        if (anchor != null) darkSinceMs = now
         anchorWallMs = null
-        gaveUp = false
     }
 
     companion object {

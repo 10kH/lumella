@@ -1,0 +1,214 @@
+== second photo 0.3s after the first | rtd03x-2.mp4 growth over 3s mid-take: 2108240 -> 4188288 | files: rtd03x-2.mp4 rtd03x-learner.wav rtd03x-tutor.wav rtd03x.mp4 
+09-28 21:48:36.146 I/lumella ( 1291): debug: start recording -> /storage/emulated/0/Android/data/com.woolab.lumella/files/rtd03x.mp4 camera=true
+09-28 21:48:36.337 D/VideoCapture( 1291): Found selectedQualities [ConstantQuality{value=5, name=HD}, ConstantQuality{value=6, name=FHD}] by QualitySelector{preferredQualities=[ConstantQuality{value=5, name=HD}], fallbackStrategy=RuleStrategy{fallbackQuality=ConstantQuality{value=4, name=SD}, fallbackRule=3}}
+09-28 21:48:36.375 D/VideoCapture( 1291): Set custom ordered resolutions = [1280x720, 1920x1080]
+09-28 21:48:36.388 D/VideoCapture( 1291): Found selectedQualities [ConstantQuality{value=5, name=HD}, ConstantQuality{value=6, name=FHD}] by QualitySelector{preferredQualities=[ConstantQuality{value=5, name=HD}], fallbackStrategy=RuleStrategy{fallbackQuality=ConstantQuality{value=4, name=SD}, fallbackRule=3}}
+09-28 21:48:36.392 D/VideoCapture( 1291): Set custom ordered resolutions = [1280x720, 1920x1080]
+09-28 21:48:36.393 D/VideoCapture( 1291): onSuggestedStreamSpecUpdated: StreamSpec{resolution=1280x720, dynamicRange=DynamicRange@c1e0aea{encoding=SDR, bitDepth=8}, expectedFrameRateRange=[24, 24], implementationOptions=androidx.camera.camera2.impl.Camera2ImplConfig@c87b751}
+09-28 21:48:36.395 D/Camera2CameraImpl( 1291): {Camera@9d4872c[id=0]} Use case androidx.camera.video.VideoCapture-2c3707b8-d297-4f22-a7c6-4138e3fbe6a2126279390 INACTIVE
+09-28 21:48:36.522 D/VideoCapture( 1291): camera timebase = REALTIME, processing timebase = UPTIME
+09-28 21:48:36.539 D/Camera2CameraImpl( 1291): {Camera@9d4872c[id=0]} Use case androidx.camera.video.VideoCapture-2c3707b8-d297-4f22-a7c6-4138e3fbe6a2126279390 ACTIVE
+09-28 21:48:36.542 D/Camera2CameraImpl( 1291): {Camera@9d4872c[id=0]} Use cases [androidx.camera.video.VideoCapture-2c3707b8-d297-4f22-a7c6-4138e3fbe6a2126279390] now ATTACHED
+09-28 21:48:36.543 D/UseCaseAttachState( 1291): All use case: [androidx.camera.video.VideoCapture-2c3707b8-d297-4f22-a7c6-4138e3fbe6a2126279390] for camera: 0
+09-28 21:48:36.546 D/VideoCapture( 1291): Stream info update: old: StreamInfo{id=0, streamState=INACTIVE, inProgressTransformationInfo=null} new: StreamInfo{id=0, streamState=INACTIVE, inProgressTransformationInfo=null}
+09-28 21:48:36.550 D/UseCaseAttachState( 1291): Active and attached use case: [androidx.camera.video.VideoCapture-2c3707b8-d297-4f22-a7c6-4138e3fbe6a2126279390, MeteringRepeating142297842] for camera: 0
+09-28 21:48:36.555 D/Camera2CameraImpl( 1291): {Camera@9d4872c[id=0]} Resetting Capture Session
+09-28 21:48:36.562 D/UseCaseAttachState( 1291): All use case: [androidx.camera.video.VideoCapture-2c3707b8-d297-4f22-a7c6-4138e3fbe6a2126279390, MeteringRepeating142297842] for camera: 0
+09-28 21:48:36.580 D/Camera2CameraImpl( 1291): {Camera@9d4872c[id=0]} Use case androidx.camera.video.VideoCapture-2c3707b8-d297-4f22-a7c6-4138e3fbe6a2126279390 ACTIVE
+09-28 21:48:36.582 D/UseCaseAttachState( 1291): Active and attached use case: [androidx.camera.video.VideoCapture-2c3707b8-d297-4f22-a7c6-4138e3fbe6a2126279390, MeteringRepeating142297842] for camera: 0
+09-28 21:48:36.590 D/UseCaseAttachState( 1291): All use case: [androidx.camera.video.VideoCapture-2c3707b8-d297-4f22-a7c6-4138e3fbe6a2126279390, MeteringRepeating142297842] for camera: 0
+09-28 21:48:36.597 D/UseCaseAttachState( 1291): Active and attached use case: [androidx.camera.video.VideoCapture-2c3707b8-d297-4f22-a7c6-4138e3fbe6a2126279390, MeteringRepeating142297842] for camera: 0
+09-28 21:48:36.614 D/SyncCaptureSessionBase( 1291): [androidx.camera.camera2.internal.SynchronizedCaptureSessionBaseImpl@578f669] getSurface...done
+09-28 21:48:36.614 D/CaptureSession( 1291): Opening capture session.
+09-28 21:48:36.614 D/VideoCapture( 1291): Stream info update: old: StreamInfo{id=0, streamState=INACTIVE, inProgressTransformationInfo=null} new: StreamInfo{id=215203949, streamState=INACTIVE, inProgressTransformationInfo=null}
+09-28 21:48:36.615 D/VideoCapture( 1291): Stream info update: old: StreamInfo{id=215203949, streamState=INACTIVE, inProgressTransformationInfo=null} new: StreamInfo{id=215203949, streamState=ACTIVE, inProgressTransformationInfo=null}
+09-28 21:48:36.615 D/VideoCapture( 1291): A newer surface update is requested. Previous surface update cancelled.
+09-28 21:48:36.617 I/lumella ( 1291): recording started -> /storage/emulated/0/Android/data/com.woolab.lumella/files/rtd03x.mp4
+09-28 21:48:36.698 D/Camera2CameraImpl( 1291): {Camera@9d4872c[id=0]} Use case androidx.camera.video.VideoCapture-2c3707b8-d297-4f22-a7c6-4138e3fbe6a2126279390 UPDATED
+09-28 21:48:36.700 D/UseCaseAttachState( 1291): Active and attached use case: [androidx.camera.video.VideoCapture-2c3707b8-d297-4f22-a7c6-4138e3fbe6a2126279390, MeteringRepeating142297842] for camera: 0
+09-28 21:48:36.705 D/CaptureSession( 1291): Attempting to send capture request onConfigured
+09-28 21:48:36.705 D/CaptureSession( 1291): Issuing request for session.
+09-28 21:48:36.706 D/Camera2CaptureRequestBuilder( 1291): createCaptureRequest
+09-28 21:48:36.712 D/CaptureSession( 1291): CameraCaptureSession.onConfigured() mState=OPENED
+09-28 21:48:36.713 D/CaptureSession( 1291): CameraCaptureSession.onReady() OPENED
+09-28 21:48:37.905 D/VideoCapture( 1291): cameraCaptureResult timestampNs = 202114355583228, current system uptimeMs = 65185790, current system realtimeMs = 202114430
+09-28 21:48:37.930 D/VideoCapture( 1291): Stream info update: old: StreamInfo{id=215203949, streamState=ACTIVE, inProgressTransformationInfo=null} new: StreamInfo{id=215203949, streamState=ACTIVE, inProgressTransformationInfo=TransformationInfo{getCropRect=Rect(0, 0 - 1280, 720), getRotationDegrees=270, getTargetRotation=-1, hasCameraTransform=true, getSensorToBufferTransform=Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 0.0][0.0, 0.0, 1.0]}, getMirroring=false}}
+09-28 21:48:42.241 I/lumella ( 1291): debug: capturePhoto triggered via broadcast
+09-28 21:48:42.302 I/lumella ( 1291): capture during recording; closing segment to lift a frame
+09-28 21:48:42.468 I/lumella ( 1291): recording finalized ok=true err=0 bytes=file:///storage/emulated/0/Android/data/com.woolab.lumella/files/rtd03x.mp4
+09-28 21:48:42.472 I/lumella ( 1291): debug: rec finalized /storage/emulated/0/Android/data/com.woolab.lumella/files/rtd03x.mp4
+09-28 21:48:42.472 D/Camera2CameraImpl( 1291): {Camera@9d4872c[id=0]} Use cases [androidx.camera.video.VideoCapture-2c3707b8-d297-4f22-a7c6-4138e3fbe6a2126279390] now DETACHED for camera
+09-28 21:48:42.475 D/Camera2CameraImpl( 1291): {Camera@9d4872c[id=0]} Resetting Capture Session
+09-28 21:48:42.486 D/Camera2CameraImpl( 1291): {Camera@9d4872c[id=0]} Resetting Capture Session
+09-28 21:48:42.487 D/CaptureSession( 1291): onSessionFinished()
+09-28 21:48:42.621 I/lumella ( 1291): debug: capturePhoto triggered via broadcast
+09-28 21:48:42.679 W/lumella ( 1291): Camera capture failed: Recording is between segments or ending; try again
+09-28 21:48:42.734 D/VideoCapture( 1291): Found selectedQualities [ConstantQuality{value=5, name=HD}, ConstantQuality{value=6, name=FHD}] by QualitySelector{preferredQualities=[ConstantQuality{value=5, name=HD}], fallbackStrategy=RuleStrategy{fallbackQuality=ConstantQuality{value=4, name=SD}, fallbackRule=3}}
+09-28 21:48:42.737 D/VideoCapture( 1291): Set custom ordered resolutions = [1280x720, 1920x1080]
+09-28 21:48:42.744 D/VideoCapture( 1291): Found selectedQualities [ConstantQuality{value=5, name=HD}, ConstantQuality{value=6, name=FHD}] by QualitySelector{preferredQualities=[ConstantQuality{value=5, name=HD}], fallbackStrategy=RuleStrategy{fallbackQuality=ConstantQuality{value=4, name=SD}, fallbackRule=3}}
+09-28 21:48:42.746 D/VideoCapture( 1291): Set custom ordered resolutions = [1280x720, 1920x1080]
+09-28 21:48:42.747 D/VideoCapture( 1291): onSuggestedStreamSpecUpdated: StreamSpec{resolution=1280x720, dynamicRange=DynamicRange@c1e0aea{encoding=SDR, bitDepth=8}, expectedFrameRateRange=[24, 24], implementationOptions=androidx.camera.camera2.impl.Camera2ImplConfig@724462f}
+09-28 21:48:42.780 D/VideoCapture( 1291): camera timebase = REALTIME, processing timebase = UPTIME
+09-28 21:48:42.789 I/lumella ( 1291): segment resume: recording -> /storage/emulated/0/Android/data/com.woolab.lumella/files/rtd03x-2.mp4
+09-28 21:48:42.791 D/VideoCapture( 1291): Stream info update: old: StreamInfo{id=0, streamState=INACTIVE, inProgressTransformationInfo=null} new: StreamInfo{id=0, streamState=INACTIVE, inProgressTransformationInfo=null}
+09-28 21:48:42.846 I/lumella ( 1291): photo -> realtime model: chars=56440 sent=false
+09-28 21:48:42.886 D/VideoCapture( 1291): Stream info update: old: StreamInfo{id=0, streamState=INACTIVE, inProgressTransformationInfo=null} new: StreamInfo{id=233919596, streamState=ACTIVE, inProgressTransformationInfo=null}
+09-28 21:48:42.887 D/VideoCapture( 1291): A newer surface update is requested. Previous surface update cancelled.
+09-28 21:48:42.888 I/lumella ( 1291): recording started -> /storage/emulated/0/Android/data/com.woolab.lumella/files/rtd03x-2.mp4
+09-28 21:48:43.209 D/Camera2CameraImpl( 1291): {Camera@9d4872c[id=0]} Use case androidx.camera.video.VideoCapture-a248983c-3464-4414-9728-3633ef318e65111047177 INACTIVE
+09-28 21:48:43.210 D/Camera2CameraImpl( 1291): {Camera@9d4872c[id=0]} Use case androidx.camera.video.VideoCapture-a248983c-3464-4414-9728-3633ef318e65111047177 ACTIVE
+09-28 21:48:43.212 D/Camera2CameraImpl( 1291): {Camera@9d4872c[id=0]} Use cases [androidx.camera.video.VideoCapture-a248983c-3464-4414-9728-3633ef318e65111047177] now ATTACHED
+09-28 21:48:43.213 D/UseCaseAttachState( 1291): All use case: [androidx.camera.video.VideoCapture-a248983c-3464-4414-9728-3633ef318e65111047177] for camera: 0
+09-28 21:48:43.218 D/UseCaseAttachState( 1291): Active and attached use case: [androidx.camera.video.VideoCapture-a248983c-3464-4414-9728-3633ef318e65111047177, MeteringRepeating104213872] for camera: 0
+09-28 21:48:43.220 D/Camera2CameraImpl( 1291): {Camera@9d4872c[id=0]} Resetting Capture Session
+09-28 21:48:43.223 D/Camera2CameraImpl( 1291): {Camera@9d4872c[id=0]} Use case androidx.camera.video.VideoCapture-a248983c-3464-4414-9728-3633ef318e65111047177 ACTIVE
+09-28 21:48:43.224 D/UseCaseAttachState( 1291): Active and attached use case: [androidx.camera.video.VideoCapture-a248983c-3464-4414-9728-3633ef318e65111047177, MeteringRepeating104213872] for camera: 0
+09-28 21:48:43.227 D/Camera2CameraImpl( 1291): {Camera@9d4872c[id=0]} Use case androidx.camera.video.VideoCapture-a248983c-3464-4414-9728-3633ef318e65111047177 UPDATED
+09-28 21:48:43.228 D/UseCaseAttachState( 1291): Active and attached use case: [androidx.camera.video.VideoCapture-a248983c-3464-4414-9728-3633ef318e65111047177, MeteringRepeating104213872] for camera: 0
+09-28 21:48:43.240 D/UseCaseAttachState( 1291): All use case: [androidx.camera.video.VideoCapture-a248983c-3464-4414-9728-3633ef318e65111047177, MeteringRepeating104213872] for camera: 0
+09-28 21:48:43.255 D/UseCaseAttachState( 1291): All use case: [androidx.camera.video.VideoCapture-a248983c-3464-4414-9728-3633ef318e65111047177, MeteringRepeating104213872] for camera: 0
+09-28 21:48:43.257 D/UseCaseAttachState( 1291): Active and attached use case: [androidx.camera.video.VideoCapture-a248983c-3464-4414-9728-3633ef318e65111047177, MeteringRepeating104213872] for camera: 0
+09-28 21:48:43.260 D/SyncCaptureSessionBase( 1291): [androidx.camera.camera2.internal.SynchronizedCaptureSessionBaseImpl@984c715] getSurface...done
+09-28 21:48:43.260 D/CaptureSession( 1291): Opening capture session.
+09-28 21:48:43.330 D/CaptureSession( 1291): Attempting to send capture request onConfigured
+09-28 21:48:43.330 D/CaptureSession( 1291): Issuing request for session.
+09-28 21:48:43.331 D/Camera2CaptureRequestBuilder( 1291): createCaptureRequest
+09-28 21:48:43.335 D/CaptureSession( 1291): CameraCaptureSession.onConfigured() mState=OPENED
+09-28 21:48:43.336 D/CaptureSession( 1291): CameraCaptureSession.onReady() OPENED
+09-28 21:48:44.791 D/VideoCapture( 1291): cameraCaptureResult timestampNs = 202121233000937, current system uptimeMs = 65192676, current system realtimeMs = 202121316
+09-28 21:48:44.818 D/VideoCapture( 1291): Stream info update: old: StreamInfo{id=233919596, streamState=ACTIVE, inProgressTransformationInfo=null} new: StreamInfo{id=233919596, streamState=ACTIVE, inProgressTransformationInfo=TransformationInfo{getCropRect=Rect(0, 0 - 1280, 720), getRotationDegrees=270, getTargetRotation=-1, hasCameraTransform=true, getSensorToBufferTransform=Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 0.0][0.0, 0.0, 1.0]}, getMirroring=false}}
+09-28 21:48:50.870 I/lumella ( 1291): debug: stop recording
+09-28 21:48:50.873 I/lumella ( 1291): debug: rec stopping
+09-28 21:48:51.076 I/lumella ( 1291): recording finalized ok=true err=0 bytes=file:///storage/emulated/0/Android/data/com.woolab.lumella/files/rtd03x-2.mp4
+09-28 21:48:51.079 I/lumella ( 1291): segment resume: finalized /storage/emulated/0/Android/data/com.woolab.lumella/files/rtd03x-2.mp4
+09-28 21:48:51.079 D/Camera2CameraImpl( 1291): {Camera@9d4872c[id=0]} Use cases [androidx.camera.video.VideoCapture-a248983c-3464-4414-9728-3633ef318e65111047177] now DETACHED for camera
+09-28 21:48:51.081 D/Camera2CameraImpl( 1291): {Camera@9d4872c[id=0]} Resetting Capture Session
+09-28 21:48:51.088 D/Camera2CameraImpl( 1291): {Camera@9d4872c[id=0]} Resetting Capture Session
+09-28 21:48:51.089 D/CaptureSession( 1291): onSessionFinished()
+== second photo 0.7s after the first | rtd07x-2.mp4 growth over 3s mid-take: none -> none | files: rtd07x-3.mp4 rtd07x-learner.wav rtd07x-tutor.wav rtd07x.mp4 
+09-28 21:48:55.365 I/lumella ( 1291): debug: start recording -> /storage/emulated/0/Android/data/com.woolab.lumella/files/rtd07x.mp4 camera=true
+09-28 21:48:55.377 D/VideoCapture( 1291): Found selectedQualities [ConstantQuality{value=5, name=HD}, ConstantQuality{value=6, name=FHD}] by QualitySelector{preferredQualities=[ConstantQuality{value=5, name=HD}], fallbackStrategy=RuleStrategy{fallbackQuality=ConstantQuality{value=4, name=SD}, fallbackRule=3}}
+09-28 21:48:55.379 D/VideoCapture( 1291): Set custom ordered resolutions = [1280x720, 1920x1080]
+09-28 21:48:55.384 D/VideoCapture( 1291): Found selectedQualities [ConstantQuality{value=5, name=HD}, ConstantQuality{value=6, name=FHD}] by QualitySelector{preferredQualities=[ConstantQuality{value=5, name=HD}], fallbackStrategy=RuleStrategy{fallbackQuality=ConstantQuality{value=4, name=SD}, fallbackRule=3}}
+09-28 21:48:55.386 D/VideoCapture( 1291): Set custom ordered resolutions = [1280x720, 1920x1080]
+09-28 21:48:55.386 D/VideoCapture( 1291): onSuggestedStreamSpecUpdated: StreamSpec{resolution=1280x720, dynamicRange=DynamicRange@c1e0aea{encoding=SDR, bitDepth=8}, expectedFrameRateRange=[24, 24], implementationOptions=androidx.camera.camera2.impl.Camera2ImplConfig@ea65d79}
+09-28 21:48:55.387 D/Camera2CameraImpl( 1291): {Camera@9d4872c[id=0]} Use case androidx.camera.video.VideoCapture-c6837eb5-8e26-4aa5-ac1f-1d25ced21cec111821251 INACTIVE
+09-28 21:48:55.419 D/VideoCapture( 1291): camera timebase = REALTIME, processing timebase = UPTIME
+09-28 21:48:55.428 D/Camera2CameraImpl( 1291): {Camera@9d4872c[id=0]} Use case androidx.camera.video.VideoCapture-c6837eb5-8e26-4aa5-ac1f-1d25ced21cec111821251 ACTIVE
+09-28 21:48:55.429 D/VideoCapture( 1291): Stream info update: old: StreamInfo{id=0, streamState=INACTIVE, inProgressTransformationInfo=null} new: StreamInfo{id=0, streamState=INACTIVE, inProgressTransformationInfo=null}
+09-28 21:48:55.430 D/Camera2CameraImpl( 1291): {Camera@9d4872c[id=0]} Use cases [androidx.camera.video.VideoCapture-c6837eb5-8e26-4aa5-ac1f-1d25ced21cec111821251] now ATTACHED
+09-28 21:48:55.431 D/UseCaseAttachState( 1291): All use case: [androidx.camera.video.VideoCapture-c6837eb5-8e26-4aa5-ac1f-1d25ced21cec111821251] for camera: 0
+09-28 21:48:55.436 D/UseCaseAttachState( 1291): Active and attached use case: [androidx.camera.video.VideoCapture-c6837eb5-8e26-4aa5-ac1f-1d25ced21cec111821251, MeteringRepeating38807055] for camera: 0
+09-28 21:48:55.439 D/Camera2CameraImpl( 1291): {Camera@9d4872c[id=0]} Resetting Capture Session
+09-28 21:48:55.444 D/UseCaseAttachState( 1291): All use case: [androidx.camera.video.VideoCapture-c6837eb5-8e26-4aa5-ac1f-1d25ced21cec111821251, MeteringRepeating38807055] for camera: 0
+09-28 21:48:55.456 D/Camera2CameraImpl( 1291): {Camera@9d4872c[id=0]} Use case androidx.camera.video.VideoCapture-c6837eb5-8e26-4aa5-ac1f-1d25ced21cec111821251 ACTIVE
+09-28 21:48:55.456 D/UseCaseAttachState( 1291): Active and attached use case: [androidx.camera.video.VideoCapture-c6837eb5-8e26-4aa5-ac1f-1d25ced21cec111821251, MeteringRepeating38807055] for camera: 0
+09-28 21:48:55.462 D/UseCaseAttachState( 1291): All use case: [androidx.camera.video.VideoCapture-c6837eb5-8e26-4aa5-ac1f-1d25ced21cec111821251, MeteringRepeating38807055] for camera: 0
+09-28 21:48:55.463 D/UseCaseAttachState( 1291): Active and attached use case: [androidx.camera.video.VideoCapture-c6837eb5-8e26-4aa5-ac1f-1d25ced21cec111821251, MeteringRepeating38807055] for camera: 0
+09-28 21:48:55.489 D/SyncCaptureSessionBase( 1291): [androidx.camera.camera2.internal.SynchronizedCaptureSessionBaseImpl@d681515] getSurface...done
+09-28 21:48:55.489 D/CaptureSession( 1291): Opening capture session.
+09-28 21:48:55.489 D/VideoCapture( 1291): Stream info update: old: StreamInfo{id=0, streamState=INACTIVE, inProgressTransformationInfo=null} new: StreamInfo{id=67898457, streamState=INACTIVE, inProgressTransformationInfo=null}
+09-28 21:48:55.490 D/VideoCapture( 1291): Stream info update: old: StreamInfo{id=67898457, streamState=INACTIVE, inProgressTransformationInfo=null} new: StreamInfo{id=67898457, streamState=ACTIVE, inProgressTransformationInfo=null}
+09-28 21:48:55.490 D/VideoCapture( 1291): A newer surface update is requested. Previous surface update cancelled.
+09-28 21:48:55.491 I/lumella ( 1291): recording started -> /storage/emulated/0/Android/data/com.woolab.lumella/files/rtd07x.mp4
+09-28 21:48:55.560 D/Camera2CameraImpl( 1291): {Camera@9d4872c[id=0]} Use case androidx.camera.video.VideoCapture-c6837eb5-8e26-4aa5-ac1f-1d25ced21cec111821251 UPDATED
+09-28 21:48:55.561 D/UseCaseAttachState( 1291): Active and attached use case: [androidx.camera.video.VideoCapture-c6837eb5-8e26-4aa5-ac1f-1d25ced21cec111821251, MeteringRepeating38807055] for camera: 0
+09-28 21:48:55.564 D/CaptureSession( 1291): Attempting to send capture request onConfigured
+09-28 21:48:55.564 D/CaptureSession( 1291): Issuing request for session.
+09-28 21:48:55.565 D/Camera2CaptureRequestBuilder( 1291): createCaptureRequest
+09-28 21:48:55.568 D/CaptureSession( 1291): CameraCaptureSession.onConfigured() mState=OPENED
+09-28 21:48:55.569 D/CaptureSession( 1291): CameraCaptureSession.onReady() OPENED
+09-28 21:48:56.216 D/VideoCapture( 1291): cameraCaptureResult timestampNs = 202132662789009, current system uptimeMs = 65204101, current system realtimeMs = 202132740
+09-28 21:48:56.239 D/VideoCapture( 1291): Stream info update: old: StreamInfo{id=67898457, streamState=ACTIVE, inProgressTransformationInfo=null} new: StreamInfo{id=67898457, streamState=ACTIVE, inProgressTransformationInfo=TransformationInfo{getCropRect=Rect(0, 0 - 1280, 720), getRotationDegrees=270, getTargetRotation=-1, hasCameraTransform=true, getSensorToBufferTransform=Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 0.0][0.0, 0.0, 1.0]}, getMirroring=false}}
+09-28 21:49:01.461 I/lumella ( 1291): debug: capturePhoto triggered via broadcast
+09-28 21:49:01.515 I/lumella ( 1291): capture during recording; closing segment to lift a frame
+09-28 21:49:01.668 I/lumella ( 1291): recording finalized ok=true err=0 bytes=file:///storage/emulated/0/Android/data/com.woolab.lumella/files/rtd07x.mp4
+09-28 21:49:01.671 I/lumella ( 1291): debug: rec finalized /storage/emulated/0/Android/data/com.woolab.lumella/files/rtd07x.mp4
+09-28 21:49:01.672 D/Camera2CameraImpl( 1291): {Camera@9d4872c[id=0]} Use cases [androidx.camera.video.VideoCapture-c6837eb5-8e26-4aa5-ac1f-1d25ced21cec111821251] now DETACHED for camera
+09-28 21:49:01.674 D/Camera2CameraImpl( 1291): {Camera@9d4872c[id=0]} Resetting Capture Session
+09-28 21:49:01.686 D/Camera2CameraImpl( 1291): {Camera@9d4872c[id=0]} Resetting Capture Session
+09-28 21:49:01.687 D/CaptureSession( 1291): onSessionFinished()
+09-28 21:49:01.857 D/VideoCapture( 1291): Found selectedQualities [ConstantQuality{value=5, name=HD}, ConstantQuality{value=6, name=FHD}] by QualitySelector{preferredQualities=[ConstantQuality{value=5, name=HD}], fallbackStrategy=RuleStrategy{fallbackQuality=ConstantQuality{value=4, name=SD}, fallbackRule=3}}
+09-28 21:49:01.860 D/VideoCapture( 1291): Set custom ordered resolutions = [1280x720, 1920x1080]
+09-28 21:49:01.878 D/VideoCapture( 1291): Found selectedQualities [ConstantQuality{value=5, name=HD}, ConstantQuality{value=6, name=FHD}] by QualitySelector{preferredQualities=[ConstantQuality{value=5, name=HD}], fallbackStrategy=RuleStrategy{fallbackQuality=ConstantQuality{value=4, name=SD}, fallbackRule=3}}
+09-28 21:49:01.880 D/VideoCapture( 1291): Set custom ordered resolutions = [1280x720, 1920x1080]
+09-28 21:49:01.880 D/VideoCapture( 1291): onSuggestedStreamSpecUpdated: StreamSpec{resolution=1280x720, dynamicRange=DynamicRange@c1e0aea{encoding=SDR, bitDepth=8}, expectedFrameRateRange=[24, 24], implementationOptions=androidx.camera.camera2.impl.Camera2ImplConfig@d7fa7ac}
+09-28 21:49:01.918 D/VideoCapture( 1291): camera timebase = REALTIME, processing timebase = UPTIME
+09-28 21:49:01.927 I/lumella ( 1291): segment resume: recording -> /storage/emulated/0/Android/data/com.woolab.lumella/files/rtd07x-2.mp4
+09-28 21:49:01.929 D/VideoCapture( 1291): Stream info update: old: StreamInfo{id=0, streamState=INACTIVE, inProgressTransformationInfo=null} new: StreamInfo{id=0, streamState=INACTIVE, inProgressTransformationInfo=null}
+09-28 21:49:02.001 D/VideoCapture( 1291): Stream info update: old: StreamInfo{id=0, streamState=INACTIVE, inProgressTransformationInfo=null} new: StreamInfo{id=50523365, streamState=INACTIVE, inProgressTransformationInfo=null}
+09-28 21:49:02.001 D/VideoCapture( 1291): Stream info update: old: StreamInfo{id=50523365, streamState=INACTIVE, inProgressTransformationInfo=null} new: StreamInfo{id=50523365, streamState=ACTIVE, inProgressTransformationInfo=null}
+09-28 21:49:02.001 D/VideoCapture( 1291): A newer surface update is requested. Previous surface update cancelled.
+09-28 21:49:02.002 I/lumella ( 1291): recording started -> /storage/emulated/0/Android/data/com.woolab.lumella/files/rtd07x-2.mp4
+09-28 21:49:02.012 I/lumella ( 1291): photo -> realtime model: chars=56968 sent=false
+09-28 21:49:02.246 I/lumella ( 1291): debug: capturePhoto triggered via broadcast
+09-28 21:49:02.328 I/lumella ( 1291): capture during recording; closing segment to lift a frame
+09-28 21:49:02.341 D/Camera2CameraImpl( 1291): {Camera@9d4872c[id=0]} Use case androidx.camera.video.VideoCapture-f2a9d33e-3933-488f-9c17-a6e51d8761b0241909177 INACTIVE
+09-28 21:49:02.342 D/Camera2CameraImpl( 1291): {Camera@9d4872c[id=0]} Use case androidx.camera.video.VideoCapture-f2a9d33e-3933-488f-9c17-a6e51d8761b0241909177 ACTIVE
+09-28 21:49:02.343 D/Camera2CameraImpl( 1291): {Camera@9d4872c[id=0]} Use cases [androidx.camera.video.VideoCapture-f2a9d33e-3933-488f-9c17-a6e51d8761b0241909177] now ATTACHED
+09-28 21:49:02.344 D/UseCaseAttachState( 1291): All use case: [androidx.camera.video.VideoCapture-f2a9d33e-3933-488f-9c17-a6e51d8761b0241909177] for camera: 0
+09-28 21:49:02.348 D/UseCaseAttachState( 1291): Active and attached use case: [androidx.camera.video.VideoCapture-f2a9d33e-3933-488f-9c17-a6e51d8761b0241909177, MeteringRepeating67119966] for camera: 0
+09-28 21:49:02.350 D/Camera2CameraImpl( 1291): {Camera@9d4872c[id=0]} Resetting Capture Session
+09-28 21:49:02.353 D/Camera2CameraImpl( 1291): {Camera@9d4872c[id=0]} Use case androidx.camera.video.VideoCapture-f2a9d33e-3933-488f-9c17-a6e51d8761b0241909177 ACTIVE
+09-28 21:49:02.354 D/UseCaseAttachState( 1291): Active and attached use case: [androidx.camera.video.VideoCapture-f2a9d33e-3933-488f-9c17-a6e51d8761b0241909177, MeteringRepeating67119966] for camera: 0
+09-28 21:49:02.355 D/Camera2CameraImpl( 1291): {Camera@9d4872c[id=0]} Use case androidx.camera.video.VideoCapture-f2a9d33e-3933-488f-9c17-a6e51d8761b0241909177 UPDATED
+09-28 21:49:02.356 D/UseCaseAttachState( 1291): Active and attached use case: [androidx.camera.video.VideoCapture-f2a9d33e-3933-488f-9c17-a6e51d8761b0241909177, MeteringRepeating67119966] for camera: 0
+09-28 21:49:02.365 D/UseCaseAttachState( 1291): All use case: [androidx.camera.video.VideoCapture-f2a9d33e-3933-488f-9c17-a6e51d8761b0241909177, MeteringRepeating67119966] for camera: 0
+09-28 21:49:02.379 D/UseCaseAttachState( 1291): All use case: [androidx.camera.video.VideoCapture-f2a9d33e-3933-488f-9c17-a6e51d8761b0241909177, MeteringRepeating67119966] for camera: 0
+09-28 21:49:02.381 D/UseCaseAttachState( 1291): Active and attached use case: [androidx.camera.video.VideoCapture-f2a9d33e-3933-488f-9c17-a6e51d8761b0241909177, MeteringRepeating67119966] for camera: 0
+09-28 21:49:02.383 D/SyncCaptureSessionBase( 1291): [androidx.camera.camera2.internal.SynchronizedCaptureSessionBaseImpl@b92124b] getSurface...done
+09-28 21:49:02.383 D/CaptureSession( 1291): Opening capture session.
+09-28 21:49:02.454 D/CaptureSession( 1291): Attempting to send capture request onConfigured
+09-28 21:49:02.454 D/CaptureSession( 1291): Issuing request for session.
+09-28 21:49:02.454 D/Camera2CaptureRequestBuilder( 1291): createCaptureRequest
+09-28 21:49:02.458 D/CaptureSession( 1291): CameraCaptureSession.onConfigured() mState=OPENED
+09-28 21:49:02.459 D/CaptureSession( 1291): CameraCaptureSession.onReady() OPENED
+09-28 21:49:03.043 D/VideoCapture( 1291): cameraCaptureResult timestampNs = 202139499288176, current system uptimeMs = 65210927, current system realtimeMs = 202139567
+09-28 21:49:03.072 I/lumella ( 1291): recording finalized ok=false err=8 bytes=
+09-28 21:49:03.075 I/lumella ( 1291): segment resume: failed code=8
+09-28 21:49:03.076 D/Camera2CameraImpl( 1291): {Camera@9d4872c[id=0]} Use cases [androidx.camera.video.VideoCapture-f2a9d33e-3933-488f-9c17-a6e51d8761b0241909177] now DETACHED for camera
+09-28 21:49:03.077 D/Camera2CameraImpl( 1291): {Camera@9d4872c[id=0]} Resetting Capture Session
+09-28 21:49:03.082 D/Camera2CameraImpl( 1291): {Camera@9d4872c[id=0]} Resetting Capture Session
+09-28 21:49:03.083 D/CaptureSession( 1291): onSessionFinished()
+09-28 21:49:03.132 D/VideoCapture( 1291): Found selectedQualities [ConstantQuality{value=5, name=HD}, ConstantQuality{value=6, name=FHD}] by QualitySelector{preferredQualities=[ConstantQuality{value=5, name=HD}], fallbackStrategy=RuleStrategy{fallbackQuality=ConstantQuality{value=4, name=SD}, fallbackRule=3}}
+09-28 21:49:03.133 D/VideoCapture( 1291): Set custom ordered resolutions = [1280x720, 1920x1080]
+09-28 21:49:03.139 D/VideoCapture( 1291): Found selectedQualities [ConstantQuality{value=5, name=HD}, ConstantQuality{value=6, name=FHD}] by QualitySelector{preferredQualities=[ConstantQuality{value=5, name=HD}], fallbackStrategy=RuleStrategy{fallbackQuality=ConstantQuality{value=4, name=SD}, fallbackRule=3}}
+09-28 21:49:03.140 D/VideoCapture( 1291): Set custom ordered resolutions = [1280x720, 1920x1080]
+09-28 21:49:03.140 D/VideoCapture( 1291): onSuggestedStreamSpecUpdated: StreamSpec{resolution=1280x720, dynamicRange=DynamicRange@c1e0aea{encoding=SDR, bitDepth=8}, expectedFrameRateRange=[24, 24], implementationOptions=androidx.camera.camera2.impl.Camera2ImplConfig@170243b}
+09-28 21:49:03.173 D/VideoCapture( 1291): camera timebase = REALTIME, processing timebase = UPTIME
+09-28 21:49:03.181 I/lumella ( 1291): segment resume: recording -> /storage/emulated/0/Android/data/com.woolab.lumella/files/rtd07x-3.mp4
+09-28 21:49:03.181 D/VideoCapture( 1291): Stream info update: old: StreamInfo{id=0, streamState=INACTIVE, inProgressTransformationInfo=null} new: StreamInfo{id=0, streamState=INACTIVE, inProgressTransformationInfo=null}
+09-28 21:49:03.248 D/VideoCapture( 1291): Stream info update: old: StreamInfo{id=0, streamState=INACTIVE, inProgressTransformationInfo=null} new: StreamInfo{id=144304161, streamState=INACTIVE, inProgressTransformationInfo=null}
+09-28 21:49:03.248 D/VideoCapture( 1291): Stream info update: old: StreamInfo{id=144304161, streamState=INACTIVE, inProgressTransformationInfo=null} new: StreamInfo{id=144304161, streamState=ACTIVE, inProgressTransformationInfo=null}
+09-28 21:49:03.249 D/VideoCapture( 1291): A newer surface update is requested. Previous surface update cancelled.
+09-28 21:49:03.250 I/lumella ( 1291): recording started -> /storage/emulated/0/Android/data/com.woolab.lumella/files/rtd07x-3.mp4
+09-28 21:49:04.454 D/Camera2CameraImpl( 1291): {Camera@9d4872c[id=0]} Use case androidx.camera.video.VideoCapture-401e28cb-8db0-48ab-8e4f-d0f8e7596bb1104506933 INACTIVE
+09-28 21:49:04.455 D/Camera2CameraImpl( 1291): {Camera@9d4872c[id=0]} Use case androidx.camera.video.VideoCapture-401e28cb-8db0-48ab-8e4f-d0f8e7596bb1104506933 ACTIVE
+09-28 21:49:04.456 D/Camera2CameraImpl( 1291): {Camera@9d4872c[id=0]} Use cases [androidx.camera.video.VideoCapture-401e28cb-8db0-48ab-8e4f-d0f8e7596bb1104506933] now ATTACHED
+09-28 21:49:04.457 D/UseCaseAttachState( 1291): All use case: [androidx.camera.video.VideoCapture-401e28cb-8db0-48ab-8e4f-d0f8e7596bb1104506933] for camera: 0
+09-28 21:49:04.461 D/UseCaseAttachState( 1291): Active and attached use case: [androidx.camera.video.VideoCapture-401e28cb-8db0-48ab-8e4f-d0f8e7596bb1104506933, MeteringRepeating20669205] for camera: 0
+09-28 21:49:04.463 D/Camera2CameraImpl( 1291): {Camera@9d4872c[id=0]} Resetting Capture Session
+09-28 21:49:04.465 D/Camera2CameraImpl( 1291): {Camera@9d4872c[id=0]} Use case androidx.camera.video.VideoCapture-401e28cb-8db0-48ab-8e4f-d0f8e7596bb1104506933 ACTIVE
+09-28 21:49:04.466 D/UseCaseAttachState( 1291): Active and attached use case: [androidx.camera.video.VideoCapture-401e28cb-8db0-48ab-8e4f-d0f8e7596bb1104506933, MeteringRepeating20669205] for camera: 0
+09-28 21:49:04.468 D/Camera2CameraImpl( 1291): {Camera@9d4872c[id=0]} Use case androidx.camera.video.VideoCapture-401e28cb-8db0-48ab-8e4f-d0f8e7596bb1104506933 UPDATED
+09-28 21:49:04.468 D/UseCaseAttachState( 1291): Active and attached use case: [androidx.camera.video.VideoCapture-401e28cb-8db0-48ab-8e4f-d0f8e7596bb1104506933, MeteringRepeating20669205] for camera: 0
+09-28 21:49:04.476 D/UseCaseAttachState( 1291): All use case: [androidx.camera.video.VideoCapture-401e28cb-8db0-48ab-8e4f-d0f8e7596bb1104506933, MeteringRepeating20669205] for camera: 0
+09-28 21:49:04.489 D/UseCaseAttachState( 1291): All use case: [androidx.camera.video.VideoCapture-401e28cb-8db0-48ab-8e4f-d0f8e7596bb1104506933, MeteringRepeating20669205] for camera: 0
+09-28 21:49:04.490 D/UseCaseAttachState( 1291): Active and attached use case: [androidx.camera.video.VideoCapture-401e28cb-8db0-48ab-8e4f-d0f8e7596bb1104506933, MeteringRepeating20669205] for camera: 0
+09-28 21:49:04.492 D/SyncCaptureSessionBase( 1291): [androidx.camera.camera2.internal.SynchronizedCaptureSessionBaseImpl@9272da6] getSurface...done
+09-28 21:49:04.492 D/CaptureSession( 1291): Opening capture session.
+09-28 21:49:04.563 D/CaptureSession( 1291): Attempting to send capture request onConfigured
+09-28 21:49:04.563 D/CaptureSession( 1291): Issuing request for session.
+09-28 21:49:04.564 D/Camera2CaptureRequestBuilder( 1291): createCaptureRequest
+09-28 21:49:04.567 D/CaptureSession( 1291): CameraCaptureSession.onConfigured() mState=OPENED
+09-28 21:49:04.568 D/CaptureSession( 1291): CameraCaptureSession.onReady() OPENED
+09-28 21:49:05.651 D/VideoCapture( 1291): cameraCaptureResult timestampNs = 202142107315937, current system uptimeMs = 65213536, current system realtimeMs = 202142175
+09-28 21:49:05.677 D/VideoCapture( 1291): Stream info update: old: StreamInfo{id=144304161, streamState=ACTIVE, inProgressTransformationInfo=null} new: StreamInfo{id=144304161, streamState=ACTIVE, inProgressTransformationInfo=TransformationInfo{getCropRect=Rect(0, 0 - 1280, 720), getRotationDegrees=270, getTargetRotation=-1, hasCameraTransform=true, getSensorToBufferTransform=Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 0.0][0.0, 0.0, 1.0]}, getMirroring=false}}
+09-28 21:49:10.481 I/lumella ( 1291): debug: stop recording
+09-28 21:49:10.483 I/lumella ( 1291): debug: rec stopping
+09-28 21:49:10.758 I/lumella ( 1291): recording finalized ok=true err=0 bytes=file:///storage/emulated/0/Android/data/com.woolab.lumella/files/rtd07x-3.mp4
+09-28 21:49:10.761 I/lumella ( 1291): segment resume: finalized /storage/emulated/0/Android/data/com.woolab.lumella/files/rtd07x-3.mp4
+09-28 21:49:10.761 D/Camera2CameraImpl( 1291): {Camera@9d4872c[id=0]} Use cases [androidx.camera.video.VideoCapture-401e28cb-8db0-48ab-8e4f-d0f8e7596bb1104506933] now DETACHED for camera
+09-28 21:49:10.762 D/Camera2CameraImpl( 1291): {Camera@9d4872c[id=0]} Resetting Capture Session
+09-28 21:49:10.769 D/Camera2CameraImpl( 1291): {Camera@9d4872c[id=0]} Resetting Capture Session
+09-28 21:49:10.770 D/CaptureSession( 1291): onSessionFinished()

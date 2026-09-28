@@ -11,8 +11,8 @@
 #   capture    per-5s-window late reads (not scheduled), lost reads (buffer overran), worst cycle
 #   ttfa       per-turn time to first tutor audio
 #   thermal    CPU zone temperatures and frequencies at start and end
-#   files      POV and screen recordings: codec, resolution, effective fps (ffprobe); learner and
-#              tutor WAVs: length and share of loud samples
+#   files      POV, screen and the composed FINAL: codec, resolution, effective fps (ffprobe);
+#              learner and tutor WAVs: length and share of loud samples
 #   diagnosis  ruleGap after turn 3 and after turn 6 (the slow path must not regress)
 # and keeps the raw top samples (<label>.top.txt) and the app's log (<label>.logcat.txt) beside it.
 #
@@ -136,10 +136,11 @@ POV_FILE="$(echo "$STOP_OUT" | awk '$1=="pov" && $2 ~ /\.mp4$/ {print $2}' | tr 
 SCREEN_FILE="$(echo "$STOP_OUT" | awk '$1=="screen" {print $2; exit}' || true)"
 TUTOR_FILE="$(echo "$STOP_OUT" | awk '$1=="tutor" {print $2; exit}' || true)"
 LEARNER_FILE="$(echo "$STOP_OUT" | awk '$1=="learner" {print $2; exit}' || true)"
+FINAL_FILE="$(echo "$STOP_OUT" | awk '$1=="FINAL" {print $2; exit}' || true)"
 
-python3 - "$LABEL" "$MODE" "$WORK" "$OUT_DIR/$LABEL.json" "$POV_FILE" "$SCREEN_FILE" "$TUTOR_FILE" "$LEARNER_FILE" <<'PY'
+python3 - "$LABEL" "$MODE" "$WORK" "$OUT_DIR/$LABEL.json" "$POV_FILE" "$SCREEN_FILE" "$TUTOR_FILE" "$LEARNER_FILE" "$FINAL_FILE" <<'PY'
 import json, re, sys, subprocess, os, statistics
-label, mode, work, out, pov, screen, tutor, learner = sys.argv[1:9]
+label, mode, work, out, pov, screen, tutor, learner, final = sys.argv[1:10]
 
 def rd(n):
     try: return open(os.path.join(work, n), encoding='utf-8', errors='replace').read()
@@ -249,7 +250,8 @@ result={'label':label,'mode':mode,'stress':int(os.environ.get('STRESS','0')),
               'warnings':slowWarn[:10]},
   'playback':playback,'capture':capture,'ttfaMs':ttfa,
   'thermal':{'start':rd('thermal-start.txt').strip().splitlines(),'end':rd('thermal-end.txt').strip().splitlines()},
-  'files':{'pov':[probe(p) for p in pov.split()] if pov else None,'screen':probe(screen),'tutorWav':voiced(tutor),'learnerWav':voiced(learner)}}
+  'files':{'pov':[probe(p) for p in pov.split()] if pov else None,'screen':probe(screen),'tutorWav':voiced(tutor),'learnerWav':voiced(learner),
+         'final':probe(final)}}
 json.dump(result, open(out,'w'), ensure_ascii=False, indent=1)
 # CameraX logs a Status event per encoded frame — 80% of a POV run's log. A run of them is kept
 # as its first and last line: the first is when frames actually started reaching the file (the

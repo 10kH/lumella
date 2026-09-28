@@ -219,10 +219,16 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
      * the tutor heard it) and `<name>-tutor.wav` (the tutor's own PCM). The POV itself is silent;
      * see [GlassesCamera.startRecording] for why.
      */
-    private fun startTakeVoices(name: String, followVideo: Boolean) {
+    /** Returns false, having logged why, if the take cannot start. */
+    private fun startTakeVoices(name: String, followVideo: Boolean): Boolean {
         // take.sh's retry reuses the take name 3s after a stop. The previous take's files must be
         // finished before new taps truncate them, or a slow close writes into the new file.
         tapCloser?.join(TAP_CLOSE_WAIT_MS)
+        if (lastTaps.any { !it.drained }) {
+            // A writer outlived close()'s own wait (a failing disk): it still holds its file.
+            Log.w(TAG, "debug: start refused — the last take's voice writer is still busy")
+            return false
+        }
         val dir = getExternalFilesDir(null)
         val warn: (String) -> Unit = { Log.w(TAG, it) }
         val clock = TakeClock(followVideo, warn = warn)
@@ -233,6 +239,7 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
             liveSlackMs = AudioCapture.CAPTURE_BUFFER_MS.toLong(),
         )
         Log.i(TAG, "debug: voices -> $dir/$name-{learner,tutor}.wav")
+        return true
     }
 
     /** Ends the take's voices at this moment: the clock stops here, then the files are closed. */
@@ -244,6 +251,7 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
         audioPlayback.tap = null
         audioCapture.tap = null
         takeClock = null
+        lastTaps = listOfNotNull(tutor, learner)
         // close() waits for each writer to drain: milliseconds normally, up to 2s each on a
         // failing disk. Not on the main thread, which this is (the debug receiver, onDestroy).
         tapCloser = Thread({
@@ -252,14 +260,16 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
         }, "lumella-tap-close").apply { start() }
     }
 
-    /** The last take's closing thread; [startTakeVoices] waits for it. Main-thread only. */
+    /** The last take's closing thread and taps; [startTakeVoices] waits for them. Main thread. */
     private var tapCloser: Thread? = null
+    private var lastTaps: List<WavTap> = emptyList()
 
     /** The camera's view of a take's clock. The camera carries it from segment to segment. */
     private fun TakeClock.asRecordingClock(): GlassesCamera.RecordingClock {
         val clock = this
         return object : GlassesCamera.RecordingClock {
-            override fun rolling(segmentRecordedMs: Long) = clock.rolling(segmentRecordedMs)
+            override fun firstFrame(segmentRecordedMs: Long) = clock.firstFrame(segmentRecordedMs)
+            override fun noVideo() = clock.noVideo()
             override fun dark() = clock.dark()
             override fun segmentEnded(recordedMs: Long) = clock.segmentEnded(recordedMs)
         }
@@ -1409,7 +1419,7 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
                             Log.i(TAG, "debug: start recording -> ${dest.absolutePath} camera=$withCamera")
                             // Taps first, on a clock that waits for the camera's first frame, so
                             // not a word falls between the two starts.
-                            startTakeVoices(name, followVideo = withCamera)
+                            if (!startTakeVoices(name, followVideo = withCamera)) return
                             if (withCamera) {
                                 camera.startRecording(dest, takeClock?.asRecordingClock()) { msg -> Log.i(TAG, "debug: rec $msg") }
                             }
