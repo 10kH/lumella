@@ -197,9 +197,9 @@ for m in re.finditer(r'perf: capture reads=(\d+) lateReads=(\d+)(?: lostReads=(\
 ttfa=[int(x) for x in re.findall(r'튜터 발화 시작 \(TTFA (-?\d+)ms\)', log)]
 # Turns the server's VAD really ended, as opposed to the harness's injected ones. A quiet-room run
 # must have none: room sound taken for speech changes the run (9/28 at home it switched the tutor's
-# language and closed the app). lumella logs "turn end (VAD)" for both, and "debug: 음성 종료 주입"
-# only for the injected ones.
-realVad=max(0, len(re.findall(r'turn end \(VAD\)', log)) - len(re.findall(r'debug: 음성 종료 주입', log)))
+# language and closed the app). "음성 종료됨 (VAD) - 턴 종료" is logged only on the socket's own
+# speech_stopped event; the harness's injected stops log "debug: 음성 종료 주입" instead.
+realVad=len(re.findall(r'음성 종료됨 \(VAD\) - 턴 종료', log))
 
 # --- Files
 def probe(p):
