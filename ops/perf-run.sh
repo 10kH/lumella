@@ -195,6 +195,11 @@ for m in re.finditer(r'perf: capture reads=(\d+) lateReads=(\d+)(?: lostReads=(\
     capture.append({'reads':int(r),'lateReads':int(l),'lostReads':int(lo) if lo is not None else int(l),
                     'maxCycleMs':int(mc),'maxHandleMs':int(mh),'chunkMs':int(ch) if ch is not None else int(b),'bufferMs':int(b)})
 ttfa=[int(x) for x in re.findall(r'튜터 발화 시작 \(TTFA (-?\d+)ms\)', log)]
+# Turns the server's VAD really ended, as opposed to the harness's injected ones. A quiet-room run
+# must have none: room sound taken for speech changes the run (9/28 at home it switched the tutor's
+# language and closed the app). lumella logs "turn end (VAD)" for both, and "debug: 음성 종료 주입"
+# only for the injected ones.
+realVad=max(0, len(re.findall(r'turn end \(VAD\)', log)) - len(re.findall(r'debug: 음성 종료 주입', log)))
 
 # --- Files
 def probe(p):
@@ -244,7 +249,8 @@ result={'label':label,'mode':mode,'stress':int(os.environ.get('STRESS','0')),
              'cpuTotalPeakPct':round(max(total),1) if total else None,
              'playback':summarise_pb(playback),'capture':summarise_cap(capture),
              'ttfaMs':{'n':len(ttfa),'median':statistics.median(ttfa) if ttfa else None,'max':max(ttfa) if ttfa else None},
-             'ruleGapAfter3':rg('state-3.json'),'ruleGapAfter6':rg('state-6.json')},
+             'ruleGapAfter3':rg('state-3.json'),'ruleGapAfter6':rg('state-6.json'),
+             'realVadTurns':realVad},
   'cpu':{'samples':len(samples),'processes':agg('proc',10),'threads':agg('thr',15)},
   'slowPath':{'after3':stateSummary('state-3.json'),'after6':stateSummary('state-6.json'),
               'warnings':slowWarn[:10]},
