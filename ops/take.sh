@@ -10,6 +10,8 @@
 # It also dumps the on-screen text per take, because transcribing Korean subtitles by eye from
 # video is how typos get into the final cut (docs/MACBOOK-SETUP.md, layer B-aux).
 #
+# --stop also leaves <take>-app.log: the app's log for the take (see collect).
+#
 # --stop leaves <take>-FINAL.mp4: the wearer's view (upright portrait) beside the glasses display,
 # 1820x960, audio carrying both voices; for --audio, the display with the voices. That is the file for the edit; the parts are kept beside it, including
 # <take>-learner.wav and <take>-tutor.wav for an edit that wants the voices on separate tracks.
@@ -247,8 +249,25 @@ collect() {
 
   compose "$stamp"
 
+  # uiautomator waits indefinitely on a dozing display (a take stopped after the glasses were set
+  # down hung here for minutes, 2026-09-29).
+  wake_display
   ANDROID_SERIAL="$DEV" "$REPO_ROOT/ops/screen-dump.sh" > "$OUT/$NAME-$stamp.txt" 2>/dev/null
   echo "  text   $OUT/$NAME-$stamp.txt"
+
+  # The app's own log for the take: what the learner said, what the tutor's subtitle said, when
+  # each reply started and ended, and which coach took each turn ("코치 turn N:"). The edit is
+  # captioned from it — which overlay goes where, and whether its condition held — and the
+  # device's ring buffer does not keep it long. From the take's start (device clock) to now.
+  local since
+  since="$(cat "/tmp/lumella-take-$NAME.since" 2>/dev/null || true)"
+  if [ -n "$since" ]; then
+    adb -s "$DEV" logcat -d -v time -T "$since" 2>/dev/null | grep -E '/lumella *\(' > "$OUT/$NAME-$stamp-app.log" || true
+  else
+    adb -s "$DEV" logcat -d -v time 2>/dev/null | grep -E '/lumella *\(' > "$OUT/$NAME-$stamp-app.log" || true
+  fi
+  echo "  log    $OUT/$NAME-$stamp-app.log ($(grep -c '' "$OUT/$NAME-$stamp-app.log") lines)"
+  rm -f "/tmp/lumella-take-$NAME.since"
 
   # Frame count is the honest check: a static screen yields 1 frame and that is normal, but a take
   # meant to show a conversation with 1 frame means nothing changed and the take is empty.
@@ -291,6 +310,13 @@ start_pov() {
   echo "  WARNING: POV never advanced — shoot will be screen-only" >&2
 }
 
+wake_display() {
+  adb -s "$DEV" shell input keyevent KEYCODE_WAKEUP >/dev/null 2>&1
+  sleep 1
+  if adb -s "$DEV" shell dumpsys power 2>/dev/null | grep -q 'mWakefulness=Awake'; then return 0; fi
+  echo "  WARNING: glasses display did not wake — put them on; the POV needs the app in front" >&2
+}
+
 stop_pov() {
   adb -s "$DEV" shell am broadcast -p "$PKG" -a "$PKG.DEBUG_REC_STOP" >/dev/null 2>&1
   # Finalize is asynchronous; pulling immediately gets a truncated file.
@@ -299,6 +325,13 @@ stop_pov() {
 
 case "$MODE" in
   start)
+    # A dozing display stops the activity, and CameraX will not open the camera for a stopped
+    # activity: the POV binds, delivers no frame, and finalizes empty (err=8). Seen 2026-09-29 with
+    # the glasses set down between takes. Wake it before anything starts.
+    wake_display
+    # Keep the whole take's app log on the device (collect saves it): 16 MB is hours of it.
+    adb -s "$DEV" logcat -G 16M >/dev/null 2>&1 || true
+    adb -s "$DEV" shell 'date "+%m-%d %H:%M:%S.000"' 2>/dev/null | tr -d '\r' > "/tmp/lumella-take-$NAME.since"
     # Screen first, POV second. The POV start now spends ~6s confirming the file is growing, and
     # whichever is started first runs during that wait — so the order decides which layer carries
     # the head offset. Screen is the cheap one (0.26 MB/min against ~43), and a few seconds of it
@@ -340,6 +373,9 @@ case "$MODE" in
     ;;
   block)
     STAMP="$(date +%H%M%S)"
+    wake_display
+    adb -s "$DEV" logcat -G 16M >/dev/null 2>&1 || true
+    adb -s "$DEV" shell 'date "+%m-%d %H:%M:%S.000"' 2>/dev/null | tr -d '\r' > "/tmp/lumella-take-$NAME.since"
     echo "[$NAME] ${SEC}s — $(date '+%H:%M:%S')${POV:+ (+POV)}${AUDIO:+ (+audio)}"
     start_pov
     adb -s "$DEV" shell "screenrecord --time-limit $SEC --size 1280x480 $REMOTE_SCREEN_DIR/$NAME.mp4"
