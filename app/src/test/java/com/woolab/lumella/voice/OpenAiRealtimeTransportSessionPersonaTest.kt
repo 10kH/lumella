@@ -95,4 +95,21 @@ class OpenAiRealtimeTransportSessionPersonaTest {
         assertTrue("length cap lost", p.contains("1-2 short sentences"))
         assertTrue("difficulty cap lost", p.contains("everyday vocabulary"))
     }
+
+    @Test
+    fun `the persona leads with the learner's politeness level`() {
+        // Without it the "friend" framing answered -요 in 반말: 0 of 18 kept (2026-09-29, aaai27
+        // artifacts/demo-scenario/lumella-persona-before.json); first, with an example, 17 of 18.
+        val p = OpenAiRealtimeTransport.DEFAULT_SESSION_INSTRUCTIONS
+        assertTrue("the rule must come first", p.startsWith("POLITENESS"))
+        assertTrue(p.contains("-요") && p.contains("반말"))
+        assertTrue("with the drift to avoid", p.contains("샀구나"))
+    }
+
+    @Test
+    fun `a correct but plain sentence is expanded, not just repeated`() {
+        val p = OpenAiRealtimeTransport.DEFAULT_SESSION_INSTRUCTIONS
+        assertTrue(p.contains("EXPAND"))
+        assertTrue(p.contains("빨갛고 큰 사과"))
+    }
 }
