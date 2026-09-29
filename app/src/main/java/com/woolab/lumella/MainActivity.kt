@@ -221,6 +221,9 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
     private fun publishLearnerTurn() {
         capturePolicy.onLearnerSpoke()
         val turnId = turnTracker.next()
+        // Ties everything logged later with this id ('코치 turn N:', the corner) to this utterance;
+        // the film is assembled from the take's log (aaai27 video-aifesta/assemble.py).
+        Log.i(TAG, "학습자 턴 $turnId 발행")
         voicePathExecutor.execute {
             voiceFastPath.onTurnStart(turnId)
             runOnUiThread { updateStatus("Thinking...", "#2196F3") }
