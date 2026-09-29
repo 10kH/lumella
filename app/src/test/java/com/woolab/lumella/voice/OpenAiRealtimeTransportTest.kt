@@ -5,6 +5,7 @@ import com.woolab.lumella.TokenServiceCredentialProvider
 import com.woolab.tutor.slowpath.MiniJson
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -356,6 +357,58 @@ class OpenAiRealtimeTransportTest {
         assertTrue(listener.statuses.contains(RealtimeConnectionStatus.CONNECTING))
         assertTrue(listener.statuses.contains(RealtimeConnectionStatus.TOKEN_FAIL))
         assertFalse(transport.sessionReady)
+    }
+
+    @Test
+    fun tokenFetchWithoutNetworkRetriesInsteadOfGivingUp() {
+        // The glasses' Wi-Fi goes off while the display sleeps; the first fetch after waking
+        // fails with a DNS error. That must retry, and the retry must open the socket.
+        var networkUp = false
+        val provider = TokenServiceCredentialProvider(
+            transport = { _, _, _, callback ->
+                if (networkUp) {
+                    callback(Result.success(TokenHttpResponse(200, """{"token":"ek_after_wifi","expiresAt":${Long.MAX_VALUE / 2}}""")))
+                } else {
+                    callback(Result.failure(java.net.UnknownHostException("lumella-token.vercel.app")))
+                }
+            },
+            baseUrl = "http://localhost:8788",
+            localToken = "shared-secret",
+        )
+        val factory = FakeFactory()
+        val listener = RecordingListener()
+        val retries = mutableListOf<() -> Unit>()
+        val transport = OpenAiRealtimeTransport(
+            provider, factory, listener = listener,
+            reconnectScheduler = { _, task -> retries.add(task) },
+        )
+
+        transport.connect()
+
+        assertNull(factory.lastListener)
+        assertFalse(listener.statuses.contains(RealtimeConnectionStatus.TOKEN_FAIL))
+        assertTrue(listener.statuses.contains(RealtimeConnectionStatus.CLOSED))
+        assertEquals(1, retries.size)
+
+        networkUp = true
+        retries.removeAt(0)()
+
+        assertNotNull("the retry opens the socket once the network is back", factory.lastListener)
+    }
+
+    @Test
+    fun tokenServiceHttpErrorStillFailsWithoutRetry() {
+        val retries = mutableListOf<() -> Unit>()
+        val listener = RecordingListener()
+        val transport = OpenAiRealtimeTransport(
+            failingProvider(), FakeFactory(), listener = listener,
+            reconnectScheduler = { _, task -> retries.add(task) },
+        )
+
+        transport.connect()
+
+        assertTrue(listener.statuses.contains(RealtimeConnectionStatus.TOKEN_FAIL))
+        assertTrue("a configuration error is not retried in a loop", retries.isEmpty())
     }
 
     @Test

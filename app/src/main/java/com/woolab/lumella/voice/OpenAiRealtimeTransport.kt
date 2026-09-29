@@ -335,8 +335,20 @@ class OpenAiRealtimeTransport(
             result.fold(
                 onSuccess = { token -> openSocket(token.value) },
                 onFailure = { error ->
-                    listener.onStatus(RealtimeConnectionStatus.TOKEN_FAIL)
-                    listener.onError(error.message ?: error.javaClass.simpleName)
+                    if (error is java.io.IOException) {
+                        // No network, not a bad credential: the glasses' launcher turns Wi-Fi off
+                        // about a minute after the display sleeps (glasses taken off) and back on
+                        // when it wakes (logcat WifiService, 2026-09-29, seven times in one
+                        // evening). Treating that as TOKEN_FAIL left the app dead until relaunch —
+                        // a take started after putting the glasses back on had no tutor. Retry on
+                        // the same backoff as a dropped socket; READY resets it.
+                        listener.onStatus(RealtimeConnectionStatus.CLOSED)
+                        listener.onError(error.message ?: error.javaClass.simpleName)
+                        scheduleReconnect()
+                    } else {
+                        listener.onStatus(RealtimeConnectionStatus.TOKEN_FAIL)
+                        listener.onError(error.message ?: error.javaClass.simpleName)
+                    }
                 },
             )
         }

@@ -115,6 +115,18 @@ class LumaTutorBrainTest {
     }
 
     @Test
+    fun `unreachable server on login throws instead of claiming bad credentials`() {
+        val transport = FakeLumaHttpTransport().apply {
+            on("POST", "/v1/auth/session") { throw java.net.UnknownHostException("luma.test") }
+        }
+        val brain = newBrain(transport)
+
+        val thrown = runCatching { brain.connect(FakeCredentialsProvider()) }.exceptionOrNull()
+
+        assertTrue(thrown is java.io.IOException, "a network failure must reach the caller so it can retry")
+    }
+
+    @Test
     fun `D-7 resumes an active session younger than the resume window`() {
         val transport = FakeLumaHttpTransport().apply {
             wireHappyPath(activeSessionBody = """{"session":{"id":"sess-young","lastMessageAt":"2026-07-21T11:45:00Z"}}""")

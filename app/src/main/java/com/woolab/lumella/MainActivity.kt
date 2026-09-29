@@ -69,6 +69,8 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
         private const val BRAIN_UNREACHABLE_AFTER_MS = 15_000L
         /** After a brain call that went unanswered that long, how long to stop asking before trying again. */
         private const val BRAIN_RETRY_AFTER_MS = 30_000L
+        private const val BRAIN_BOOTSTRAP_FIRST_RETRY_MS = 3_000L
+        private const val BRAIN_BOOTSTRAP_MAX_RETRY_MS = 30_000L
         private const val TAG = "lumella"
         private const val RIGHT_TOUCHPAD_DEVICE = "cyttsp5_mt"
         private const val LEFT_TOUCHPAD_DEVICE = "cyttsp6_mt"
@@ -602,25 +604,54 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
         // own thread and the voice loop does not know or care when it does.
         transport.connect()
         Thread({
-            val connection = try {
-                brain.connect(credentialsProvider)
-            } catch (e: Exception) {
-                Log.w(TAG, "brain.connect failed: ${e.message}")
-                null
-            }
-
-            if (connection != null && connection.state != BrainConnectionState.AUTH_REQUIRED) {
-                val session = try {
-                    brain.startSession(SessionPolicy.RESUME_ACTIVE)
+            // Unreachable at launch is routine on the glasses: their Wi-Fi is switched off while
+            // the display sleeps and comes back a few seconds after it wakes. One attempt meant a
+            // session launched in that window had no coach at all — no Tango/GPT line, no habit —
+            // until relaunch (2026-09-29). Keep trying on a backoff; rejected credentials stop it.
+            var delayMs = BRAIN_BOOTSTRAP_FIRST_RETRY_MS
+            var attempt = 1
+            while (!isFinishing && !isDestroyed) {
+                if (attempt > 1 && config.lumaBaseUrl == buildConfigLumaBaseUrl) {
+                    // The luma address comes from the remote config, fetched once above; if that
+                    // fetch also failed for want of a network, the brain would retry forever
+                    // against the build-time LAN address (192.168.x, seen 2026-09-29).
+                    val again = AppConfig.withResolvedLumaBaseUrl(
+                        config,
+                        HttpUrlConnectionTokenHttpTransport(connectTimeoutMs = REMOTE_CONFIG_TIMEOUT_MS, readTimeoutMs = REMOTE_CONFIG_TIMEOUT_MS),
+                    )
+                    if (again.lumaBaseUrl != config.lumaBaseUrl) {
+                        config = again
+                        Log.i(TAG, "Resolved lumaBaseUrl from remote config on retry (attempt $attempt)")
+                    }
+                }
+                val connection = try {
+                    brain.connect(credentialsProvider)
                 } catch (e: Exception) {
-                    Log.w(TAG, "brain.startSession failed: ${e.message}")
+                    Log.w(TAG, "brain.connect failed (attempt $attempt): ${e.message}")
                     null
                 }
-                session?.let { sessionIdRef.set(it.sessionId) }
-                brainReachable.set(session != null)
-                Log.i(TAG, "brain ready: session=${session?.sessionId ?: "none"} (voice was already up)")
-            } else {
-                Log.w(TAG, "Brain unavailable/auth-required at bootstrap; continuing voice-only per W-1 posture")
+                if (connection?.state == BrainConnectionState.AUTH_REQUIRED) {
+                    Log.w(TAG, "Brain auth-required at bootstrap; continuing voice-only per W-1 posture")
+                    break
+                }
+                if (connection != null) {
+                    val session = try {
+                        brain.startSession(SessionPolicy.RESUME_ACTIVE)
+                    } catch (e: Exception) {
+                        Log.w(TAG, "brain.startSession failed (attempt $attempt): ${e.message}")
+                        null
+                    }
+                    if (session != null) {
+                        sessionIdRef.set(session.sessionId)
+                        brainReachable.set(true)
+                        Log.i(TAG, "brain ready: session=${session.sessionId} (attempt $attempt; voice was already up)")
+                        break
+                    }
+                }
+                Log.w(TAG, "Brain unreachable at bootstrap; voice-only for now, retrying in ${delayMs}ms")
+                try { Thread.sleep(delayMs) } catch (_: InterruptedException) { break }
+                delayMs = (delayMs * 2).coerceAtMost(BRAIN_BOOTSTRAP_MAX_RETRY_MS)
+                attempt++
             }
 
             // Realtime voice transport connects independently of brain readiness — D-4/W-1:

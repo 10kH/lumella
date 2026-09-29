@@ -12,11 +12,16 @@
 #
 # --stop also leaves <take>-app.log: the app's log for the take (see collect).
 #
+# The screen is recorded in 170 s segments (screenrecord stops at 180 s), and laid under the joined
+# POV by ops/screen_track.py so the tutor's subtitle appears with its voice: before 2026-09-29 the
+# FINAL stacked both from t=0 and the subtitles ran 3.4-4.4 s behind the voices. The FINAL is a
+# constant 30 fps.
+#
 # --stop leaves <take>-FINAL.mp4: the wearer's view (upright portrait) beside the glasses display,
 # 1820x960, audio carrying both voices; for --audio, the display with the voices. That is the file for the edit; the parts are kept beside it, including
 # <take>-learner.wav and <take>-tutor.wav for an edit that wants the voices on separate tracks.
 #
-#   ops/take.sh c7                   # blocking, 180s, screen only
+#   ops/take.sh c7                   # blocking, 180s (any length), screen only
 #   ops/take.sh c7 60 --pov          # blocking, 60s, + wearer's view
 #   ops/take.sh c7 --start --pov     # start and return; the wearer talks for as long as needed
 #   ops/take.sh c7 --stop            # stop, collect, report
@@ -169,15 +174,19 @@ compose() {
   local screen="$OUT/$NAME-$stamp-screen.mp4" voices="$OUT/$NAME-$stamp-voices.wav"
   local out="$OUT/$NAME-$stamp-FINAL.mp4"
   [ -f "$screen" ] || return 0
+  # The screen track is already on the voices' clock and 30 fps (screen_track.py), so the two
+  # halves line up from t=0; the FINAL is written at a constant 30 fps for the edit.
   local pov="$OUT/$NAME-$stamp-pov-MIXED.mp4"
   [ -f "$pov" ] || pov="$OUT/$NAME-$stamp-pov-JOINED.mp4"
   [ -f "$pov" ] || pov="$OUT/$NAME-$stamp-pov.mp4"
   local ok=0
   if [ -f "$pov" ]; then
     # -map 0:a? — a take whose voices failed to mix still gets its picture.
+    local pdur
+    pdur="$(ffprobe -v error -show_entries format=duration -of csv=p=0 "$pov" 2>/dev/null)"
     ffmpeg -v error -i "$pov" -i "$screen" -filter_complex \
-      "[1:v]crop=640:480:0:0,scale=1280:960,setsar=1[scr];[0:v]scale=-2:960,setsar=1[pv];[pv][scr]hstack=inputs=2[v]" \
-      -map "[v]" -map "0:a?" -c:v libx264 -preset veryfast -crf 20 -c:a aac -y "$out" 2>/dev/null && ok=1
+      "[1:v]crop=640:480:0:0,scale=1280:960,setsar=1,fps=30,tpad=stop_mode=clone:stop=-1[scr];[0:v]scale=-2:960,setsar=1,fps=30[pv];[pv][scr]hstack=inputs=2[v]" \
+      -map "[v]" -map "0:a?" -c:v libx264 -preset veryfast -crf 20 -r 30 -c:a aac -t "$pdur" -y "$out" 2>/dev/null && ok=1
   elif [ -f "$voices" ]; then
     # screenrecord writes a frame only when the display changes, so its file ends at the last
     # change, not at the end of the take. Hold that last frame, and cut at the voices' length
@@ -185,8 +194,8 @@ compose() {
     local dur
     dur="$(ffprobe -v error -show_entries format=duration -of csv=p=0 "$voices" 2>/dev/null)"
     [ -n "$dur" ] && ffmpeg -v error -i "$screen" -i "$voices" \
-      -filter_complex "[0:v]crop=640:480:0:0,scale=1280:960,setsar=1,tpad=stop_mode=clone:stop=-1[v]" \
-      -map "[v]" -map 1:a -c:v libx264 -preset veryfast -crf 20 -c:a aac -t "$dur" -y "$out" 2>/dev/null && ok=1
+      -filter_complex "[0:v]crop=640:480:0:0,scale=1280:960,setsar=1,fps=30,tpad=stop_mode=clone:stop=-1[v]" \
+      -map "[v]" -map 1:a -c:v libx264 -preset veryfast -crf 20 -r 30 -c:a aac -t "$dur" -y "$out" 2>/dev/null && ok=1
   else
     return 0
   fi
@@ -201,9 +210,22 @@ compose() {
 
 collect() {
   local stamp="$1"
-  adb -s "$DEV" pull "$REMOTE_SCREEN_DIR/$NAME.mp4" "$OUT/$NAME-$stamp-screen.mp4" >/dev/null 2>&1
-  adb -s "$DEV" shell "rm -f $REMOTE_SCREEN_DIR/$NAME.mp4"
-  echo "  screen $OUT/$NAME-$stamp-screen.mp4"
+  # Screen segments <name>-s1.mp4, -s2.mp4 ... (screenrecord stops at 180 s; the device loop
+  # started by --start chains them) with each one's start time in <name>-sN.t (device epoch).
+  local segargs=() i=1 seg t
+  rm -f "$OUT/$NAME-$stamp-screen-starts.txt"
+  while :; do
+    seg="$OUT/$NAME-$stamp-screen-s$i.mp4"
+    adb -s "$DEV" pull "$REMOTE_SCREEN_DIR/$NAME-s$i.mp4" "$seg" >/dev/null 2>&1 || break
+    t="$(adb -s "$DEV" shell "cat $REMOTE_SCREEN_DIR/$NAME-s$i.t" 2>/dev/null | tr -d '\r')"
+    adb -s "$DEV" shell "rm -f $REMOTE_SCREEN_DIR/$NAME-s$i.mp4 $REMOTE_SCREEN_DIR/$NAME-s$i.t"
+    segargs+=(--seg "$seg" "${t:-0}")
+    # Kept beside the take, so the screen track can be rebuilt without the device.
+    printf '%s %s\n' "$(basename "$seg")" "${t:-0}" >> "$OUT/$NAME-$stamp-screen-starts.txt"
+    i=$((i + 1))
+  done
+  adb -s "$DEV" shell "rm -f $REMOTE_SCREEN_DIR/$NAME.stop"
+  [ "${#segargs[@]}" = 0 ] && echo "  screen MISSING — no segments on the device" >&2
 
   if [ -n "$POV" ] || adb -s "$DEV" shell "ls $REMOTE_POV_DIR/$NAME.mp4" >/dev/null 2>&1; then
     # A photo turn during a take closes the current segment and opens the next, so one take can
@@ -247,6 +269,33 @@ collect() {
   done
   mix_voices "$stamp"
 
+  # Each POV segment's length and its 'recording started' time on the device clock, so the
+  # screen can be laid under the joined POV piece by piece (screen_track.py).
+  local since povargs=() k f started
+  since="$(cat "/tmp/lumella-take-$NAME.since" 2>/dev/null || true)"
+  if [ -n "$since" ] && [ -f "$OUT/$NAME-$stamp-pov.mp4" ]; then
+    local startlog; startlog="$(mktemp -t lumella-starts)"
+    adb -s "$DEV" logcat -d -v epoch -T "$since" 2>/dev/null | grep 'lumella.*recording started' > "$startlog"
+    k=1
+    while :; do
+      if [ "$k" = 1 ]; then f="$OUT/$NAME-$stamp-pov.mp4"; remote="$NAME.mp4"
+      else f="$OUT/$NAME-$stamp-pov-$k.mp4"; remote="$NAME-$k.mp4"; fi
+      [ -f "$f" ] || break
+      started="$(grep "/$remote\$" "$startlog" | tail -1 | awk '{print $1}')"
+      [ -n "$started" ] || { povargs=(); break; }
+      povargs+=(--pov-seg "$(ffprobe -v error -show_entries format=duration -of csv=p=0 "$f")" "$started")
+      k=$((k + 1))
+    done
+    rm -f "$startlog"
+  fi
+  if [ "${#segargs[@]}" -gt 0 ]; then
+    local tutorarg=()
+    [ -f "$OUT/$NAME-$stamp-tutor.wav" ] && tutorarg=(--tutor "$OUT/$NAME-$stamp-tutor.wav")
+    # ${a[@]+"${a[@]}"}: an empty array is "unbound" under set -u in macOS's bash 3.2.
+    python3 "$REPO_ROOT/ops/screen_track.py" "$OUT/$NAME-$stamp-screen.mp4" "${segargs[@]}" \
+      ${tutorarg[@]+"${tutorarg[@]}"} ${povargs[@]+"${povargs[@]}"} || echo "  screen track FAILED — the segments are intact" >&2
+  fi
+
   compose "$stamp"
 
   # uiautomator waits indefinitely on a dozing display (a take stopped after the glasses were set
@@ -259,8 +308,6 @@ collect() {
   # each reply started and ended, and which coach took each turn ("코치 turn N:"). The edit is
   # captioned from it — which overlay goes where, and whether its condition held — and the
   # device's ring buffer does not keep it long. From the take's start (device clock) to now.
-  local since
-  since="$(cat "/tmp/lumella-take-$NAME.since" 2>/dev/null || true)"
   if [ -n "$since" ]; then
     adb -s "$DEV" logcat -d -v time -T "$since" 2>/dev/null | grep -E '/lumella *\(' > "$OUT/$NAME-$stamp-app.log" || true
   else
@@ -271,7 +318,7 @@ collect() {
 
   # Frame count is the honest check: a static screen yields 1 frame and that is normal, but a take
   # meant to show a conversation with 1 frame means nothing changed and the take is empty.
-  for f in "$OUT/$NAME-$stamp-screen.mp4" "$OUT/$NAME-$stamp-pov"*.mp4; do
+  for f in "$OUT/$NAME-$stamp-screen-s"*.mp4 "$OUT/$NAME-$stamp-pov"*.mp4; do
     [ -f "$f" ] || continue
     case "$f" in *-JOINED.mp4|*-MIXED.mp4|*-FINAL.mp4) continue ;; esac
     ffprobe -v error -show_entries stream=nb_frames -show_entries format=duration,size \
@@ -318,41 +365,70 @@ wake_display() {
 }
 
 stop_pov() {
+  { [ -n "$POV" ] || [ -n "$AUDIO" ]; } || return 0
   adb -s "$DEV" shell am broadcast -p "$PKG" -a "$PKG.DEBUG_REC_STOP" >/dev/null 2>&1
   # Finalize is asynchronous; pulling immediately gets a truncated file.
   sleep 3
 }
 
+# The screen, recorded ON THE DEVICE in a loop of screenrecord segments, each with its start time
+# (device epoch) beside it. screenrecord stops at 180 s and --time-limit above that is rejected
+# outright (the process exits at once, silently); a take of the thirteen-line script with pauses
+# runs 2.5-4 minutes. Each segment is 170 s; the loop ends when --stop leaves <name>.stop.
+#
+# Detach ON THE DEVICE. `setsid` was tried first and the process was gone within seconds every
+# time (2026-09-14); nohup + a backgrounded sh keeps running after adb shell returns (measured
+# 2026-09-29). Do not "improve" this back to setsid.
+start_screen() {
+  local d="$REMOTE_SCREEN_DIR"
+  adb -s "$DEV" shell "rm -f $d/$NAME.stop $d/$NAME-s*.mp4 $d/$NAME-s*.t $d/$NAME.mp4" >/dev/null 2>&1
+  # nohup sh -c with every stream redirected: a bare `( loop ) &` keeps adb shell waiting on the
+  # loop (its stdin is still the pty), which hung --start for the whole take (2026-09-29).
+  adb -s "$DEV" shell "nohup sh -c 'i=1; while [ ! -f $d/$NAME.stop ]; do date +%s.%N > $d/$NAME-s\$i.t; screenrecord --time-limit 170 --size 1280x480 $d/$NAME-s\$i.mp4; i=\$((i+1)); done' </dev/null >/dev/null 2>&1 &" >/dev/null 2>&1
+  sleep 1
+  # Check the process list, not the exit status: adb shell does not forward it.
+  if [ "$(adb -s "$DEV" shell "pgrep screenrecord" 2>/dev/null | tr -d '\r' | grep -c .)" = "0" ]; then
+    echo "WARNING: screen recording did not start; POV may still be running" >&2
+  fi
+}
+
+stop_screen() {
+  adb -s "$DEV" shell "touch $REMOTE_SCREEN_DIR/$NAME.stop" >/dev/null 2>&1
+  # SIGINT so screenrecord finalises the container; SIGKILL leaves an unplayable file.
+  adb -s "$DEV" shell "pkill -INT screenrecord" >/dev/null 2>&1
+  sleep 3
+}
+
+begin_take() {
+  # A dozing display stops the activity, and CameraX will not open the camera for a stopped
+  # activity: the POV binds, delivers no frame, and finalizes empty (err=8). Seen 2026-09-29 with
+  # the glasses set down between takes. Wake it before anything starts.
+  wake_display
+  # Keep the whole take's app log on the device (collect saves it): 16 MB is hours of it.
+  adb -s "$DEV" logcat -G 16M >/dev/null 2>&1 || true
+  adb -s "$DEV" shell 'date "+%m-%d %H:%M:%S.000"' 2>/dev/null | tr -d '\r' > "/tmp/lumella-take-$NAME.since"
+  # Screen first, POV second. The POV start spends ~6s confirming the file is growing; the
+  # screen's head start is removed when the track is built (screen_track.py).
+  start_screen
+  start_pov
+  # The mode goes with the stamp, so --stop knows what to collect without being told again.
+  echo "$(date +%H%M%S) ${POV:+pov}${AUDIO:+audio}" > "/tmp/lumella-take-$NAME.stamp"
+}
+
+end_take() {
+  read -r STAMP SAVED_MODE < "/tmp/lumella-take-$NAME.stamp" 2>/dev/null || true
+  STAMP="${STAMP:-$(date +%H%M%S)}"
+  case "${SAVED_MODE:-}" in *pov*) POV=1 ;; esac
+  case "${SAVED_MODE:-}" in *audio*) AUDIO=1 ;; esac
+  stop_pov
+  stop_screen
+  collect "$STAMP"
+  rm -f "/tmp/lumella-take-$NAME.stamp"
+}
+
 case "$MODE" in
   start)
-    # A dozing display stops the activity, and CameraX will not open the camera for a stopped
-    # activity: the POV binds, delivers no frame, and finalizes empty (err=8). Seen 2026-09-29 with
-    # the glasses set down between takes. Wake it before anything starts.
-    wake_display
-    # Keep the whole take's app log on the device (collect saves it): 16 MB is hours of it.
-    adb -s "$DEV" logcat -G 16M >/dev/null 2>&1 || true
-    adb -s "$DEV" shell 'date "+%m-%d %H:%M:%S.000"' 2>/dev/null | tr -d '\r' > "/tmp/lumella-take-$NAME.since"
-    # Screen first, POV second. The POV start now spends ~6s confirming the file is growing, and
-    # whichever is started first runs during that wait — so the order decides which layer carries
-    # the head offset. Screen is the cheap one (0.26 MB/min against ~43), and a few seconds of it
-    # before the wearer speaks costs nothing, while the same seconds missing from the POV cost the
-    # opening of the shot. Neither order makes them equal; this one makes the surplus harmless.
-    adb -s "$DEV" shell "screenrecord --time-limit 180 --size 1280x480 $REMOTE_SCREEN_DIR/$NAME.mp4 >/dev/null 2>&1 &" >/dev/null 2>&1
-    start_pov
-    # Detach ON THE DEVICE with a plain `&`. `setsid` was tried first and the process was gone
-    # within seconds every time, while the bare background job keeps running (measured
-    # 2026-09-14). Do not "improve" this back to setsid.
-    #
-    # 180 is screenrecord's own ceiling: --time-limit 900 is REJECTED and the process exits at
-    # once, silently, leaving a take with no screen track. That is exactly how the first version
-    # of this failed. A longer take needs --stop before the cap, or a second take.
-    sleep 1
-    # Check the process list, not the exit status: adb shell does not forward it.
-    if [ "$(adb -s "$DEV" shell "pgrep screenrecord" 2>/dev/null | tr -d '\r' | grep -c .)" = "0" ]; then
-      echo "WARNING: screen recording did not start; POV may still be running" >&2
-    fi
-    # The mode goes with the stamp, so --stop knows what to collect without being told again.
-    echo "$(date +%H%M%S) ${POV:+pov}${AUDIO:+audio}" > "/tmp/lumella-take-$NAME.stamp"
+    begin_take
     if [ -n "$POV" ]; then   mode="screen + POV"
     elif [ -n "$AUDIO" ]; then mode="screen + both voices (no camera)"
     else                     mode="screen"
@@ -360,26 +436,12 @@ case "$MODE" in
     echo "$NAME: recording ($mode). stop with: ops/take.sh $NAME --stop"
     ;;
   stop)
-    read -r STAMP SAVED_MODE < "/tmp/lumella-take-$NAME.stamp" 2>/dev/null || true
-    STAMP="${STAMP:-$(date +%H%M%S)}"
-    case "${SAVED_MODE:-}" in *pov*) POV=1 ;; esac
-    case "${SAVED_MODE:-}" in *audio*) AUDIO=1 ;; esac
-    stop_pov
-    # SIGINT so screenrecord finalises the container; SIGKILL leaves an unplayable file.
-    adb -s "$DEV" shell "pkill -INT screenrecord" >/dev/null 2>&1
-    sleep 3
-    collect "$STAMP"
-    rm -f "/tmp/lumella-take-$NAME.stamp"
+    end_take
     ;;
   block)
-    STAMP="$(date +%H%M%S)"
-    wake_display
-    adb -s "$DEV" logcat -G 16M >/dev/null 2>&1 || true
-    adb -s "$DEV" shell 'date "+%m-%d %H:%M:%S.000"' 2>/dev/null | tr -d '\r' > "/tmp/lumella-take-$NAME.since"
     echo "[$NAME] ${SEC}s — $(date '+%H:%M:%S')${POV:+ (+POV)}${AUDIO:+ (+audio)}"
-    start_pov
-    adb -s "$DEV" shell "screenrecord --time-limit $SEC --size 1280x480 $REMOTE_SCREEN_DIR/$NAME.mp4"
-    { [ -n "$POV" ] || [ -n "$AUDIO" ]; } && stop_pov
-    collect "$STAMP"
+    begin_take
+    sleep "$SEC"
+    end_take
     ;;
 esac

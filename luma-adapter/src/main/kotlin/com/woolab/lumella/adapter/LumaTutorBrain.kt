@@ -88,6 +88,12 @@ class LumaTutorBrain(
         )
         val loginResponse = try {
             postJson("/v1/auth/session", loginPayload, authorized = false)
+        } catch (e: java.io.IOException) {
+            // Unreachable is not "credentials rejected". Reporting it as AUTH_REQUIRED made the
+            // app give up on the coach for the whole session whenever it launched a few seconds
+            // before the glasses' Wi-Fi came back (2026-09-29). Let the caller see the failure and
+            // retry.
+            throw e
         } catch (_: Exception) {
             return BrainConnection(BrainConnectionState.AUTH_REQUIRED, BrainCapabilities(coach = false, capabilitiesRoute = false))
         }
@@ -360,6 +366,9 @@ class LumaTutorBrain(
 
     private fun startHeartbeat(label: String) {
         if (deviceId.isBlank()) return
+        // connect() may run again when the app retries a bootstrap whose session start failed;
+        // one heartbeat per device is enough.
+        if (heartbeatThread?.isAlive == true) return
         heartbeatStop.set(false)
         val thread = Thread({
             while (!heartbeatStop.get()) {
