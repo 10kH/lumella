@@ -115,7 +115,8 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
         private const val BASE_HINT = "핸즈프리 대화 중 · 우측 탭: 지금 말 끝 · 좌측 탭: 사진"
     }
 
-    private lateinit var config: AppConfig
+    // Replaced from the brain-bootstrap thread when the remote config arrives late; read everywhere.
+    @Volatile private lateinit var config: AppConfig
     private lateinit var brain: TutorBrain
     private lateinit var socketFactory: OkHttpRealtimeWebSocketFactory
     private lateinit var transport: OpenAiRealtimeTransport
@@ -650,6 +651,11 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
                     } catch (e: Exception) {
                         Log.w(TAG, "brain.startSession failed (attempt $attempt): ${e.message}")
                         null
+                    }
+                    if (session != null && (isFinishing || isDestroyed)) {
+                        // Torn down while the session was starting: end it rather than leave it open.
+                        runCatching { brain.endSession(session.sessionId) }
+                        break
                     }
                     if (session != null) {
                         sessionIdRef.set(session.sessionId)

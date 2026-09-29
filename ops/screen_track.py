@@ -85,7 +85,10 @@ def subtitle_appearances(path):
 
 
 def voice_onsets(wav):
-    """Times (s) at which the tutor starts speaking after at least 2 s of silence."""
+    """Times (s) at which the tutor starts speaking after at least 2 s of silence.
+
+    Kept in step with voice_onsets in aaai27 video-aifesta/assemble.py (this file stays free of
+    anything outside lumella and the standard library)."""
     raw = subprocess.run(["ffmpeg", "-v", "error", "-i", wav, "-ac", "1", "-ar", "1000", "-f", "s16le", "-"],
                          capture_output=True).stdout
     a = array.array("h")

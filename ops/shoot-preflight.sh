@@ -37,12 +37,19 @@ else
   sed 's/^/        /' /tmp/shoot-preflight-chain.txt | tail -8
 fi
 
-DEV="$(adb devices | awk 'NR>1 && $2=="device" {print $1}')"
+DEV="${ANDROID_SERIAL:-$(adb devices | awk 'NR>1 && $2=="device" {print $1}')}"
 if [ "$(printf '%s\n' "$DEV" | grep -c .)" != 1 ]; then
-  fail "exactly one device must be connected (found: $(printf '%s' "$DEV" | tr '\n' ' ')). adb disconnect, or unplug one"
+  # Cable plugged back in to charge while adb is also on Wi-Fi: name the one to use.
+  fail "more than one device (found: $(printf '%s' "$DEV" | tr '\n' ' ')) — run with ANDROID_SERIAL=<one of them>, or unplug one"
   echo "verdict: NOT READY"; exit 1
 fi
+export ANDROID_SERIAL="$DEV"
 A="adb -s $DEV"
+# A take whose --stop never ran leaves the device-side screen loop recording until the disk fills.
+if [ "$($A shell pgrep screenrecord 2>/dev/null | tr -d '\r' | grep -c .)" != 0 ] && ! ls /tmp/lumella-take-*.stamp >/dev/null 2>&1; then
+  $A shell 'for f in /sdcard/*-s1.t; do touch "${f%-s1.t}.stop"; done; pkill -INT screenrecord' >/dev/null 2>&1
+  warn "a screen recording from an unfinished take was still running; stopped it"
+fi
 
 echo "== ETRI Tango"
 t0=$(python3 -c 'import time; print(time.time())')

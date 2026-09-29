@@ -13,19 +13,26 @@ set -uo pipefail
 cd "$(dirname "$0")/.."
 NAME="${1:?take name}"; FILE="${2:?lines file}"; FIRST="${3:?first line}"; LAST="${4:?last line}"; GAP="${5:-20}"
 PKG=com.woolab.lumella
+DEV="${ANDROID_SERIAL:-$(adb devices | awk 'NR>1 && $2=="device" {print $1; exit}')}"
+[ -n "$DEV" ] || { echo "no device" >&2; exit 1; }
+export ANDROID_SERIAL="$DEV"
 LINES=()
 while IFS= read -r l; do
   case "$l" in ''|'#'*) continue ;; esac
   LINES+=("$l")
 done < "$FILE"
+if [ "$LAST" -gt "${#LINES[@]}" ] || [ "$FIRST" -lt 1 ]; then
+  echo "lines $FIRST-$LAST: the file has ${#LINES[@]}" >&2; exit 2
+fi
 ./ops/take.sh "$NAME" --start --pov || exit 1
+# Stop the take however this ends — an interrupted run must not leave the device recording.
+trap './ops/take.sh "$NAME" --stop' EXIT
 sleep 3
 for i in $(seq "$FIRST" "$LAST"); do
   line="${LINES[$((i - 1))]}"
   echo "  $i: $line"
-  adb shell "am broadcast -p $PKG -a $PKG.DEBUG_SAY --es text '$line'" </dev/null >/dev/null
+  adb -s "$DEV" shell "am broadcast -p $PKG -a $PKG.DEBUG_SAY --es text '$line'" </dev/null >/dev/null
   sleep 1
-  adb shell "am broadcast -p $PKG -a $PKG.DEBUG_EVENT --es json 'input_transcript:$line'" </dev/null >/dev/null
+  adb -s "$DEV" shell "am broadcast -p $PKG -a $PKG.DEBUG_EVENT --es json 'input_transcript:$line'" </dev/null >/dev/null
   sleep "$GAP"
 done
-./ops/take.sh "$NAME" --stop
