@@ -79,7 +79,8 @@ for a in "$@"; do
 done
 mkdir -p "$OUT"
 
-DEV="$(adb devices | awk 'NR>1 && $2=="device" {print $1; exit}')"
+# ANDROID_SERIAL picks one when the glasses are on USB and Wi-Fi adb at once (shoot-preflight exports it).
+DEV="${ANDROID_SERIAL:-$(adb devices | awk 'NR>1 && $2=="device" {print $1; exit}')}"
 if [ -z "$DEV" ]; then
   echo "no device. ops/preflight.sh --find" >&2
   exit 1
