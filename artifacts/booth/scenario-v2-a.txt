@@ -1,0 +1,85 @@
+# ops/scenario-check.sh v2-a — 2026-09-29 16:41 — lumella a17ba7b
+
+== 1  학습자: 안녕하세요, 저는 한국어 배운 지 1년 됐어요
+     L  tvStatus       [16,12][76,40]             "Ready"
+     L  tvLayers       [537,12][624,45]           "voice  realtime&#10;coach  ·"
+     L  tvSubtitle     [24,145][616,178]          "와, 한국어 배운 지 1년 되셨군요! 계속 열심히 해봐요!"
+     L  tvUserEcho     [24,186][616,211]          "안녕하세요, 저는 한국어 배운 지 1년 됐어요"
+     L  tvHint         [0,397][640,448]           "음성 LLM-GPT · 코치 SLM-TANGO(주제대화 94%) · 핸즈프리 대화 중 · 우측 탭: 지금 말 끝 · 좌측 탭: 사진"
+
+== 2  학습자: 이거 뭐예요?
+     L  tvStatus       [16,12][119,40]            "Speaking..."
+     L  tvLayers       [537,12][624,45]           "voice  realtime&#10;coach  ·"
+     L  tvSubtitle     [24,145][616,178]          "이거요? 붉"
+     L  tvUserEcho     [24,186][616,211]          "이거 뭐예요?"
+     L  tvHint         [0,401][640,448]           "사유: The learner is asking a direct question ('이거 뭐예요?'), so a Q&amp;A answer is required rather than conversation practice."
+
+== 3  학습자: 여기 카페 분위기 좋아요
+     L  tvStatus       [16,12][140,40]            "Connecting..."
+     L  tvLayers       [537,12][624,45]           "voice  realtime&#10;coach  ·"
+     L  tvUserEcho     [24,186][616,211]          "여기 카페 분위기 좋아요"
+     L  tvHint         [0,397][640,448]           "음성 LLM-GPT · 코치 LLM-GPT(질문답변 99%) · 핸즈프리 대화 중 · 우측 탭: 지금 말 끝 · 좌측 탭: 사진"
+
+== 4  학습자: 어제 친구가 여기서 만났어요
+     L  tvStatus       [16,12][116,40]            "사진 보는 중"
+     L  tvLayers       [537,12][624,45]           "voice  realtime&#10;coach  ·"
+     L  tvSubtitle     [24,145][616,178]          "군요! 재밌는 시간 보냈어요?"
+     L  tvUserEcho     [24,186][616,211]          "어제 친구가 여기서 만났어요"
+     L  tvHint         [0,397][640,448]           "음성 LLM-GPT · 코치 LLM-GPT(질문답변 99%) · 핸즈프리 대화 중 · 우측 탭: 지금 말 끝 · 좌측 탭: 사진"
+
+== 5  학습자: 친구가 커피가 샀어요
+     L  tvStatus       [16,12][76,40]             "Ready"
+     L  tvLayers       [537,12][624,45]           "voice  realtime&#10;coach  ·"
+     L  tvSubtitle     [24,145][616,178]          "친구가 커피를 샀어요? 맛있게 마셨겠네요!"
+     L  tvUserEcho     [24,186][616,211]          "친구가 커피가 샀어요"
+     L  tvHint         [0,397][640,448]           "음성 LLM-GPT · 코치 LLM-GPT(질문답변 99%) · 핸즈프리 대화 중 · 우측 탭: 지금 말 끝 · 좌측 탭: 사진"
+
+== 6  학습자: 저는 케이크가 먹었어요
+     L  tvStatus       [16,12][76,40]             "Ready"
+     L  tvLayers       [537,12][624,45]           "voice  realtime&#10;coach  ·"
+     L  tvSubtitle     [24,135][616,203]          "아, 저는 케이크를 먹었어요, 이렇게 말하면 자연스러워요. 케이크 맛있었어요?"
+     L  tvUserEcho     [24,211][616,236]          "저는 케이크가 먹었어요"
+     L  tvHint         [115,423][526,448]         "핸즈프리 대화 중 · 우측 탭: 지금 말 끝 · 좌측 탭: 사진"
+
+== 7  학습자: 근데 BTS 콘서트 티켓은 어떻게 사요?
+     L  tvStatus       [16,12][76,40]             "Ready"
+     L  tvLayers       [537,12][624,45]           "voice  realtime&#10;coach  luna"
+     L  tvSubtitle     [24,145][616,178]          "BTS 콘서트 티켓은 보통 사전 예매 기간에 빨리 사야 돼요."
+     L  tvUserEcho     [24,186][616,211]          "근데 BTS 콘서트 티켓은 어떻게 사요?"
+     L  tvHint         [115,423][526,448]         "핸즈프리 대화 중 · 우측 탭: 지금 말 끝 · 좌측 탭: 사진"
+
+== 8  학습자: 고마워요! 다시 카페 얘기해요
+     L  tvStatus       [16,12][76,40]             "Ready"
+     L  tvLayers       [537,12][624,45]           "voice  realtime&#10;coach  luna"
+     L  tvSubtitle     [24,135][616,203]          "좋아요, 아까 친구가 커피를 샀고, 케이크를 먹었고, 분위기 어땠어요?"
+     L  tvUserEcho     [24,211][616,236]          "고마워요! 다시 카페 얘기해요"
+     L  tvHint         [115,423][526,448]         "핸즈프리 대화 중 · 우측 탭: 지금 말 끝 · 좌측 탭: 사진"
+
+== 9  학습자: 어제 친구를 여기서 만났어요
+     L  tvStatus       [16,12][76,40]             "Ready"
+     L  tvLayers       [537,12][624,45]           "voice  realtime&#10;coach  luna"
+     L  tvSubtitle     [24,145][616,178]          "어제 친구를 여기서 만났군요! 분위기가 어땠어요?"
+     L  tvUserEcho     [24,186][616,211]          "어제 친구를 여기서 만났어요"
+     L  tvHint         [115,423][526,448]         "핸즈프리 대화 중 · 우측 탭: 지금 말 끝 · 좌측 탭: 사진"
+
+== 10  학습자: 친구가 커피를 샀어요
+     L  tvStatus       [16,12][76,40]             "Ready"
+     L  tvLayers       [537,12][624,45]           "voice  realtime&#10;coach  ·"
+     L  tvSubtitle     [24,145][616,178]          "좋네요, 친구가 커피를 샀어요, 케이크도 같이 먹었나요?"
+     L  tvUserEcho     [24,186][616,211]          "친구가 커피를 샀어요"
+     L  tvHint         [115,423][526,448]         "핸즈프리 대화 중 · 우측 탭: 지금 말 끝 · 좌측 탭: 사진"
+
+== 11  학습자: 저는 케이크를 먹었어요
+     L  tvStatus       [16,12][76,40]             "Ready"
+     L  tvLayers       [537,12][624,45]           "voice  realtime&#10;coach  ·"
+     L  tvSubtitle     [24,145][616,178]          "아, 케이크를 먹었어요, 맛이 어땠어요?"
+     L  tvUserEcho     [24,186][616,211]          "저는 케이크를 먹었어요"
+     L  tvHint         [115,423][526,448]         "핸즈프리 대화 중 · 우측 탭: 지금 말 끝 · 좌측 탭: 사진"
+
+== 12  학습자: 이 케이크 달고 부드러워요. 더 좋은 말 있어요?
+     L  tvStatus       [16,12][76,40]             "Ready"
+     L  tvLayers       [537,12][624,45]           "voice  realtime&#10;coach  ·"
+     L  tvSubtitle     [24,145][616,178]          "달고 부드러운 케이크, 촉촉하기도 했어요?"
+     L  tvUserEcho     [24,186][616,211]          "이 케이크 달고 부드러워요. 더 좋은 말 있어요?"
+     L  tvHint         [115,423][526,448]         "핸즈프리 대화 중 · 우측 탭: 지금 말 끝 · 좌측 탭: 사진"
+wrote artifacts/booth/scenario-v2-a.txt
