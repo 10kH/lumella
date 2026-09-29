@@ -288,6 +288,13 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // A hands-free tutor is never touched, and on battery the glasses sleep the display after
+        // 60 s without a touch (screen_off_timeout). That stops the activity — the camera, the POV
+        // recording and the subtitles with it — and about a minute later the launcher switches
+        // Wi-Fi off, which ends the realtime session. Reproduced 2026-09-29 with `dumpsys battery
+        // unplug`: Awake -> Dozing in 75 s with lumella in front. While lumella is showing, the
+        // display stays on.
+        window.addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
         // BaseMirrorActivity inflates ActivityMainBinding per-eye into mBindingPair — no
         // setContentView() here (see LEGACY TUTOR/ELLA MainActivity, same base class).
