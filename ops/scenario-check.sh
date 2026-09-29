@@ -11,11 +11,14 @@
 # describes the current turn, was dropped every time (first run, 2026-09-29). The photo turn in scene B cannot be
 # rehearsed this way; it needs a wearer and a real scene.
 #
-#   ops/scenario-check.sh <label>      # writes artifacts/booth/scenario-<label>.txt
+#   ops/scenario-check.sh <label> [lines-file]   # writes artifacts/booth/scenario-<label>.txt
+#
+# lines-file: one learner line per line (blank lines and # comments skipped); default the list below.
 
 set -uo pipefail
 cd "$(dirname "$0")/.."
-LABEL="${1:?usage: ops/scenario-check.sh <label>}"
+LABEL="${1:?usage: ops/scenario-check.sh <label> [lines-file]}"
+LINES_FILE="${2:-}"
 PKG=com.woolab.lumella
 DEV="${ANDROID_SERIAL:-A06B4A043084773}"
 OUT="artifacts/booth/scenario-$LABEL.txt"
@@ -43,6 +46,14 @@ LINES=(
 # launch-lumella.sh waits for "Ready", but hands-free lumella shows "Listening..." once it is
 # connected and listening (log: status=READY, then 연속 청취 시작) until the first turn. Both mean
 # ready here.
+if [ -n "$LINES_FILE" ]; then
+  LINES=()
+  while IFS= read -r l; do
+    case "$l" in ''|'#'*) continue ;; esac
+    LINES+=("$l")
+  done < "$LINES_FILE"
+fi
+
 ./ops/launch-lumella.sh --reset >/dev/null 2>&1
 ready=""
 for _ in $(seq 1 10); do

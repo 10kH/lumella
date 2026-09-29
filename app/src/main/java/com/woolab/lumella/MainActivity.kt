@@ -67,6 +67,8 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
 
     companion object {
         private const val BRAIN_UNREACHABLE_AFTER_MS = 15_000L
+        /** After a brain call that went unanswered that long, how long to stop asking before trying again. */
+        private const val BRAIN_RETRY_AFTER_MS = 30_000L
         private const val TAG = "lumella"
         private const val RIGHT_TOUCHPAD_DEVICE = "cyttsp5_mt"
         private const val LEFT_TOUCHPAD_DEVICE = "cyttsp6_mt"
@@ -124,12 +126,19 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
 
     private lateinit var turnTracker: TurnTracker
     /**
-     * Whether the brain connected and opened a session at bootstrap, and has not since taken
-     * unreachable-long to answer. If not, every call into it is a connect to an address that
-     * does not refuse — the lab server on another subnet hangs to the transport's 20s timeout.
-     * Nothing is gained by asking a brain that is not there.
+     * Whether the brain connected and opened a session at bootstrap. If not, every call into it
+     * is a connect to an address that does not refuse — the lab server on another subnet hangs
+     * to the transport's 20s timeout. Nothing is gained by asking a brain that is not there.
      */
     private val brainReachable = java.util.concurrent.atomic.AtomicBoolean(false)
+    /**
+     * A call that went unanswered for [BRAIN_UNREACHABLE_AFTER_MS] pauses the brain until this
+     * time, then it is asked again. It used to switch the brain off for the rest of the session:
+     * on 2026-09-29, with TANGO back, one coach turn took 16.6s and the next hit the 20s timeout,
+     * and the coach line was gone for every turn after — the half of the demo take that shows
+     * it. A slow call that did answer is not unreachable at all.
+     */
+    @Volatile private var brainPausedUntilMs = 0L
     private val sessionIdRef = AtomicReference("")
     /** Runs the brain submit off the slow path, so the record and the corner never queue behind the coach hint. */
     private val brainSubmitExecutor = Executors.newSingleThreadExecutor { r ->
@@ -1107,7 +1116,7 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
         slowPathExecutor.execute {
             slowPath.dispatch(SlowPathTask(turnId = turnId, userTranscript = evidence.learnerTranscript))
         }
-        if (brainReachable.get()) {
+        if (brainReachable.get() && System.currentTimeMillis() >= brainPausedUntilMs) {
             brainSubmitExecutor.execute {
                 val started = System.currentTimeMillis()
                 val indicator = try {
@@ -1118,11 +1127,20 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
                     null
                 }
                 val took = System.currentTimeMillis() - started
+                // One line per coach turn, shown on screen or not: an answer that lands after the
+                // next turn began is not drawn (it would describe the wrong turn), and the film
+                // is captioned from this line instead of from memory.
+                Log.i(TAG, "코치 turn $turnId: ${indicator?.let { "${it.attemptedProvider?.let { a -> "$a→" } ?: ""}${it.provider}/${it.route}" } ?: "no answer"} in ${took}ms" +
+                    if (turnId != turnTracker.current()) " (next turn already began; not drawn)" else "")
                 // A connect to an address that does not refuse hangs to the transport's 20s
                 // timeout. That is what "unreachable" means; a slow coach turn is not it.
                 if (took >= BRAIN_UNREACHABLE_AFTER_MS) {
-                    brainReachable.set(false)
-                    Log.w(TAG, "brain.submitTurnEvidence took ${took}ms at turn $turnId; brain marked unreachable")
+                    if (indicator == null) {
+                        brainPausedUntilMs = System.currentTimeMillis() + BRAIN_RETRY_AFTER_MS
+                        Log.w(TAG, "brain.submitTurnEvidence took ${took}ms at turn $turnId with no answer; paused ${BRAIN_RETRY_AFTER_MS}ms")
+                    } else {
+                        Log.w(TAG, "brain.submitTurnEvidence took ${took}ms at turn $turnId (answered; still asking)")
+                    }
                 }
                 // Hints arrive in turn order because this executor is single-threaded and
                 // runOnUiThread posts to one Looper. The one path that can post out of order —
