@@ -46,6 +46,8 @@ class OpenAiRealtimeTransportTest {
         override fun onStatus(status: RealtimeConnectionStatus) { statuses.add(status) }
         override fun onAudioDelta(base64Pcm16: String) { lastAudioDelta = base64Pcm16 }
         override fun onInputTranscript(text: String) { lastTranscript = text }
+        val inputDeltas = mutableListOf<Pair<String?, String>>()
+        override fun onInputTranscriptDelta(itemId: String?, delta: String) { inputDeltas += itemId to delta }
         override fun onTranscriptDelta(text: String) {
             lastTranscriptDelta = text
             transcriptDeltas.add(text)
@@ -139,7 +141,9 @@ class OpenAiRealtimeTransportTest {
         assertTrue(sessionUpdate.contains("\"type\":\"session.update\""))
         assertTrue(sessionUpdate.contains("\"rate\":24000"))
         assertTrue(sessionUpdate.contains("\"voice\":\"shimmer\""))
-        assertTrue(sessionUpdate.contains("\"model\":\"whisper-1\""))
+        // gpt-4o-mini-transcribe streams the learner's words; whisper-1 sent them after the
+        // tutor had started answering (see OpenAiRealtimeTransport.TRANSCRIPTION_MODEL).
+        assertTrue(sessionUpdate.contains("\"model\":\"gpt-4o-mini-transcribe\""))
         // Without a pinned language Whisper guesses per utterance; a Korean learner's words
         // can come back as Chinese or Japanese. This must not silently disappear.
         assertTrue(sessionUpdate.contains("\"language\":\"ko\""))
@@ -303,6 +307,26 @@ class OpenAiRealtimeTransportTest {
         )
 
         assertEquals("hello there", listener.lastTranscript)
+    }
+
+    @Test
+    fun inputTranscriptDeltasReachTheListenerWithTheirItem() {
+        // The learner echo is drawn from these as they stream, so it keeps pace with the reply.
+        val factory = FakeFactory()
+        val listener = RecordingListener()
+        val transport = OpenAiRealtimeTransport(successProvider(), factory, listener = listener)
+        transport.connect()
+        factory.lastListener?.onOpen()
+
+        factory.lastListener?.onMessage(
+            """{"type":"conversation.item.input_audio_transcription.delta","item_id":"item_1","delta":"스파이더맨은"}""",
+        )
+        factory.lastListener?.onMessage(
+            """{"type":"conversation.item.input_audio_transcription.delta","item_id":"item_1","delta":" 초록색인가요?"}""",
+        )
+
+        assertEquals(listOf("item_1" to "스파이더맨은", "item_1" to " 초록색인가요?"), listener.inputDeltas)
+        assertEquals("deltas are not the completed transcript", null, listener.lastTranscript)
     }
 
     @Test

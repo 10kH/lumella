@@ -63,6 +63,12 @@ class OpenAiRealtimeTransport(
         fun onAudioDelta(base64Pcm16: String) {}
         fun onAudioDone() {}
         fun onInputTranscript(text: String) {}
+        /**
+         * Part of the learner's transcript while it is still being written, for the on-screen
+         * echo only. [itemId] is the learner's conversation item, so deltas of one utterance can
+         * be told from the next. The slow path and the coach take [onInputTranscript] only.
+         */
+        fun onInputTranscriptDelta(itemId: String?, delta: String) {}
         fun onTranscriptDelta(text: String) {}
         fun onError(message: String) {}
 
@@ -105,6 +111,19 @@ class OpenAiRealtimeTransport(
          * one. So this prompt is a precaution against the failure ELLA saw, not a fix for one
          * lumella has observed; the human-voice pass is still owed (artifacts/booth).
          */
+        /**
+         * gpt-4o-mini-transcribe, not whisper-1: whisper-1 sends the learner's words only once it
+         * has finished, and on this path that was after the tutor had already started answering
+         * — the wearer saw their own sentence appear under the tutor's reply (reported on the
+         * glasses 2026-09-29). Measured the same day through a realtime session (aaai27
+         * artifacts/demo-scenario/echo-latency.json, six Korean turns, synthetic voice): from the
+         * end of the learner's turn, whisper-1's text arrived at a median 1.58s (0.88-2.26s),
+         * gpt-4o-mini-transcribe's first words at 0.61s and all of it at 1.21s; the tutor's first
+         * audio at ~0.63s. gpt-4o-mini-transcribe kept the particle slips (빵이 먹었어요, 친구가
+         * 만났어요) and was exact 6/6; whisper-1 5/6 (세 개 -> 3개). Its deltas are what the echo shows.
+         */
+        const val TRANSCRIPTION_MODEL: String = "gpt-4o-mini-transcribe"
+
         const val TRANSCRIPTION_PROMPT: String =
             "들리는 대로 정확하게 받아쓰세요. 문법 실수도 그대로 적으세요. " +
                 "조사, 어미, 시제를 고치지 마세요. " +
@@ -719,6 +738,9 @@ class OpenAiRealtimeTransport(
                 MiniJson.string(obj, "delta")?.let(listener::onTranscriptDelta)
             }
             RealtimeServerEventKind.AUDIO_DONE -> listener.onAudioDone()
+            RealtimeServerEventKind.INPUT_TRANSCRIPT_DELTA -> {
+                MiniJson.string(obj, "delta")?.let { listener.onInputTranscriptDelta(MiniJson.string(obj, "item_id"), it) }
+            }
             RealtimeServerEventKind.INPUT_TRANSCRIPT_COMPLETED -> {
                 MiniJson.string(obj, "transcript")?.let(listener::onInputTranscript)
             }
@@ -825,7 +847,7 @@ class OpenAiRealtimeTransport(
             // language pinned: without it Whisper guesses per utterance, and the sibling app
             // (ELLA, English) saw a learner's words come up as Japanese. For a Korean learner
             // the same guess lands on Chinese or Japanese. The prompt biases vocabulary.
-            """"audio":{"input":{"format":$format,"transcription":{"model":"whisper-1","language":"ko",""" +
+            """"audio":{"input":{"format":$format,"transcription":{"model":${jsonString(TRANSCRIPTION_MODEL)},"language":"ko",""" +
             """"prompt":${jsonString(TRANSCRIPTION_PROMPT)}},""" +
             """"turn_detection":{"type":"server_vad","threshold":0.5,"prefix_padding_ms":300,""" +
             """"silence_duration_ms":$VAD_SILENCE_DURATION_MS,"create_response":false}},""" +

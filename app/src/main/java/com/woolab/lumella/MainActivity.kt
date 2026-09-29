@@ -97,6 +97,8 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
         private const val LANGUAGE_SWITCH_DELAY_MS = 1_200L
 
         /** How long the router's stated reason holds the hint line before the tap guide returns. */
+        /** After the tutor's last audio arrives, when to ask the track whether it all played. */
+        private const val DRAIN_CHECK_MS = 1_500L
         private const val REASON_DISPLAY_MS = 8_000L
         /** Short timeout for the boot-time remote config fetch — must never stall app boot. */
         private const val REMOTE_CONFIG_TIMEOUT_MS = 3_000
@@ -160,6 +162,10 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
     @Volatile private var voiceTransportUnavailable = false
     /** Accumulates AUDIO_TRANSCRIPT_DELTA chunks for the current tutor turn (UI-thread only). */
     private val subtitleAccumulator = StringBuilder()
+
+    /** The learner's transcript as it streams in, for the echo; UI thread only. */
+    private val echoDraft = StringBuilder()
+    private var echoItemId: String? = null
 
     /** 08/05 requirement 1: a speech start retains the tutor's last subtitle for a window instead of blanking it. */
     private val subtitleRetention = SubtitleRetention()
@@ -400,6 +406,10 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
                     // is the failure hands-free lives or dies on.
                     Log.i(TAG, "튜터 발화 끝")
                     audioPlayback.endResponseStats()?.let { Log.i(TAG, it) }
+                    // What the subtitle says for this reply, to hold against what was heard
+                    // (wearer 2026-09-29: the subtitle had a closing question the audio did not).
+                    runOnUiThread { Log.i(TAG, "튜터 자막: $subtitleAccumulator") }
+                    audioPlayback.checkDrainedAfter(DRAIN_CHECK_MS) { Log.i(TAG, it) }
                     speaking = false
                     runOnUiThread { updateStatus("Ready") }
                 }
@@ -445,7 +455,26 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
                 }
 
                 override fun onInputTranscript(text: String) {
+                    val since = if (turnEndedAtMs > 0) System.currentTimeMillis() - turnEndedAtMs else -1
+                    Log.i(TAG, "학습자 자막 완료 (턴 끝에서 ${since}ms): $text")
+                    runOnUiThread { echoItemId = null; echoDraft.setLength(0) }
                     handleInputTranscript(text)
+                }
+
+                override fun onInputTranscriptDelta(itemId: String?, delta: String) {
+                    // The learner's words as they are transcribed, so the echo keeps pace with the
+                    // tutor's reply instead of arriving under it. The completed transcript
+                    // replaces the draft (handleInputTranscript); a new item starts a new draft.
+                    runOnUiThread {
+                        if (itemId != echoItemId) {
+                            echoItemId = itemId
+                            echoDraft.setLength(0)
+                            val since = if (turnEndedAtMs > 0) System.currentTimeMillis() - turnEndedAtMs else -1
+                            Log.i(TAG, "학습자 자막 시작 (턴 끝에서 ${since}ms)")
+                        }
+                        echoDraft.append(delta)
+                        updateUserEcho(echoDraft.toString())
+                    }
                 }
 
                 override fun onResponseStarted() {

@@ -114,6 +114,33 @@ class AudioPlayback(private val sampleRateHz: Int = 24_000) {
     }
     @Volatile private var stats: ResponseStats? = null
 
+    /** Frames handed to the track since it was created (preroll included). */
+    @Volatile private var framesWritten = 0L
+
+    /**
+     * Logs, [delayMs] after a reply's last audio, how much of what was written the speaker has
+     * not played. Streaming tracks leave a remainder below the mixer's minimum sitting in the
+     * buffer until more data or a stop arrives; the wearer then does not hear a reply's last
+     * syllables until the next reply. Measures it rather than assuming; see [checkDrained].
+     */
+    fun checkDrainedAfter(delayMs: Long, log: (String) -> Unit) {
+        val writtenAtEnd = framesWritten
+        Thread {
+            Thread.sleep(delayMs)
+            log(checkDrained(writtenAtEnd))
+        }.apply { isDaemon = true; name = "lumella-drain-check" }.start()
+    }
+
+    private fun checkDrained(writtenAtEnd: Long): String {
+        val track = audioTrack ?: return "perf: drain track=none"
+        // playbackHeadPosition is an unsigned 32-bit frame count that wraps; a take is far
+        // shorter than the ~50h it takes to wrap at 24kHz.
+        val head = track.playbackHeadPosition.toLong() and 0xFFFF_FFFFL
+        val unplayed = writtenAtEnd - head
+        return "perf: drain unplayedMs=${unplayed * 1000 / sampleRateHz} writtenFrames=$writtenAtEnd headFrames=$head " +
+            "playState=${track.playState}"
+    }
+
     /** Closes the current response's stats and returns them as one log-ready line, or null if none. */
     fun endResponseStats(): String? {
         val st = stats ?: return null
@@ -147,7 +174,8 @@ class AudioPlayback(private val sampleRateHz: Int = 24_000) {
             if (gap > st.maxGapMs) st.maxGapMs = gap
         }
         val t0 = System.nanoTime()
-        track.write(bytes, 0, bytes.size)
+        val wrote = track.write(bytes, 0, bytes.size)
+        if (wrote > 0) framesWritten += wrote / 2
         val writeMs = (System.nanoTime() - t0) / 1_000_000
         st.chunks++
         st.audioBytes += bytes.size
@@ -181,7 +209,8 @@ class AudioPlayback(private val sampleRateHz: Int = 24_000) {
         val st = ResponseStats(track.underrunCount, PREROLL_MS.toLong())
         stats = st
         val silence = ByteArray(sampleRateHz * 2 * PREROLL_MS / 1000)
-        track.write(silence, 0, silence.size)
+        val wrote = track.write(silence, 0, silence.size)
+        if (wrote > 0) framesWritten += wrote / 2
         tap?.write(silence)
         return st
     }

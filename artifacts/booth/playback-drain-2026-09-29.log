@@ -1,0 +1,36 @@
+15:53:48.887( 8533): debug: 학습자 발화 주입 = 스파이더맨은 초록색인가요?
+15:53:56.528( 8533): perf: playback underruns=0 audioMs=7100 wallMs=6958 chunks=28 maxWriteMs=504 sumWriteMs=6535 maxTapMs=0 bufferFrames=12000 minLeadMs=134 maxGapMs=116 minLeadAtChunk=1
+15:53:56.529( 8533): 튜터 자막: 스파이더맨은 빨간색이랑 파란색이잖아요! 혹시 옆에 초록색 뭔가 보여요? 한번 볼까요?
+15:53:56.969ateMachine( 8533): New public camera state CameraState{type=OPENING, error=null} from OPENING and null
+15:53:56.970ateMachine( 8533): Publishing new public camera state CameraState{type=OPENING, error=null}
+15:53:56.996ateMachine( 8533): New public camera state CameraState{type=OPEN, error=null} from OPEN and null
+15:53:56.997ateMachine( 8533): Publishing new public camera state CameraState{type=OPEN, error=null}
+15:53:57.758ateMachine( 8533): New public camera state CameraState{type=CLOSING, error=null} from CLOSING and null
+15:53:57.759ateMachine( 8533): Publishing new public camera state CameraState{type=CLOSING, error=null}
+15:53:58.030( 8533): perf: drain unplayedMs=0 writtenFrames=174000 headFrames=174000 playState=3
+15:53:58.275ateMachine( 8533): New public camera state CameraState{type=CLOSED, error=null} from CLOSED and null
+15:53:58.275ateMachine( 8533): Publishing new public camera state CameraState{type=CLOSED, error=null}
+15:54:02.989( 8533): debug: 학습자 발화 주입 = 배트맨은 어디에 살아요?
+15:54:06.200( 8533): perf: playback underruns=0 audioMs=7000 wallMs=6868 chunks=28 maxWriteMs=504 sumWriteMs=6541 maxTapMs=0 bufferFrames=12000 minLeadMs=234 maxGapMs=60 minLeadAtChunk=1
+15:54:06.201( 8533): 튜터 자막: 지금 보니까 테이블이랑 노트북이 보이는데 초록색 물건은 안 보이네요. 혹시 다른 데 있나
+15:54:06.218( 8533): Realtime transport error: {"type":"error","event_id":"event_ETM0xuQas0TMYDDhG8B3L","error":{"type":"invalid_request_error","code":"response_cancel_not_active","message":"Cancellation failed: no active r
+15:54:07.702( 8533): perf: drain unplayedMs=-1250 writtenFrames=345600 headFrames=375600 playState=3
+15:54:10.640( 8533): perf: playback underruns=0 audioMs=4300 wallMs=4403 chunks=17 maxWriteMs=766 sumWriteMs=4256 maxTapMs=0 bufferFrames=12000 minLeadMs=28 maxGapMs=16 minLeadAtChunk=14
+15:54:10.641( 8533): 튜터 자막: 배트맨은 고담 시에 살잖아요. 멋진 동굴도 있고요.
+15:54:12.143( 8533): perf: drain unplayedMs=0 writtenFrames=452400 headFrames=452400 playState=3
+15:54:17.093( 8533): debug: 학습자 발화 주입 = 한국 겨울은 추워요?
+15:54:22.220( 8533): perf: playback underruns=0 audioMs=4750 wallMs=4473 chunks=19 maxWriteMs=506 sumWriteMs=4016 maxTapMs=0 bufferFrames=12000 minLeadMs=59 maxGapMs=186 minLeadAtChunk=1
+15:54:22.221( 8533): 튜터 자막: 응, 한국 겨울은 꽤 추운 편이에요. 따뜻하게 입어야 해요.
+15:54:23.722( 8533): perf: drain unplayedMs=0 writtenFrames=570000 headFrames=570000 playState=3
+15:54:31.187( 8533): debug: 학습자 발화 주입 = 오늘 점심에 김치찌개 먹었어요
+15:54:35.675( 8533): perf: playback underruns=0 audioMs=3950 wallMs=3791 chunks=15 maxWriteMs=764 sumWriteMs=3507 maxTapMs=0 bufferFrames=12000 minLeadMs=208 maxGapMs=150 minLeadAtChunk=5
+15:54:35.676( 8533): 튜터 자막: 김치찌개 먹었구나! 얼큰하고 뜨끈했겠어요.
+15:54:37.177( 8533): perf: drain unplayedMs=0 writtenFrames=668400 headFrames=668400 playState=3
+15:54:45.285( 8533): debug: 학습자 발화 주입 = 경복궁 가 봤어요?
+15:54:51.679( 8533): perf: playback underruns=0 audioMs=5950 wallMs=5650 chunks=23 maxWriteMs=505 sumWriteMs=5269 maxTapMs=0 bufferFrames=12000 minLeadMs=76 maxGapMs=170 minLeadAtChunk=1
+15:54:51.680( 8533): 튜터 자막: 응, 경복궁 가 본 적 있어요. 거기 정말 웅장하더라구요.
+15:54:53.181( 8533): perf: drain unplayedMs=0 writtenFrames=814800 headFrames=814800 playState=3
+15:54:59.368( 8533): debug: 학습자 발화 주입 = BTS 노래 좋아해요
+15:55:03.886( 8533): perf: playback underruns=0 audioMs=4000 wallMs=3832 chunks=16 maxWriteMs=506 sumWriteMs=3518 maxTapMs=0 bufferFrames=12000 minLeadMs=74 maxGapMs=171 minLeadAtChunk=1
+15:55:03.887( 8533): 튜터 자막: BTS 노래 좋아하시는군요! 요즘 어떤 곡 자주 들어요?
+15:55:05.388( 8533): perf: drain unplayedMs=0 writtenFrames=914400 headFrames=914400 playState=3
