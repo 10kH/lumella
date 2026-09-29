@@ -1130,6 +1130,12 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
      * wearer gets (the handleSpeechStarted lesson, third application).
      */
     private fun handleInputTranscript(text: String) {
+        if (NoiseTranscript.isNoise(text)) {
+            // A turn opened by background noise (see NoiseTranscript). Keep it out of the record,
+            // the coach and the echo; the edit finds these by this line.
+            Log.w(TAG, "잡음 턴 - 기록·코치 제외: ${text.take(40)}")
+            return
+        }
         currentTurnUserTranscript = text
         runOnUiThread { updateUserEcho(text) }
         submitCurrentTurnEvidence()
@@ -1571,8 +1577,16 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
         // show yet and nothing on record, so the corner stays blank until the store is built.
         if (!::learnerStore.isInitialized) return
         val text = LayerIndicator.render(learnerStore.snapshot())
+        if (text != lastCornerText) {
+            // The habit memory lighting and clearing is a moment the film is cut to; the edit
+            // finds it by this line (with the turn it happened in), not by scrubbing the video.
+            Log.i(TAG, "모서리: ${text.replace("\n", " / ")} (turn ${if (::turnTracker.isInitialized) turnTracker.current() else 0})")
+            lastCornerText = text
+        }
         mBindingPair.left.tvLayers.text = text
         mBindingPair.right.tvLayers.text = text
     }
+
+    private var lastCornerText: String? = null
 
 }
