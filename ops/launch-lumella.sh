@@ -77,6 +77,14 @@ if [ "$RESET" = 1 ] || [ "$TOPIC_SET" = 1 ] || [ "$HOLD" = 1 ]; then
   sleep 5
 fi
 
+# The glasses keep the last media volume across launches; it was once left at 1/15 overnight and
+# the tutor was then barely audible on the next launch. Below 8, bring it back to 10 (the preflight rule).
+vol="$(adb -s "$S" shell cmd media_session volume --stream 3 --get 2>/dev/null | tr -d '\r' | sed -n 's/.*volume is \([0-9]*\).*/\1/p')"
+if [ -n "$vol" ] && [ "$vol" -lt 8 ]; then
+  adb -s "$S" shell cmd media_session volume --stream 3 --set 10 >/dev/null 2>&1
+  echo "  volume $vol -> 10"
+fi
+
 adb -s "$S" shell input keyevent KEYCODE_WAKEUP >/dev/null 2>&1
 sleep 1
 # am start (not monkey): monkey's launch intent has been eaten by a dimming screen more than once.
