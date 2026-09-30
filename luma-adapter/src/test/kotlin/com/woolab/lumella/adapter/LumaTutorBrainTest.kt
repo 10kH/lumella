@@ -131,9 +131,12 @@ class LumaTutorBrainTest {
         val transport = FakeLumaHttpTransport().apply {
             wireHappyPath(coach = true)
             on("POST", "/v1/orchestrator/turn", json(
+                // The shape luma sends in coach mode (luma 62b55ab): assistantText blanked, the
+                // topic tutor's line in coachEvidence.topicGuide.
                 """{"session":{"id":"sess-1"},"selectedRoute":"topic_chat","selectedProvider":"etri",""" +
-                    """"assistantText":"친구가 커피를 사줬군요! 어떤 커피를 마셨어요?",""" +
-                    """"coachEvidence":{"corrections":[],"hints":[],"confidence":0.7}}"""
+                    """"assistantText":"",""" +
+                    """"coachEvidence":{"corrections":[],"hints":[],"confidence":0.7,""" +
+                    """"topicGuide":"친구가 커피를 사줬군요! 어떤 커피를 마셨어요?"}}"""
             ))
         }
         val brain = newBrain(transport)
@@ -157,8 +160,8 @@ class LumaTutorBrainTest {
             wireHappyPath(coach = true)
             on("POST", "/v1/orchestrator/turn", json(
                 """{"session":{"id":"sess-1"},"selectedRoute":"gpt_qa","selectedProvider":"openai",""" +
-                    """"assistantText":"티켓은 공식 사이트에서 사요.",""" +
-                    """"coachEvidence":{"corrections":[],"hints":[],"confidence":0.9}}"""
+                    """"assistantText":"",""" +
+                    """"coachEvidence":{"corrections":[],"hints":[],"confidence":0.9,"topicGuide":null}}"""
             ))
         }
         val brain = newBrain(transport)

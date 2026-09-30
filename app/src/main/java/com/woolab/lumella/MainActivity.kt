@@ -72,6 +72,7 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
         private const val BRAIN_RETRY_AFTER_MS = 30_000L
         private const val BRAIN_BOOTSTRAP_FIRST_RETRY_MS = 3_000L
         private const val TOPIC_FILE = "topic.txt"
+        private const val LAST_TOPIC_FILE = "last-topic.txt"
         private const val BRAIN_BOOTSTRAP_MAX_RETRY_MS = 30_000L
         private const val TAG = "lumella"
         private const val RIGHT_TOUCHPAD_DEVICE = "cyttsp5_mt"
@@ -151,6 +152,9 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
      * writes it — so a topic survives the relaunches of a shoot day. See [TopicGuidance].
      */
     @Volatile private var sessionTopic: String? = null
+
+    /** The topic differs from the last launch's: start a fresh luma session instead of resuming. */
+    @Volatile private var topicChanged = false
     private val sessionIdRef = AtomicReference("")
     /** Runs the brain submit off the slow path, so the record and the corner never queue behind the coach hint. */
     private val brainSubmitExecutor = Executors.newSingleThreadExecutor { r ->
@@ -315,6 +319,13 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
             java.io.File(getExternalFilesDir(null), TOPIC_FILE).takeIf { it.isFile }?.readText()?.trim()
         }.getOrNull()?.takeIf { it.isNotEmpty() }
         Log.i(TAG, sessionTopic?.let { "대화 주제: $it" } ?: "대화 주제 없음 (열린 대화)")
+        // luma resumes the active session if it is younger than 30 minutes, and a topic_chat segment
+        // keeps the old topic in Tango's running transcript. A changed topic starts a fresh luma
+        // session; the same topic (the second take after a relaunch) continues the conversation.
+        val lastTopicFile = java.io.File(filesDir, LAST_TOPIC_FILE)
+        val lastTopic = runCatching { lastTopicFile.takeIf { it.isFile }?.readText() }.getOrNull()
+        topicChanged = (lastTopic ?: "") != (sessionTopic ?: "")
+        runCatching { lastTopicFile.writeText(sessionTopic ?: "") }
 
         // BaseMirrorActivity inflates ActivityMainBinding per-eye into mBindingPair — no
         // setContentView() here (see LEGACY TUTOR/ELLA MainActivity, same base class).
@@ -664,7 +675,7 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
                 }
                 if (connection != null) {
                     val session = try {
-                        brain.startSession(SessionPolicy.RESUME_ACTIVE)
+                        brain.startSession(if (topicChanged) SessionPolicy.FRESH else SessionPolicy.RESUME_ACTIVE)
                     } catch (e: Exception) {
                         Log.w(TAG, "brain.startSession failed (attempt $attempt): ${e.message}")
                         null

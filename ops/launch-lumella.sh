@@ -46,8 +46,14 @@ if [ "$TOPIC_SET" = 1 ]; then
   if [ -n "$TOPIC" ]; then
     # adb push, not shell echo: the topic is Korean with spaces and the device shell re-splits.
     tmp="$(mktemp -t lumella-topic)"; printf '%s\n' "$TOPIC" > "$tmp"
-    adb -s "$S" push "$tmp" "$TOPIC_PATH" >/dev/null 2>&1 && echo "  topic: $TOPIC" || echo "  topic push FAILED" >&2
+    adb -s "$S" push "$tmp" "$TOPIC_PATH" >/dev/null 2>&1
     rm -f "$tmp"
+    got="$(adb -s "$S" shell "cat $TOPIC_PATH" 2>/dev/null | tr -d '\r')"
+    if [ "$got" != "$TOPIC" ]; then
+      echo "  topic did not land on the glasses (read back: '${got}'); not launching an open conversation by mistake" >&2
+      exit 1
+    fi
+    echo "  topic: $TOPIC"
   else
     adb -s "$S" shell "rm -f $TOPIC_PATH" >/dev/null 2>&1; echo "  topic cleared (open conversation)"
   fi

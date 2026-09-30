@@ -10,18 +10,21 @@
 #
 #   ops/shoot-preflight.sh             # everything, then relaunch lumella with --reset
 #   ops/shoot-preflight.sh --no-reset  # keep the learner record (between the two takes)
+#   ops/shoot-preflight.sh --topic "어제 친구와 한 일을 말해요"   # a topic-guided session (the v4 film)
 #   ops/shoot-preflight.sh --wifi-adb  # also switch adb to Wi-Fi so the cable can come off
 #
 # Exit status 0 only if nothing FAILED. WARN lines do not stop the shoot but say what to watch.
 set -uo pipefail
 cd "$(dirname "$0")/.."
-RESET=1; WIFI_ADB=0
-for a in "$@"; do
-  case "$a" in
+RESET=1; WIFI_ADB=0; TOPIC_ARGS=()
+while [ $# -gt 0 ]; do
+  case "$1" in
     --no-reset) RESET=0 ;;
     --wifi-adb) WIFI_ADB=1 ;;
-    *) echo "unknown argument: $a" >&2; exit 2 ;;
+    --topic) TOPIC_ARGS=(--topic "${2:?--topic needs a topic}"); shift ;;
+    *) echo "unknown argument: $1" >&2; exit 2 ;;
   esac
+  shift
 done
 PKG=com.woolab.lumella
 FAILS=0; WARNS=0
@@ -112,8 +115,8 @@ else $A shell "cmd media_session volume --stream 3 --set 10" >/dev/null 2>&1; wa
 
 echo "== lumella"
 $A shell input keyevent KEYCODE_WAKEUP >/dev/null 2>&1
-if [ "$RESET" = 1 ]; then ANDROID_SERIAL="$DEV" ./ops/launch-lumella.sh --reset >/dev/null 2>&1
-else ANDROID_SERIAL="$DEV" ./ops/launch-lumella.sh >/dev/null 2>&1; fi
+if [ "$RESET" = 1 ]; then ANDROID_SERIAL="$DEV" ./ops/launch-lumella.sh --reset ${TOPIC_ARGS[@]+"${TOPIC_ARGS[@]}"} >/dev/null 2>&1
+else ANDROID_SERIAL="$DEV" ./ops/launch-lumella.sh ${TOPIC_ARGS[@]+"${TOPIC_ARGS[@]}"} >/dev/null 2>&1; fi
 pid=""; ready=""; brain=""
 for _ in $(seq 1 30); do
   sleep 2
@@ -125,6 +128,15 @@ for _ in $(seq 1 30); do
   [ -n "$ready" ] && [ -n "$brain" ] && break
 done
 [ -n "$ready" ] && ok "voice READY" || fail "voice not READY after 60 s — ops/preflight.sh, then relaunch"
+topic_line="$($A logcat -d -v brief 2>/dev/null | grep "( *$pid)" | grep -oE '대화 주제: .*|대화 주제 없음.*' | tail -1)"
+if [ "${#TOPIC_ARGS[@]}" -gt 0 ]; then
+  case "$topic_line" in
+    "대화 주제: ${TOPIC_ARGS[1]}"*) ok "topic session: ${TOPIC_ARGS[1]}" ;;
+    *) fail "topic not in effect (${topic_line:-no log line}) — ops/launch-lumella.sh --topic \"${TOPIC_ARGS[1]}\"" ;;
+  esac
+else
+  ok "${topic_line:-topic: unknown}"
+fi
 [ -n "$brain" ] && ok "coach connected" || fail "coach not connected after 60 s — no Tango/GPT line, no habit memory; check luma"
 [ "$RESET" = 1 ] && ok "learner record wiped (take 1 starts fresh)" || ok "learner record kept (take 2 continues take 1)"
 

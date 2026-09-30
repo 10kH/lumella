@@ -176,20 +176,14 @@ class LumaTutorBrain(
 
             json.obj("session")?.str("id")?.let { sessionId -> currentSessionId = sessionId }
 
-            // On the topic route the reply luma produced IS the topic tutor's next line (ETRI Tango
-            // prompted with the topic and the running conversation). The voice never speaks it —
-            // it takes its direction for the next turn (topic-guided conversation, D-4).
-            val topicGuide = json.str("assistantText")?.trim()?.takeIf {
-                it.isNotEmpty() && json.str("selectedRoute") == "topic_chat"
-            }
+            // On a topic session luma passes the topic tutor's next line (ETRI Tango, prompted with
+            // the topic and the running conversation) as coachEvidence.topicGuide — coach mode
+            // blanks assistantText, so this is the only channel. The voice never speaks it; it takes
+            // its direction for the next turn (topic-guided conversation, D-4). distillCoachEvidence
+            // reads it.
             val coach = json.obj("coachEvidence")
             if (coach != null) {
-                lastEvidence = distillCoachEvidence(coach, evidence.turnId).copy(topicGuide = topicGuide)
-            } else if (topicGuide != null) {
-                lastEvidence = SteeringEvidence(
-                    corrections = emptyList(), hints = emptyList(), confidence = 0.0,
-                    sourceTurnId = evidence.turnId, topicGuide = topicGuide,
-                )
+                lastEvidence = distillCoachEvidence(coach, evidence.turnId)
             } else {
                 // Parseable 2xx without coachEvidence: not steering, but the slow path is
                 // reachable again — clear any stale unavailability flag (NOT_READY surfaces
@@ -316,6 +310,7 @@ class LumaTutorBrain(
             confidence = coach.num("confidence") ?: 0.0,
             sourceTurnId = turnRef,
             visual = distillVisual(coach.obj("visual")),
+            topicGuide = coach.str("topicGuide")?.trim()?.takeIf { it.isNotEmpty() },
         )
     }
 
