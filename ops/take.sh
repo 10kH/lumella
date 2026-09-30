@@ -25,7 +25,7 @@
 #   ops/take.sh c7 60 --pov          # blocking, 60s, + wearer's view
 #   ops/take.sh c7 --start --pov     # start and return; the wearer talks for as long as needed
 #   ops/take.sh c7 --stop            # stop, collect, report
-#   ops/take.sh c7 --recompose 190942  # rebuild c7-190942-FINAL.mp4 from its files (ops/fix-pov-rotation.sh)
+#   ops/take.sh c7 --recompose 190942  # remix voices, rebuild c7-190942-FINAL.mp4 from its files
 #   ops/take.sh t1 --start --pov --opener   # ... then the tutor asks "오늘은 어떤 얘기할까요?" on camera
 #                                           # (launch with --hold-opener so it waits for this)
 #
@@ -136,6 +136,14 @@ join_segments() {
 # Mix the voice taps into one track, and put it under the wearer's view. Whichever taps came back
 # are used — one missing tap must not leave the take silent. Taps and the silent POV stay on disk:
 # the mix is a convenience, and an edit may well want separate tracks.
+# The learner's tap is the processed microphone (VOICE_COMMUNICATION) and comes back about 23 dB
+# under the tutor: lt8 (9/30) speech median -41 dBFS against the tutor's -18 — "barely audible" in
+# the FINAL. In the mix only, the learner is brought up to the tutor's level with a dynamic
+# normalizer: quiet stretches get up to 30x (+29.5 dB), peaks stay under -3 dB, and the digital
+# silence between turns stays silent (measured on lt8: speech median -22, 90th percentile -14,
+# against the tutor's -18 / -13). The -learner.wav tap itself is left untouched.
+LEARNER_LIFT="highpass=f=80,dynaudnorm=f=250:g=15:p=0.7:m=30"
+
 mix_voices() {
   local stamp="$1"
   local voices="$OUT/$NAME-$stamp-voices.wav" who f
@@ -148,8 +156,10 @@ mix_voices() {
   local mixed=1
   if [ "$n" = 2 ]; then
     ffmpeg -v error "${inputs[@]}" \
-      -filter_complex "[0:a][1:a]amix=inputs=2:duration=longest:dropout_transition=0:normalize=0[a]" \
+      -filter_complex "[0:a]$LEARNER_LIFT[l];[l][1:a]amix=inputs=2:duration=longest:dropout_transition=0:normalize=0[a]" \
       -map "[a]" -y "$voices" 2>/dev/null || mixed=0
+  elif [ -f "$OUT/$NAME-$stamp-learner.wav" ]; then
+    ffmpeg -v error "${inputs[@]}" -af "$LEARNER_LIFT" -y "$voices" 2>/dev/null || mixed=0
   else
     ffmpeg -v error "${inputs[@]}" -c copy -y "$voices" 2>/dev/null || mixed=0
   fi
@@ -447,7 +457,8 @@ end_take() {
 
 case "$MODE" in
   recompose)
-    # Offline: rebuild the FINAL from files already in $OUT (no device needed).
+    # Offline: remix the voices and rebuild the FINAL from files already in $OUT (no device needed).
+    mix_voices "$RECOMPOSE"
     compose "$RECOMPOSE"
     ;;
   start)
