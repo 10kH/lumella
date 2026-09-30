@@ -25,6 +25,8 @@
 #   ops/take.sh c7 60 --pov          # blocking, 60s, + wearer's view
 #   ops/take.sh c7 --start --pov     # start and return; the wearer talks for as long as needed
 #   ops/take.sh c7 --stop            # stop, collect, report
+#   ops/take.sh t1 --start --pov --opener   # ... then the tutor asks "오늘은 어떤 얘기할까요?" on camera
+#                                           # (launch with --hold-opener so it waits for this)
 #
 # The booth shoot is `--start --pov`. It used to make the tutor stutter and was shot around with
 # --audio; since 2026-09-28 it runs the six booth sentences with no playback underrun at all
@@ -63,6 +65,7 @@ MODE="block"
 SEC=180
 POV=""
 AUDIO=""
+OPENER=""
 for a in "$@"; do
   case "$a" in
     --start) MODE="start" ;;
@@ -73,6 +76,9 @@ for a in "$@"; do
     # sound does not pay for the camera — still the heaviest thing this device does
     # (artifacts/perf/README.md).
     --audio) AUDIO=1 ;;
+    # The tutor's opening question, asked once recording runs (the app holds it when launched with
+    # launch-lumella.sh --hold-opener), so the film starts with it.
+    --opener) OPENER=1 ;;
     ''|*[!0-9]*) echo "unknown argument: $a" >&2; exit 2 ;;
     *)       SEC="$a" ;;
   esac
@@ -412,6 +418,10 @@ begin_take() {
   # screen's head start is removed when the track is built (screen_track.py).
   start_screen
   start_pov
+  if [ -n "$OPENER" ]; then
+    adb -s "$DEV" shell am broadcast -p "$PKG" -a "$PKG.DEBUG_OPENER" >/dev/null 2>&1
+    echo "  opener: the tutor asks what to talk about — wait for it, then line 1"
+  fi
   # The mode goes with the stamp, so --stop knows what to collect without being told again.
   echo "$(date +%H%M%S) ${POV:+pov}${AUDIO:+audio}" > "/tmp/lumella-take-$NAME.stamp"
 }

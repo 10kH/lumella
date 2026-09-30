@@ -15,7 +15,8 @@
 #   ops/launch-lumella.sh            # bring ELLA to the front (start if needed), wait for Ready
 #   ops/launch-lumella.sh --reset    # also wipe learner-state.json (needs the app stopped first)
 #   ops/launch-lumella.sh --topic "어제 친구와 한 일을 말해요"   # topic-guided conversation
-#   ops/launch-lumella.sh --no-topic # back to an open conversation
+#   ops/launch-lumella.sh --no-topic # back to an open conversation (the tutor asks what to talk about)
+#   ops/launch-lumella.sh --no-topic --hold-opener   # ... but only when take.sh --opener says so
 #
 # The topic lives in topic.txt in the app's external files dir and is read at launch, so it
 # survives relaunches until --no-topic; setting or clearing it restarts the app.
@@ -24,17 +25,19 @@ set -uo pipefail
 S="${ANDROID_SERIAL:-A06B4A043084773}"
 PKG="com.woolab.lumella"
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-RESET=0; TOPIC_SET=0; TOPIC=""
+RESET=0; TOPIC_SET=0; TOPIC=""; HOLD=0
 while [ $# -gt 0 ]; do
   case "$1" in
     --reset) RESET=1 ;;
     --topic) TOPIC_SET=1; TOPIC="${2:?--topic needs a topic}"; shift ;;
     --no-topic) TOPIC_SET=1; TOPIC="" ;;
+    --hold-opener) HOLD=1 ;;
     *) echo "unknown argument: $1" >&2; exit 2 ;;
   esac
   shift
 done
 TOPIC_PATH="/storage/emulated/0/Android/data/$PKG/files/topic.txt"
+HOLD_PATH="/storage/emulated/0/Android/data/$PKG/files/hold-opener"
 
 # lumella and ELLA fight over the mic; the later one wins silently.
 adb -s "$S" shell pidof com.woolab.ella >/dev/null 2>&1 && {
@@ -59,7 +62,12 @@ if [ "$TOPIC_SET" = 1 ]; then
   fi
 fi
 
-if [ "$RESET" = 1 ] || [ "$TOPIC_SET" = 1 ]; then
+if [ "$HOLD" = 1 ]; then
+  # Read and deleted by the app at launch: this launch only.
+  adb -s "$S" shell "touch $HOLD_PATH" >/dev/null 2>&1 && echo "  opening question held for take.sh --opener"
+fi
+
+if [ "$RESET" = 1 ] || [ "$TOPIC_SET" = 1 ] || [ "$HOLD" = 1 ]; then
   adb -s "$S" shell am force-stop "$PKG" >/dev/null 2>&1
   if [ "$RESET" = 1 ]; then
     adb -s "$S" shell "run-as $PKG rm -f files/learner-state.json files/learner-state.json.tmp" 2>/dev/null

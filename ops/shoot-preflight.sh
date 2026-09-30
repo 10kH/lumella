@@ -23,7 +23,8 @@ while [ $# -gt 0 ]; do
     --no-reset) RESET=0 ;;
     --wifi-adb) WIFI_ADB=1 ;;
     --topic) TOPIC_ARGS=(--topic "${2:?--topic needs a topic}"); shift ;;
-    --no-topic) TOPIC_ARGS=(--no-topic) ;;
+    # The film opens with the tutor's question, asked on camera: hold it until take.sh --opener.
+    --no-topic) TOPIC_ARGS=(--no-topic --hold-opener) ;;
     *) echo "unknown argument: $1" >&2; exit 2 ;;
   esac
   shift

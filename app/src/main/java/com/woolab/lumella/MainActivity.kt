@@ -95,6 +95,8 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
         private const val DEBUG_EVENT_ACTION = "com.woolab.lumella.DEBUG_EVENT"
         private const val DEBUG_REC_START_ACTION = "com.woolab.lumella.DEBUG_REC_START"
         private const val DEBUG_REC_STOP_ACTION = "com.woolab.lumella.DEBUG_REC_STOP"
+        private const val DEBUG_OPENER_ACTION = "com.woolab.lumella.DEBUG_OPENER"
+        private const val HOLD_OPENER_FILE = "hold-opener"
         /** Two taps, each allowed 2s to drain ([WavTap.close]). */
         private const val TAP_CLOSE_WAIT_MS = 4_500L
         /** This app's own tutoring language, per `switch_tutor_language`'s own-language check. */
@@ -327,6 +329,12 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
         val lastTopicFile = java.io.File(filesDir, LAST_TOPIC_FILE)
         val lastTopic = runCatching { lastTopicFile.takeIf { it.isFile }?.readText() }.getOrNull()
         topicChanged = (lastTopic ?: "") != (sessionTopic ?: "")
+        // A shoot holds the opening question until recording runs (ops/take.sh --opener); the hold
+        // is for this launch only.
+        openerHeld = java.io.File(getExternalFilesDir(null), HOLD_OPENER_FILE).let { f ->
+            f.isFile.also { held -> if (held) f.delete() }
+        }
+        if (openerHeld) Log.i(TAG, "첫 질문 보류 (take.sh --opener 신호를 기다림)")
         runCatching { lastTopicFile.writeText(sessionTopic ?: "") }
 
         // BaseMirrorActivity inflates ActivityMainBinding per-eye into mBindingPair — no
@@ -440,7 +448,7 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
                         // what to talk about ("오늘은 어떤 얘기할까요?"); the learner's answer sets the
                         // topic by voice (set_topic). Once only — a reconnect mid-conversation must
                         // not greet again — and never over a topic chosen for the session already.
-                        if (!openerSent && sessionTopic == null && transport.sessionConfigured) {
+                        if (!openerSent && !openerHeld && sessionTopic == null && transport.sessionConfigured) {
                             openerSent = true
                             voicePathExecutor.execute { sendOpener() }
                         }
@@ -614,6 +622,7 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
                     addAction(DEBUG_EVENT_ACTION)
                     addAction(DEBUG_REC_START_ACTION)
                     addAction(DEBUG_REC_STOP_ACTION)
+                    addAction(DEBUG_OPENER_ACTION)
                 },
                 // Only a sender holding DUMP may reach these. The receiver has to stay
                 // exported — `adb shell am broadcast` is the whole point of it, and the glasses
@@ -1029,6 +1038,9 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
 
     /** The opening question has been asked in this app run (see the READY branch). */
     @Volatile private var openerSent = false
+
+    /** This launch waits for DEBUG_OPENER (a shoot) instead of asking at READY. */
+    @Volatile private var openerHeld = false
 
     /**
      * The tutor speaks first: a response with no learner turn, asked to greet and ask what to talk
@@ -1513,6 +1525,17 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
                                 runOnUiThread { publishLearnerTurn() }
                             }
                             runOnUiThread { updateUserEcho(said) }
+                        }
+                        DEBUG_OPENER_ACTION -> {
+                            // The shoot's cue (ops/take.sh --opener): ask the opening question now
+                            // that recording runs. Same path as the automatic one.
+                            if (sessionTopic != null || !transport.sessionConfigured || openerSent) {
+                                Log.w(TAG, "debug: 첫 질문 신호 무시 (topic=$sessionTopic, " +
+                                    "configured=${transport.sessionConfigured}, sent=$openerSent)")
+                            } else {
+                                openerSent = true
+                                voicePathExecutor.execute { sendOpener() }
+                            }
                         }
                         DEBUG_EVENT_ACTION -> {
                             // Drives the VAD path without a wearer, so the speech gate can be

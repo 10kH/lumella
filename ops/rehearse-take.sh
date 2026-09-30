@@ -7,6 +7,8 @@
 #
 #   ops/rehearse-take.sh <take-name> <lines-file> <first> <last> [gap-seconds]
 #   ops/rehearse-take.sh rh-a script-v3.txt 1 6        # lines 1-6
+#   OPENER=1 ops/rehearse-take.sh rh-a script-v5.txt 1 4   # the tutor's opening question first
+#                                                     # (launch with --no-topic --hold-opener)
 #
 # Lines starting with '#' and blank lines in the file are skipped; numbering counts script lines.
 set -uo pipefail
@@ -24,10 +26,12 @@ done < "$FILE"
 if [ "$LAST" -gt "${#LINES[@]}" ] || [ "$FIRST" -lt 1 ]; then
   echo "lines $FIRST-$LAST: the file has ${#LINES[@]}" >&2; exit 2
 fi
-./ops/take.sh "$NAME" --start --pov || exit 1
+./ops/take.sh "$NAME" --start --pov ${OPENER:+--opener} || exit 1
 # Stop the take however this ends — an interrupted run must not leave the device recording.
 trap './ops/take.sh "$NAME" --stop' EXIT
 sleep 3
+# The opening question takes a few seconds to say; line 1 answers it.
+[ -n "${OPENER:-}" ] && sleep 8
 for i in $(seq "$FIRST" "$LAST"); do
   line="${LINES[$((i - 1))]}"
   echo "  $i: $line"
