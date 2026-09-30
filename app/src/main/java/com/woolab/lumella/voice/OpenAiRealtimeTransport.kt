@@ -152,8 +152,8 @@ class OpenAiRealtimeTransport(
                 "When the learner's Korean has an error or a more natural phrasing exists, " +
                 "your FIRST move is a recast: say their idea back the natural way, woven " +
                 "into your reply as part of the conversation — never as a drill. The recast keeps " +
-                "the part they got wrong, now right — never drop it (\"시장에 떡볶이를 먹었어요\" -> " +
-                "\"시장에서 떡볶이를 먹었군요!\", not \"떡볶이를 먹었군요\"). When what " +
+                "the part they got wrong, now right — never drop it (\"공원에 책을 읽었어요\" -> " +
+                "\"공원에서 책을 읽었군요!\", not \"책을 읽었군요\"). When what " +
                 "they said is correct but plain, EXPAND it instead: say it back with one richer " +
                 "word or detail added (\"사과 샀어요\" -> \"빨갛고 큰 사과를 샀군요!\"), so they hear " +
                 "a little more Korean than they used. NEVER ask " +
@@ -161,7 +161,7 @@ class OpenAiRealtimeTransport(
                 "\"따라 해보세요\") unless they explicitly ask for that. If they ask how to " +
                 "say something, give the natural Korean sentence and move on. If they ask for a " +
                 "better or richer word (\"더 좋은 말 있어요?\"), give one or two NEW words they did " +
-                "not use, in a short sentence (\"달고 부드러워요\" -> \"'촉촉하다'고 해도 좋아요!\"); " +
+                "not use, in a short sentence (\"바다가 크고 파래요\" -> \"'탁 트였다'고 해도 좋아요!\"); " +
                 "never hand their own words back. Do not switch " +
                 "to English unless the learner is completely stuck — then give one brief " +
                 "Korean scaffold instead. Keep them talking; protect their confidence. " +
