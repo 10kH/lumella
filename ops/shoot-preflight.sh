@@ -10,7 +10,8 @@
 #
 #   ops/shoot-preflight.sh             # everything, then relaunch lumella with --reset
 #   ops/shoot-preflight.sh --no-reset  # keep the learner record (between the two takes)
-#   ops/shoot-preflight.sh --topic "어제 친구와 한 일을 말해요"   # a topic-guided session (the v4 film)
+#   ops/shoot-preflight.sh --no-topic  # no preset topic: the tutor opens with "오늘은 어떤 얘기할까요?"
+#   ops/shoot-preflight.sh --topic "어제 친구와 한 일"   # a preset topic (booth/operator)
 #   ops/shoot-preflight.sh --wifi-adb  # also switch adb to Wi-Fi so the cable can come off
 #
 # Exit status 0 only if nothing FAILED. WARN lines do not stop the shoot but say what to watch.
@@ -22,6 +23,7 @@ while [ $# -gt 0 ]; do
     --no-reset) RESET=0 ;;
     --wifi-adb) WIFI_ADB=1 ;;
     --topic) TOPIC_ARGS=(--topic "${2:?--topic needs a topic}"); shift ;;
+    --no-topic) TOPIC_ARGS=(--no-topic) ;;
     *) echo "unknown argument: $1" >&2; exit 2 ;;
   esac
   shift
@@ -129,7 +131,12 @@ for _ in $(seq 1 30); do
 done
 [ -n "$ready" ] && ok "voice READY" || fail "voice not READY after 60 s — ops/preflight.sh, then relaunch"
 topic_line="$($A logcat -d -v brief 2>/dev/null | grep "( *$pid)" | grep -oE '대화 주제: .*|대화 주제 없음.*' | tail -1)"
-if [ "${#TOPIC_ARGS[@]}" -gt 0 ]; then
+if [ "${TOPIC_ARGS[0]:-}" = "--no-topic" ]; then
+  case "$topic_line" in
+    "대화 주제 없음"*) ok "no preset topic — the tutor will ask what to talk about" ;;
+    *) fail "a topic is still set (${topic_line}) — ops/launch-lumella.sh --no-topic" ;;
+  esac
+elif [ "${#TOPIC_ARGS[@]}" -gt 0 ]; then
   case "$topic_line" in
     "대화 주제: ${TOPIC_ARGS[1]}"*) ok "topic session: ${TOPIC_ARGS[1]}" ;;
     *) fail "topic not in effect (${topic_line:-no log line}) — ops/launch-lumella.sh --topic \"${TOPIC_ARGS[1]}\"" ;;
