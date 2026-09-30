@@ -40,7 +40,9 @@ object TopicGuidance {
         val offer = if (examples.isEmpty()) {
             "and offer two everyday examples (like 어제 한 일, 좋아하는 음식)"
         } else {
-            "and offer these as examples: " + examples.joinToString(", ") { "\"$it\"" }
+            // luma's profile keeps them as typed at onboarding, often English ("travel", "daily life").
+            "and offer these as examples, said in natural Korean (translate any that are not Korean): " +
+                examples.joinToString(", ") { "\"$it\"" }
         }
         return "OPENING (the learner has not spoken yet). In ONE short sentence in 해요체, greet the learner, " +
             "ask what they would like to talk about today — \"오늘은 어떤 얘기할까요?\" — $offer. " +
