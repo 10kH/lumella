@@ -5,7 +5,7 @@
 # carry rotation=90 in their metadata, and every player — ffmpeg, QuickTime, Final Cut — turns
 # the view counter-clockwise onto its head (Woody, lt8 on 9/30: keyboard at the top, ceiling at
 # the bottom). The pixels are fine; only the flag is wrong. This rewrites the flag to -90
-# (stream copy: nothing is re-encoded, nothing lost) on the POV files and rebuilds the FINAL with
+# (stream copy: nothing is re-encoded, nothing lost) on every POV file and rebuilds the FINAL with
 # take.sh --recompose.
 #
 #   ops/fix-pov-rotation.sh ~/shots/lt8-200609
@@ -14,8 +14,10 @@ PREFIX="${1:?usage: ops/fix-pov-rotation.sh ~/shots/<name>-<stamp>}"
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 base="$(basename "$PREFIX")"; NAME="${base%-*}"; STAMP="${base##*-}"
 fixed=0
-for f in "$PREFIX-pov.mp4" "$PREFIX-pov-MIXED.mp4" "$PREFIX-pov-JOINED.mp4"; do
+# Every POV file of the take: -pov, -pov-2… (photo-turn segments), -pov-JOINED, -pov-MIXED.
+for f in "$PREFIX"-pov*.mp4; do
   [ -f "$f" ] || continue
+  case "$f" in *.rot.mp4) continue ;; esac
   rot="$(ffprobe -v error -select_streams v:0 -show_entries stream_side_data=rotation -of csv=p=0 "$f" | head -1)"
   if [ "$rot" != "90" ]; then echo "  $(basename "$f"): rotation ${rot:-none}, left as is"; continue; fi
   tmp="${f%.mp4}.rot.mp4"
