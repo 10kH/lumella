@@ -71,6 +71,45 @@ if [[ -n "$published" ]] && curl -sf -m 8 -o /dev/null "${published%/}${PROBE_PA
   exit 0
 fi
 
+# A quick tunnel gets a NEW hostname every restart, which is what makes the LAN fallback fire far
+# more often than "the tunnel is down". The moment cloudflared restarts, the advertised URL is the
+# PREVIOUS host, that host is dead, and the check above sends us straight to publishing a LAN
+# address -- while a perfectly good tunnel is running under a different name. Nothing then moves the
+# advertisement back, because only ops/luma-tunnel.sh publishes tunnel URLs and it does that once at
+# its own startup. Measured twice: 2026-09-26 and again 2026-09-30, both times the tunnel answered
+# 200 on its current host while /v1/config pointed at the LAN and the glasses could not reach luma
+# from outside the house.
+#
+# So before falling back, ask the running tunnel what it is called now and prefer it if it answers.
+# The LAN address stays the last resort it was designed to be.
+CF_LOG="${CF_LOG:-$REPO_ROOT/tmp/luma-tunnel/cloudflared.log}"
+if [[ -r "$CF_LOG" ]]; then
+  # tail: the log accumulates every host this tunnel has ever had; the live one is the last written.
+  tunnel_url="$(grep -oE 'https://[a-zA-Z0-9-]+\.trycloudflare\.com' "$CF_LOG" 2>/dev/null | tail -n1 || true)"
+  if [[ -n "$tunnel_url" && "$tunnel_url" != "$published" ]] \
+     && curl -sf -m 8 -o /dev/null "${tunnel_url%/}${PROBE_PATH}"; then
+    log "tunnel moved to $tunnel_url and answers; republishing it instead of the LAN address"
+    cd "$REPO_ROOT"
+    vercel env rm LUMA_BASE_URL production --yes >/dev/null 2>&1 || true
+    printf '%s' "$tunnel_url" | vercel env add LUMA_BASE_URL production >/dev/null 2>&1
+    vercel --prod --yes >/dev/null 2>&1
+
+    tunnel_verify=""
+    if [[ -n "$local_token" ]]; then
+      sleep 5
+      tunnel_verify="$(curl -s -m 10 -H "X-Lumella-Local-Token: ${local_token}" "${token_service%/}/v1/config" 2>/dev/null \
+        | sed -n 's/.*"lumaBaseUrl"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p')"
+    fi
+    if [[ "$tunnel_verify" == "$tunnel_url" ]]; then
+      log "published and verified: $tunnel_url"
+      exit 0
+    fi
+    # Fall through to the LAN address: an unverified publish is not a working one, and a reachable
+    # LAN address beats a tunnel URL we cannot confirm the endpoint is actually serving.
+    log "WARNING: published $tunnel_url but /v1/config reports '${tunnel_verify:-unreadable}'; falling back to LAN"
+  fi
+fi
+
 desired="http://${lan_ip}:${PORT}"
 log "published address unusable (${published:-none}); republishing $desired"
 
