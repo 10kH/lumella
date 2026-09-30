@@ -127,6 +127,53 @@ class LumaTutorBrainTest {
     }
 
     @Test
+    fun `topic session sends the topic and keeps the topic tutor's line as its guide`() {
+        val transport = FakeLumaHttpTransport().apply {
+            wireHappyPath(coach = true)
+            on("POST", "/v1/orchestrator/turn", json(
+                """{"session":{"id":"sess-1"},"selectedRoute":"topic_chat","selectedProvider":"etri",""" +
+                    """"assistantText":"친구가 커피를 사줬군요! 어떤 커피를 마셨어요?",""" +
+                    """"coachEvidence":{"corrections":[],"hints":[],"confidence":0.7}}"""
+            ))
+        }
+        val brain = newBrain(transport)
+        brain.connect(FakeCredentialsProvider())
+        brain.startSession(SessionPolicy.RESUME_ACTIVE)
+
+        brain.submitTurnEvidence(TurnEvidence(turnId = 3, learnerTranscript = "친구가 커피가 샀어요",
+            topicHint = "어제 친구와 한 일을 말해요"))
+
+        val sent = transport.recorded.last { it.method == "POST" && it.url.endsWith("/v1/orchestrator/turn") }.body.orEmpty()
+        assertTrue(sent.contains("\"topicHint\":\"어제 친구와 한 일을 말해요\""), sent)
+        val steering = brain.fetchSteering("sess-1") as SteeringResult.Available
+        assertEquals("친구가 커피를 사줬군요! 어떤 커피를 마셨어요?", steering.evidence.topicGuide)
+        assertEquals(3, steering.evidence.sourceTurnId)
+        brain.stopHeartbeat()
+    }
+
+    @Test
+    fun `an off-topic route carries no topic guide`() {
+        val transport = FakeLumaHttpTransport().apply {
+            wireHappyPath(coach = true)
+            on("POST", "/v1/orchestrator/turn", json(
+                """{"session":{"id":"sess-1"},"selectedRoute":"gpt_qa","selectedProvider":"openai",""" +
+                    """"assistantText":"티켓은 공식 사이트에서 사요.",""" +
+                    """"coachEvidence":{"corrections":[],"hints":[],"confidence":0.9}}"""
+            ))
+        }
+        val brain = newBrain(transport)
+        brain.connect(FakeCredentialsProvider())
+        brain.startSession(SessionPolicy.RESUME_ACTIVE)
+
+        brain.submitTurnEvidence(TurnEvidence(turnId = 7, learnerTranscript = "BTS 티켓은 어떻게 사요?",
+            topicHint = "어제 친구와 한 일을 말해요"))
+
+        val steering = brain.fetchSteering("sess-1") as SteeringResult.Available
+        assertNull(steering.evidence.topicGuide)
+        brain.stopHeartbeat()
+    }
+
+    @Test
     fun `D-7 resumes an active session younger than the resume window`() {
         val transport = FakeLumaHttpTransport().apply {
             wireHappyPath(activeSessionBody = """{"session":{"id":"sess-young","lastMessageAt":"2026-07-21T11:45:00Z"}}""")

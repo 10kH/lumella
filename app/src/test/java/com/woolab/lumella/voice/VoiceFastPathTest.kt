@@ -42,13 +42,64 @@ class VoiceFastPathTest {
         override fun endSession(sessionId: String) {}
     }
 
-    private fun fastPath(brain: TutorBrain, transport: RealtimeTransport = RecordingTransport()) = VoiceFastPath(
+    private fun fastPath(
+        brain: TutorBrain,
+        transport: RealtimeTransport = RecordingTransport(),
+        topic: String? = null,
+    ) = VoiceFastPath(
         orchestrator = StateGraphOrchestrator(TutorLanguage.KOREAN, LearnerStateStore(), StalenessGuard(2, 4), AblationMode.FULL),
         brain = brain,
         transport = transport,
         sessionId = { "s1" },
         personaSummary = "You are Luma.",
+        topic = { topic },
     )
+
+    private fun guideFrom(turn: Int, line: String) = ScriptedBrain({
+        SteeringResult.Available(
+            SteeringEvidence(corrections = emptyList(), hints = emptyList(), confidence = 0.0,
+                sourceTurnId = turn, topicGuide = line),
+        )
+    })
+
+    // --- topic-guided conversation (주제 유도형 자유대화) ---
+
+    @Test
+    fun topicSessionCarriesTheTopicAndTheTopicTutorsLineIntoTheNextReply() {
+        val transport = RecordingTransport()
+        val voice = fastPath(guideFrom(3, "어떤 커피 마셨나요?"), transport, topic = "어제 친구와 한 일을 말해요")
+
+        voice.onTurnStart(currentTurnId = 4)
+
+        val sent = transport.sent.single()
+        assertTrue(sent.contains("어제 친구와 한 일을 말해요"))
+        assertTrue(sent.contains("어떤 커피 마셨나요?"))
+        assertTrue("the recast still comes first", sent.contains("recast"))
+        assertEquals(Triple(4, 3, "어떤 커피 마셨나요?"), voice.lastAppliedTopicGuide)
+    }
+
+    @Test
+    fun aStaleTopicLineIsNotApplied() {
+        val transport = RecordingTransport()
+        val voice = fastPath(guideFrom(1, "어떤 커피 마셨나요?"), transport, topic = "어제 친구와 한 일을 말해요")
+
+        voice.onTurnStart(currentTurnId = 5)
+
+        assertFalse(transport.sent.single().contains("어떤 커피 마셨나요?"))
+        assertTrue("the topic itself still applies", transport.sent.single().contains("어제 친구와 한 일을 말해요"))
+        assertEquals(null, voice.lastAppliedTopicGuide)
+    }
+
+    @Test
+    fun withoutATopicNeitherTheTopicNorATopicLineIsAdded() {
+        val transport = RecordingTransport()
+        val voice = fastPath(guideFrom(3, "어떤 커피 마셨나요?"), transport, topic = null)
+
+        voice.onTurnStart(currentTurnId = 4)
+
+        assertFalse(transport.sent.single().contains("TOPIC-GUIDED"))
+        assertFalse(transport.sent.single().contains("어떤 커피 마셨나요?"))
+    }
 
     // --- (a) D-4 arbitration: brain text has NO direct path to spoken output ---
 

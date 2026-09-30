@@ -27,6 +27,7 @@ import com.woolab.lumella.contract.BrainCredentials
 import com.woolab.lumella.contract.BrainCredentialsProvider
 import com.woolab.lumella.contract.CoachIndicator
 import com.woolab.lumella.contract.SessionPolicy
+import com.woolab.lumella.contract.SteeringResult
 import com.woolab.lumella.contract.TutorBrain
 import com.woolab.lumella.databinding.ActivityMainBinding
 import com.woolab.tutor.slowpath.StateGraphOrchestrator
@@ -70,6 +71,7 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
         /** After a brain call that went unanswered that long, how long to stop asking before trying again. */
         private const val BRAIN_RETRY_AFTER_MS = 30_000L
         private const val BRAIN_BOOTSTRAP_FIRST_RETRY_MS = 3_000L
+        private const val TOPIC_FILE = "topic.txt"
         private const val BRAIN_BOOTSTRAP_MAX_RETRY_MS = 30_000L
         private const val TAG = "lumella"
         private const val RIGHT_TOUCHPAD_DEVICE = "cyttsp5_mt"
@@ -142,6 +144,13 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
      * it. A slow call that did answer is not unreachable at all.
      */
     @Volatile private var brainPausedUntilMs = 0L
+
+    /**
+     * The conversation's topic for a topic-guided session (주제 유도형 자유대화), or null. Read once
+     * at launch from topic.txt in the app's external files dir — ops/launch-lumella.sh --topic
+     * writes it — so a topic survives the relaunches of a shoot day. See [TopicGuidance].
+     */
+    @Volatile private var sessionTopic: String? = null
     private val sessionIdRef = AtomicReference("")
     /** Runs the brain submit off the slow path, so the record and the corner never queue behind the coach hint. */
     private val brainSubmitExecutor = Executors.newSingleThreadExecutor { r ->
@@ -227,6 +236,9 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
         Log.i(TAG, "학습자 턴 $turnId 발행")
         voicePathExecutor.execute {
             voiceFastPath.onTurnStart(turnId)
+            voiceFastPath.lastAppliedTopicGuide?.takeIf { it.first == turnId }?.let { (_, source, line) ->
+                Log.i(TAG, "주제 유도 적용 turn $turnId ← 코치 turn $source: $line")
+            }
             runOnUiThread { updateStatus("Thinking...", "#2196F3") }
         }
     }
@@ -299,6 +311,10 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
         // unplug`: Awake -> Dozing in 75 s with lumella in front. While lumella is showing, the
         // display stays on.
         window.addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        sessionTopic = runCatching {
+            java.io.File(getExternalFilesDir(null), TOPIC_FILE).takeIf { it.isFile }?.readText()?.trim()
+        }.getOrNull()?.takeIf { it.isNotEmpty() }
+        Log.i(TAG, sessionTopic?.let { "대화 주제: $it" } ?: "대화 주제 없음 (열린 대화)")
 
         // BaseMirrorActivity inflates ActivityMainBinding per-eye into mBindingPair — no
         // setContentView() here (see LEGACY TUTOR/ELLA MainActivity, same base class).
@@ -546,6 +562,7 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
             transport = transport,
             sessionId = { sessionIdRef.get() },
             personaSummary = OpenAiRealtimeTransport.DEFAULT_SESSION_INSTRUCTIONS,
+            topic = { sessionTopic },
         )
 
         audioCapture = AudioCapture(
@@ -1160,6 +1177,7 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
     private fun submitCurrentTurnEvidence() {
         val turnId = turnTracker.current().takeIf { it > 0 } ?: return
         val evidence = turnEvidenceAssembler.assemble(turnId = turnId, transcript = currentTurnUserTranscript)
+            .copy(topicHint = sessionTopic)
         // The slow path does not wait for the brain. Measured 2026-09-26: a live coach turn on
         // /v1/orchestrator/turn takes ~5s, and the first version of this method ran it
         // synchronously ahead of the dispatcher, so every grammar record and the diagnosis
@@ -1185,6 +1203,13 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
                 // is captioned from this line instead of from memory.
                 Log.i(TAG, "코치 turn $turnId: ${indicator?.let { "${it.attemptedProvider?.let { a -> "$a→" } ?: ""}${it.provider}/${it.route}" } ?: "no answer"} in ${took}ms" +
                     if (turnId != turnTracker.current()) " (next turn already began; not drawn)" else "")
+                // The topic tutor's own next line, for the edit: the film shows it next to the
+                // voice's reply that took its direction ('주제 유도 적용 turn N ← 코치 turn M').
+                if (sessionTopic != null) {
+                    (runCatching { brain.fetchSteering(sessionIdRef.get()) }.getOrNull() as? SteeringResult.Available)
+                        ?.evidence?.takeIf { it.sourceTurnId == turnId }?.topicGuide
+                        ?.let { Log.i(TAG, "주제 코치 turn $turnId: $it") }
+                }
                 // A connect to an address that does not refuse hangs to the transport's 20s
                 // timeout. That is what "unreachable" means; a slow coach turn is not it.
                 if (took >= BRAIN_UNREACHABLE_AFTER_MS) {

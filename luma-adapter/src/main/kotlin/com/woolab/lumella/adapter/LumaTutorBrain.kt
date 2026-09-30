@@ -156,6 +156,9 @@ class LumaTutorBrain(
         if (evidence.imageId != null) {
             fields["imageId"] = jsonStr(evidence.imageId)
         }
+        // A topic-guided session: luma's classifier sees the topic and serves on-topic turns on
+        // topic_chat (ETRI Tango, prompted with the topic); off-topic turns still go elsewhere.
+        evidence.topicHint?.takeIf { it.isNotBlank() }?.let { fields["topicHint"] = jsonStr(it) }
 
         try {
             val response = postJson("/v1/orchestrator/turn", LumaJson.Obj(fields))
@@ -173,9 +176,20 @@ class LumaTutorBrain(
 
             json.obj("session")?.str("id")?.let { sessionId -> currentSessionId = sessionId }
 
+            // On the topic route the reply luma produced IS the topic tutor's next line (ETRI Tango
+            // prompted with the topic and the running conversation). The voice never speaks it —
+            // it takes its direction for the next turn (topic-guided conversation, D-4).
+            val topicGuide = json.str("assistantText")?.trim()?.takeIf {
+                it.isNotEmpty() && json.str("selectedRoute") == "topic_chat"
+            }
             val coach = json.obj("coachEvidence")
             if (coach != null) {
-                lastEvidence = distillCoachEvidence(coach, evidence.turnId)
+                lastEvidence = distillCoachEvidence(coach, evidence.turnId).copy(topicGuide = topicGuide)
+            } else if (topicGuide != null) {
+                lastEvidence = SteeringEvidence(
+                    corrections = emptyList(), hints = emptyList(), confidence = 0.0,
+                    sourceTurnId = evidence.turnId, topicGuide = topicGuide,
+                )
             } else {
                 // Parseable 2xx without coachEvidence: not steering, but the slow path is
                 // reachable again — clear any stale unavailability flag (NOT_READY surfaces

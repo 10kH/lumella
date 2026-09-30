@@ -41,7 +41,14 @@ class VoiceFastPath(
     private val sessionId: () -> String,
     private val personaSummary: String = "",
     private val fetchSteeringTimeoutMs: Long = 1_500L,
+    /** The session's conversation topic, or null for an open conversation (see [TopicGuidance]). */
+    private val topic: () -> String? = { null },
 ) {
+
+    /** The topic tutor's line applied at the last turn start: (turn, source turn, line); for the log. */
+    @Volatile
+    var lastAppliedTopicGuide: Triple<Int, Int, String>? = null
+        private set
 
     /** True once the brain has reported/thrown Unavailable for the current turn's steering fetch. */
     @Volatile
@@ -61,12 +68,21 @@ class VoiceFastPath(
      */
     fun onTurnStart(currentTurnId: Int): ResponseInstructions {
         val instructions = orchestrator.buildResponseInstructions(currentTurnId, personaSummary)
-        val steeringText = fetchSteeringText(currentTurnId)
-        val combinedText = if (steeringText.isNullOrBlank()) {
-            instructions.text
+        val evidence = fetchSteering(currentTurnId)
+        val steeringText = evidence?.let { composeSteeringText(it) }
+        val sessionTopic = topic()?.takeIf { it.isNotBlank() }
+        val guide = if (sessionTopic != null && evidence != null) {
+            TopicGuidance.freshGuide(evidence.topicGuide, evidence.sourceTurnId, currentTurnId)
         } else {
-            listOf(instructions.text, steeringText).filter { it.isNotBlank() }.joinToString("\n")
+            null
         }
+        lastAppliedTopicGuide = guide?.let { Triple(currentTurnId, evidence!!.sourceTurnId, it) }
+        val combinedText = listOfNotNull(
+            instructions.text,
+            steeringText,
+            sessionTopic?.let { TopicGuidance.topicInstruction(it) },
+            guide?.let { TopicGuidance.guideInstruction(it) },
+        ).filter { it.isNotBlank() }.joinToString("\n")
 
         transport.sendInstructions(combinedText)
         orchestrator.commitDelivery(instructions)
@@ -91,7 +107,7 @@ class VoiceFastPath(
      * (non-interruptible) brain call keeps the single worker occupied, so fetches
      * queued behind it also time out to the same degrade path — the loop never stalls.
      */
-    private fun fetchSteeringText(currentTurnId: Int): String? {
+    private fun fetchSteering(currentTurnId: Int): SteeringEvidence? {
         val future = steeringExecutor.submit(Callable { brain.fetchSteering(sessionId()) })
         val result = try {
             future.get(fetchSteeringTimeoutMs, TimeUnit.MILLISECONDS)
@@ -108,7 +124,7 @@ class VoiceFastPath(
         return when (result) {
             is SteeringResult.Available -> {
                 degraded = false
-                composeSteeringText(result.evidence)
+                result.evidence
             }
             is SteeringResult.Unavailable -> {
                 degraded = true

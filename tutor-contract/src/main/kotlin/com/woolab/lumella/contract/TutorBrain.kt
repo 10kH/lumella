@@ -28,12 +28,15 @@ data class BrainSession(
  * @param assistantTranscript optional fast-path assistant response for this
  *   turn, if already generated.
  * @param imageId optional [ImageContext.imageId] this turn is grounded in.
+ * @param topicHint the conversation's topic when the session runs a topic-guided conversation
+ *   (주제 유도형 자유대화); the brain routes on-topic turns to its topic tutor with it.
  */
 data class TurnEvidence(
     val turnId: Int,
     val learnerTranscript: String,
     val assistantTranscript: String? = null,
-    val imageId: String? = null
+    val imageId: String? = null,
+    val topicHint: String? = null,
 )
 
 /**

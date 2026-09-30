@@ -63,6 +63,9 @@ data class SteeringVisual(
  * @param visual optional visual grounding evidence for [sourceTurnId], only
  *   present when a real image analysis backs it — `null` on turns without an
  *   analyzed image (see [SteeringVisual]'s no-fabrication rule).
+ * @param topicGuide the topic tutor's own next line for [sourceTurnId] (ETRI Tango on luma's
+ *   topic_chat route), present only when that route served the turn. Steering per D-4: the
+ *   fast path takes its direction, never reads it out.
  */
 data class SteeringEvidence(
     val corrections: List<SteeringCorrection>,
@@ -71,6 +74,7 @@ data class SteeringEvidence(
     val confidence: Double,
     val sourceTurnId: Int,
     val visual: SteeringVisual? = null,
+    val topicGuide: String? = null,
 )
 
 /**
