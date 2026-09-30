@@ -72,6 +72,23 @@ class LumaTutorBrain(
 
     @Volatile private var coachIndicatorField: CoachIndicator? = null
 
+    /** From GET /v1/me at connect (the learner's onboarding choices); empty on any failure. */
+    @Volatile private var favoriteTopicsField: List<String> = emptyList()
+
+    override fun favoriteTopics(): List<String> = favoriteTopicsField
+
+    private fun fetchFavoriteTopics(): List<String> {
+        val response = try {
+            getJson("/v1/me")
+        } catch (_: Exception) {
+            return emptyList()
+        }
+        if (response.code !in 200..299) return emptyList()
+        val json = LumaJsonParser.parseOrNull(response.body) as? LumaJson.Obj ?: return emptyList()
+        return json.obj("preferences")?.arr("favoriteTopics")?.let { LumaJson.Arr(it).strings() }
+            ?.map { it.trim() }?.filter { it.isNotEmpty() } ?: emptyList()
+    }
+
     private val pendingSessionCounter = AtomicLong(0)
     private var heartbeatThread: Thread? = null
     private val heartbeatStop = AtomicBoolean(false)
@@ -109,6 +126,7 @@ class LumaTutorBrain(
 
         val caps = fetchCapabilities()
         capabilities = caps
+        favoriteTopicsField = fetchFavoriteTopics()
 
         registerDevice(credentials.deviceName)
         startHeartbeat(credentials.deviceName)

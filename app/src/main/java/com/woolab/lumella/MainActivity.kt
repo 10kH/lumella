@@ -41,6 +41,7 @@ import com.woolab.tutor.slowpath.LearnerStateStore
 import com.woolab.lumella.voice.OkHttpRealtimeWebSocketFactory
 import com.woolab.lumella.voice.OpenAiRealtimeTransport
 import com.woolab.lumella.voice.RealtimeConnectionStatus
+import com.woolab.lumella.voice.TopicGuidance
 import com.woolab.lumella.voice.VoiceFastPath
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicReference
@@ -73,6 +74,7 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
         private const val BRAIN_BOOTSTRAP_FIRST_RETRY_MS = 3_000L
         private const val TOPIC_FILE = "topic.txt"
         private const val LAST_TOPIC_FILE = "last-topic.txt"
+        private const val OPENER_PROFILE_WAIT_MS = 4_000L
         private const val BRAIN_BOOTSTRAP_MAX_RETRY_MS = 30_000L
         private const val TAG = "lumella"
         private const val RIGHT_TOUCHPAD_DEVICE = "cyttsp5_mt"
@@ -315,9 +317,9 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
         // unplug`: Awake -> Dozing in 75 s with lumella in front. While lumella is showing, the
         // display stays on.
         window.addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-        sessionTopic = runCatching {
-            java.io.File(getExternalFilesDir(null), TOPIC_FILE).takeIf { it.isFile }?.readText()?.trim()
-        }.getOrNull()?.takeIf { it.isNotEmpty() }
+        sessionTopic = TopicGuidance.normalizeTopic(runCatching {
+            java.io.File(getExternalFilesDir(null), TOPIC_FILE).takeIf { it.isFile }?.readText()
+        }.getOrNull())
         Log.i(TAG, sessionTopic?.let { "대화 주제: $it" } ?: "대화 주제 없음 (열린 대화)")
         // luma resumes the active session if it is younger than 30 minutes, and a topic_chat segment
         // keeps the old topic in Tango's running transcript. A changed topic starts a fresh luma
@@ -432,6 +434,15 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
                             // reach into it either.
                             subtitleRetention.onSessionReset()
                             clearSubtitle()
+                            updateHint(null)
+                        }
+                        // The first READY of the app, with no topic set: the tutor opens by asking
+                        // what to talk about ("오늘은 어떤 얘기할까요?"); the learner's answer sets the
+                        // topic by voice (set_topic). Once only — a reconnect mid-conversation must
+                        // not greet again — and never over a topic chosen for the session already.
+                        if (!openerSent && sessionTopic == null && transport.sessionConfigured) {
+                            openerSent = true
+                            voicePathExecutor.execute { sendOpener() }
                         }
                     }
                 }
@@ -478,6 +489,10 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
                         }
                         "switch_tutor_language" -> {
                             handleSwitchTutorLanguage(callId, arguments)
+                            return
+                        }
+                        "set_topic" -> {
+                            handleSetTopic(callId, arguments)
                             return
                         }
                     }
@@ -1012,6 +1027,67 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
         }
     }
 
+    /** The opening question has been asked in this app run (see the READY branch). */
+    @Volatile private var openerSent = false
+
+    /**
+     * The tutor speaks first: a response with no learner turn, asked to greet and ask what to talk
+     * about, offering the learner's favourite topics from their luma profile. Waits briefly for
+     * the profile (the brain connects on its own thread) rather than ask without it.
+     */
+    private fun sendOpener() {
+        var favorites = runCatching { brain.favoriteTopics() }.getOrDefault(emptyList())
+        var waited = 0L
+        while (favorites.isEmpty() && !brainReachable.get() && waited < OPENER_PROFILE_WAIT_MS) {
+            Thread.sleep(250)
+            waited += 250
+            favorites = runCatching { brain.favoriteTopics() }.getOrDefault(emptyList())
+        }
+        val instructions = listOf(
+            OpenAiRealtimeTransport.DEFAULT_SESSION_INSTRUCTIONS,
+            TopicGuidance.openingInstruction(favorites),
+        ).joinToString("\n")
+        turnEndedAtMs = System.currentTimeMillis()
+        transport.sendInstructions(instructions)
+        Log.i(TAG, "첫 질문: 오늘은 어떤 얘기할까요? (관심 주제 ${favorites.take(2)})")
+    }
+
+    /**
+     * `set_topic`: the learner chose what to talk about ("여행 얘기하자", or an answer to the opening
+     * question), or asked to talk freely (empty topic). Takes effect from the next turn: the topic
+     * goes into every reply's instructions and to luma as topicHint (see [TopicGuidance]); a
+     * changed topic starts a fresh luma session, so Tango does not carry the old topic's transcript.
+     * The tool is answered with a continuation — the model says it will talk about it and asks one
+     * question on it (persona rule).
+     */
+    private fun handleSetTopic(callId: String, arguments: String) {
+        val raw = toolArgumentString(arguments, "topic")
+        if (raw == null) {
+            Log.w(TAG, "음성 명령: set_topic 인자 손상/누락")
+            answerToolCall(callId, """{"status":"error","reason":"bad_arguments"}""")
+            return
+        }
+        val next = TopicGuidance.normalizeTopic(raw)
+        if (next == sessionTopic) {
+            answerToolCall(callId, """{"status":"ok","note":"unchanged"}""")
+            return
+        }
+        sessionTopic = next
+        Log.i(TAG, next?.let { "대화 주제: $it (음성으로 정함)" } ?: "대화 주제 없음 (음성으로 끔)")
+        runCatching { java.io.File(filesDir, LAST_TOPIC_FILE).writeText(next ?: "") }
+        runOnUiThread { updateHint(null) }
+        if (brainReachable.get()) {
+            brainSubmitExecutor.execute {
+                val old = sessionIdRef.get()
+                runCatching { brain.endSession(old) }
+                val fresh = runCatching { brain.startSession(SessionPolicy.FRESH) }.getOrNull()
+                if (fresh != null) sessionIdRef.set(fresh.sessionId)
+                Log.i(TAG, "주제 변경: luma 세션 새로 시작 (${fresh?.sessionId ?: "실패"})")
+            }
+        }
+        answerToolCall(callId, """{"status":"ok"}""")
+    }
+
     /**
      * `switch_tutor_language`: same-language request confirms and does nothing further.
      * A real switch answers `ok` immediately (so the model's handover sentence, already
@@ -1367,8 +1443,10 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
     }
 
     private fun setHintText(text: String) {
-        mBindingPair.left.tvHint.text = text
-        mBindingPair.right.tvHint.text = text
+        // Today's topic leads the hint line, so the wearer can see what the tutor steers toward.
+        val shown = sessionTopic?.let { "주제: $it · $text" } ?: text
+        mBindingPair.left.tvHint.text = shown
+        mBindingPair.right.tvHint.text = shown
     }
 
     /** Monotonic per-hint-update counter; a revert timer from an older update is refused. UI thread only. */

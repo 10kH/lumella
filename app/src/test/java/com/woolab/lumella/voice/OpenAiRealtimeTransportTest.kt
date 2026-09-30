@@ -360,6 +360,21 @@ class OpenAiRealtimeTransportTest {
     }
 
     @Test
+    fun sessionIsConfiguredOnlyOnceTheServerConfirmsTheUpdate() {
+        val factory = FakeFactory()
+        val transport = OpenAiRealtimeTransport(successProvider(), factory, listener = RecordingListener())
+        transport.connect()
+        factory.lastListener?.onOpen()
+        factory.lastListener?.onMessage("""{"type":"session.created","session":{}}""")
+        assertTrue(transport.sessionReady)
+        assertFalse("session.created is not the persona and tools landing", transport.sessionConfigured)
+        factory.lastListener?.onMessage("""{"type":"session.updated","session":{}}""")
+        assertTrue(transport.sessionConfigured)
+        transport.connect()
+        assertFalse("a new connection starts unconfigured", transport.sessionConfigured)
+    }
+
+    @Test
     fun tokenFetchWithoutNetworkRetriesInsteadOfGivingUp() {
         // The glasses' Wi-Fi goes off while the display sleeps; the first fetch after waking
         // fails with a DNS error. That must retry, and the retry must open the socket.
@@ -953,7 +968,7 @@ class OpenAiRealtimeTransportTest {
         assertTrue("tools array missing/empty", tools != null && tools.isNotEmpty())
         val toolNames = tools!!.mapNotNull { com.woolab.tutor.slowpath.MiniJson.string(com.woolab.tutor.slowpath.MiniJson.asObject(it), "name") }
         assertEquals(
-            listOf("capture_photo", "set_text_display", "set_hints_visible", "switch_tutor_language"),
+            listOf("capture_photo", "set_text_display", "set_hints_visible", "switch_tutor_language", "set_topic"),
             toolNames,
         )
     }

@@ -183,7 +183,15 @@ class OpenAiRealtimeTransport(
                 "one short handover sentence FIRST — e.g. \"영어 튜터로 넘어갈게요\" — THEN " +
                 "call switch_tutor_language with language=\"english\". If they ask for Korean " +
                 "while you are already the Korean tutor, still call switch_tutor_language " +
-                "with language=\"korean\" — it will simply confirm you are already active."
+                "with language=\"korean\" — it will simply confirm you are already active. " +
+                "Conversation topic: when the learner says what they want to talk about — " +
+                "answering \"오늘은 어떤 얘기할까요?\", or \"여행 얘기하자\", \"주제 바꿔줘\" " +
+                "followed by a topic — call set_topic with a short Korean name for it (e.g. " +
+                "\"여행\", \"어제 친구와 한 일\"). If they ask to talk freely without a topic, " +
+                "call set_topic with topic \"\". Never call it for a passing mention or a question " +
+                "about something: only when they choose what to talk about. After the call, say in " +
+                "one short sentence, in the learner's politeness level, that you will talk about " +
+                "it and ask one question on it."
 
         /**
          * How long the server waits for silence before deciding the learner has finished.
@@ -329,6 +337,7 @@ class OpenAiRealtimeTransport(
      */
     fun connect() {
         closedByClient = false
+        sessionConfigured = false
         noteActivity()
         listener.onStatus(RealtimeConnectionStatus.CONNECTING)
         credentialProvider.fetchToken { result ->
@@ -353,6 +362,16 @@ class OpenAiRealtimeTransport(
             )
         }
     }
+
+    /**
+     * The server has confirmed this session's session.update (persona, tools, VAD). READY fires
+     * already at session.created; a response.create sent between the two fails with a server_error
+     * about one time in four (measured 2026-09-30, aaai27 opener_probe) — so a response the app
+     * starts on its own, like the opening question, waits for this.
+     */
+    @Volatile
+    var sessionConfigured: Boolean = false
+        private set
 
     private fun openSocket(bearerToken: String) {
         if (RealtimeCredentialGuard.isStandardOpenAiApiKey(bearerToken)) {
@@ -731,6 +750,7 @@ class OpenAiRealtimeTransport(
                 // shipped this exact bug on 2026-08-05) leaves the session running on server
                 // defaults while the UI still says "Ready" — additive, not a hard gate: this
                 // can only ever demote an already-READY session, never block it.
+                sessionConfigured = true
                 sessionReady = true
                 reconnectDelayMs = RECONNECT_BASE_DELAY_MS
                 listener.onStatus(RealtimeConnectionStatus.READY)
@@ -884,7 +904,12 @@ class OpenAiRealtimeTransport(
             """"description":"Hand the learner off to the English or Korean tutor app. """ +
             """Say a short handover sentence before calling this.",""" +
             """"parameters":{"type":"object","properties":{"language":{"type":"string",""" +
-            """"enum":["english","korean"]}},"required":["language"]}}],""" +
+            """"enum":["english","korean"]}},"required":["language"]}},""" +
+            """{"type":"function","name":"set_topic",""" +
+            """"description":"Set today's conversation topic when the learner chooses what to """ +
+            """talk about; empty topic to talk freely without one. Not for passing mentions.",""" +
+            """"parameters":{"type":"object","properties":{"topic":{"type":"string"}},""" +
+            """"required":["topic"]}}],""" +
             """"tool_choice":"auto"}"""
         return """{"type":"session.update","event_id":${jsonString(SESSION_UPDATE_EVENT_ID)},"session":$session}"""
     }

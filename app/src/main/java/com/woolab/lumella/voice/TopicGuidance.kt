@@ -30,6 +30,30 @@ object TopicGuidance {
             "learner's politeness level. Do not read it out word for word. If the learner has just asked about " +
             "something else, answer that first; use this direction only to come back to the topic."
 
+    /**
+     * The tutor's first words of a session without a topic: greet and ask what to talk about,
+     * offering up to two of the learner's own favourite topics (luma profile) as examples. The
+     * learner has not spoken yet, so politeness is 해요체.
+     */
+    fun openingInstruction(favorites: List<String>): String {
+        val examples = favorites.map { it.trim() }.filter { it.isNotEmpty() }.distinct().take(2)
+        val offer = if (examples.isEmpty()) {
+            "and offer two everyday examples (like 어제 한 일, 좋아하는 음식)"
+        } else {
+            "and offer these as examples: " + examples.joinToString(", ") { "\"$it\"" }
+        }
+        return "OPENING (the learner has not spoken yet). In ONE short sentence in 해요체, greet the learner, " +
+            "ask what they would like to talk about today — \"오늘은 어떤 얘기할까요?\" — $offer. " +
+            "Do not call any tool now."
+    }
+
+    /** A spoken or file topic, tidied: one line, at most [MAX_TOPIC_CHARS]; blank means none. */
+    fun normalizeTopic(raw: String?): String? =
+        raw?.lineSequence()?.firstOrNull()?.trim()?.trim('"', '\'', '“', '”')?.take(MAX_TOPIC_CHARS)
+            ?.takeIf { it.isNotEmpty() }
+
+    const val MAX_TOPIC_CHARS = 30
+
     /** The guide to use at [currentTurnId], or null when there is none or it is stale. */
     fun freshGuide(guide: String?, sourceTurnId: Int, currentTurnId: Int): String? =
         guide?.takeIf { it.isNotBlank() && currentTurnId - sourceTurnId in 1..MAX_GUIDE_AGE_TURNS }

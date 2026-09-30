@@ -46,6 +46,8 @@ private fun FakeLumaHttpTransport.wireHappyPath(
         on("GET", "/v1/capabilities", json("not found", code = capabilitiesCode))
     }
     on("POST", "/v1/devices/register", json("""{"deviceId":"dev-1"}"""))
+    // Registered after any test-specific /v1/me (the first matching route wins).
+    on("GET", "/v1/me", json("""{"user":{"id":"u1"},"onboardingCompleted":true}"""))
     on("POST", "/v1/devices/dev-1/heartbeat", json("{}"))
     if (activeSessionBody != null) {
         on("GET", "/v1/users/me/active-orchestrator-session", json(activeSessionBody))
@@ -66,6 +68,29 @@ private fun newBrain(
 )
 
 class LumaTutorBrainTest {
+
+    @Test
+    fun `favorite topics come from the learner profile, and are empty when it fails`() {
+        val transport = FakeLumaHttpTransport().apply {
+            on("GET", "/v1/me", json("""{"user":{"id":"u1"},"onboardingCompleted":true,""" +
+                """"preferences":{"correctionEnabledDefault":true,"hintEnabledDefault":true,""" +
+                """"favoriteTopics":["여행"," K-컬처 ",""]}}"""))
+            wireHappyPath(coach = true)
+        }
+        val brain = newBrain(transport)
+        brain.connect(FakeCredentialsProvider())
+        assertEquals(listOf("여행", "K-컬처"), brain.favoriteTopics())
+        brain.stopHeartbeat()
+
+        val failing = FakeLumaHttpTransport().apply {
+            on("GET", "/v1/me", json("oops", code = 500))
+            wireHappyPath(coach = true)
+        }
+        val brain2 = newBrain(failing)
+        brain2.connect(FakeCredentialsProvider())
+        assertEquals(emptyList<String>(), brain2.favoriteTopics())
+        brain2.stopHeartbeat()
+    }
 
     @Test
     fun `connect happy path is READY with coach capability`() {

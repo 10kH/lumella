@@ -107,6 +107,12 @@ interface TutorBrain {
     fun endSession(sessionId: String)
 
     /**
+     * The learner's favourite topics from their profile, for the tutor's opening question
+     * ("오늘은 어떤 얘기할까요?"). Empty when unknown; never blocks on the network.
+     */
+    fun favoriteTopics(): List<String> = emptyList()
+
+    /**
      * Which model/service coached the most recently submitted turn, or `null` when no
      * coach routing data is available (brain reports nothing, or the data is stale/absent).
      * Additive default (D-4/contract-module rule): existing [TutorBrain] implementations
