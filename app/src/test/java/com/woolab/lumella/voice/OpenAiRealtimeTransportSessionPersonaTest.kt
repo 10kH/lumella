@@ -107,6 +107,16 @@ class OpenAiRealtimeTransportSessionPersonaTest {
     }
 
     @Test
+    fun `a recast keeps the corrected part, and a request for a better word gets new words`() {
+        // 9/30 30-turn probe (aaai27 topic_voice_probe.py v6): "시장에 떡볶이를 먹었어요" came back as
+        // "떡볶이를 먹었군요" 3/3 — the slip dropped, not recast — and "더 좋은 말 있어요?" got the
+        // learner's own "달고 부드러웠어요" back 3/3.
+        val p = OpenAiRealtimeTransport.DEFAULT_SESSION_INSTRUCTIONS
+        assertTrue(p.contains("never drop it"))
+        assertTrue(p.contains("give one or two NEW words"))
+    }
+
+    @Test
     fun `a correct but plain sentence is expanded, not just repeated`() {
         val p = OpenAiRealtimeTransport.DEFAULT_SESSION_INSTRUCTIONS
         assertTrue(p.contains("EXPAND"))

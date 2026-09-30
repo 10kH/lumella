@@ -33,10 +33,12 @@ object TopicGuidance {
             "without announcing it as a lesson: when there is room, ask one short question about it. If the " +
             "learner asks about something else, ANSWER IT first in one short, useful sentence — never refuse, " +
             "postpone or wave it away — and then bring the talk back to the topic with one question. Your recast " +
-            "of the learner's sentence still comes first, and the whole reply stays 1-2 short sentences."
+            "or expansion of the learner's sentence still comes first — the topic question never replaces it — " +
+            "and the whole reply stays 1-2 short sentences."
 
     fun guideInstruction(guide: String): String =
-        "The topic tutor (ETRI Tango) proposed this next line for the topic: \"$guide\". After your recast, " +
+        "The topic tutor (ETRI Tango) proposed this next line for the topic: \"$guide\". After your recast or " +
+            "expansion, " +
             "take the conversation in that direction — use its question, in your own short words and in the " +
             "learner's politeness level. Do not read it out word for word. If the learner has just asked about " +
             "something else, answer that first; use this direction only to come back to the topic."
