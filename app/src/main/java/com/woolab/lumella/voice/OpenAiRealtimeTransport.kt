@@ -464,6 +464,12 @@ class OpenAiRealtimeTransport(
      * second create and silently drops the first, which reaches the wearer as the tutor cutting
      * itself off mid-sentence and restarting (review finding, HIGH).
      */
+    /** Cancels the response in progress, if any (a reply cut off by RunawayReplyGuard). */
+    fun cancelActiveResponse(): Boolean =
+        synchronized(responseEmitLock) {
+            if (responseActive.getAndSet(false)) sendRaw("""{"type":"response.cancel"}""") else false
+        }
+
     private fun emitCancelThenCreate(instructions: String, shouldCancel: (activeId: String?) -> Boolean): Boolean =
         synchronized(responseEmitLock) {
             if (shouldCancel(activeResponseId) && responseActive.getAndSet(false)) {

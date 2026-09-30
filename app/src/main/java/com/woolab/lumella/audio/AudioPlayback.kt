@@ -215,6 +215,18 @@ class AudioPlayback(private val sampleRateHz: Int = 24_000) {
         return st
     }
 
+    /**
+     * Drops whatever is queued and not yet heard (a reply cut off by RunawayReplyGuard). The
+     * track stays open; the next reply's first delta plays it again.
+     */
+    fun flush() {
+        val track = audioTrack ?: return
+        runCatching {
+            track.pause()
+            track.flush()
+        }
+    }
+
     fun stop() {
         try {
             audioTrack?.stop()

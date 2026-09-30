@@ -41,6 +41,7 @@ import com.woolab.tutor.slowpath.LearnerStateStore
 import com.woolab.lumella.voice.OkHttpRealtimeWebSocketFactory
 import com.woolab.lumella.voice.OpenAiRealtimeTransport
 import com.woolab.lumella.voice.RealtimeConnectionStatus
+import com.woolab.lumella.voice.RunawayReplyGuard
 import com.woolab.lumella.voice.TopicGuidance
 import com.woolab.lumella.voice.TopicMemory
 import com.woolab.lumella.voice.VoiceFastPath
@@ -77,6 +78,7 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
         private const val LAST_TOPIC_FILE = "last-topic.txt"
         private const val OPENER_PROFILE_WAIT_MS = 4_000L
         private const val RECENT_TOPICS_FILE = "recent-topics.txt"
+        private const val TUTOR_SAMPLE_RATE_HZ = 24_000
         private const val BRAIN_BOOTSTRAP_MAX_RETRY_MS = 30_000L
         private const val TAG = "lumella"
         private const val RIGHT_TOUCHPAD_DEVICE = "cyttsp5_mt"
@@ -471,6 +473,19 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
                 }
 
                 override fun onAudioDelta(base64Pcm16: String) {
+                    if (runawayGuard.isCut()) return
+                    val pcm = runCatching { java.util.Base64.getDecoder().decode(base64Pcm16) }.getOrNull()
+                    pcm?.let { runawayGuard.onPcm(it) }?.let { why ->
+                        // Sound that is not speech, or far past any reply: stop it now. The
+                        // wearer hears silence instead of a hum, the model stops generating.
+                        Log.w(TAG, "튜터 응답 끊음 ($why): 말이 아닌 소리이거나 너무 김 — 재생 중지, 응답 취소")
+                        audioPlayback.flush()
+                        transport.cancelActiveResponse()
+                        audioPlayback.endResponseStats()?.let { Log.i(TAG, "$it closedBy=runawayGuard") }
+                        speaking = false
+                        runOnUiThread { updateStatus(listeningLabel(), "#FF5722") }
+                        return
+                    }
                     responseSpoke = true
                     if (!speaking) {
                         speaking = true
@@ -571,6 +586,7 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
 
                 override fun onResponseStarted() {
                     responseSpoke = false
+                    runawayGuard.onResponseStarted()
                     Log.d(TAG, "응답 경계: 억제 해제 + 리셋")
                     // A reply cut off before its output_audio.done (barge-in, cancel) would
                     // otherwise run on into this one's playback accounting — and this reply
@@ -1056,6 +1072,9 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
             binding.tvHint.visibility = if (state.hintsVisible) View.VISIBLE else View.GONE
         }
     }
+
+    /** Cuts a reply that turned into non-speech sound (19:27 on 9/30). Websocket reader thread only. */
+    private val runawayGuard = RunawayReplyGuard(sampleRateHz = TUTOR_SAMPLE_RATE_HZ)
 
     /** The response in progress has produced tutor audio (set per response). */
     @Volatile private var responseSpoke = false
