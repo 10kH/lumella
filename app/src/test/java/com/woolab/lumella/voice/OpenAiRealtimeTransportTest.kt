@@ -360,6 +360,21 @@ class OpenAiRealtimeTransportTest {
     }
 
     @Test
+    fun responseDoneIsReportedToTheListener() {
+        val factory = FakeFactory()
+        var done = 0
+        val listener = object : OpenAiRealtimeTransport.Listener {
+            override fun onResponseDone() { done++ }
+        }
+        val transport = OpenAiRealtimeTransport(successProvider(), factory, listener = listener)
+        transport.connect()
+        factory.lastListener?.onOpen()
+        factory.lastListener?.onMessage("""{"type":"response.created","response":{"id":"r1"}}""")
+        factory.lastListener?.onMessage("""{"type":"response.done","response":{"id":"r1","status":"completed"}}""")
+        assertEquals(1, done)
+    }
+
+    @Test
     fun aSystemNoteIsASystemMessageNotLearnerInput() {
         val factory = FakeFactory()
         val transport = OpenAiRealtimeTransport(successProvider(), factory, listener = RecordingListener())

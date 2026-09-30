@@ -471,6 +471,7 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
                 }
 
                 override fun onAudioDelta(base64Pcm16: String) {
+                    responseSpoke = true
                     if (!speaking) {
                         speaking = true
                         // Time to first audio: what the wearer actually experiences as the
@@ -564,7 +565,12 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
                     }
                 }
 
+                override fun onResponseDone() {
+                    settleTopicContinuation()
+                }
+
                 override fun onResponseStarted() {
+                    responseSpoke = false
                     Log.d(TAG, "응답 경계: 억제 해제 + 리셋")
                     // A reply cut off before its output_audio.done (barge-in, cancel) would
                     // otherwise run on into this one's playback accounting — and this reply
@@ -1051,6 +1057,12 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
         }
     }
 
+    /** The response in progress has produced tutor audio (set per response). */
+    @Volatile private var responseSpoke = false
+
+    /** A set_topic call answered without a continuation yet: decided when its response ends. */
+    @Volatile private var topicContinuationPending = false
+
     /** The opening question has been asked in this app run (see the READY branch). */
     @Volatile private var openerSent = false
 
@@ -1119,6 +1131,16 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
         next?.let { topicMemory.remember(it) }
         runCatching { java.io.File(filesDir, LAST_TOPIC_FILE).writeText(next ?: "") }
         runOnUiThread { updateHint(null) }
+        // The model usually says "좋아요, ○○ 얘기해요! …" in the same response that calls
+        // set_topic. Asking for a continuation then made it speak a second time (9/30 19:09, on
+        // camera). Answer the call now; ask for a reply only if that response said nothing — which
+        // is known once it ends (onResponseDone).
+        if (!transport.sendFunctionCallOutput(callId, """{"status":"ok"}""")) {
+            Log.w(TAG, "도구 응답 전송 실패 (set_topic)")
+            runOnUiThread { updateStatus("연결이 끊겼어요", "#FF5252") }
+        } else {
+            topicContinuationPending = true
+        }
         if (brainReachable.get()) {
             brainSubmitExecutor.execute {
                 val old = sessionIdRef.get()
@@ -1128,7 +1150,17 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
                 Log.i(TAG, "주제 변경: luma 세션 새로 시작 (${fresh?.sessionId ?: "실패"})")
             }
         }
-        answerToolCall(callId, """{"status":"ok"}""")
+    }
+
+    /** End of a response that carried set_topic: a reply only if it said nothing. */
+    private fun settleTopicContinuation() {
+        if (!topicContinuationPending) return
+        topicContinuationPending = false
+        if (responseSpoke) {
+            Log.i(TAG, "주제 정함: 튜터가 이미 말함 — 이어 말하기 요청 안 함")
+        } else if (!transport.requestResponseContinuation()) {
+            Log.w(TAG, "이어 말하기 요청 실패 (set_topic)")
+        }
     }
 
     /**

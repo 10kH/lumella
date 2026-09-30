@@ -77,6 +77,9 @@ class OpenAiRealtimeTransport(
          * `"{}"` when the model sent none. Callers parse only the fields they need. */
         fun onToolCall(name: String, callId: String, arguments: String = "{}") {}
 
+        /** A response finished (response.done) — spoken, tool-only, or cancelled. */
+        fun onResponseDone() {}
+
         /**
          * A new response began streaming. This is the boundary that separates a dying
          * response's late deltas from the next reply's first ones — without it the app cannot
@@ -835,6 +838,7 @@ class OpenAiRealtimeTransport(
                     responseActive.set(false)
                     activeResponseId = null
                 }
+                listener.onResponseDone()
             }
             RealtimeServerEventKind.ERROR -> {
                 if (isFatalAccountError(text)) {
