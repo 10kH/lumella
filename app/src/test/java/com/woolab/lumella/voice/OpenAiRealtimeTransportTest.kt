@@ -360,6 +360,19 @@ class OpenAiRealtimeTransportTest {
     }
 
     @Test
+    fun aSystemNoteIsASystemMessageNotLearnerInput() {
+        val factory = FakeFactory()
+        val transport = OpenAiRealtimeTransport(successProvider(), factory, listener = RecordingListener())
+        transport.connect()
+        factory.lastListener?.onOpen()
+        assertTrue(transport.sendSystemNote("The learner has just put the glasses on. Open the conversation."))
+        val item = factory.socket.sent.last()
+        assertTrue(item, item.contains("\"type\":\"conversation.item.create\""))
+        assertTrue(item, item.contains("\"role\":\"system\""))
+        assertFalse(item, item.contains("\"role\":\"user\""))
+    }
+
+    @Test
     fun sessionIsConfiguredOnlyOnceTheServerConfirmsTheUpdate() {
         val factory = FakeFactory()
         val transport = OpenAiRealtimeTransport(successProvider(), factory, listener = RecordingListener())

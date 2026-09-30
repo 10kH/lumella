@@ -42,6 +42,7 @@ import com.woolab.lumella.voice.OkHttpRealtimeWebSocketFactory
 import com.woolab.lumella.voice.OpenAiRealtimeTransport
 import com.woolab.lumella.voice.RealtimeConnectionStatus
 import com.woolab.lumella.voice.TopicGuidance
+import com.woolab.lumella.voice.TopicMemory
 import com.woolab.lumella.voice.VoiceFastPath
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicReference
@@ -75,6 +76,7 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
         private const val TOPIC_FILE = "topic.txt"
         private const val LAST_TOPIC_FILE = "last-topic.txt"
         private const val OPENER_PROFILE_WAIT_MS = 4_000L
+        private const val RECENT_TOPICS_FILE = "recent-topics.txt"
         private const val BRAIN_BOOTSTRAP_MAX_RETRY_MS = 30_000L
         private const val TAG = "lumella"
         private const val RIGHT_TOUCHPAD_DEVICE = "cyttsp5_mt"
@@ -159,6 +161,12 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
 
     /** The topic differs from the last launch's: start a fresh luma session instead of resuming. */
     @Volatile private var topicChanged = false
+
+    /** Topics the learner chose by voice, for the next conversation's opening. */
+    private lateinit var topicMemory: TopicMemory
+
+    /** The session idled out and closed; the next READY is a learner coming back, not a recycle. */
+    @Volatile private var returningFromIdle = false
     private val sessionIdRef = AtomicReference("")
     /** Runs the brain submit off the slow path, so the record and the corner never queue behind the coach hint. */
     private val brainSubmitExecutor = Executors.newSingleThreadExecutor { r ->
@@ -329,6 +337,7 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
         val lastTopicFile = java.io.File(filesDir, LAST_TOPIC_FILE)
         val lastTopic = runCatching { lastTopicFile.takeIf { it.isFile }?.readText() }.getOrNull()
         topicChanged = (lastTopic ?: "") != (sessionTopic ?: "")
+        topicMemory = TopicMemory(java.io.File(filesDir, RECENT_TOPICS_FILE))
         // A shoot holds the opening question until recording runs (ops/take.sh --opener); the hold
         // is for this launch only.
         openerHeld = java.io.File(getExternalFilesDir(null), HOLD_OPENER_FILE).let { f ->
@@ -407,6 +416,12 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
             listener = object : OpenAiRealtimeTransport.Listener {
                 override fun onStatus(status: RealtimeConnectionStatus) {
                     Log.i(TAG, "status=${statusLabel(status)}")
+                    if (status == RealtimeConnectionStatus.IDLE) {
+                        // The session closed after 10 idle minutes; whoever wakes it starts a new
+                        // conversation, so it opens on the topic again (keep it, or choose another).
+                        returningFromIdle = true
+                        openerSent = false
+                    }
                     runOnUiThread { applyStatus(status) }
                     // A new or broken session has heard nothing by definition. Without this
                     // the flag survives a reconnect: the socket can die between speech_started
@@ -444,11 +459,11 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
                             clearSubtitle()
                             updateHint(null)
                         }
-                        // The first READY of the app, with no topic set: the tutor opens by asking
-                        // what to talk about ("오늘은 어떤 얘기할까요?"); the learner's answer sets the
-                        // topic by voice (set_topic). Once only — a reconnect mid-conversation must
-                        // not greet again — and never over a topic chosen for the session already.
-                        if (!openerSent && !openerHeld && sessionTopic == null && transport.sessionConfigured) {
+                        // Every conversation opens on a topic (TopicGuidance): the first READY of
+                        // the app, and the first READY after an idle close (a learner coming back).
+                        // Not after the hourly recycle or a network blip — that is the same
+                        // conversation, and greeting again would interrupt it.
+                        if (!openerSent && !openerHeld && transport.sessionConfigured) {
                             openerSent = true
                             voicePathExecutor.execute { sendOpener() }
                         }
@@ -1048,20 +1063,35 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
      * the profile (the brain connects on its own thread) rather than ask without it.
      */
     private fun sendOpener() {
-        var favorites = runCatching { brain.favoriteTopics() }.getOrDefault(emptyList())
-        var waited = 0L
-        while (favorites.isEmpty() && !brainReachable.get() && waited < OPENER_PROFILE_WAIT_MS) {
-            Thread.sleep(250)
-            waited += 250
+        val topic = sessionTopic
+        val returning = returningFromIdle
+        returningFromIdle = false
+        val kind = TopicGuidance.openingKind(topic, returning)
+        var favorites = emptyList<String>()
+        var last: String? = null
+        if (kind == TopicGuidance.Opening.CHOOSE) {
+            last = topicMemory.last()
             favorites = runCatching { brain.favoriteTopics() }.getOrDefault(emptyList())
+            var waited = 0L
+            while (favorites.isEmpty() && !brainReachable.get() && waited < OPENER_PROFILE_WAIT_MS) {
+                Thread.sleep(250)
+                waited += 250
+                favorites = runCatching { brain.favoriteTopics() }.getOrDefault(emptyList())
+            }
         }
         val instructions = listOf(
             OpenAiRealtimeTransport.DEFAULT_SESSION_INSTRUCTIONS,
-            TopicGuidance.openingInstruction(favorites),
+            TopicGuidance.openingInstruction(topic, returning, last, favorites),
         ).joinToString("\n")
         turnEndedAtMs = System.currentTimeMillis()
+        transport.sendSystemNote(TopicGuidance.openingNote(kind))
         transport.sendInstructions(instructions)
-        Log.i(TAG, "첫 질문: 오늘은 어떤 얘기할까요? (관심 주제 ${favorites.take(2)})")
+        // The film is assembled from these lines (aaai27 assemble.py reads '첫 질문:').
+        Log.i(TAG, when (kind) {
+            TopicGuidance.Opening.CHOOSE -> "첫 질문: 오늘은 어떤 얘기할까요? (지난번 ${last ?: "없음"}, 관심 주제 ${favorites.take(2)})"
+            TopicGuidance.Opening.ON_TOPIC -> "첫 질문: 주제로 시작 — $topic"
+            TopicGuidance.Opening.WELCOME_BACK -> "첫 질문: 다시 온 학습자 — '$topic' 이어서 할지"
+        })
     }
 
     /**
@@ -1086,6 +1116,7 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
         }
         sessionTopic = next
         Log.i(TAG, next?.let { "대화 주제: $it (음성으로 정함)" } ?: "대화 주제 없음 (음성으로 끔)")
+        next?.let { topicMemory.remember(it) }
         runCatching { java.io.File(filesDir, LAST_TOPIC_FILE).writeText(next ?: "") }
         runOnUiThread { updateHint(null) }
         if (brainReachable.get()) {
@@ -1529,7 +1560,7 @@ class MainActivity : BaseMirrorActivity<ActivityMainBinding>() {
                         DEBUG_OPENER_ACTION -> {
                             // The shoot's cue (ops/take.sh --opener): ask the opening question now
                             // that recording runs. Same path as the automatic one.
-                            if (sessionTopic != null || !transport.sessionConfigured || openerSent) {
+                            if (!transport.sessionConfigured || openerSent) {
                                 Log.w(TAG, "debug: 첫 질문 신호 무시 (topic=$sessionTopic, " +
                                     "configured=${transport.sessionConfigured}, sent=$openerSent)")
                             } else {

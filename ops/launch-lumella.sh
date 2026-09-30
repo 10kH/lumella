@@ -70,8 +70,8 @@ fi
 if [ "$RESET" = 1 ] || [ "$TOPIC_SET" = 1 ] || [ "$HOLD" = 1 ]; then
   adb -s "$S" shell am force-stop "$PKG" >/dev/null 2>&1
   if [ "$RESET" = 1 ]; then
-    adb -s "$S" shell "run-as $PKG rm -f files/learner-state.json files/learner-state.json.tmp" 2>/dev/null
-    echo "  learner-state.json wiped"
+    adb -s "$S" shell "run-as $PKG rm -f files/learner-state.json files/learner-state.json.tmp files/recent-topics.txt files/last-topic.txt" 2>/dev/null
+    echo "  learner-state.json and remembered topics wiped"
   fi
   echo "  waiting out the launcher's sweep"
   sleep 5

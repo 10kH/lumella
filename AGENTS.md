@@ -52,6 +52,35 @@ runtimeOnly(project(":luma-adapter"))        // luma를 아는 쪽은 실행 시
 
 luma가 없어도 앱은 뜹니다(`NoOpBrain` 폴백). 코치 기능만 빠집니다.
 
+## 대화는 주제로 돌아갑니다 (2026-09-30, 맥북에서 결정)
+
+lumella 는 **주제 유도형 자유대화**(판넬의 Chat 스킬, ETRI Tango) 기준으로 짜여 있습니다.
+코드의 중심은 `voice/TopicGuidance.kt`입니다.
+
+```
+대화 시작   튜터가 먼저 말한다 (앱이 켜진 첫 READY, 그리고 10분 idle 뒤 깨어난 첫 READY)
+  주제 없음      "오늘은 어떤 얘기할까요?" + 예시 (지난번 고른 주제, luma 프로필 관심 주제 — 한국어로)
+  주제 있음      그 주제로 첫 질문 (운영자가 --topic 으로 미리 정한 경우)
+  돌아온 학습자   "계속 ○○ 얘기할까요, 다른 얘기할까요?"
+주제 정하기  말로만. set_topic 도구 — 학습자가 고를 때만, 지나가는 말엔 부르지 않음, "" 은 주제 없이
+주제가 정해지면  매 턴 지시에 주제 + luma 에 topicHint → 주제 대화는 Tango (topic_chat)
+             Tango 의 다음 질문(coachEvidence.topicGuide, luma #13)이 다음 턴 목소리의 방향 (한 턴 뒤에서 이끎)
+             안경 안내 줄에 "주제: ○○", 주제가 바뀌면 luma 세션 새로
+기억        말로 고른 주제는 files/recent-topics.txt (--reset 이 지움). 운영자 preset 은 기억하지 않음
+```
+
+- 목소리는 늘 실시간 모델입니다. Tango 의 말을 그대로 읽지 않습니다(D-4). 리캐스트가 먼저인 규칙은 그대로입니다.
+- 첫 질문 앞에는 system 메시지를 하나 넣습니다(`sendSystemNote`). 빈 대화에 `response.create` 를 보내면
+  서버가 절반 넘게 server_error 로 실패합니다(9/30 측정 6/8 실패 → 넣은 뒤 0/8). 빼지 마십시오.
+- 첫 질문은 `session.updated` 뒤에 보냅니다. READY 는 `session.created` 에서도 오지만 그때 보내면 실패합니다.
+- 운영: `ops/launch-lumella.sh --topic "…"` / `--no-topic` / `--hold-opener`(촬영: `take.sh --opener` 가 녹화 뒤 첫 질문을
+  시킴), `ops/shoot-preflight.sh --no-topic`(촬영) 또는 `--topic "…"`(주제를 미리 정하는 부스).
+- 로그: `첫 질문: …`, `대화 주제: ○○ (음성으로 정함)`, `주제 코치 turn N: <Tango>`, `주제 유도 적용 turn N ← 코치 turn M`.
+  영상 조립기(aaai27 `video-aifesta/assemble.py`)가 이 줄들을 읽습니다 — 문구를 바꾸면 거기도 바꾸십시오.
+- 실측 스크립트는 aaai27 `artifacts/demo-scenario/`: `opener_probe.py`(첫 질문·주제 고르기), `topic_voice_probe.py`
+  (리캐스트·주제 복귀), `topic_route_probe.py`(luma 라우팅). 페르소나를 바꾸면 다시 돌리십시오.
+- 알려진 문제: 옆길(수업 밖 질문) 뒤 luma 라우터가 Tango 로 잘 안 돌아옵니다(3/12) — luma 이슈 #14.
+
 ## 주소는 실행 중에 받습니다
 
 ```

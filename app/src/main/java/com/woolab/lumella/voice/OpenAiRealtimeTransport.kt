@@ -188,7 +188,9 @@ class OpenAiRealtimeTransport(
                 "answering \"오늘은 어떤 얘기할까요?\", or \"여행 얘기하자\", \"주제 바꿔줘\" " +
                 "followed by a topic — call set_topic with a short Korean name for it (e.g. " +
                 "\"여행\", \"어제 친구와 한 일\"). If they ask to talk freely without a topic, " +
-                "call set_topic with topic \"\". Never call it for a passing mention or a question " +
+                "call set_topic with topic \"\". If they want to change the subject but do not say to " +
+                "what (\"다른 얘기 하고 싶어요\"), ask what they would like to talk about and call set_topic " +
+                "once they choose. Never call it for a passing mention or a question " +
                 "about something: only when they choose what to talk about. After the call, say in " +
                 "one short sentence, in the learner's politeness level, that you will talk about " +
                 "it and ask one question on it."
@@ -522,9 +524,22 @@ class OpenAiRealtimeTransport(
         return sent
     }
 
-    internal fun buildTextItemJson(text: String): String =
-        """{"type":"conversation.item.create","item":{"type":"message","role":"user",""" +
+    internal fun buildTextItemJson(text: String, role: String = "user"): String =
+        """{"type":"conversation.item.create","item":{"type":"message","role":${jsonString(role)},""" +
             """"content":[{"type":"input_text","text":${jsonString(text)}}]}}"""
+
+    /**
+     * Puts an app note into the conversation as a system message — what the model should know
+     * happened ("the learner has just put the glasses on"), not something anyone said. The
+     * tutor's opening needs one: a response.create into an empty conversation failed with a
+     * server_error in 6 of 8 tries on 2026-09-30, and 0 of 8 with this note first (aaai27
+     * opener_probe). Not brain output either, so off the single-method interface.
+     */
+    fun sendSystemNote(text: String): Boolean {
+        val sent = sendRaw(buildTextItemJson(text, role = "system"))
+        if (!sent) listener.onError("sendSystemNote failed: socket unavailable")
+        return sent
+    }
 
     /**
      * Answers a tool call. Like [sendUserImage] this is not brain output, so it stays off the
