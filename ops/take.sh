@@ -25,6 +25,7 @@
 #   ops/take.sh c7 60 --pov          # blocking, 60s, + wearer's view
 #   ops/take.sh c7 --start --pov     # start and return; the wearer talks for as long as needed
 #   ops/take.sh c7 --stop            # stop, collect, report
+#   ops/take.sh c7 --recompose 190942  # rebuild c7-190942-FINAL.mp4 from its files (ops/fix-pov-rotation.sh)
 #   ops/take.sh t1 --start --pov --opener   # ... then the tutor asks "오늘은 어떤 얘기할까요?" on camera
 #                                           # (launch with --hold-opener so it waits for this)
 #
@@ -66,8 +67,12 @@ SEC=180
 POV=""
 AUDIO=""
 OPENER=""
+RECOMPOSE=""
+prev=""
 for a in "$@"; do
+  if [ "$prev" = "--recompose" ]; then RECOMPOSE="$a"; prev=""; continue; fi
   case "$a" in
+    --recompose) MODE="recompose"; prev="--recompose"; continue ;;
     --start) MODE="start" ;;
     --stop)  MODE="stop" ;;
     --pov)   POV=1 ;;
@@ -84,10 +89,13 @@ for a in "$@"; do
   esac
 done
 mkdir -p "$OUT"
+if [ "$MODE" = "recompose" ] && [ -z "$RECOMPOSE" ]; then
+  echo "--recompose needs the take's stamp (the HHMMSS in <name>-<stamp>-FINAL.mp4)" >&2; exit 2
+fi
 
 # ANDROID_SERIAL picks one when the glasses are on USB and Wi-Fi adb at once (shoot-preflight exports it).
 DEV="${ANDROID_SERIAL:-$(adb devices | awk 'NR>1 && $2=="device" {print $1; exit}')}"
-if [ -z "$DEV" ]; then
+if [ -z "$DEV" ] && [ "$MODE" != "recompose" ]; then
   echo "no device. ops/preflight.sh --find" >&2
   exit 1
 fi
@@ -170,7 +178,7 @@ mix_voices() {
 # side showing the same thing. Only the left eye is kept; the right is a duplicate and including
 # it would halve the legible text size for nothing.
 #
-# The POV is stored 1280x720 with 90° rotation metadata: upright it is PORTRAIT (720x1280). This
+# The POV is stored 1280x720 with -90° rotation metadata: upright it is PORTRAIT (720x1280). This
 # used to be composed with -noautorotate and stacked above the screen, which laid the view on its
 # side in every FINAL — the comment promised a rotation the filter never did. ffmpeg now applies
 # the metadata, and the portrait view goes beside the screen at the same height.
@@ -438,6 +446,10 @@ end_take() {
 }
 
 case "$MODE" in
+  recompose)
+    # Offline: rebuild the FINAL from files already in $OUT (no device needed).
+    compose "$RECOMPOSE"
+    ;;
   start)
     begin_take
     if [ -n "$POV" ]; then   mode="screen + POV"

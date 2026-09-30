@@ -373,14 +373,15 @@ class GlassesCamera(context: Context, private val lifecycleOwner: LifecycleOwner
                         // its side. Pin the rotation here rather than fixing it per file in the
                         // edit, which is a step easy to forget on one take out of twelve.
                         //
-                        // Determined by looking at the picture, not the dimensions. ROTATION_90
-                        // removed the metadata and produced a landscape-shaped file, which read
-                        // as correct, but the scene inside was still on its left. ROTATION_270
-                        // then stamped rotation=-180 and stood it on its head. ROTATION_180 is
-                        // what leaves the wearer's view upright: stored 1280x720 with 90° rotation
-                        // metadata, it plays as an upright 720x1280 portrait (QuickTime and
-                        // ffmpeg, checked 2026-09-28).
-                        targetRotation = Surface.ROTATION_180
+                        // Determined by looking at the picture, not the dimensions — and checked
+                        // against a scene with an obvious up (ceiling lights, a keyboard under the
+                        // hands). ROTATION_180 stamps rotation=90, and every player turns the view
+                        // counter-clockwise onto its head: the 9/28 check that chose it was wrong,
+                        // and every take until 9/30 came out upside down (Woody, lt8; repaired
+                        // with ops/fix-pov-rotation.sh). The upright file is the raw 1280x720
+                        // turned clockwise, i.e. rotation=-90 in the metadata. ROTATION_0 is the
+                        // setting that stamps it (verified on the glasses, 9/30).
+                        targetRotation = Surface.ROTATION_0
                     }
                 // VideoCapture binds ALONE. This camera refuses every second use case
                 // beside it — both ImageCapture and ImageAnalysis come back with
